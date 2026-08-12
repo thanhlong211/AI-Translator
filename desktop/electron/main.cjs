@@ -6682,60 +6682,19 @@ function decodeNovelTextBuffer(buffer) {
   };
 }
 
-async function openNovelTxtFile() {
+async function readNovelTxtPath(filePathValue) {
   await ensureAuthenticated();
   requireDesktopFeatureCapability(
     "novelReaderTxt"
   );
 
-  const ownerWindow =
-    mainWindow &&
-    !mainWindow.isDestroyed()
-      ? mainWindow
-      : undefined;
-
-  const dialogOptions = {
-    title:
-      "Mở Novel TXT",
-    properties: [
-      "openFile",
-    ],
-    filters: [
-      {
-        name: "Text / Novel",
-        extensions: [
-          "txt",
-        ],
-      },
-    ],
-  };
-
-  const result =
-    ownerWindow
-      ? await dialog.showOpenDialog(
-          ownerWindow,
-          dialogOptions
-        )
-      : await dialog.showOpenDialog(
-          dialogOptions
-        );
-
-  if (
-    result.canceled ||
-    !result.filePaths?.length
-  ) {
-    return {
-      success: false,
-      canceled: true,
-    };
-  }
-
   const filePath =
     path.resolve(
-      result.filePaths[0]
+      String(filePathValue || "")
     );
 
   if (
+    !filePath ||
     path.extname(filePath)
       .toLowerCase() !== ".txt"
   ) {
@@ -6804,6 +6763,95 @@ async function openNovelTxtFile() {
         decoded.encoding,
     },
     text,
+  };
+}
+
+async function openNovelTxtFile() {
+  await ensureAuthenticated();
+  requireDesktopFeatureCapability(
+    "novelReaderTxt"
+  );
+
+  const ownerWindow =
+    mainWindow &&
+    !mainWindow.isDestroyed()
+      ? mainWindow
+      : undefined;
+
+  const dialogOptions = {
+    title:
+      "Thêm Novel TXT vào thư viện",
+    properties: [
+      "openFile",
+      "multiSelections",
+    ],
+    filters: [
+      {
+        name: "Text / Novel",
+        extensions: [
+          "txt",
+        ],
+      },
+    ],
+  };
+
+  const result =
+    ownerWindow
+      ? await dialog.showOpenDialog(
+          ownerWindow,
+          dialogOptions
+        )
+      : await dialog.showOpenDialog(
+          dialogOptions
+        );
+
+  if (
+    result.canceled ||
+    !result.filePaths?.length
+  ) {
+    return {
+      success: false,
+      canceled: true,
+    };
+  }
+
+  const items = [];
+  const errors = [];
+
+  for (
+    const selectedPath of
+      result.filePaths.slice(0, 30)
+  ) {
+    try {
+      items.push(
+        await readNovelTxtPath(
+          selectedPath
+        )
+      );
+    } catch (error) {
+      errors.push({
+        path: selectedPath,
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+      });
+    }
+  }
+
+  if (!items.length) {
+    throw new Error(
+      errors[0]?.error ||
+      "Không mở được file TXT nào."
+    );
+  }
+
+  return {
+    success: true,
+    file: items[0].file,
+    text: items[0].text,
+    files: items,
+    errors,
   };
 }
 
@@ -11132,6 +11180,15 @@ ipcMain.handle(
   "novel:open-txt",
   async () => {
     return openNovelTxtFile();
+  }
+);
+
+ipcMain.handle(
+  "novel:read-txt",
+  async (_event, filePath) => {
+    return readNovelTxtPath(
+      filePath
+    );
   }
 );
 

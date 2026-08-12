@@ -1,32 +1,18 @@
-# React + TypeScript + Vite
+# Batch 13.2.1 — Reader Font Settings
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Adds a dedicated **Novel Reader Font** section to Settings.
 
-Currently, two official plugins are available:
+## What changed
+- Settings presets: Auto, Serif, Sans, Japanese Gothic, Japanese Mincho, System, Custom.
+- Custom font family input with CJK-safe fallback stack.
+- Live multilingual preview (Japanese / Vietnamese / English).
+- Settings stored locally under `aiTranslator.novelReader.fontSettings.v1`.
+- Novel Reader reacts to the saved setting without backend/DB changes.
+- `Auto` preserves Batch 13.1.1 language-aware font fallback.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Files
+- `desktop/src/pages/SettingsPage.tsx`
+- `desktop/src/pages/NovelReaderPage.tsx`
+- `desktop/src/index.css`
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
-```
-
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+No backend, Flyway, license, or entitlement changes.

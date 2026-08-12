@@ -1,0 +1,6 @@
+Chương 1
+Đây là file mẫu để kiểm tra Novel Library nhiều file.
+Bạn có thể bookmark đoạn này và chuyển sang novel khác.
+
+Chương 2
+Khi mở lại file này, vị trí đọc và bookmark phải được giữ nguyên.

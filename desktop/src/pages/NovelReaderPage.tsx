@@ -67,7 +67,30 @@ interface SavedNovelProgress {
     translations: Record<string, NovelTranslation>;
 }
 
+interface NovelLibraryEntry {
+    path: string;
+    name: string;
+    sizeBytes: number;
+    modifiedAt: string;
+    encoding: string;
+    totalBlocks: number;
+    chapterCount: number;
+    currentIndex: number;
+    currentChapter: string;
+    bookmarks: number[];
+    lastOpenedAt: number;
+    sourceLanguage: TranslationLanguage;
+    targetLanguage: TargetTranslationLanguage;
+    profileId: number | null;
+    readerPreferences: NovelReaderPreferences;
+}
 
+interface NovelOpenPayload {
+    success: boolean;
+    canceled?: boolean;
+    file?: NovelFileInfo;
+    text?: string;
+}
 
 type NovelReaderTheme = "light" | "sepia" | "dark";
 type NovelReaderMode = "parallel" | "translation" | "source";
@@ -81,8 +104,101 @@ interface NovelReaderPreferences {
     width: NovelReaderWidth;
 }
 
+
+type NovelReaderFontPreset =
+    | "auto"
+    | "serif"
+    | "sans"
+    | "jp-gothic"
+    | "jp-mincho"
+    | "system"
+    | "custom";
+
+interface NovelReaderFontSettings {
+    preset: NovelReaderFontPreset;
+    customFamily: string;
+}
+
+const NOVEL_READER_FONT_SETTINGS_KEY =
+    "aiTranslator.novelReader.fontSettings.v1";
+
+const NOVEL_READER_FONT_SETTINGS_EVENT =
+    "ai-translator:novel-font-settings";
+
+const DEFAULT_NOVEL_READER_FONT_SETTINGS: NovelReaderFontSettings = {
+    preset: "auto",
+    customFamily: ""
+};
+
+function loadNovelReaderFontSettings(): NovelReaderFontSettings {
+    try {
+        const raw = localStorage.getItem(
+            NOVEL_READER_FONT_SETTINGS_KEY
+        );
+
+        if (!raw) {
+            return DEFAULT_NOVEL_READER_FONT_SETTINGS;
+        }
+
+        const parsed = JSON.parse(raw) as Partial<NovelReaderFontSettings>;
+        const allowed: NovelReaderFontPreset[] = [
+            "auto",
+            "serif",
+            "sans",
+            "jp-gothic",
+            "jp-mincho",
+            "system",
+            "custom"
+        ];
+
+        return {
+            preset: allowed.includes(
+                parsed.preset as NovelReaderFontPreset
+            )
+                ? parsed.preset as NovelReaderFontPreset
+                : "auto",
+            customFamily:
+                typeof parsed.customFamily === "string"
+                    ? parsed.customFamily.slice(0, 160)
+                    : ""
+        };
+    } catch {
+        return DEFAULT_NOVEL_READER_FONT_SETTINGS;
+    }
+}
+
+function novelReaderFontStack(
+    settings: NovelReaderFontSettings
+) {
+    switch (settings.preset) {
+        case "serif":
+            return 'Georgia, "Times New Roman", "Yu Mincho", "Noto Serif JP", serif';
+        case "sans":
+            return '"Segoe UI", Arial, "Yu Gothic UI", Meiryo, "Noto Sans JP", sans-serif';
+        case "jp-gothic":
+            return '"Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif';
+        case "jp-mincho":
+            return '"Yu Mincho", "MS PMincho", "Noto Serif JP", serif';
+        case "system":
+            return 'system-ui, -apple-system, "Segoe UI", sans-serif';
+        case "custom": {
+            const custom = settings.customFamily.trim();
+            return custom
+                ? `${custom}, "Yu Gothic UI", Meiryo, "Segoe UI", sans-serif`
+                : '"Segoe UI", "Yu Gothic UI", Meiryo, sans-serif';
+        }
+        default:
+            return '"Segoe UI", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif';
+    }
+}
+
 const NOVEL_READER_PREFERENCES_KEY =
     "aiTranslator.novelReader.preferences.v1";
+
+const NOVEL_LIBRARY_KEY =
+    "aiTranslator.novelReader.library.v1";
+
+const MAX_LIBRARY_ITEMS = 50;
 
 const DEFAULT_READER_PREFERENCES: NovelReaderPreferences = {
     theme: "sepia",
@@ -150,6 +266,81 @@ function loadReaderPreferences(): NovelReaderPreferences {
     } catch {
         return DEFAULT_READER_PREFERENCES;
     }
+}
+
+function loadNovelLibrary(): NovelLibraryEntry[] {
+    try {
+        const raw = localStorage.getItem(
+            NOVEL_LIBRARY_KEY
+        );
+
+        if (!raw) {
+            return [];
+        }
+
+        const items = JSON.parse(raw) as NovelLibraryEntry[];
+
+        if (!Array.isArray(items)) {
+            return [];
+        }
+
+        return items
+            .filter(
+                (item) =>
+                    Boolean(item?.path && item?.name)
+            )
+            .map((item) => ({
+                ...item,
+                bookmarks: Array.isArray(item.bookmarks)
+                    ? item.bookmarks.filter(Number.isFinite)
+                    : [],
+                sourceLanguage: item.sourceLanguage || "AUTO",
+                targetLanguage: item.targetLanguage || "VI",
+                profileId: Number.isFinite(item.profileId)
+                    ? item.profileId
+                    : null,
+                readerPreferences: {
+                    ...DEFAULT_READER_PREFERENCES,
+                    ...(item.readerPreferences || {})
+                }
+            }))
+            .sort((a, b) => b.lastOpenedAt - a.lastOpenedAt)
+            .slice(0, MAX_LIBRARY_ITEMS);
+    } catch {
+        return [];
+    }
+}
+
+function saveNovelLibrary(items: NovelLibraryEntry[]) {
+    try {
+        localStorage.setItem(
+            NOVEL_LIBRARY_KEY,
+            JSON.stringify(
+                items
+                    .sort((a, b) => b.lastOpenedAt - a.lastOpenedAt)
+                    .slice(0, MAX_LIBRARY_ITEMS)
+            )
+        );
+    } catch {
+        // Local library is best-effort only.
+    }
+}
+
+function chapterAtIndex(
+    blocks: NovelBlock[],
+    index: number
+) {
+    for (
+        let cursor = Math.min(index, blocks.length - 1);
+        cursor >= 0;
+        cursor--
+    ) {
+        if (blocks[cursor]?.heading) {
+            return blocks[cursor].text;
+        }
+    }
+
+    return "Chưa xác định chapter";
 }
 
 const NOVEL_PROGRESS_KEY =
@@ -551,6 +742,14 @@ export function NovelReaderPage({
         loadReaderPreferences
     );
 
+
+    const [
+        readerFontSettings,
+        setReaderFontSettings
+    ] = useState<NovelReaderFontSettings>(
+        loadNovelReaderFontSettings
+    );
+
     const [
         isOpening,
         setIsOpening
@@ -567,6 +766,29 @@ export function NovelReaderPage({
     ] = useState(
         () => novelSessionCache.status
     );
+
+
+    const [
+        library,
+        setLibrary
+    ] = useState<NovelLibraryEntry[]>(
+        loadNovelLibrary
+    );
+
+    const [
+        librarySearch,
+        setLibrarySearch
+    ] = useState("");
+
+    const [
+        novelSearch,
+        setNovelSearch
+    ] = useState("");
+
+    const [
+        searchCursor,
+        setSearchCursor
+    ] = useState(0);
 
     const novelAvailable =
         Boolean(
@@ -601,6 +823,87 @@ export function NovelReaderPage({
             ),
         [blocks, windowStart]
     );
+
+
+    const activeLibraryEntry = useMemo(
+        () =>
+            file
+                ? library.find(
+                      (entry) => entry.path === file.path
+                  ) || null
+                : null,
+        [file, library]
+    );
+
+    const filteredLibrary = useMemo(() => {
+        const query = librarySearch.trim().toLowerCase();
+
+        if (!query) {
+            return library;
+        }
+
+        return library.filter(
+            (entry) =>
+                entry.name.toLowerCase().includes(query) ||
+                entry.currentChapter.toLowerCase().includes(query)
+        );
+    }, [library, librarySearch]);
+
+    const novelSearchMatches = useMemo(() => {
+        const query = novelSearch.trim().toLowerCase();
+
+        if (!query) {
+            return [] as number[];
+        }
+
+        return blocks
+            .filter((block) =>
+                block.text.toLowerCase().includes(query) ||
+                String(
+                    translations[String(block.index)]?.translatedText || ""
+                )
+                    .toLowerCase()
+                    .includes(query)
+            )
+            .map((block) => block.index);
+    }, [blocks, translations, novelSearch]);
+
+    useEffect(() => {
+        const refreshFontSettings = () => {
+            setReaderFontSettings(
+                loadNovelReaderFontSettings()
+            );
+        };
+
+        const handleStorage = (event: StorageEvent) => {
+            if (
+                event.key === NOVEL_READER_FONT_SETTINGS_KEY ||
+                event.key === null
+            ) {
+                refreshFontSettings();
+            }
+        };
+
+        window.addEventListener(
+            NOVEL_READER_FONT_SETTINGS_EVENT,
+            refreshFontSettings
+        );
+        window.addEventListener(
+            "storage",
+            handleStorage
+        );
+
+        return () => {
+            window.removeEventListener(
+                NOVEL_READER_FONT_SETTINGS_EVENT,
+                refreshFontSettings
+            );
+            window.removeEventListener(
+                "storage",
+                handleStorage
+            );
+        };
+    }, []);
 
     useEffect(() => {
         novelSessionCache = {
@@ -642,6 +945,44 @@ export function NovelReaderPage({
             // Reader preferences are best-effort only.
         }
     }, [readerPreferences]);
+
+
+    useEffect(() => {
+        saveNovelLibrary([...library]);
+    }, [library]);
+
+    useEffect(() => {
+        if (!file || !blocks.length) {
+            return;
+        }
+
+        setLibrary((current) =>
+            current.map((entry) =>
+                entry.path === file.path
+                    ? {
+                          ...entry,
+                          currentIndex,
+                          currentChapter: chapterAtIndex(
+                              blocks,
+                              currentIndex
+                          ),
+                          sourceLanguage,
+                          targetLanguage,
+                          profileId: activeProfile?.id ?? null,
+                          readerPreferences
+                      }
+                    : entry
+            )
+        );
+    }, [
+        file,
+        blocks,
+        currentIndex,
+        sourceLanguage,
+        targetLanguage,
+        activeProfile?.id,
+        readerPreferences
+    ]);
 
     function updateReaderPreference<
         K extends keyof NovelReaderPreferences
@@ -691,6 +1032,154 @@ export function NovelReaderPage({
         }, 0);
     }
 
+    function upsertLibraryItem(
+        nextFile: NovelFileInfo,
+        parsed: NovelBlock[],
+        options?: Partial<NovelLibraryEntry>
+    ) {
+        setLibrary((current) => {
+            const existing = current.find(
+                (entry) => entry.path === nextFile.path
+            );
+            const now = Date.now();
+            const next: NovelLibraryEntry = {
+                path: nextFile.path,
+                name: nextFile.name,
+                sizeBytes: nextFile.sizeBytes,
+                modifiedAt: nextFile.modifiedAt,
+                encoding: nextFile.encoding,
+                totalBlocks: parsed.length,
+                chapterCount: parsed.filter(
+                    (block) => block.heading
+                ).length,
+                currentIndex: options?.currentIndex ?? existing?.currentIndex ?? 0,
+                currentChapter:
+                    options?.currentChapter ||
+                    existing?.currentChapter ||
+                    chapterAtIndex(parsed, 0),
+                bookmarks:
+                    options?.bookmarks ||
+                    existing?.bookmarks ||
+                    [],
+                lastOpenedAt:
+                    options?.lastOpenedAt ||
+                    existing?.lastOpenedAt ||
+                    now,
+                sourceLanguage:
+                    options?.sourceLanguage ||
+                    existing?.sourceLanguage ||
+                    sourceLanguage,
+                targetLanguage:
+                    options?.targetLanguage ||
+                    existing?.targetLanguage ||
+                    targetLanguage,
+                profileId:
+                    options?.profileId ??
+                    existing?.profileId ??
+                    activeProfile?.id ??
+                    null,
+                readerPreferences:
+                    options?.readerPreferences ||
+                    existing?.readerPreferences ||
+                    readerPreferences
+            };
+
+            return [
+                next,
+                ...current.filter(
+                    (entry) => entry.path !== nextFile.path
+                )
+            ].slice(0, MAX_LIBRARY_ITEMS);
+        });
+    }
+
+    function applyNovelSettings(entry: NovelLibraryEntry | null) {
+        if (!entry) {
+            return;
+        }
+
+        onSourceLanguageChange(entry.sourceLanguage || "AUTO");
+        onTargetLanguageChange(entry.targetLanguage || "VI");
+
+        if (
+            entry.profileId &&
+            profiles.some((profile) => profile.id === entry.profileId)
+        ) {
+            onSelectProfile(entry.profileId);
+        }
+
+        if (entry.readerPreferences) {
+            setReaderPreferences({
+                ...DEFAULT_READER_PREFERENCES,
+                ...entry.readerPreferences
+            });
+        }
+    }
+
+    function loadNovelPayload(
+        payload: NovelOpenPayload,
+        knownEntry?: NovelLibraryEntry | null
+    ) {
+        if (!payload?.success || !payload.file) {
+            throw new Error(
+                "Không mở được file TXT."
+            );
+        }
+
+        const parsed = parseNovelText(
+            payload.text || ""
+        );
+
+        if (!parsed.length) {
+            throw new Error(
+                "Không tìm thấy đoạn văn nào trong file."
+            );
+        }
+
+        const nextFile = payload.file;
+        const saved = loadProgress(nextFile);
+        const restoredIndex = Math.max(
+            0,
+            Math.min(
+                parsed.length - 1,
+                saved?.currentIndex ??
+                    knownEntry?.currentIndex ??
+                    0
+            )
+        );
+
+        setFile(nextFile);
+        setBlocks(parsed);
+        setTranslations(
+            saved?.translations || {}
+        );
+        setCurrentIndex(restoredIndex);
+        setWindowStart(
+            Math.max(0, restoredIndex - 5)
+        );
+        setNovelSearch("");
+        setSearchCursor(0);
+        applyNovelSettings(knownEntry || null);
+        upsertLibraryItem(
+            nextFile,
+            parsed,
+            {
+                ...(knownEntry || {}),
+                currentIndex: restoredIndex,
+                currentChapter: chapterAtIndex(
+                    parsed,
+                    restoredIndex
+                ),
+                lastOpenedAt: Date.now()
+            }
+        );
+        setStatus(
+            saved || knownEntry
+                ? `Tiếp tục đọc · đoạn ${restoredIndex + 1}/${parsed.length}.`
+                : `Đã mở ${parsed.length} đoạn văn.`
+        );
+    }
+
     async function openTxt() {
         if (!novelAvailable) {
             onUpgrade();
@@ -699,7 +1188,7 @@ export function NovelReaderPage({
 
         try {
             setIsOpening(true);
-            setStatus("Đang mở file TXT...");
+            setStatus("Đang thêm novel vào thư viện...");
 
             const result = await api.openNovelTxt?.();
 
@@ -708,47 +1197,48 @@ export function NovelReaderPage({
                 return;
             }
 
-            if (!result?.success || !result?.file) {
+            const items: NovelOpenPayload[] =
+                Array.isArray(result?.files) && result.files.length
+                    ? result.files
+                    : [result];
+
+            let firstPayload: NovelOpenPayload | null = null;
+
+            for (const item of items) {
+                if (!item?.success || !item.file) {
+                    continue;
+                }
+
+                const parsed = parseNovelText(item.text || "");
+                if (!parsed.length) {
+                    continue;
+                }
+
+                upsertLibraryItem(item.file, parsed, {
+                    lastOpenedAt: Date.now()
+                });
+
+                firstPayload ||= item;
+            }
+
+            if (!firstPayload) {
                 throw new Error(
                     result?.error ||
-                    "Không mở được file TXT."
+                    "Không mở được file TXT nào."
                 );
             }
 
-            const parsed = parseNovelText(
-                result.text || ""
-            );
-
-            if (!parsed.length) {
-                throw new Error(
-                    "Không tìm thấy đoạn văn nào trong file."
-                );
-            }
-
-            const nextFile =
-                result.file as NovelFileInfo;
-            const saved = loadProgress(nextFile);
-            const restoredIndex = Math.max(
-                0,
-                Math.min(
-                    parsed.length - 1,
-                    saved?.currentIndex || 0
-                )
-            );
-
-            setFile(nextFile);
-            setBlocks(parsed);
-            setTranslations(
-                saved?.translations || {}
-            );
-            setCurrentIndex(restoredIndex);
-            setWindowStart(
-                Math.max(0, restoredIndex - 5)
+            loadNovelPayload(
+                firstPayload,
+                library.find(
+                    (entry) =>
+                        entry.path === firstPayload?.file?.path
+                ) || null
             );
             setStatus(
-                saved
-                    ? `Đã khôi phục vị trí đọc · đoạn ${restoredIndex + 1}/${parsed.length}.`
-                    : `Đã mở ${parsed.length} đoạn văn.`
+                items.length > 1
+                    ? `Đã thêm ${items.length} novel vào thư viện và mở ${firstPayload.file?.name}.`
+                    : `Đã thêm ${firstPayload.file?.name} vào thư viện.`
             );
         } catch (error) {
             setStatus(
@@ -759,6 +1249,85 @@ export function NovelReaderPage({
         } finally {
             setIsOpening(false);
         }
+    }
+
+    async function openLibraryNovel(entry: NovelLibraryEntry) {
+        if (!novelAvailable) {
+            onUpgrade();
+            return;
+        }
+
+        try {
+            setIsOpening(true);
+            setStatus(`Đang mở ${entry.name}...`);
+
+            const result = await api.readNovelTxt?.(
+                entry.path
+            );
+
+            loadNovelPayload(result, entry);
+        } catch (error) {
+            setStatus(
+                `Không mở lại được ${entry.name}. File có thể đã bị di chuyển hoặc xóa. ${
+                    error instanceof Error ? error.message : String(error)
+                }`
+            );
+        } finally {
+            setIsOpening(false);
+        }
+    }
+
+    function removeLibraryNovel(path: string) {
+        setLibrary((current) =>
+            current.filter((entry) => entry.path !== path)
+        );
+
+        if (file?.path === path) {
+            setFile(null);
+            setBlocks([]);
+            setTranslations({});
+            setCurrentIndex(0);
+            setWindowStart(0);
+            setStatus(
+                "Đã gỡ novel khỏi thư viện. File gốc trên máy không bị xóa."
+            );
+        }
+    }
+
+    function toggleBookmark(index: number) {
+        if (!file) {
+            return;
+        }
+
+        setLibrary((current) =>
+            current.map((entry) => {
+                if (entry.path !== file.path) {
+                    return entry;
+                }
+
+                const exists = entry.bookmarks.includes(index);
+                return {
+                    ...entry,
+                    bookmarks: exists
+                        ? entry.bookmarks.filter(
+                              (value) => value !== index
+                          )
+                        : [...entry.bookmarks, index].sort((a, b) => a - b)
+                };
+            })
+        );
+    }
+
+    function jumpSearch(direction: 1 | -1) {
+        if (!novelSearchMatches.length) {
+            return;
+        }
+
+        const nextCursor =
+            (searchCursor + direction + novelSearchMatches.length) %
+            novelSearchMatches.length;
+        setSearchCursor(nextCursor);
+        jumpTo(novelSearchMatches[nextCursor]);
     }
 
     function buildContext(beforeIndex: number) {
@@ -994,7 +1563,10 @@ export function NovelReaderPage({
 
     const readerStyle = {
         "--novel-font-size": `${readerPreferences.fontSize}px`,
-        "--novel-line-height": String(readerPreferences.lineHeight)
+        "--novel-line-height": String(readerPreferences.lineHeight),
+        "--novel-reader-font-family": novelReaderFontStack(
+            readerFontSettings
+        )
     } as CSSProperties;
 
     return (
@@ -1004,7 +1576,8 @@ export function NovelReaderPage({
                 "novel-reader-page",
                 `reader-theme-${readerPreferences.theme}`,
                 `reader-mode-${readerPreferences.mode}`,
-                `reader-width-${readerPreferences.width}`
+                `reader-width-${readerPreferences.width}`,
+                `reader-font-${readerFontSettings.preset}`
             ].join(" ")}
             style={readerStyle}
         >
@@ -1029,8 +1602,99 @@ export function NovelReaderPage({
                     onClick={() => void openTxt()}
                     disabled={isOpening || isTranslating}
                 >
-                    {isOpening ? "Đang mở..." : "Mở file TXT"}
+                    {isOpening ? "Đang thêm..." : "+ Thêm TXT"}
                 </button>
+            </section>
+
+            <section className="novel-library-card">
+                <div className="novel-library-header">
+                    <div>
+                        <span className="eyebrow">NOVEL LIBRARY</span>
+                        <h3>Thư viện của bạn</h3>
+                        <p>
+                            {library.length} novel · lưu cục bộ trên máy · không xóa file gốc khi gỡ khỏi Library.
+                        </p>
+                    </div>
+
+                    <label className="novel-library-search">
+                        <span>Tìm novel</span>
+                        <input
+                            value={librarySearch}
+                            placeholder="Tên novel hoặc chapter..."
+                            onChange={(event) => {
+                                setLibrarySearch(event.target.value);
+                            }}
+                        />
+                    </label>
+                </div>
+
+                {filteredLibrary.length ? (
+                    <div className="novel-library-grid">
+                        {filteredLibrary.map((entry) => {
+                            const percent = entry.totalBlocks
+                                ? Math.round(
+                                      ((entry.currentIndex + 1) /
+                                          entry.totalBlocks) *
+                                          100
+                                  )
+                                : 0;
+                            const active = file?.path === entry.path;
+
+                            return (
+                                <article
+                                    className={
+                                        active
+                                            ? "novel-library-item active"
+                                            : "novel-library-item"
+                                    }
+                                    key={entry.path}
+                                >
+                                    <div className="novel-library-cover">TXT</div>
+                                    <div className="novel-library-item-main">
+                                        <strong title={entry.name}>
+                                            {entry.name}
+                                        </strong>
+                                        <span>
+                                            {percent}% · {entry.currentChapter}
+                                        </span>
+                                        <small>
+                                            {entry.chapterCount} chapter · {entry.bookmarks.length} bookmark · {translationLanguageLabels[entry.targetLanguage]}
+                                        </small>
+                                        <div className="novel-library-progress">
+                                            <span style={{ width: `${percent}%` }} />
+                                        </div>
+                                    </div>
+                                    <div className="novel-library-actions">
+                                        <button
+                                            className="primary-action compact"
+                                            disabled={isOpening || isTranslating}
+                                            onClick={() => {
+                                                void openLibraryNovel(entry);
+                                            }}
+                                        >
+                                            {active ? "Đang đọc" : "Tiếp tục"}
+                                        </button>
+                                        <button
+                                            className="text-action danger-text"
+                                            disabled={isOpening || isTranslating}
+                                            onClick={() => {
+                                                removeLibraryNovel(entry.path);
+                                            }}
+                                        >
+                                            Gỡ
+                                        </button>
+                                    </div>
+                                </article>
+                            );
+                        })}
+                    </div>
+                ) : (
+                    <div className="novel-library-empty">
+                        {library.length
+                            ? "Không tìm thấy novel phù hợp."
+                            : "Chưa có novel. Bấm + Thêm TXT và có thể chọn nhiều file cùng lúc."}
+                    </div>
+                )}
             </section>
 
             <section className="novel-reader-toolbar">
@@ -1278,6 +1942,80 @@ export function NovelReaderPage({
             </section>
 
             {file && (
+                <section className="novel-reader-navigation-card">
+                    <label className="novel-text-search">
+                        <span>Tìm trong novel</span>
+                        <input
+                            value={novelSearch}
+                            placeholder="Tìm nguyên văn hoặc bản dịch..."
+                            onChange={(event) => {
+                                setNovelSearch(event.target.value);
+                                setSearchCursor(0);
+                            }}
+                        />
+                    </label>
+
+                    <div className="novel-search-actions">
+                        <span>
+                            {novelSearch.trim()
+                                ? `${novelSearchMatches.length} kết quả`
+                                : "Nhập từ khóa để tìm"}
+                        </span>
+                        <button
+                            className="secondary-action compact"
+                            disabled={!novelSearchMatches.length}
+                            onClick={() => jumpSearch(-1)}
+                        >
+                            ← Trước
+                        </button>
+                        <button
+                            className="secondary-action compact"
+                            disabled={!novelSearchMatches.length}
+                            onClick={() => jumpSearch(1)}
+                        >
+                            Sau →
+                        </button>
+                    </div>
+
+                    <div className="novel-bookmark-bar">
+                        <button
+                            className={
+                                activeLibraryEntry?.bookmarks.includes(currentIndex)
+                                    ? "primary-action compact"
+                                    : "secondary-action compact"
+                            }
+                            onClick={() => toggleBookmark(currentIndex)}
+                        >
+                            {activeLibraryEntry?.bookmarks.includes(currentIndex)
+                                ? "★ Đã bookmark"
+                                : "☆ Bookmark đoạn này"}
+                        </button>
+
+                        {Boolean(activeLibraryEntry?.bookmarks.length) && (
+                            <select
+                                className="novel-bookmark-select"
+                                value=""
+                                onChange={(event) => {
+                                    if (event.target.value) {
+                                        jumpTo(Number(event.target.value));
+                                    }
+                                }}
+                            >
+                                <option value="">Đi tới bookmark...</option>
+                                {activeLibraryEntry?.bookmarks.map((index) => (
+                                    <option key={index} value={index}>
+                                        #{index + 1} · {blocks[index]?.heading
+                                            ? blocks[index].text
+                                            : blocks[index]?.text.slice(0, 55) || "Đoạn đã lưu"}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+                </section>
+            )}
+
+            {file && (
                 <section className="novel-file-card">
                     <div className="novel-file-main">
                         <div className="novel-file-icon">TXT</div>
@@ -1440,6 +2178,23 @@ export function NovelReaderPage({
                                 <div className="novel-source-pane">
                                     <div className="novel-row-meta">
                                         <span>#{block.index + 1}</span>
+                                        <button
+                                            type="button"
+                                            className={
+                                                activeLibraryEntry?.bookmarks.includes(block.index)
+                                                    ? "novel-inline-bookmark active"
+                                                    : "novel-inline-bookmark"
+                                            }
+                                            title="Bookmark đoạn này"
+                                            onClick={(event) => {
+                                                event.stopPropagation();
+                                                toggleBookmark(block.index);
+                                            }}
+                                        >
+                                            {activeLibraryEntry?.bookmarks.includes(block.index)
+                                                ? "★"
+                                                : "☆"}
+                                        </button>
                                         {block.heading && (
                                             <span className="novel-heading-chip">
                                                 CHAPTER

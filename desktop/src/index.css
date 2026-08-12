@@ -5065,3 +5065,343 @@ button:disabled {
 .novel-reader-page p:lang(th) {
     font-family: "Leelawadee UI", "Noto Sans Thai", "Segoe UI", sans-serif;
 }
+
+/* Batch 13.2: Novel Library + progress + bookmark + search. */
+.novel-reader-page .novel-library-card,
+.novel-reader-page .novel-reader-navigation-card {
+    border: 1px solid var(--novel-border);
+    border-radius: 22px;
+    background: var(--novel-surface);
+    box-shadow: var(--novel-shadow);
+    color: var(--novel-text);
+}
+
+.novel-library-card {
+    padding: 18px;
+}
+
+.novel-library-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.novel-library-header h3 {
+    margin: 4px 0 4px;
+    color: var(--novel-text);
+    font-size: 19px;
+}
+
+.novel-library-header p {
+    margin: 0;
+    color: var(--novel-muted);
+    font-size: 12px;
+}
+
+.novel-library-search,
+.novel-text-search {
+    display: grid;
+    gap: 7px;
+}
+
+.novel-library-search {
+    width: min(340px, 100%);
+}
+
+.novel-library-search > span,
+.novel-text-search > span {
+    color: var(--novel-muted);
+    font-size: 11px;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+}
+
+.novel-library-search input,
+.novel-text-search input,
+.novel-bookmark-select {
+    min-height: 40px;
+    border: 1px solid var(--novel-border-strong);
+    border-radius: 12px;
+    background: var(--novel-surface-raised);
+    color: var(--novel-text);
+    padding: 0 12px;
+    font: inherit;
+    outline: none;
+}
+
+.novel-library-search input:focus,
+.novel-text-search input:focus,
+.novel-bookmark-select:focus {
+    border-color: var(--novel-accent);
+    box-shadow: 0 0 0 3px var(--novel-accent-soft);
+}
+
+.novel-library-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+    gap: 12px;
+}
+
+.novel-library-item {
+    display: grid;
+    grid-template-columns: 52px minmax(0, 1fr) auto;
+    gap: 12px;
+    align-items: center;
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid var(--novel-border);
+    border-radius: 16px;
+    background: var(--novel-surface-soft);
+    transition: border-color 140ms ease, background 140ms ease, transform 140ms ease;
+}
+
+.novel-library-item:hover {
+    border-color: var(--novel-border-strong);
+    transform: translateY(-1px);
+}
+
+.novel-library-item.active {
+    border-color: var(--novel-accent);
+    background: var(--novel-accent-soft);
+}
+
+.novel-library-cover {
+    display: grid;
+    place-items: center;
+    width: 52px;
+    height: 66px;
+    border-radius: 10px 7px 7px 10px;
+    background: var(--novel-accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+    box-shadow: inset 4px 0 0 rgba(0, 0, 0, 0.12);
+}
+
+.novel-library-item-main {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.novel-library-item-main > strong,
+.novel-library-item-main > span,
+.novel-library-item-main > small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.novel-library-item-main > strong {
+    color: var(--novel-text);
+    font-size: 13px;
+}
+
+.novel-library-item-main > span,
+.novel-library-item-main > small {
+    color: var(--novel-muted);
+    font-size: 11px;
+}
+
+.novel-library-progress {
+    height: 5px;
+    margin-top: 4px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--novel-border);
+}
+
+.novel-library-progress > span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--novel-accent);
+}
+
+.novel-library-actions {
+    display: grid;
+    gap: 5px;
+    justify-items: stretch;
+}
+
+.novel-library-actions .compact,
+.novel-search-actions .compact,
+.novel-bookmark-bar .compact {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 11px;
+}
+
+.novel-library-empty {
+    padding: 22px;
+    border: 1px dashed var(--novel-border-strong);
+    border-radius: 14px;
+    color: var(--novel-muted);
+    text-align: center;
+    font-size: 12px;
+}
+
+.novel-reader-navigation-card {
+    display: grid;
+    grid-template-columns: minmax(260px, 1fr) auto auto;
+    gap: 14px;
+    align-items: end;
+    padding: 14px 16px;
+}
+
+.novel-search-actions,
+.novel-bookmark-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.novel-search-actions > span {
+    color: var(--novel-muted);
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+.novel-bookmark-select {
+    max-width: 280px;
+}
+
+.novel-inline-bookmark {
+    display: inline-grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--novel-muted);
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.novel-inline-bookmark:hover,
+.novel-inline-bookmark.active {
+    background: var(--novel-accent-soft);
+    color: var(--novel-accent);
+}
+
+.novel-reader-page .danger-text {
+    color: #b44f4f;
+}
+
+.novel-reader-page.reader-theme-dark .danger-text {
+    color: #f08f8f;
+}
+
+@media (max-width: 1100px) {
+    .novel-reader-navigation-card {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .novel-text-search {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 760px) {
+    .novel-library-header {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .novel-library-search {
+        width: 100%;
+    }
+
+    .novel-library-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .novel-library-item {
+        grid-template-columns: 48px minmax(0, 1fr);
+    }
+
+    .novel-library-actions {
+        grid-column: 1 / -1;
+        grid-template-columns: 1fr auto;
+    }
+
+    .novel-reader-navigation-card {
+        grid-template-columns: 1fr;
+    }
+
+    .novel-text-search,
+    .novel-search-actions,
+    .novel-bookmark-bar {
+        grid-column: auto;
+    }
+
+    .novel-search-actions,
+    .novel-bookmark-bar {
+        flex-wrap: wrap;
+    }
+
+    .novel-bookmark-select {
+        max-width: 100%;
+        flex: 1 1 220px;
+    }
+}
+
+
+/* Batch 13.2.1: Settings-driven Novel Reader font selection. */
+.novel-reader-page:not(.reader-font-auto) .novel-source-pane p,
+.novel-reader-page:not(.reader-font-auto) .novel-translation-pane p {
+    font-family: var(
+        --novel-reader-font-family,
+        "Segoe UI",
+        "Yu Gothic UI",
+        Meiryo,
+        sans-serif
+    ) !important;
+}
+
+.novel-font-settings-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.novel-font-settings-grid {
+    align-items: end;
+}
+
+.novel-font-preview {
+    margin-top: 18px;
+    padding: 20px 22px;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.035);
+    line-height: 1.8;
+}
+
+.novel-font-preview > span {
+    display: block;
+    margin-bottom: 5px;
+    color: var(--muted);
+    font-family: "Segoe UI", sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.novel-font-preview strong {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.novel-font-preview p {
+    margin: 7px 0 0;
+    font-size: 16px;
+}
