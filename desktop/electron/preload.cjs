@@ -15,6 +15,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  readNovelTxt: (filePath) => {
+    return ipcRenderer.invoke(
+      "novel:read-txt",
+      filePath
+    );
+  },
+
   translateNovelBlocks: (payload) => {
     return ipcRenderer.invoke(
       "novel:translate-batch",

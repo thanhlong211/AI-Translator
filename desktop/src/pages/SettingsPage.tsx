@@ -17,6 +17,95 @@ import type {
     StudyLevel
 } from "../app/types";
 
+
+
+type NovelReaderFontPreset =
+    | "auto"
+    | "serif"
+    | "sans"
+    | "jp-gothic"
+    | "jp-mincho"
+    | "system"
+    | "custom";
+
+interface NovelReaderFontSettings {
+    preset: NovelReaderFontPreset;
+    customFamily: string;
+}
+
+const NOVEL_READER_FONT_SETTINGS_KEY =
+    "aiTranslator.novelReader.fontSettings.v1";
+
+const NOVEL_READER_FONT_SETTINGS_EVENT =
+    "ai-translator:novel-font-settings";
+
+const DEFAULT_NOVEL_READER_FONT_SETTINGS: NovelReaderFontSettings = {
+    preset: "auto",
+    customFamily: ""
+};
+
+function loadNovelReaderFontSettings(): NovelReaderFontSettings {
+    try {
+        const raw = localStorage.getItem(
+            NOVEL_READER_FONT_SETTINGS_KEY
+        );
+
+        if (!raw) {
+            return DEFAULT_NOVEL_READER_FONT_SETTINGS;
+        }
+
+        const parsed = JSON.parse(raw) as Partial<NovelReaderFontSettings>;
+        const allowed: NovelReaderFontPreset[] = [
+            "auto",
+            "serif",
+            "sans",
+            "jp-gothic",
+            "jp-mincho",
+            "system",
+            "custom"
+        ];
+
+        return {
+            preset: allowed.includes(
+                parsed.preset as NovelReaderFontPreset
+            )
+                ? parsed.preset as NovelReaderFontPreset
+                : "auto",
+            customFamily:
+                typeof parsed.customFamily === "string"
+                    ? parsed.customFamily.slice(0, 160)
+                    : ""
+        };
+    } catch {
+        return DEFAULT_NOVEL_READER_FONT_SETTINGS;
+    }
+}
+
+function novelReaderFontStack(
+    settings: NovelReaderFontSettings
+) {
+    switch (settings.preset) {
+        case "serif":
+            return 'Georgia, "Times New Roman", "Yu Mincho", "Noto Serif JP", serif';
+        case "sans":
+            return '"Segoe UI", Arial, "Yu Gothic UI", Meiryo, "Noto Sans JP", sans-serif';
+        case "jp-gothic":
+            return '"Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif';
+        case "jp-mincho":
+            return '"Yu Mincho", "MS PMincho", "Noto Serif JP", serif';
+        case "system":
+            return 'system-ui, -apple-system, "Segoe UI", sans-serif';
+        case "custom": {
+            const custom = settings.customFamily.trim();
+            return custom
+                ? `${custom}, "Yu Gothic UI", Meiryo, "Segoe UI", sans-serif`
+                : '"Segoe UI", "Yu Gothic UI", Meiryo, sans-serif';
+        }
+        default:
+            return '"Segoe UI", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif';
+    }
+}
+
 interface SettingsPageProps {
     backend: BackendStatus;
     auth: AuthStatus;
@@ -229,6 +318,29 @@ export function SettingsPage({
         setIsActivatingLicense
     ] = useState(false);
 
+
+    const initialNovelFontSettings =
+        loadNovelReaderFontSettings();
+
+    const [
+        novelFontPreset,
+        setNovelFontPreset
+    ] = useState<NovelReaderFontPreset>(
+        initialNovelFontSettings.preset
+    );
+
+    const [
+        novelCustomFont,
+        setNovelCustomFont
+    ] = useState(
+        initialNovelFontSettings.customFamily
+    );
+
+    const [
+        novelFontMessage,
+        setNovelFontMessage
+    ] = useState("");
+
     async function submitLicense(
         event: FormEvent
     ) {
@@ -324,6 +436,61 @@ export function SettingsPage({
     }, [
         appPreferences
     ]);
+
+    function saveNovelFontSettings() {
+        const next: NovelReaderFontSettings = {
+            preset: novelFontPreset,
+            customFamily: novelCustomFont.trim().slice(0, 160)
+        };
+
+        try {
+            localStorage.setItem(
+                NOVEL_READER_FONT_SETTINGS_KEY,
+                JSON.stringify(next)
+            );
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    NOVEL_READER_FONT_SETTINGS_EVENT,
+                    { detail: next }
+                )
+            );
+
+            setNovelFontMessage(
+                "Đã lưu font mặc định cho Novel Reader."
+            );
+        } catch {
+            setNovelFontMessage(
+                "Không thể lưu font Novel Reader trên máy này."
+            );
+        }
+    }
+
+    function resetNovelFontSettings() {
+        setNovelFontPreset("auto");
+        setNovelCustomFont("");
+
+        try {
+            localStorage.removeItem(
+                NOVEL_READER_FONT_SETTINGS_KEY
+            );
+
+            window.dispatchEvent(
+                new CustomEvent(
+                    NOVEL_READER_FONT_SETTINGS_EVENT,
+                    {
+                        detail: DEFAULT_NOVEL_READER_FONT_SETTINGS
+                    }
+                )
+            );
+        } catch {
+            // Best effort only.
+        }
+
+        setNovelFontMessage(
+            "Đã dùng lại font tự động theo ngôn ngữ."
+        );
+    }
 
     async function saveShortcuts() {
         try {
@@ -1084,6 +1251,131 @@ export function SettingsPage({
                 {preferencesMessage && (
                     <div className="notice info">
                         {preferencesMessage}
+                    </div>
+                )}
+            </section>
+
+            <section className="settings-section novel-font-settings-section">
+                <div className="settings-section-header">
+                    <div>
+                        <span className="eyebrow violet">
+                            NOVEL READER FONT
+                        </span>
+
+                        <h2>
+                            Font chữ khi đọc Novel
+                        </h2>
+
+                        <p>
+                            Font này áp dụng làm mặc định cho Novel Reader.
+                            Chế độ Tự động vẫn ưu tiên font phù hợp với
+                            tiếng Nhật, Việt, Anh, Trung và Hàn.
+                        </p>
+                    </div>
+
+                    <div className="novel-font-settings-actions">
+                        <button
+                            type="button"
+                            className="secondary-action"
+                            onClick={resetNovelFontSettings}
+                        >
+                            Reset font
+                        </button>
+
+                        <button
+                            type="button"
+                            className="primary-action"
+                            onClick={saveNovelFontSettings}
+                        >
+                            Lưu font
+                        </button>
+                    </div>
+                </div>
+
+                <div className="settings-preference-grid novel-font-settings-grid">
+                    <label className="control-field">
+                        <span>Font Reader</span>
+
+                        <select
+                            value={novelFontPreset}
+                            onChange={(event) => {
+                                setNovelFontPreset(
+                                    event.target.value as NovelReaderFontPreset
+                                );
+                            }}
+                        >
+                            <option value="auto">
+                                Tự động · Khuyên dùng
+                            </option>
+                            <option value="serif">
+                                Serif · Kiểu sách
+                            </option>
+                            <option value="sans">
+                                Sans · Dễ nhìn
+                            </option>
+                            <option value="jp-gothic">
+                                Japanese Gothic
+                            </option>
+                            <option value="jp-mincho">
+                                Japanese Mincho
+                            </option>
+                            <option value="system">
+                                Font hệ thống
+                            </option>
+                            <option value="custom">
+                                Font tùy chỉnh
+                            </option>
+                        </select>
+
+                        <small>
+                            Tự động là lựa chọn an toàn nhất khi novel
+                            có nhiều ngôn ngữ.
+                        </small>
+                    </label>
+
+                    <label className="control-field">
+                        <span>Custom font family</span>
+
+                        <input
+                            value={novelCustomFont}
+                            onChange={(event) => {
+                                setNovelCustomFont(
+                                    event.target.value.slice(0, 160)
+                                );
+                            }}
+                            disabled={novelFontPreset !== "custom"}
+                            placeholder='Ví dụ: "Noto Serif JP", Meiryo'
+                        />
+
+                        <small>
+                            Dùng tên font đã cài trên Windows. App vẫn
+                            nối thêm fallback để giảm lỗi glyph.
+                        </small>
+                    </label>
+                </div>
+
+                <div
+                    className="novel-font-preview"
+                    style={{
+                        fontFamily: novelReaderFontStack({
+                            preset: novelFontPreset,
+                            customFamily: novelCustomFont
+                        })
+                    }}
+                >
+                    <span>Preview</span>
+                    <strong>
+                        日本語の小説 · Tiếng Việt · English Novel
+                    </strong>
+                    <p>
+                        魔法の本を開いた。 — Cô ấy mở cuốn sách ma thuật.
+                        — She opened the book of magic.
+                    </p>
+                </div>
+
+                {novelFontMessage && (
+                    <div className="notice info">
+                        {novelFontMessage}
                     </div>
                 )}
             </section>
