@@ -7,7 +7,8 @@ const {
     Tray,
     Menu,
     nativeImage,
-    safeStorage
+    safeStorage,
+    dialog
 } = require("electron");
 const { spawn } = require("child_process");
 const readline = require("readline");
@@ -549,6 +550,11 @@ const PAID_FEATURE_REQUIREMENTS = Object.freeze({
     featureKey: "continuousManga",
     featureName: "Continuous Manga",
     requiredPlan: "MANGA_PLUS",
+  }),
+  novelReaderTxt: Object.freeze({
+    featureKey: "novelReaderTxt",
+    featureName: "Novel Reader TXT",
+    requiredPlan: "PRO",
   }),
 });
 
@@ -6464,15 +6470,20 @@ async function translateBatchBlocks(
       currentTranslationTargetLanguage
     );
 
-  const purpose =
+  const requestedPurpose =
     String(
       options?.purpose ||
       "GENERAL"
     )
       .trim()
-      .toUpperCase() === "MANGA"
+      .toUpperCase();
+
+  const purpose =
+    requestedPurpose === "MANGA"
       ? "MANGA"
-      : "GENERAL";
+      : requestedPurpose === "NOVEL"
+        ? "NOVEL"
+        : "GENERAL";
 
   const normalizedBlocks =
     (Array.isArray(blocks)
@@ -6497,7 +6508,7 @@ async function translateBatchBlocks(
 
   if (!normalizedBlocks.length) {
     throw new Error(
-      "Không có OCR block để dịch."
+      "Không có text block để dịch."
     );
   }
 
@@ -6594,6 +6605,238 @@ async function translateBatchBlocks(
     sourceLanguage,
     targetLanguage,
   };
+}
+
+const NOVEL_TXT_MAX_BYTES =
+  8 * 1024 * 1024;
+
+function decodeNovelTextBuffer(buffer) {
+  if (!Buffer.isBuffer(buffer)) {
+    return {
+      text: "",
+      encoding: "UTF-8",
+    };
+  }
+
+  if (
+    buffer.length >= 3 &&
+    buffer[0] === 0xef &&
+    buffer[1] === 0xbb &&
+    buffer[2] === 0xbf
+  ) {
+    return {
+      text: buffer
+        .subarray(3)
+        .toString("utf8"),
+      encoding: "UTF-8 BOM",
+    };
+  }
+
+  if (
+    buffer.length >= 2 &&
+    buffer[0] === 0xff &&
+    buffer[1] === 0xfe
+  ) {
+    return {
+      text: buffer
+        .subarray(2)
+        .toString("utf16le"),
+      encoding: "UTF-16 LE",
+    };
+  }
+
+  if (
+    buffer.length >= 2 &&
+    buffer[0] === 0xfe &&
+    buffer[1] === 0xff
+  ) {
+    const swapped =
+      Buffer.from(
+        buffer.subarray(2)
+      );
+
+    for (
+      let index = 0;
+      index + 1 < swapped.length;
+      index += 2
+    ) {
+      const first =
+        swapped[index];
+      swapped[index] =
+        swapped[index + 1];
+      swapped[index + 1] =
+        first;
+    }
+
+    return {
+      text: swapped.toString(
+        "utf16le"
+      ),
+      encoding: "UTF-16 BE",
+    };
+  }
+
+  return {
+    text: buffer.toString("utf8"),
+    encoding: "UTF-8",
+  };
+}
+
+async function openNovelTxtFile() {
+  await ensureAuthenticated();
+  requireDesktopFeatureCapability(
+    "novelReaderTxt"
+  );
+
+  const ownerWindow =
+    mainWindow &&
+    !mainWindow.isDestroyed()
+      ? mainWindow
+      : undefined;
+
+  const dialogOptions = {
+    title:
+      "Mở Novel TXT",
+    properties: [
+      "openFile",
+    ],
+    filters: [
+      {
+        name: "Text / Novel",
+        extensions: [
+          "txt",
+        ],
+      },
+    ],
+  };
+
+  const result =
+    ownerWindow
+      ? await dialog.showOpenDialog(
+          ownerWindow,
+          dialogOptions
+        )
+      : await dialog.showOpenDialog(
+          dialogOptions
+        );
+
+  if (
+    result.canceled ||
+    !result.filePaths?.length
+  ) {
+    return {
+      success: false,
+      canceled: true,
+    };
+  }
+
+  const filePath =
+    path.resolve(
+      result.filePaths[0]
+    );
+
+  if (
+    path.extname(filePath)
+      .toLowerCase() !== ".txt"
+  ) {
+    throw new Error(
+      "Novel Reader hiện chỉ hỗ trợ file .txt."
+    );
+  }
+
+  const stat =
+    await fs.stat(filePath);
+
+  if (!stat.isFile()) {
+    throw new Error(
+      "Đường dẫn đã chọn không phải file."
+    );
+  }
+
+  if (stat.size > NOVEL_TXT_MAX_BYTES) {
+    throw new Error(
+      "File TXT lớn hơn 8 MB. Hãy chia novel thành file nhỏ hơn để đọc ổn định."
+    );
+  }
+
+  const buffer =
+    await fs.readFile(filePath);
+
+  const decoded =
+    decodeNovelTextBuffer(buffer);
+
+  const text =
+    String(decoded.text || "")
+      .replace(/^\uFEFF/, "")
+      .replace(/\u0000/g, "")
+      .trim();
+
+  if (!text) {
+    throw new Error(
+      "File TXT không có nội dung đọc được."
+    );
+  }
+
+  const replacementCount =
+    (text.match(/\uFFFD/g) || [])
+      .length;
+
+  if (
+    decoded.encoding === "UTF-8" &&
+    replacementCount >= 3 &&
+    replacementCount / text.length > 0.003
+  ) {
+    throw new Error(
+      "Encoding TXT có vẻ không phải UTF-8 (có thể là Shift-JIS). Hãy lưu/chuyển file sang UTF-8 rồi mở lại."
+    );
+  }
+
+  return {
+    success: true,
+    file: {
+      path: filePath,
+      name:
+        path.basename(filePath),
+      sizeBytes: stat.size,
+      modifiedAt:
+        stat.mtime.toISOString(),
+      encoding:
+        decoded.encoding,
+    },
+    text,
+  };
+}
+
+async function translateNovelBlocks(
+  payload
+) {
+  await ensureAuthenticated();
+  requireDesktopFeatureCapability(
+    "novelReaderTxt"
+  );
+
+  const blocks =
+    Array.isArray(payload?.blocks)
+      ? payload.blocks.slice(0, 8)
+      : [];
+
+  return translateBatchBlocks(
+    blocks,
+    {
+      purpose: "NOVEL",
+      sourceLanguage:
+        payload?.sourceLanguage,
+      targetLanguage:
+        payload?.targetLanguage,
+      context:
+        Array.isArray(
+          payload?.context
+        )
+          ? payload.context
+              .slice(-10)
+          : [],
+    }
+  );
 }
 
 async function applyOverlayCorrectionLocally(
@@ -10880,6 +11123,23 @@ ipcMain.handle(
   async (_event, sessionId) => {
     return revokeDeviceSession(
       sessionId
+    );
+  }
+);
+
+
+ipcMain.handle(
+  "novel:open-txt",
+  async () => {
+    return openNovelTxtFile();
+  }
+);
+
+ipcMain.handle(
+  "novel:translate-batch",
+  async (_event, payload) => {
+    return translateNovelBlocks(
+      payload
     );
   }
 );

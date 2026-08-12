@@ -76,6 +76,15 @@ public class BatchTranslationController {
             );
         }
 
+        if (request.purpose() == BatchTranslationPurpose.NOVEL) {
+            entitlementService.requireFeature(
+                    user,
+                    "novelReaderTxt",
+                    "Novel Reader TXT",
+                    "PRO"
+            );
+        }
+
         entitlementService
                 .requireTranslationQuota(user);
 

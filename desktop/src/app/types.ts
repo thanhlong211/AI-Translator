@@ -1,5 +1,6 @@
 export type PageId =
     | "translate"
+    | "novel"
     | "study"
     | "vocabulary"
     | "grammar"

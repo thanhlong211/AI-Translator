@@ -34,6 +34,16 @@ export function Icon({ name, size = 20 }: IconProps) {
                     <path d="M15.2 16h4.6" />
                 </svg>
             );
+        case "novel":
+            return (
+                <svg {...common}>
+                    <path d="M5 3.5h10a3 3 0 0 1 3 3V21H8a3 3 0 0 1-3-3z" />
+                    <path d="M8 7h7" />
+                    <path d="M8 11h7" />
+                    <path d="M8 15h5" />
+                    <path d="M5 18a3 3 0 0 1 3-3h10" />
+                </svg>
+            );
         case "study":
             return (
                 <svg {...common}>
