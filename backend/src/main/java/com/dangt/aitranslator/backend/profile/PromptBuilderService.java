@@ -3,6 +3,7 @@ package com.dangt.aitranslator.backend.profile;
 import com.dangt.aitranslator.backend.translation.TranslationContextItem;
 import com.dangt.aitranslator.backend.translation.TranslationLanguage;
 import com.dangt.aitranslator.backend.translation.batch.BatchTranslationBlockRequest;
+import com.dangt.aitranslator.backend.translation.batch.BatchTranslationPurpose;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -184,6 +185,7 @@ public class PromptBuilderService {
             TranslationProfile profile,
             TranslationLanguage sourceLanguage,
             TranslationLanguage targetLanguage,
+            BatchTranslationPurpose purpose,
             List<TranslationContextItem> context,
             List<BatchTranslationBlockRequest> blocks
     ) {
@@ -203,15 +205,38 @@ public class PromptBuilderService {
             );
         }
 
+        BatchTranslationPurpose resolvedPurpose =
+                purpose == null
+                        ? BatchTranslationPurpose.GENERAL
+                        : purpose;
+
         StringBuilder prompt =
                 new StringBuilder();
 
         prompt.append("""
                 Bạn là AI Translation Engine của AI Translator Desktop.
-                Bạn đang dịch NHIỀU text block OCR lấy từ cùng một màn hình/trang.
-
-                YÊU CẦU BẮT BUỘC:
                 """);
+
+        if (resolvedPurpose == BatchTranslationPurpose.NOVEL) {
+            prompt.append("""
+                    Bạn đang dịch các đoạn văn LIÊN TIẾP của cùng một novel/light novel.
+                    Hãy duy trì nhất quán ngôi kể, đại từ, tên riêng, cách xưng hô và giọng văn giữa các đoạn.
+
+                    YÊU CẦU BẮT BUỘC:
+                    """);
+        } else if (resolvedPurpose == BatchTranslationPurpose.MANGA) {
+            prompt.append("""
+                    Bạn đang dịch nhiều text block OCR từ cùng một trang manga.
+
+                    YÊU CẦU BẮT BUỘC:
+                    """);
+        } else {
+            prompt.append("""
+                    Bạn đang dịch nhiều text block từ cùng một màn hình/trang.
+
+                    YÊU CẦU BẮT BUỘC:
+                    """);
+        }
 
         if (resolvedSource == TranslationLanguage.AUTO) {
             prompt.append(
@@ -231,8 +256,19 @@ public class PromptBuilderService {
                 resolvedTarget.promptName()
         ).append(".\n");
 
+        if (resolvedPurpose == BatchTranslationPurpose.NOVEL) {
+            prompt.append("""
+                    - Các block là các đoạn liên tiếp; dùng block trước/sau để hiểu mạch kể nhưng vẫn dịch từng block riêng.
+                    - Giữ văn phong tự nhiên như văn xuôi, không biến thành giải thích hay tóm tắt.
+                    - Nếu một câu/ý nối qua ranh giới block, ưu tiên nghĩa tự nhiên nhưng KHÔNG gộp output của hai block.
+                    """);
+        } else {
+            prompt.append("""
+                    - Các block thuộc cùng một màn hình/trang; có thể dùng các block khác để hiểu ngữ cảnh, nhân vật và đại từ.
+                    """);
+        }
+
         prompt.append("""
-                - Các block thuộc cùng một screenshot; có thể dùng các block khác để hiểu ngữ cảnh, nhân vật và đại từ.
                 - KHÔNG gộp hai block thành một bản dịch.
                 - KHÔNG bỏ block.
                 - KHÔNG đổi id.
@@ -314,7 +350,7 @@ public class PromptBuilderService {
 
         prompt.append("""
 
-                OCR BLOCKS JSON (giữ nguyên id):
+                TEXT BLOCKS JSON (giữ nguyên id):
                 {"blocks":[
                 """);
 

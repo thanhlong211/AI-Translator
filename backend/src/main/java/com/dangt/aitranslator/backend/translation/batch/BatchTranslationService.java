@@ -157,6 +157,7 @@ public class BatchTranslationService {
                                     profile,
                                     request.sourceLanguage(),
                                     request.targetLanguage(),
+                                    request.purpose(),
                                     request.context(),
                                     aiBlocks
                             );

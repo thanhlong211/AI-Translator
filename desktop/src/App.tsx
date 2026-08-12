@@ -44,6 +44,7 @@ import { Sidebar } from "./components/Sidebar";
 import { Topbar } from "./components/Topbar";
 import { OnboardingModal } from "./components/OnboardingModal";
 import { TranslatePage } from "./pages/TranslatePage";
+import { NovelReaderPage } from "./pages/NovelReaderPage";
 import { StudyPage } from "./pages/StudyPage";
 import { VocabularyPage } from "./pages/VocabularyPage";
 import { GrammarPage } from "./pages/GrammarPage";
@@ -4174,6 +4175,40 @@ function App() {
                                 );
                             }
                         }
+                    />
+                );
+
+            case "novel":
+                return (
+                    <NovelReaderPage
+                        backend={backend}
+                        auth={auth}
+                        entitlements={entitlements}
+                        profiles={profiles}
+                        activeProfile={profileDraft}
+                        profileDirty={profileDirty}
+                        sourceLanguage={sourceLanguage}
+                        targetLanguage={targetLanguage}
+                        onSourceLanguageChange={setSourceLanguage}
+                        onTargetLanguageChange={setTargetLanguage}
+                        onSelectProfile={selectProfile}
+                        onUpgrade={() => {
+                            setEntitlementMessage(
+                                "Novel Reader TXT yêu cầu gói PRO hoặc cao hơn."
+                            );
+                            setActivePage("settings");
+
+                            window.setTimeout(() => {
+                                document
+                                    .getElementById(
+                                        "plan-license"
+                                    )
+                                    ?.scrollIntoView({
+                                        behavior: "smooth",
+                                        block: "start"
+                                    });
+                            }, 0);
+                        }}
                     />
                 );
 

@@ -12,6 +12,7 @@ const mainItems: Array<{
     description: string;
 }> = [
     { id: "translate", label: "Dịch", description: "OCR & AI" },
+    { id: "novel", label: "Novel TXT", description: "Đọc & dịch văn bản" },
     { id: "study", label: "Học tập", description: "Phân tích câu" },
     { id: "vocabulary", label: "Từ vựng", description: "Kho cá nhân" },
     { id: "grammar", label: "Ngữ pháp", description: "Cấu trúc đã lưu" },

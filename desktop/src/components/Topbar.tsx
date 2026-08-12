@@ -21,6 +21,10 @@ const pageTitles: Record<
         title: "Dịch màn hình",
         subtitle: "OCR local, AI translation qua Java backend"
     },
+    novel: {
+        title: "Novel Reader TXT",
+        subtitle: "Đọc song ngữ + Context + Translation Memory"
+    },
     study: {
         title: "Chế độ học",
         subtitle: "Dịch và phân tích tiếng Nhật theo ngữ cảnh"

@@ -9,6 +9,20 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
 
+  openNovelTxt: () => {
+    return ipcRenderer.invoke(
+      "novel:open-txt"
+    );
+  },
+
+  translateNovelBlocks: (payload) => {
+    return ipcRenderer.invoke(
+      "novel:translate-batch",
+      payload
+    );
+  },
+
+
   translatePanel: (options) => {
     return ipcRenderer.invoke(
       "translation:panel",

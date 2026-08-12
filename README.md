@@ -1,84 +1,84 @@
-# Batch 12 — Plans / Entitlements / License
+# Batch 13 — Novel Reader TXT
 
-Branch: `feature/batch-12-plans-entitlements`
+Branch: `feature/batch-13-novel-reader-txt`
 
-## What changed
+## Scope
 
-- Backend is now the source-of-truth for plan, features and limits.
-- Flyway V12 adds plan catalog, feature entitlements, plan limits, license keys and license activations.
-- Plans seeded: `FREE`, `PRO`, `MANGA_PLUS`.
-- `continuousManga` is OFF for FREE/PRO and ON for MANGA_PLUS.
-- Desktop Batch 11 no longer hard-codes Continuous Manga as available.
-- Settings has a Plan & License section with current plan, capabilities, quota and license activation.
-- `/api/v1/translate` and `/api/v1/translate/batch` enforce `monthlyTranslations` before calling AI.
-- A local-only `AI_TRANSLATOR_DEV_PLAN` override exists for development testing.
-- Local helper `backend/mysql/create-dev-license.sql` creates a 30-day MANGA_PLUS test license.
+- New `Novel TXT` workspace in the Desktop sidebar.
+- PRO/MANGA_PLUS feature gate via existing `novelReaderTxt` entitlement from V12.
+- Native Electron `.txt` file picker.
+- Local file reading; the whole novel is never uploaded to the backend.
+- Supported encodings in this batch: UTF-8, UTF-8 BOM, UTF-16 LE, UTF-16 BE.
+- Shift-JIS-like decoding errors are rejected with a clear message instead of sending mojibake to AI.
+- Paragraph/chapter segmentation; each translation block stays under the backend 1200-character limit.
+- Chapter markers include `第N章/話/節/巻/部`, `Chapter N`, `Chương N`, `Prologue`, `Epilogue`, `序章`, `終章`, `幕間`, `間章`.
+- Reader translates only requested blocks: 1–8 per batch (`6` by default), never the whole book automatically.
+- Context uses the latest translated paragraphs in the same novel, up to the existing backend limit of 10.
+- Personal Translation Memory remains checked per block before AI.
+- Current Reader session remains in memory when switching app tabs.
+- Reading progress and up to 160 recent translations are stored locally for up to 5 recent TXT files; reopening the same unchanged file restores them.
+- New backend batch `purpose = NOVEL` adds a prose-focused prompt and backend entitlement enforcement.
+- No Flyway migration: V12 already has `novelReaderTxt = FALSE` for FREE and `TRUE` for PRO/MANGA_PLUS.
 
-## Endpoints
+## Apply
 
-- `GET /api/v1/account/entitlements`
-- `POST /api/v1/account/license/activate`
+Copy the patch contents into the repository root, preserving paths.
 
-Activation body:
+## Test matrix
 
-```json
-{
-  "licenseKey": "AIT-..."
-}
-```
+### FREE
 
-Raw license keys are never stored in MySQL. Backend normalizes the key and stores/looks up SHA-256 only.
+- Open `Novel TXT` in the sidebar.
+- It must show the PRO paywall.
+- Direct backend `purpose=NOVEL` must also be denied.
 
-## Local test — fastest path
+### PRO
 
-Set backend environment variable before startup:
+- Open `samples/novel-reader-test.txt`.
+- Reader should detect 2 chapter markers.
+- Select a saved Translation Profile.
+- Click `Dịch 6 đoạn tiếp`.
+- Original and translated paragraphs should appear side-by-side.
+- `Memory N · AI N` should match backend batch summary.
+- Switch to another app tab and back: the open Reader session should remain.
+- Close/reopen the same TXT: reading position/recent translations should restore locally.
+- Continuous Manga remains unavailable, unchanged from Batch 12.
 
-```bash
-export AI_TRANSLATOR_DEV_PLAN=MANGA_PLUS
-```
+### MANGA_PLUS
 
-Then login Desktop. Settings should show `Manga+ · DEVELOPMENT_OVERRIDE`, and Auto Manga should be available.
-
-Unset it to verify FREE gating:
-
-```bash
-unset AI_TRANSLATOR_DEV_PLAN
-```
-
-Restart backend + login again. Settings should show FREE and Continuous Manga should be unavailable.
-
-## Local test — real license activation path
-
-Leave `AI_TRANSLATOR_DEV_PLAN` blank. Run:
-
-`backend/mysql/create-dev-license.sql`
-
-Then paste the returned local test key into Settings → Plan & License → License key. The effective plan should become MANGA_PLUS.
-
-## Security change
-
-`application.properties` no longer contains fallback DB/JWT credentials. Configure these outside Git:
-
-- `DB_PASSWORD`
-- `JWT_SECRET_BASE64`
-- `OPENAI_API_KEY`
-
-Because older values were already committed before this patch, rotate the DB password and JWT secret. Rotating JWT intentionally invalidates existing access/refresh authentication state as appropriate; users may need to log in again.
+- Same Novel Reader behavior as PRO.
+- Continuous Manga remains available.
 
 ## Validation performed
 
-- `node --check desktop/electron/main.cjs` — PASS
-- `node --check desktop/electron/preload.cjs` — PASS
-- TypeScript parse/type integration with local React stubs — PASS
-- New entitlement/license Java package compiled with dependency stubs — PASS
-- Modified normal + batch translation controllers compiled with dependency stubs — PASS
-- Secret-pattern scan on reconstructed tracked source — no matching committed fallback credentials
+- Electron `main.cjs` syntax PASS.
+- Electron `preload.cjs` syntax PASS.
+- TypeScript integration compile for App + Novel Reader + sidebar/topbar/types PASS.
+- `PromptBuilderService` targeted Java compile PASS.
+- `BatchTranslationService` targeted Java compile PASS.
+- `BatchTranslationController` targeted Java compile PASS.
+- Existing migrations remain V1–V13 only; no Flyway file changed.
 
-Full Maven/Vite dependency builds were not possible in the sandbox because project dependencies are not installed/cached there. Run your normal backend + Vite + Electron runtime test on Windows before committing.
+## Git after Windows runtime test passes
 
-## Suggested commit after Windows test
+Suggested commit:
 
 ```bash
-git add .env.example backend desktop
-git commit -m "feat(billing): add plans entitlements and license activation"
+git add backend/src/main/java/com/dangt/aitranslator/backend/profile/PromptBuilderService.java \
+        backend/src/main/java/com/dangt/aitranslator/backend/translation/batch/BatchTranslationController.java \
+        backend/src/main/java/com/dangt/aitranslator/backend/translation/batch/BatchTranslationPurpose.java \
+        backend/src/main/java/com/dangt/aitranslator/backend/translation/batch/BatchTranslationService.java \
+        desktop/electron/main.cjs \
+        desktop/electron/preload.cjs \
+        desktop/src/App.tsx \
+        desktop/src/app/types.ts \
+        desktop/src/components/Icon.tsx \
+        desktop/src/components/Sidebar.tsx \
+        desktop/src/components/Topbar.tsx \
+        desktop/src/index.css \
+        desktop/src/pages/NovelReaderPage.tsx
+
+git commit -m "feat(novel): add TXT reader with contextual batch translation"
 ```
+
+The `samples/` file is only for local testing; do not stage it unless you intentionally want it in the repository.
