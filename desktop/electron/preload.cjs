@@ -340,6 +340,61 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  getAccountEntitlements: () => {
+    return ipcRenderer.invoke(
+      "account:get-entitlements"
+    );
+  },
+
+  activateLicense: (licenseKey) => {
+    return ipcRenderer.invoke(
+      "account:activate-license",
+      licenseKey
+    );
+  },
+
+  onAccountEntitlementsChanged: (
+    callback
+  ) => {
+    const listener =
+      (_event, data) => {
+        callback(data);
+      };
+
+    ipcRenderer.on(
+      "account-entitlements-changed",
+      listener
+    );
+
+    return () => {
+      ipcRenderer.removeListener(
+        "account-entitlements-changed",
+        listener
+      );
+    };
+  },
+
+  onPaidFeatureRequired: (
+    callback
+  ) => {
+    const listener =
+      (_event, data) => {
+        callback(data);
+      };
+
+    ipcRenderer.on(
+      "paid-feature-required",
+      listener
+    );
+
+    return () => {
+      ipcRenderer.removeListener(
+        "paid-feature-required",
+        listener
+      );
+    };
+  },
+
   getDevices: () => {
     return ipcRenderer.invoke(
       "auth:get-devices"

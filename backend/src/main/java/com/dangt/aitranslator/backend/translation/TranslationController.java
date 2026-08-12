@@ -2,6 +2,7 @@ package com.dangt.aitranslator.backend.translation;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
 import com.dangt.aitranslator.backend.common.ApiError;
+import com.dangt.aitranslator.backend.entitlement.EntitlementService;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,16 +28,20 @@ public class TranslationController {
 
     private final TranslationService translationService;
     private final CurrentUserService currentUserService;
+    private final EntitlementService entitlementService;
 
     public TranslationController(
             TranslationService translationService,
-            CurrentUserService currentUserService
+            CurrentUserService currentUserService,
+            EntitlementService entitlementService
     ) {
         this.translationService =
                 translationService;
 
         this.currentUserService =
                 currentUserService;
+        this.entitlementService =
+                entitlementService;
     }
 
     @Operation(
@@ -103,6 +108,9 @@ public class TranslationController {
         UserAccount user =
                 currentUserService
                         .requireActiveUser(jwt);
+
+        entitlementService
+                .requireTranslationQuota(user);
 
         return translationService.translate(
                 user.getId(),

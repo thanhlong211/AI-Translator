@@ -18,6 +18,9 @@ public record BatchTranslateRequest(
 
         Long profileId,
 
+        @Schema(example = "MANGA")
+        BatchTranslationPurpose purpose,
+
         @Schema(example = "AUTO")
         TranslationLanguage sourceLanguage,
 
@@ -34,6 +37,11 @@ public record BatchTranslateRequest(
 
 ) {
     public BatchTranslateRequest {
+        purpose =
+                purpose == null
+                        ? BatchTranslationPurpose.GENERAL
+                        : purpose;
+
         sourceLanguage =
                 sourceLanguage == null
                         ? TranslationLanguage.AUTO

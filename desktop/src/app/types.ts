@@ -41,6 +41,18 @@ export interface DeviceSession {
     expiresAt: string;
 }
 
+export interface AccountEntitlements {
+    planCode: string;
+    planName: string;
+    subscriptionStatus: string;
+    subscriptionSource: string;
+    periodEnd?: string | null;
+    features: Record<string, boolean>;
+    limits: Record<string, number>;
+    usage: Record<string, number>;
+    developmentOverride: boolean;
+}
+
 export interface TranslationState {
     original: string;
     vietnamese: string;

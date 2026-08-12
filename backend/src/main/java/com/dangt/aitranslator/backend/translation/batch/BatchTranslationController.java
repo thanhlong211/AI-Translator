@@ -1,6 +1,7 @@
 package com.dangt.aitranslator.backend.translation.batch;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
+import com.dangt.aitranslator.backend.entitlement.EntitlementService;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -25,15 +26,19 @@ public class BatchTranslationController {
 
     private final BatchTranslationService batchTranslationService;
     private final CurrentUserService currentUserService;
+    private final EntitlementService entitlementService;
 
     public BatchTranslationController(
             BatchTranslationService batchTranslationService,
-            CurrentUserService currentUserService
+            CurrentUserService currentUserService,
+            EntitlementService entitlementService
     ) {
         this.batchTranslationService =
                 batchTranslationService;
         this.currentUserService =
                 currentUserService;
+        this.entitlementService =
+                entitlementService;
     }
 
     @Operation(
@@ -61,6 +66,18 @@ public class BatchTranslationController {
         UserAccount user =
                 currentUserService
                         .requireActiveUser(jwt);
+
+        if (request.purpose() == BatchTranslationPurpose.MANGA) {
+            entitlementService.requireFeature(
+                    user,
+                    "mangaPanel",
+                    "Manga Translation",
+                    "PRO"
+            );
+        }
+
+        entitlementService
+                .requireTranslationQuota(user);
 
         return batchTranslationService.translate(
                 user.getId(),
