@@ -1,0 +1,136 @@
+# ============================================================
+# AI Translator monorepo
+# Root: AI-Translator/
+#   desktop/  -> Electron + React + PaddleOCR
+#   backend/  -> Spring Boot
+# ============================================================
+
+# ----------------------------
+# Secrets / local environment
+# ----------------------------
+.env
+.env.*
+!.env.example
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+
+# Spring local-only config / secrets
+backend/src/main/resources/application-local.properties
+backend/src/main/resources/application-local.yml
+backend/src/main/resources/application-local.yaml
+backend/src/main/resources/application-secrets.properties
+backend/src/main/resources/application-secrets.yml
+backend/src/main/resources/application-secrets.yaml
+
+# ----------------------------
+# OS / IDE
+# ----------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# ----------------------------
+# Node / React / Electron
+# ----------------------------
+node_modules/
+desktop/node_modules/
+
+# Frontend build output
+desktop/dist/
+desktop/out/
+desktop/build/
+desktop/release/
+
+# Electron Builder output
+*.blockmap
+latest.yml
+builder-debug.yml
+builder-effective-config.yaml
+
+# Electron runtime captures (keep real UI assets such as tray.png/icon.ico)
+desktop/electron/selected.png
+desktop/electron/full-screen.png
+desktop/electron/fullscreen.png
+desktop/electron/crop.png
+desktop/electron/cropped.png
+
+# ----------------------------
+# Python / PaddleOCR runtime
+# ----------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+
+.venv/
+venv/
+desktop/ocr/.venv/
+
+# Local Paddle/PaddleX caches and downloaded models
+.paddlex/
+.paddleocr/
+desktop/ocr/.paddlex/
+desktop/ocr/.paddleocr/
+
+# ----------------------------
+# Java / Maven / Spring Boot
+# ----------------------------
+backend/target/
+target/
+*.class
+
+# IMPORTANT: Maven Wrapper files under .mvn/wrapper ARE source files.
+# Do not ignore maven-wrapper.jar if your backend uses Maven Wrapper.
+
+# ----------------------------
+# Runtime / cache / logs
+# ----------------------------
+runtime/
+desktop/runtime/
+backend/runtime/
+
+cache/
+desktop/cache/
+backend/cache/
+
+logs/
+desktop/logs/
+backend/logs/
+
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ----------------------------
+# Local databases / temp files
+# ----------------------------
+*.db
+*.sqlite
+*.sqlite3
+*.tmp
+*.temp
+*.bak
+
+# ----------------------------
+# Local packaging artifacts
+# ----------------------------
+*.exe
+*.msi
+*.dmg
+*.AppImage
+
+# ----------------------------
+# Test / coverage output
+# ----------------------------
+coverage/
+.nyc_output/

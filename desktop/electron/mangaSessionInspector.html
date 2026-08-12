@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: #111827;
+    }
+    body { padding: 8px; }
+    .panel {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid rgba(17,24,39,.16);
+      border-radius: 16px;
+      background: rgba(255,255,255,.97);
+      box-shadow: 0 14px 42px rgba(0,0,0,.24);
+    }
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 14px 11px;
+      border-bottom: 1px solid #e5e7eb;
+      -webkit-app-region: drag;
+    }
+    .header-main { min-width: 0; }
+    .eyebrow {
+      display: block;
+      color: #6366f1;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 3px 0 2px;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+    #subtitle {
+      display: block;
+      color: #6b7280;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .icon-button {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid #e5e7eb;
+      border-radius: 9px;
+      background: #fff;
+      cursor: pointer;
+      color: #4b5563;
+      font-size: 16px;
+      -webkit-app-region: no-drag;
+    }
+    .icon-button:hover { background: #f3f4f6; color: #111827; }
+    .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 10px 14px 8px;
+    }
+    .chip {
+      padding: 4px 7px;
+      border-radius: 999px;
+      background: #f3f4f6;
+      color: #4b5563;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .chip.primary { background: #eef2ff; color: #4338ca; }
+    .context-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 14px 7px;
+      color: #6b7280;
+      font-size: 10px;
+      font-weight: 700;
+    }
+    #contextList {
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 0 10px 10px;
+    }
+    .context-item {
+      margin: 0 0 8px;
+      padding: 9px 10px;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      background: #fff;
+    }
+    .context-item:last-child { margin-bottom: 0; }
+    .item-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .item-index {
+      color: #6b7280;
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .page-chip {
+      color: #0f766e;
+      background: #ecfdf5;
+      border-radius: 999px;
+      padding: 2px 6px;
+      font-size: 9px;
+      font-weight: 800;
+    }
+    .original, .translated {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.38;
+    }
+    .original {
+      color: #111827;
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .arrow {
+      margin: 4px 0;
+      color: #9ca3af;
+      font-size: 10px;
+    }
+    .translated {
+      color: #4338ca;
+      font-size: 12px;
+      font-weight: 650;
+    }
+    .empty {
+      margin: 16px 4px;
+      padding: 22px 14px;
+      border: 1px dashed #d1d5db;
+      border-radius: 12px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .footer {
+      padding: 10px 12px 12px;
+      border-top: 1px solid #e5e7eb;
+      background: rgba(249,250,251,.94);
+    }
+    .hint {
+      margin: 0 0 8px;
+      color: #6b7280;
+      font-size: 10px;
+      line-height: 1.4;
+    }
+    .actions { display: flex; gap: 7px; }
+    .action {
+      min-height: 32px;
+      padding: 0 11px;
+      border-radius: 9px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #374151;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 750;
+    }
+    .action.primary {
+      flex: 1;
+      color: #fff;
+      background: #4f46e5;
+      border-color: #4f46e5;
+    }
+    .action:hover { filter: brightness(.98); }
+    .action:disabled { opacity: .55; cursor: wait; }
+    #message {
+      min-height: 15px;
+      margin-top: 7px;
+      color: #0f766e;
+      font-size: 10px;
+      font-weight: 650;
+    }
+    #message.error { color: #b42318; }
+  </style>
+</head>
+<body>
+  <section class="panel">
+    <header class="header">
+      <div class="header-main">
+        <span class="eyebrow">Manga Session</span>
+        <h1>Context Inspector</h1>
+        <span id="subtitle">Đang tải session…</span>
+      </div>
+      <button id="close" class="icon-button" title="Đóng Inspector">×</button>
+    </header>
+
+    <div class="meta">
+      <span id="chapterChip" class="chip primary">Chapter 1</span>
+      <span id="pageChip" class="chip">Trang 0</span>
+      <span id="languageChip" class="chip">AUTO → VI</span>
+      <span id="profileChip" class="chip">Profile</span>
+    </div>
+
+    <div class="context-header">
+      <span>CONTEXT GỬI SANG TRANG KẾ</span>
+      <span id="countLabel">0/10</span>
+    </div>
+
+    <main id="contextList"></main>
+
+    <footer class="footer">
+      <p class="hint">
+        “Chapter mới” giữ nguyên vùng quét, Profile và ngôn ngữ nhưng xóa context và đưa số trang về 0.
+      </p>
+      <div class="actions">
+        <button id="newChapter" class="action primary">↻ Bắt đầu chapter mới</button>
+        <button id="refresh" class="action">Làm mới</button>
+      </div>
+      <div id="message"></div>
+    </footer>
+  </section>
+
+  <script>
+    const subtitle = document.getElementById("subtitle");
+    const chapterChip = document.getElementById("chapterChip");
+    const pageChip = document.getElementById("pageChip");
+    const languageChip = document.getElementById("languageChip");
+    const profileChip = document.getElementById("profileChip");
+    const countLabel = document.getElementById("countLabel");
+    const contextList = document.getElementById("contextList");
+    const newChapter = document.getElementById("newChapter");
+    const refresh = document.getElementById("refresh");
+    const close = document.getElementById("close");
+    const message = document.getElementById("message");
+
+    function text(value) {
+      return String(value ?? "").trim();
+    }
+
+    function setMessage(value, error = false) {
+      message.textContent = text(value);
+      message.classList.toggle("error", Boolean(error));
+    }
+
+    function render(details) {
+      const active = Boolean(details?.active);
+      const chapter = Math.max(1, Number(details?.chapterNumber || 1));
+      const page = Math.max(0, Number(details?.pageNumber || 0));
+      const context = Array.isArray(details?.context) ? details.context : [];
+      const maxContext = Math.max(1, Number(details?.maxContextItems || 10));
+
+      subtitle.textContent = active
+        ? page > 0
+          ? `Đang đọc Chapter ${chapter} · Trang ${page}`
+          : `Chapter ${chapter} mới · sẵn sàng dịch Trang 1`
+        : "Chưa có Manga Session đang hoạt động";
+
+      chapterChip.textContent = `Chapter ${chapter}`;
+      pageChip.textContent = page > 0 ? `Trang ${page}` : "Chưa dịch trang";
+      languageChip.textContent = `${text(details?.sourceLanguage || "AUTO")} → ${text(details?.targetLanguage || "VI")}`;
+      profileChip.textContent = text(details?.profileName) || (details?.profileId ? `Profile #${details.profileId}` : "Profile");
+      countLabel.textContent = `${context.length}/${maxContext}`;
+      newChapter.disabled = !active;
+
+      contextList.replaceChildren();
+
+      if (!active || !context.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty";
+        empty.textContent = active
+          ? "Context đang trống. Sau khi dịch Trang 1, các cặp hội thoại gần nhất sẽ xuất hiện ở đây."
+          : "Dùng Ctrl+Shift+W để bắt đầu Manga Session.";
+        contextList.appendChild(empty);
+        return;
+      }
+
+      for (const item of context) {
+        const card = document.createElement("article");
+        card.className = "context-item";
+
+        const top = document.createElement("div");
+        top.className = "item-top";
+
+        const index = document.createElement("span");
+        index.className = "item-index";
+        index.textContent = `#${Number(item?.index || 0)}`;
+
+        const pageBadge = document.createElement("span");
+        pageBadge.className = "page-chip";
+        pageBadge.textContent = item?.pageNumber
+          ? `Trang ${Number(item.pageNumber)}`
+          : "Context";
+
+        top.append(index, pageBadge);
+
+        const original = document.createElement("div");
+        original.className = "original";
+        original.textContent = text(item?.original) || "(trống)";
+
+        const arrow = document.createElement("div");
+        arrow.className = "arrow";
+        arrow.textContent = "↓";
+
+        const translated = document.createElement("div");
+        translated.className = "translated";
+        translated.textContent = text(item?.translatedText) || "(chưa có bản dịch)";
+
+        card.append(top, original, arrow, translated);
+        contextList.appendChild(card);
+      }
+
+      contextList.scrollTop = contextList.scrollHeight;
+    }
+
+    async function load() {
+      try {
+        const details = await window.electronAPI.getMangaPanelSessionDetails();
+        render(details);
+      } catch (error) {
+        setMessage(error?.message || String(error), true);
+      }
+    }
+
+    newChapter.addEventListener("click", async () => {
+      const approved = window.confirm(
+        "Bắt đầu chapter mới? Context hiện tại sẽ bị xóa, nhưng vùng quét/Profile/ngôn ngữ được giữ lại."
+      );
+
+      if (!approved) return;
+
+      newChapter.disabled = true;
+      setMessage("Đang tạo chapter mới…");
+
+      try {
+        const result = await window.electronAPI.resetMangaPanelSessionChapter();
+        render(result?.details || result?.session || {});
+        setMessage("✓ Chapter mới đã sẵn sàng · Trang tiếp theo sẽ là Trang 1");
+      } catch (error) {
+        setMessage(error?.message || String(error), true);
+      } finally {
+        newChapter.disabled = false;
+      }
+    });
+
+    refresh.addEventListener("click", () => {
+      void load();
+    });
+
+    close.addEventListener("click", () => {
+      void window.electronAPI.closeMangaSessionInspector();
+    });
+
+    window.electronAPI.onMangaSessionInspectorRefresh?.(() => {
+      void load();
+    });
+
+    void load();
+  </script>
+</body>
+</html>

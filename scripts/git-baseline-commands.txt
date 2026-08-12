@@ -1,0 +1,30 @@
+# Run from: C:\Users\dangt\AI-Translator
+
+# 1) Initialize repository
+git init
+git branch -M main
+
+# 2) Configure identity only if Git asks for it
+# git config --global user.name "YOUR NAME"
+# git config --global user.email "YOUR EMAIL"
+
+# 3) Inspect ignores + preflight
+git status --ignored
+powershell -ExecutionPolicy Bypass -File .\scripts\git-preflight.ps1
+
+# 4) Stage, but DO NOT commit before reviewing
+git add .
+git status
+
+# If .venv / node_modules / dist / target / .env appears under "Changes to be committed",
+# STOP and fix .gitignore before committing.
+
+# 5) Baseline commit
+git commit -m "chore: establish AI Translator baseline"
+
+# 6) Stable baseline tag
+git tag -a v0.10.1 -m "Manga session and context inspector baseline"
+
+# 7) Verify
+git log --oneline --decorate -5
+git status

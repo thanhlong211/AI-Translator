@@ -1,0 +1,5 @@
+Write-Host "Backend v4 đã khóa /api/v1/translate bằng JWT."
+Write-Host "Hãy test bằng Swagger UI:"
+Write-Host "http://localhost:8080/swagger-ui.html"
+Write-Host ""
+Write-Host "Thứ tự: Register/Login -> copy accessToken -> Authorize -> POST /api/v1/translate"

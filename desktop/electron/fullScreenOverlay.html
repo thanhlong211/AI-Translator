@@ -1,0 +1,2517 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+      pointer-events: none;
+      font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+    }
+
+    :root {
+      --overlay-opacity: 0.94;
+      --overlay-font-scale: 1;
+    }
+
+    #stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #debug-layer {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 40;
+    }
+
+    body.debug-mode #debug-layer {
+      display: block;
+    }
+
+    .debug-rect {
+      position: absolute;
+      pointer-events: none;
+      border: 2px dashed rgba(220, 38, 38, .92);
+      background: rgba(220, 38, 38, .045);
+      border-radius: 3px;
+    }
+
+    .debug-rect.speech-bubble {
+      border-style: solid;
+      border-width: 3px;
+      border-color: rgba(22, 163, 74, .96);
+      background: rgba(22, 163, 74, .055);
+      border-radius: 14px;
+    }
+
+    .debug-rect.fallback-group {
+      border-color: rgba(37, 99, 235, .96);
+      background: rgba(37, 99, 235, .05);
+      border-style: dashed;
+      border-width: 3px;
+      border-radius: 8px;
+    }
+
+    .debug-rect.ignored {
+      border-color: rgba(107, 114, 128, .76);
+      background: rgba(107, 114, 128, .035);
+      border-style: dotted;
+    }
+
+    .debug-label {
+      position: absolute;
+      left: 0;
+      top: 0;
+      max-width: 220px;
+      padding: 2px 5px;
+      transform: translateY(-100%);
+      border-radius: 5px 5px 0 0;
+      color: #ffffff;
+      background: rgba(185, 28, 28, .92);
+      font-size: 9px;
+      font-weight: 800;
+      line-height: 1.25;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .debug-rect.speech-bubble .debug-label {
+      background: rgba(21, 128, 61, .95);
+    }
+
+    .debug-rect.fallback-group .debug-label {
+      background: rgba(29, 78, 216, .95);
+    }
+
+    .debug-rect.ignored .debug-label {
+      background: rgba(75, 85, 99, .9);
+    }
+
+    .debug-summary {
+      position: absolute;
+      left: 12px;
+      bottom: 12px;
+      max-width: 420px;
+      padding: 7px 9px;
+      border: 1px solid rgba(17, 24, 39, .16);
+      border-radius: 9px;
+      color: #111827;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 3px 14px rgba(0,0,0,.16);
+      font-size: 10px;
+      font-weight: 750;
+      line-height: 1.45;
+      white-space: normal;
+    }
+
+    .translation-item {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 8px;
+      overflow: hidden;
+      pointer-events: none;
+
+      color: #111827;
+      background:
+        rgba(
+          255,
+          255,
+          255,
+          var(--overlay-opacity)
+        );
+
+      border:
+        1px solid
+        rgba(17, 24, 39, 0.15);
+      border-radius: 11px;
+
+      text-align: center;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      word-break: normal;
+
+      font-weight: 650;
+      line-height: 1.18;
+
+      box-shadow:
+        0 2px 8px
+        rgba(0, 0, 0, 0.16);
+
+      opacity: 0;
+      transform: scale(0.985);
+      animation:
+        overlay-enter
+        110ms ease-out
+        forwards;
+    }
+
+    .translation-item.memory {
+      border-color:
+        rgba(39, 174, 96, 0.38);
+    }
+
+    .translation-item.vertical-source {
+      border-radius: 15px;
+    }
+
+    .translation-item.speech-bubble {
+      /*
+       * Detector đã bám theo vùng trắng của speech bubble thật.
+       * Bo tròn hơn và giảm shadow để overlay hòa vào manga thay vì trông như card UI.
+       */
+      border-radius: 18px;
+      border-color: rgba(17, 24, 39, 0.11);
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.13);
+    }
+
+    body.edit-mode,
+    body.edit-mode #stage {
+      pointer-events: auto;
+    }
+
+    body.edit-mode .translation-item {
+      pointer-events: auto;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      outline: 2px dashed rgba(37, 99, 235, 0.52);
+      outline-offset: 2px;
+      touch-action: none;
+    }
+
+    body.edit-mode .translation-item::after {
+      content: "✥";
+      position: absolute;
+      top: 3px;
+      right: 5px;
+      display: grid;
+      place-items: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 999px;
+      color: #ffffff;
+      background: rgba(37, 99, 235, 0.84);
+      font-size: 9px;
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    body.edit-mode .translation-item.dragging {
+      cursor: grabbing;
+      z-index: 9999;
+      outline-style: solid;
+      box-shadow:
+        0 7px 22px
+        rgba(0, 0, 0, 0.28);
+    }
+
+    .resize-handle {
+      display: none;
+      position: absolute;
+      right: -1px;
+      bottom: -1px;
+      width: 18px;
+      height: 18px;
+      border-radius: 8px 0 10px 0;
+      background: rgba(37, 99, 235, .92);
+      cursor: nwse-resize;
+      pointer-events: auto;
+      z-index: 4;
+    }
+
+    .resize-handle::before {
+      content: "↘";
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    body.edit-mode .resize-handle {
+      display: block;
+    }
+
+    body.edit-mode .translation-item.resizing {
+      z-index: 9999;
+      outline-style: solid;
+      box-shadow:
+        0 7px 22px
+        rgba(0, 0, 0, 0.28);
+    }
+
+
+
+    .edit-text-handle {
+      display: none;
+      position: absolute;
+      left: 4px;
+      top: 3px;
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      border: 0;
+      border-radius: 999px;
+      color: #ffffff;
+      background: rgba(109, 91, 208, .9);
+      font-size: 10px;
+      font-weight: 900;
+      line-height: 18px;
+      text-align: center;
+      cursor: text;
+      pointer-events: auto;
+      z-index: 5;
+    }
+
+    body.edit-mode .edit-text-handle {
+      display: block;
+    }
+
+    body.edit-mode .translation-item.text-editing .edit-text-handle {
+      display: none;
+    }
+
+    .translation-text {
+      width: 100%;
+      max-height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    body.edit-mode .translation-text {
+      pointer-events: auto;
+    }
+
+    body.edit-mode .translation-item {
+      --edit-toolbar-height: 26px;
+    }
+
+    body.edit-mode .translation-item.text-editing {
+      cursor: default;
+      z-index: 10000;
+      padding: 5px 6px 34px;
+      outline-style: solid;
+      min-width: 150px;
+      min-height: 86px;
+    }
+
+    .bubble-editor {
+      display: none;
+      width: 100%;
+      height: 100%;
+      min-height: 34px;
+      padding: 4px 5px;
+      resize: none;
+      border: 1px solid rgba(37, 99, 235, .4);
+      border-radius: 7px;
+      outline: none;
+      color: #111827;
+      background: rgba(255,255,255,.97);
+      font: inherit;
+      font-weight: 650;
+      line-height: 1.18;
+      text-align: center;
+      user-select: text;
+      -webkit-user-select: text;
+      pointer-events: auto;
+    }
+
+    .translation-item.text-editing .translation-text {
+      display: none;
+    }
+
+    .translation-item.text-editing .bubble-editor {
+      display: block;
+    }
+
+    .bubble-actions {
+      display: none;
+      position: absolute;
+      left: 6px;
+      right: 6px;
+      bottom: 5px;
+      height: 24px;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      pointer-events: auto;
+    }
+
+    .translation-item.text-editing .bubble-actions {
+      display: flex;
+    }
+
+    .bubble-action {
+      height: 23px;
+      padding: 0 8px;
+      border: 1px solid rgba(17,24,39,.16);
+      border-radius: 7px;
+      background: rgba(255,255,255,.96);
+      color: #374151;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .bubble-action.save {
+      color: #ffffff;
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+
+    .bubble-action:disabled {
+      cursor: wait;
+      opacity: .62;
+    }
+
+    .bubble-edit-status {
+      position: absolute;
+      left: 7px;
+      top: 5px;
+      max-width: calc(100% - 34px);
+      padding: 2px 5px;
+      border-radius: 999px;
+      background: rgba(17,24,39,.78);
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: 700;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(-2px);
+      transition: opacity 120ms ease, transform 120ms ease;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .translation-item.text-editing .bubble-edit-status:not(:empty),
+    .translation-item.saved .bubble-edit-status:not(:empty) {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .translation-item.saved {
+      border-color: rgba(39, 174, 96, .66);
+      box-shadow: 0 3px 12px rgba(39, 174, 96, .18);
+    }
+
+    body.edit-mode .translation-item.text-editing::after,
+    body.edit-mode .translation-item.text-editing .resize-handle {
+      display: none;
+    }
+
+    @keyframes overlay-enter {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="stage"></div>
+  <div id="debug-layer"></div>
+
+  <script>
+    const stage =
+      document.getElementById(
+        "stage"
+      );
+
+    const debugLayer =
+      document.getElementById(
+        "debug-layer"
+      );
+
+    let preferences = {
+      opacity: 0.94,
+      fontScale: 1
+    };
+
+    let lastPayload = null;
+    let editMode = false;
+    let debugMode = false;
+    let dragState = null;
+    let resizeState = null;
+    let textEditState = null;
+
+    const manualPositions =
+      new Map();
+
+    const manualSizes =
+      new Map();
+
+    function clamp(
+      value,
+      min,
+      max
+    ) {
+      return Math.min(
+        max,
+        Math.max(
+          min,
+          value
+        )
+      );
+    }
+
+    function rect(
+      x,
+      y,
+      width,
+      height
+    ) {
+      return {
+        x,
+        y,
+        width,
+        height,
+        right: x + width,
+        bottom: y + height
+      };
+    }
+
+    function overlapArea(
+      left,
+      right,
+      margin = 5
+    ) {
+      const width =
+        Math.max(
+          0,
+          Math.min(
+            left.right + margin,
+            right.right + margin
+          ) -
+          Math.max(
+            left.x - margin,
+            right.x - margin
+          )
+        );
+
+      const height =
+        Math.max(
+          0,
+          Math.min(
+            left.bottom + margin,
+            right.bottom + margin
+          ) -
+          Math.max(
+            left.y - margin,
+            right.y - margin
+          )
+        );
+
+      return width * height;
+    }
+
+    function fitText(
+      element
+    ) {
+      if (
+        element.classList.contains(
+          "text-editing"
+        )
+      ) {
+        return;
+      }
+
+      const textElement =
+        element.querySelector(
+          ".translation-text"
+        );
+
+      const text =
+        textElement?.textContent ||
+        "";
+
+      if (!text) {
+        return;
+      }
+
+      const area =
+        Math.max(
+          1,
+          element.clientWidth *
+          element.clientHeight
+        );
+
+      let fontSize =
+        Math.floor(
+          Math.sqrt(
+            area /
+            Math.max(
+              text.length,
+              1
+            )
+          ) *
+          0.78 *
+          preferences.fontScale
+        );
+
+      /*
+       * Manga overlay cần ổn định hơn "font càng to càng tốt".
+       * Trần 22px tránh các box lớn làm chữ phóng quá mức.
+       */
+      fontSize =
+        clamp(
+          fontSize,
+          11,
+          22
+        );
+
+      element.style.fontSize =
+        `${fontSize}px`;
+
+      while (
+        (
+          element.scrollHeight >
+          element.clientHeight ||
+          element.scrollWidth >
+          element.clientWidth
+        ) &&
+        fontSize > 9
+      ) {
+        fontSize -= 1;
+        element.style.fontSize =
+          `${fontSize}px`;
+      }
+    }
+
+    function candidatePositions(
+      item,
+      width,
+      height
+    ) {
+      const stageWidth =
+        stage.clientWidth;
+
+      const stageHeight =
+        stage.clientHeight;
+
+      const original =
+        item?.originalBox ||
+        {};
+
+      const originalX =
+        Number(original.x) || 0;
+
+      const originalY =
+        Number(original.y) || 0;
+
+      const originalWidth =
+        Math.max(
+          1,
+          Number(original.width) || 1
+        );
+
+      const originalHeight =
+        Math.max(
+          1,
+          Number(original.height) || 1
+        );
+
+      const anchorX =
+        Number.isFinite(
+          Number(item?.anchorX)
+        )
+          ? Number(item.anchorX)
+          : originalX +
+            originalWidth / 2;
+
+      const anchorY =
+        Number.isFinite(
+          Number(item?.anchorY)
+        )
+          ? Number(item.anchorY)
+          : originalY +
+            originalHeight / 2;
+
+      const gap = 7;
+
+      const speechBubble =
+        String(
+          item?.detectionSource ||
+          ""
+        ).toUpperCase() ===
+        "SPEECH_BUBBLE";
+
+      let rawCandidates;
+
+      if (speechBubble) {
+        /*
+         * Batch 09.2: detector đã biết bounds của speech bubble thật.
+         * Không đẩy bản dịch ra ngoài bubble chỉ để né collision; ưu tiên
+         * giữ text Việt nằm trong vùng thoại gốc để không che nhân vật.
+         */
+        const inset = 5;
+        const availableX =
+          Math.max(
+            0,
+            originalWidth -
+            width -
+            inset * 2
+          );
+
+        const availableY =
+          Math.max(
+            0,
+            originalHeight -
+            height -
+            inset * 2
+          );
+
+        const baseX =
+          clamp(
+            anchorX - width / 2,
+            originalX + inset,
+            Math.max(
+              originalX + inset,
+              originalX +
+              originalWidth -
+              width -
+              inset
+            )
+          );
+
+        const baseY =
+          clamp(
+            anchorY - height / 2,
+            originalY + inset,
+            Math.max(
+              originalY + inset,
+              originalY +
+              originalHeight -
+              height -
+              inset
+            )
+          );
+
+        const shiftX =
+          Math.min(
+            18,
+            availableX * 0.45
+          );
+
+        const shiftY =
+          Math.min(
+            16,
+            availableY * 0.45
+          );
+
+        rawCandidates = [
+          { x: baseX, y: baseY },
+          { x: baseX + shiftX, y: baseY },
+          { x: baseX - shiftX, y: baseY },
+          { x: baseX, y: baseY + shiftY },
+          { x: baseX, y: baseY - shiftY }
+        ];
+      } else {
+        rawCandidates = [
+          /* Ưu tiên che đúng chữ gốc. */
+          {
+            x: anchorX - width / 2,
+            y: anchorY - height / 2
+          },
+
+          /* Nếu va chạm: thử quanh chính OCR group. */
+          {
+            x: originalX +
+              originalWidth +
+              gap,
+            y: anchorY - height / 2
+          },
+          {
+            x: originalX -
+              width -
+              gap,
+            y: anchorY - height / 2
+          },
+          {
+            x: anchorX - width / 2,
+            y: originalY -
+              height -
+              gap
+          },
+          {
+            x: anchorX - width / 2,
+            y: originalY +
+              originalHeight +
+              gap
+          },
+
+          /* Những offset nhỏ giữ bubble gần thoại gốc. */
+          {
+            x: anchorX -
+              width / 2 +
+              width * 0.42,
+            y: anchorY - height / 2
+          },
+          {
+            x: anchorX -
+              width / 2 -
+              width * 0.42,
+            y: anchorY - height / 2
+          },
+          {
+            x: anchorX - width / 2,
+            y: anchorY -
+              height / 2 +
+              height * 0.55
+          },
+          {
+            x: anchorX - width / 2,
+            y: anchorY -
+              height / 2 -
+              height * 0.55
+          }
+        ];
+      }
+
+      const seen =
+        new Set();
+
+      return rawCandidates
+        .map((candidate) => {
+          const x =
+            clamp(
+              Math.round(
+                candidate.x
+              ),
+              0,
+              Math.max(
+                0,
+                stageWidth - width
+              )
+            );
+
+          const y =
+            clamp(
+              Math.round(
+                candidate.y
+              ),
+              0,
+              Math.max(
+                0,
+                stageHeight - height
+              )
+            );
+
+          return {
+            x,
+            y
+          };
+        })
+        .filter((candidate) => {
+          const key =
+            `${candidate.x}:${candidate.y}`;
+
+          if (seen.has(key)) {
+            return false;
+          }
+
+          seen.add(key);
+          return true;
+        });
+    }
+
+    function placeElement(
+      element,
+      item,
+      placedRects
+    ) {
+      const manualSize =
+        manualSizes.get(
+          String(item?.id || "")
+        );
+
+      const width =
+        Math.max(
+          1,
+          Number(manualSize?.width) ||
+          Number(item?.width) ||
+          element.offsetWidth ||
+          1
+        );
+
+      const height =
+        Math.max(
+          1,
+          Number(manualSize?.height) ||
+          Number(item?.height) ||
+          element.offsetHeight ||
+          1
+        );
+
+      element.style.width =
+        `${Math.round(width)}px`;
+
+      element.style.height =
+        `${Math.round(height)}px`;
+
+      const manual =
+        manualPositions.get(
+          String(item?.id || "")
+        );
+
+      if (manual) {
+        const x =
+          clamp(
+            Math.round(
+              Number(manual.x) || 0
+            ),
+            0,
+            Math.max(
+              0,
+              stage.clientWidth - width
+            )
+          );
+
+        const y =
+          clamp(
+            Math.round(
+              Number(manual.y) || 0
+            ),
+            0,
+            Math.max(
+              0,
+              stage.clientHeight - height
+            )
+          );
+
+        element.style.left =
+          `${x}px`;
+
+        element.style.top =
+          `${y}px`;
+
+        placedRects.push(
+          rect(
+            x,
+            y,
+            width,
+            height
+          )
+        );
+
+        return;
+      }
+
+      const candidates =
+        candidatePositions(
+          item,
+          width,
+          height
+        );
+
+      let best =
+        candidates[0] || {
+          x: 0,
+          y: 0
+        };
+
+      let bestPenalty =
+        Number.POSITIVE_INFINITY;
+
+      for (
+        const candidate
+        of candidates
+      ) {
+        const candidateRect =
+          rect(
+            candidate.x,
+            candidate.y,
+            width,
+            height
+          );
+
+        const penalty =
+          placedRects.reduce(
+            (total, placed) =>
+              total +
+              overlapArea(
+                candidateRect,
+                placed,
+                5
+              ),
+            0
+          );
+
+        if (penalty < bestPenalty) {
+          bestPenalty = penalty;
+          best = candidate;
+        }
+
+        if (penalty === 0) {
+          break;
+        }
+      }
+
+      element.style.left =
+        `${best.x}px`;
+
+      element.style.top =
+        `${best.y}px`;
+
+      placedRects.push(
+        rect(
+          best.x,
+          best.y,
+          width,
+          height
+        )
+      );
+    }
+
+    function layoutItems() {
+      const elements =
+        Array.from(
+          stage.querySelectorAll(
+            ".translation-item"
+          )
+        );
+
+      const placedRects = [];
+
+      for (
+        const element
+        of elements
+      ) {
+        const item =
+          element.__translationItem;
+
+        if (!item) {
+          continue;
+        }
+
+        fitText(element);
+
+        placeElement(
+          element,
+          item,
+          placedRects
+        );
+      }
+    }
+
+    function debugClass(
+      type
+    ) {
+      switch (
+        String(type || "")
+          .toUpperCase()
+      ) {
+        case "SPEECH_BUBBLE":
+          return "speech-bubble";
+
+        case "FALLBACK_GROUP":
+          return "fallback-group";
+
+        case "IGNORED":
+          return "ignored";
+
+        default:
+          return "ocr";
+      }
+    }
+
+    function debugLabel(
+      item,
+      index
+    ) {
+      const type =
+        String(
+          item?.type ||
+          "OCR"
+        ).toUpperCase();
+
+      if (
+        type ===
+        "SPEECH_BUBBLE"
+      ) {
+        const confidence =
+          Math.round(
+            Math.max(
+              0,
+              Math.min(
+                1,
+                Number(
+                  item?.confidence ||
+                  0
+                )
+              )
+            ) *
+            100
+          );
+
+        return (
+          `Bubble ${index + 1}` +
+          (
+            confidence
+              ? ` · ${confidence}%`
+              : ""
+          )
+        );
+      }
+
+      if (
+        type ===
+        "FALLBACK_GROUP"
+      ) {
+        return `Fallback ${index + 1}`;
+      }
+
+      if (type === "IGNORED") {
+        return (
+          `Ignored · ` +
+          String(
+            item?.text ||
+            ""
+          )
+            .replace(
+              /\s+/g,
+              " "
+            )
+            .slice(
+              0,
+              28
+            )
+        );
+      }
+
+      const score =
+        Number(
+          item?.score ||
+          0
+        );
+
+      const suffix =
+        score > 0
+          ? ` · ${Math.round(score * 100)}%`
+          : "";
+
+      const text =
+        String(
+          item?.text ||
+          ""
+        )
+          .replace(
+            /\s+/g,
+            " "
+          )
+          .slice(
+            0,
+            28
+          );
+
+      return (
+        `OCR${suffix}` +
+        (
+          text
+            ? ` · ${text}`
+            : ""
+        )
+      );
+    }
+
+    function renderDebug(
+      debug
+    ) {
+      debugLayer.replaceChildren();
+
+      if (
+        !debug ||
+        !Array.isArray(
+          debug.rects
+        )
+      ) {
+        return;
+      }
+
+      const typeIndexes =
+        new Map();
+
+      for (
+        const item
+        of debug.rects
+      ) {
+        const type =
+          String(
+            item?.type ||
+            "OCR"
+          ).toUpperCase();
+
+        const index =
+          typeIndexes.get(
+            type
+          ) || 0;
+
+        typeIndexes.set(
+          type,
+          index + 1
+        );
+
+        const element =
+          document.createElement(
+            "div"
+          );
+
+        element.className =
+          `debug-rect ${debugClass(type)}`;
+
+        element.style.left =
+          `${Math.round(
+            Number(item?.x) || 0
+          )}px`;
+
+        element.style.top =
+          `${Math.round(
+            Number(item?.y) || 0
+          )}px`;
+
+        element.style.width =
+          `${Math.max(
+            1,
+            Math.round(
+              Number(
+                item?.width
+              ) || 1
+            )
+          )}px`;
+
+        element.style.height =
+          `${Math.max(
+            1,
+            Math.round(
+              Number(
+                item?.height
+              ) || 1
+            )
+          )}px`;
+
+        const label =
+          document.createElement(
+            "div"
+          );
+
+        label.className =
+          "debug-label";
+
+        label.textContent =
+          debugLabel(
+            item,
+            index
+          );
+
+        element.appendChild(
+          label
+        );
+
+        debugLayer.appendChild(
+          element
+        );
+      }
+
+      const counts =
+        debug?.counts ||
+        {};
+
+      const diagnostics =
+        debug?.diagnostics ||
+        {};
+
+      const coverage =
+        Math.round(
+          Math.max(
+            0,
+            Math.min(
+              1,
+              Number(
+                diagnostics.coverage ||
+                0
+              )
+            )
+          ) *
+          100
+        );
+
+      const summary =
+        document.createElement(
+          "div"
+        );
+
+      summary.className =
+        "debug-summary";
+
+      const edgeAssigned =
+        Number(
+          diagnostics.edgeAssignedCount ||
+          0
+        );
+
+      const overlapAssigned =
+        Number(
+          diagnostics.overlapAssignedCount ||
+          0
+        );
+
+      const ambiguous =
+        Number(
+          diagnostics.ambiguousCount ||
+          0
+        );
+
+      summary.textContent =
+        `Bubble Debug · OCR ${Number(counts.ocr || 0)}` +
+        ` · Bubble ${Number(counts.bubbles || 0)}` +
+        ` · Fallback ${Number(counts.fallback || 0)}` +
+        ` · Coverage ${coverage}%` +
+        (edgeAssigned
+          ? ` · Edge +${edgeAssigned}`
+          : "") +
+        (overlapAssigned
+          ? ` · Overlap +${overlapAssigned}`
+          : "") +
+        (ambiguous
+          ? ` · Ambiguous ${ambiguous}`
+          : "") +
+        (
+          Number(counts.ignored || 0)
+            ? ` · Ignored ${Number(counts.ignored || 0)}`
+            : ""
+        );
+
+      debugLayer.appendChild(
+        summary
+      );
+    }
+
+    function setOverlayState(
+      state
+    ) {
+      setEditMode(
+        state
+      );
+
+      debugMode =
+        Boolean(
+          state?.debugging
+        );
+
+      document.body.classList.toggle(
+        "debug-mode",
+        debugMode
+      );
+
+      if (
+        lastPayload?.debug
+      ) {
+        renderDebug(
+          lastPayload.debug
+        );
+      }
+    }
+
+    function setEditMode(
+      state
+    ) {
+      editMode =
+        Boolean(
+          state?.editing ??
+          state
+        );
+
+      document.body.classList.toggle(
+        "edit-mode",
+        editMode
+      );
+
+      if (!editMode && textEditState) {
+        cancelTextEdit();
+      }
+
+      if (!editMode && dragState) {
+        dragState.element
+          ?.classList
+          ?.remove(
+            "dragging"
+          );
+
+        dragState = null;
+      }
+
+      if (!editMode && resizeState) {
+        resizeState.element
+          ?.classList
+          ?.remove(
+            "resizing"
+          );
+
+        resizeState = null;
+      }
+    }
+
+    function finishDrag(
+      event
+    ) {
+      if (
+        !dragState ||
+        dragState.pointerId !==
+        event.pointerId
+      ) {
+        return;
+      }
+
+      const {
+        element,
+        item
+      } = dragState;
+
+      element.classList.remove(
+        "dragging"
+      );
+
+      const x =
+        Number.parseFloat(
+          element.style.left
+        ) || 0;
+
+      const y =
+        Number.parseFloat(
+          element.style.top
+        ) || 0;
+
+      manualPositions.set(
+        String(item.id),
+        {
+          x,
+          y
+        }
+      );
+
+      try {
+        element.releasePointerCapture(
+          event.pointerId
+        );
+      } catch {
+        // Pointer capture có thể đã tự release khi window đổi focus.
+      }
+
+      dragState = null;
+    }
+
+    function makeDraggable(
+      element,
+      item
+    ) {
+      element.addEventListener(
+        "pointerdown",
+        (event) => {
+          if (
+            !editMode ||
+            event.button !== 0 ||
+            event.target
+              ?.closest
+              ?.(
+                ".resize-handle, .bubble-editor, .bubble-actions, .edit-text-handle"
+              )
+          ) {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const startX =
+            Number.parseFloat(
+              element.style.left
+            ) || 0;
+
+          const startY =
+            Number.parseFloat(
+              element.style.top
+            ) || 0;
+
+          dragState = {
+            pointerId:
+              event.pointerId,
+            element,
+            item,
+            startPointerX:
+              event.clientX,
+            startPointerY:
+              event.clientY,
+            startX,
+            startY
+          };
+
+          element.classList.add(
+            "dragging"
+          );
+
+          element.setPointerCapture(
+            event.pointerId
+          );
+        }
+      );
+
+      element.addEventListener(
+        "pointermove",
+        (event) => {
+          if (
+            !dragState ||
+            dragState.element !==
+            element ||
+            dragState.pointerId !==
+            event.pointerId
+          ) {
+            return;
+          }
+
+          event.preventDefault();
+
+          const width =
+            element.offsetWidth;
+
+          const height =
+            element.offsetHeight;
+
+          const x =
+            clamp(
+              dragState.startX +
+              event.clientX -
+              dragState.startPointerX,
+              0,
+              Math.max(
+                0,
+                stage.clientWidth - width
+              )
+            );
+
+          const y =
+            clamp(
+              dragState.startY +
+              event.clientY -
+              dragState.startPointerY,
+              0,
+              Math.max(
+                0,
+                stage.clientHeight - height
+              )
+            );
+
+          element.style.left =
+            `${Math.round(x)}px`;
+
+          element.style.top =
+            `${Math.round(y)}px`;
+        }
+      );
+
+      element.addEventListener(
+        "pointerup",
+        finishDrag
+      );
+
+      element.addEventListener(
+        "pointercancel",
+        finishDrag
+      );
+    }
+
+    function finishResize(
+      event
+    ) {
+      if (
+        !resizeState ||
+        resizeState.pointerId !==
+        event.pointerId
+      ) {
+        return;
+      }
+
+      const {
+        element,
+        item,
+        handle
+      } = resizeState;
+
+      element.classList.remove(
+        "resizing"
+      );
+
+      manualSizes.set(
+        String(item.id),
+        {
+          width: element.offsetWidth,
+          height: element.offsetHeight
+        }
+      );
+
+      try {
+        handle.releasePointerCapture(
+          event.pointerId
+        );
+      } catch {
+        // Pointer capture có thể đã tự release.
+      }
+
+      resizeState = null;
+      fitText(element);
+    }
+
+    function makeResizable(
+      element,
+      item
+    ) {
+      const handle =
+        document.createElement(
+          "span"
+        );
+
+      handle.className =
+        "resize-handle";
+
+      handle.title =
+        "Kéo để đổi kích thước khung dịch";
+
+      handle.addEventListener(
+        "pointerdown",
+        (event) => {
+          if (
+            !editMode ||
+            event.button !== 0
+          ) {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          resizeState = {
+            pointerId: event.pointerId,
+            element,
+            item,
+            handle,
+            startPointerX: event.clientX,
+            startPointerY: event.clientY,
+            startWidth: element.offsetWidth,
+            startHeight: element.offsetHeight
+          };
+
+          element.classList.add(
+            "resizing"
+          );
+
+          handle.setPointerCapture(
+            event.pointerId
+          );
+        }
+      );
+
+      handle.addEventListener(
+        "pointermove",
+        (event) => {
+          if (
+            !resizeState ||
+            resizeState.handle !== handle ||
+            resizeState.pointerId !==
+            event.pointerId
+          ) {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          const left =
+            Number.parseFloat(
+              element.style.left
+            ) || 0;
+
+          const top =
+            Number.parseFloat(
+              element.style.top
+            ) || 0;
+
+          const maxWidth =
+            Math.max(
+              72,
+              Math.min(
+                520,
+                stage.clientWidth - left
+              )
+            );
+
+          const maxHeight =
+            Math.max(
+              34,
+              Math.min(
+                360,
+                stage.clientHeight - top
+              )
+            );
+
+          const width =
+            clamp(
+              resizeState.startWidth +
+              event.clientX -
+              resizeState.startPointerX,
+              72,
+              maxWidth
+            );
+
+          const height =
+            clamp(
+              resizeState.startHeight +
+              event.clientY -
+              resizeState.startPointerY,
+              34,
+              maxHeight
+            );
+
+          element.style.width =
+            `${Math.round(width)}px`;
+
+          element.style.height =
+            `${Math.round(height)}px`;
+
+          manualSizes.set(
+            String(item.id),
+            {
+              width: Math.round(width),
+              height: Math.round(height)
+            }
+          );
+
+          fitText(element);
+        }
+      );
+
+      handle.addEventListener(
+        "pointerup",
+        finishResize
+      );
+
+      handle.addEventListener(
+        "pointercancel",
+        finishResize
+      );
+
+      element.appendChild(
+        handle
+      );
+    }
+
+    function setBubbleEditStatus(
+      state,
+      message,
+      isError = false
+    ) {
+      if (!state?.status) {
+        return;
+      }
+
+      state.status.textContent =
+        String(message || "");
+
+      state.status.style.background =
+        isError
+          ? "rgba(180, 35, 24, .9)"
+          : "rgba(17, 24, 39, .78)";
+    }
+
+    function cancelTextEdit() {
+      if (!textEditState) {
+        return;
+      }
+
+      const {
+        element,
+        editor,
+        textElement
+      } = textEditState;
+
+      editor.value =
+        textElement.textContent ||
+        "";
+
+      element.classList.remove(
+        "text-editing"
+      );
+
+      setBubbleEditStatus(
+        textEditState,
+        ""
+      );
+
+      textEditState = null;
+      fitText(element);
+
+      /*
+       * Trả keyboard focus về app bên dưới sau khi kết thúc nhập chữ.
+       * Không await để Cancel vẫn phản hồi tức thời.
+       */
+      window.electronAPI
+        ?.setFullScreenOverlayTextInputActive?.(
+          false
+        )
+        ?.catch?.(() => {});
+    }
+
+    async function saveTextEdit() {
+      const state =
+        textEditState;
+
+      if (!state) {
+        return;
+      }
+
+      const {
+        element,
+        item,
+        editor,
+        textElement,
+        saveButton,
+        cancelButton
+      } = state;
+
+      const correctedTranslation =
+        String(editor.value || "")
+          .trim();
+
+      if (!correctedTranslation) {
+        setBubbleEditStatus(
+          state,
+          "Bản dịch không được để trống",
+          true
+        );
+        return;
+      }
+
+      const currentText =
+        String(
+          textElement.textContent ||
+          ""
+        ).trim();
+
+      if (
+        correctedTranslation ===
+        currentText
+      ) {
+        cancelTextEdit();
+        return;
+      }
+
+      saveButton.disabled = true;
+      cancelButton.disabled = true;
+      editor.disabled = true;
+
+      setBubbleEditStatus(
+        state,
+        "Đang lưu vào Translation Memory…"
+      );
+
+      try {
+        const response =
+          await window.electronAPI
+            ?.saveFullScreenOverlayCorrection?.({
+              itemId:
+                item.id,
+              profileId:
+                item.profileId ??
+                lastPayload?.profileId ??
+                null,
+              sourceText:
+                item.original ||
+                "",
+              aiTranslation:
+                item.baselineTranslation ||
+                item.text ||
+                currentText,
+              correctedTranslation,
+              sourceLanguage:
+                item.sourceLanguage ||
+                lastPayload?.sourceLanguage ||
+                "AUTO",
+              targetLanguage:
+                item.targetLanguage ||
+                lastPayload?.targetLanguage ||
+                "VI",
+              provider:
+                String(item.source || "")
+                  .toUpperCase()
+                  .includes("MEMORY")
+                  ? "PERSONAL_MEMORY"
+                  : item.provider ||
+                    lastPayload?.ai?.provider ||
+                    null,
+              model:
+                item.model ||
+                lastPayload?.ai?.model ||
+                null
+            });
+
+        if (
+          !response ||
+          response.success === false
+        ) {
+          throw new Error(
+            response?.error ||
+            "Backend không xác nhận lưu bản sửa."
+          );
+        }
+
+        item.text =
+          correctedTranslation;
+        item.baselineTranslation =
+          correctedTranslation;
+        item.source =
+          "PERSONAL_MEMORY";
+
+        textElement.textContent =
+          correctedTranslation;
+
+        element.classList.add(
+          "memory",
+          "saved"
+        );
+
+        element.classList.remove(
+          "text-editing"
+        );
+
+        setBubbleEditStatus(
+          state,
+          "✓ Đã lưu Memory"
+        );
+
+        textEditState = null;
+        fitText(element);
+
+        window.electronAPI
+          ?.setFullScreenOverlayTextInputActive?.(
+            false
+          )
+          ?.catch?.(() => {});
+
+        setTimeout(
+          () => {
+            element.classList.remove(
+              "saved"
+            );
+
+            if (state.status) {
+              state.status.textContent =
+                "";
+            }
+          },
+          1200
+        );
+      } catch (error) {
+        saveButton.disabled = false;
+        cancelButton.disabled = false;
+        editor.disabled = false;
+
+        setBubbleEditStatus(
+          state,
+          error instanceof Error
+            ? error.message
+            : String(error),
+          true
+        );
+
+        editor.focus();
+      }
+    }
+
+    async function beginTextEdit(
+      element,
+      item
+    ) {
+      if (!editMode) {
+        return;
+      }
+
+      if (
+        textEditState?.element ===
+        element
+      ) {
+        return;
+      }
+
+      if (textEditState) {
+        cancelTextEdit();
+      }
+
+      const textElement =
+        element.querySelector(
+          ".translation-text"
+        );
+
+      const editor =
+        element.querySelector(
+          ".bubble-editor"
+        );
+
+      const actions =
+        element.querySelector(
+          ".bubble-actions"
+        );
+
+      const saveButton =
+        actions?.querySelector(
+          ".save"
+        );
+
+      const cancelButton =
+        actions?.querySelector(
+          ".cancel"
+        );
+
+      const status =
+        element.querySelector(
+          ".bubble-edit-status"
+        );
+
+      if (
+        !textElement ||
+        !editor ||
+        !saveButton ||
+        !cancelButton
+      ) {
+        return;
+      }
+
+      editor.value =
+        textElement.textContent ||
+        "";
+
+      editor.disabled = false;
+      saveButton.disabled = false;
+      cancelButton.disabled = false;
+
+      element.classList.add(
+        "text-editing"
+      );
+
+      textEditState = {
+        element,
+        item,
+        editor,
+        textElement,
+        saveButton,
+        cancelButton,
+        status
+      };
+
+      setBubbleEditStatus(
+        textEditState,
+        "Ctrl+Enter để lưu · Esc để hủy"
+      );
+
+      try {
+        /*
+         * DOM focus là chưa đủ khi BrowserWindow đang focusable=false.
+         * Xin native keyboard focus trước, sau đó mới focus textarea.
+         */
+        await window.electronAPI
+          ?.setFullScreenOverlayTextInputActive?.(
+            true
+          );
+      } catch {
+        // Vẫn thử DOM focus để không làm hỏng edit UI nếu IPC có lỗi.
+      }
+
+      requestAnimationFrame(
+        () => {
+          editor.focus();
+          editor.setSelectionRange(
+            editor.value.length,
+            editor.value.length
+          );
+        }
+      );
+    }
+
+    function makeTextEditable(
+      element,
+      item,
+      textElement
+    ) {
+      const editHandle =
+        document.createElement(
+          "button"
+        );
+
+      editHandle.type = "button";
+      editHandle.className =
+        "edit-text-handle";
+      editHandle.textContent =
+        "✎";
+      editHandle.title =
+        "Sửa nội dung bản dịch";
+
+      const editor =
+        document.createElement(
+          "textarea"
+        );
+
+      editor.className =
+        "bubble-editor";
+
+      editor.spellcheck = false;
+
+      const actions =
+        document.createElement(
+          "div"
+        );
+
+      actions.className =
+        "bubble-actions";
+
+      const saveButton =
+        document.createElement(
+          "button"
+        );
+
+      saveButton.type = "button";
+      saveButton.className =
+        "bubble-action save";
+      saveButton.textContent =
+        "Lưu";
+
+      const cancelButton =
+        document.createElement(
+          "button"
+        );
+
+      cancelButton.type = "button";
+      cancelButton.className =
+        "bubble-action cancel";
+      cancelButton.textContent =
+        "Hủy";
+
+      const status =
+        document.createElement(
+          "div"
+        );
+
+      status.className =
+        "bubble-edit-status";
+
+      actions.append(
+        saveButton,
+        cancelButton
+      );
+
+      element.append(
+        editHandle,
+        editor,
+        actions,
+        status
+      );
+
+      editHandle.addEventListener(
+        "click",
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          beginTextEdit(
+            element,
+            item
+          );
+        }
+      );
+
+      element.addEventListener(
+        "dblclick",
+        (event) => {
+          if (
+            !editMode ||
+            event.target
+              ?.closest
+              ?.(
+                ".resize-handle, .bubble-actions"
+              )
+          ) {
+            return;
+          }
+
+          event.preventDefault();
+          event.stopPropagation();
+
+          beginTextEdit(
+            element,
+            item
+          );
+        }
+      );
+
+      editor.addEventListener(
+        "keydown",
+        (event) => {
+          if (
+            event.key === "Escape"
+          ) {
+            event.preventDefault();
+            cancelTextEdit();
+            return;
+          }
+
+          if (
+            event.key === "Enter" &&
+            (event.ctrlKey || event.metaKey)
+          ) {
+            event.preventDefault();
+            void saveTextEdit();
+          }
+        }
+      );
+
+      saveButton.addEventListener(
+        "click",
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void saveTextEdit();
+        }
+      );
+
+      cancelButton.addEventListener(
+        "click",
+        (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          cancelTextEdit();
+        }
+      );
+    }
+
+    function resetManualLayout() {
+      cancelTextEdit();
+      manualPositions.clear();
+      manualSizes.clear();
+
+      const elements =
+        Array.from(
+          stage.querySelectorAll(
+            ".translation-item"
+          )
+        );
+
+      for (const element of elements) {
+        const item =
+          element.__translationItem;
+
+        if (!item) {
+          continue;
+        }
+
+        element.style.width =
+          `${Math.max(1, Number(item.width) || 1)}px`;
+
+        element.style.height =
+          `${Math.max(1, Number(item.height) || 1)}px`;
+      }
+
+      requestAnimationFrame(
+        layoutItems
+      );
+    }
+
+    function applyPreferences(
+      next
+    ) {
+      const opacity =
+        Number(
+          next?.opacity
+        );
+
+      const fontScale =
+        Number(
+          next?.fontScale
+        );
+
+      preferences = {
+        opacity:
+          Number.isFinite(opacity)
+            ? clamp(
+                opacity,
+                0.65,
+                1
+              )
+            : 0.94,
+
+        fontScale:
+          Number.isFinite(fontScale)
+            ? clamp(
+                fontScale,
+                0.8,
+                1.4
+              )
+            : 1
+      };
+
+      document
+        .documentElement
+        .style
+        .setProperty(
+          "--overlay-opacity",
+          String(
+            preferences.opacity
+          )
+        );
+
+      document
+        .documentElement
+        .style
+        .setProperty(
+          "--overlay-font-scale",
+          String(
+            preferences.fontScale
+          )
+        );
+
+      requestAnimationFrame(
+        layoutItems
+      );
+    }
+
+    function render(
+      payload
+    ) {
+      cancelTextEdit();
+      lastPayload = payload;
+      manualPositions.clear();
+      manualSizes.clear();
+
+      const items =
+        Array.isArray(
+          payload?.items
+        )
+          ? [...payload.items]
+          : [];
+
+      items.sort(
+        (left, right) =>
+          Number(left?.order || 0) -
+          Number(right?.order || 0)
+      );
+
+      stage.replaceChildren();
+
+      for (
+        const item
+        of items
+      ) {
+        const text =
+          String(
+            item?.text ||
+            ""
+          ).trim();
+
+        if (!text) {
+          continue;
+        }
+
+        const element =
+          document.createElement(
+            "div"
+          );
+
+        element.className =
+          "translation-item";
+
+        if (
+          String(
+            item?.source ||
+            ""
+          )
+            .toUpperCase()
+            .includes(
+              "MEMORY"
+            )
+        ) {
+          element.classList.add(
+            "memory"
+          );
+        }
+
+        if (
+          Boolean(
+            item?.verticalSource
+          )
+        ) {
+          element.classList.add(
+            "vertical-source"
+          );
+        }
+
+        if (
+          String(
+            item?.detectionSource ||
+            ""
+          ).toUpperCase() ===
+          "SPEECH_BUBBLE"
+        ) {
+          element.classList.add(
+            "speech-bubble"
+          );
+        }
+
+        element.style.width =
+          `${Math.max(
+            1,
+            Number(item?.width) || 1
+          )}px`;
+
+        element.style.height =
+          `${Math.max(
+            1,
+            Number(item?.height) || 1
+          )}px`;
+
+        const textElement =
+          document.createElement(
+            "div"
+          );
+
+        textElement.className =
+          "translation-text";
+
+        textElement.textContent =
+          text;
+
+        element.appendChild(
+          textElement
+        );
+
+        element.title =
+          String(
+            item?.original ||
+            ""
+          );
+
+        element.__translationItem =
+          item;
+
+        makeTextEditable(
+          element,
+          item,
+          textElement
+        );
+
+        makeDraggable(
+          element,
+          item
+        );
+
+        makeResizable(
+          element,
+          item
+        );
+
+        stage.appendChild(
+          element
+        );
+      }
+
+      renderDebug(
+        payload?.debug
+      );
+
+      applyPreferences(
+        payload?.preferences ||
+        preferences
+      );
+
+      requestAnimationFrame(
+        layoutItems
+      );
+    }
+
+    window.electronAPI
+      ?.onFullScreenOverlayPreferences?.(
+        applyPreferences
+      );
+
+    window.electronAPI
+      ?.onFullScreenOverlayState?.(
+        setOverlayState
+      );
+
+    window.electronAPI
+      ?.onFullScreenOverlayResetLayout?.(
+        resetManualLayout
+      );
+
+    window.electronAPI
+      ?.getFullScreenOverlayState?.()
+      .then(setOverlayState)
+      .catch(() => {});
+
+    window.electronAPI
+      ?.onFullScreenOverlayItems?.(
+        render
+      );
+
+    /*
+     * Pull fallback cho lần tạo BrowserWindow đầu tiên.
+     * Dù IPC push xảy ra trước khi listener sẵn sàng, renderer vẫn tự lấy
+     * payload hiện tại và render ngay, tránh chỉ hiện controls góc phải.
+     */
+    window.electronAPI
+      ?.getFullScreenOverlayPayload?.()
+      .then((payload) => {
+        if (
+          payload &&
+          Array.isArray(payload.items) &&
+          payload.items.length
+        ) {
+          render(payload);
+        }
+      })
+      .catch(() => {});
+
+    window.addEventListener(
+      "resize",
+      () => {
+        if (lastPayload) {
+          requestAnimationFrame(
+            layoutItems
+          );
+        }
+      }
+    );
+  </script>
+</body>
+</html>

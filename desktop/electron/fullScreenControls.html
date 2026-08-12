@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent;
+      font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+      width: 100%;
+      height: 100%;
+    }
+
+    #info {
+      min-width: 100px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 8px;
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 9px;
+      color: #374151;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 2px 7px rgba(0,0,0,.13);
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    button {
+      display: grid;
+      place-items: center;
+      width: 29px;
+      height: 26px;
+      padding: 0;
+      border: 1px solid rgba(0,0,0,.13);
+      border-radius: 9px;
+      cursor: pointer;
+      color: #4b5563;
+      background: rgba(255,255,255,.92);
+      box-shadow: 0 2px 7px rgba(0,0,0,.13);
+      font-size: 13px;
+      font-weight: 800;
+      opacity: .86;
+      transition:
+        opacity 120ms ease,
+        transform 120ms ease,
+        background 120ms ease;
+    }
+
+    button:hover {
+      opacity: 1;
+      transform: translateY(-1px);
+    }
+
+    #move.active {
+      color: #ffffff;
+      background: #2563eb;
+      border-color: #2563eb;
+    }
+
+    #pin.active {
+      color: #ffffff;
+      background: #6d5bd0;
+      border-color: #6d5bd0;
+    }
+
+    #debug.active {
+      color: #ffffff;
+      background: #b45309;
+      border-color: #b45309;
+    }
+
+    #debug[hidden],
+    #next[hidden],
+    #context[hidden] {
+      display: none;
+    }
+
+    #context.active {
+      color: #ffffff;
+      background: #4338ca;
+      border-color: #4338ca;
+    }
+
+    #next:hover {
+      color: #ffffff;
+      background: #0f766e;
+      border-color: #0f766e;
+    }
+
+    #reset:hover {
+      color: #111827;
+      background: #f3f4f6;
+    }
+
+    #close:hover {
+      color: #ffffff;
+      background: #b42318;
+      border-color: #b42318;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="controls">
+    <div id="info">
+      Khung dịch
+    </div>
+
+    <button
+      id="next"
+      title="Dịch trang manga tiếp theo bằng vùng quét đã lưu"
+      hidden
+    >
+      ▶
+    </button>
+
+    <button
+      id="context"
+      title="Xem Manga Session Context"
+      hidden
+    >
+      ☷
+    </button>
+
+    <button
+      id="move"
+      title="Bật chế độ kéo / đổi kích thước từng khung dịch"
+    >
+      ✥
+    </button>
+
+    <button
+      id="reset"
+      title="Reset vị trí và kích thước các khung dịch"
+    >
+      ↺
+    </button>
+
+    <button
+      id="debug"
+      title="Debug Bubble Detection: đỏ = OCR · xanh lá = speech bubble · xanh dương = fallback"
+    >
+      ◎
+    </button>
+
+    <button
+      id="pin"
+      title="Ghim bản dịch"
+    >
+      📌
+    </button>
+
+    <button
+      id="close"
+      title="Đóng và quay lại AI Translator"
+    >
+      ×
+    </button>
+  </div>
+
+  <script>
+    const info =
+      document.getElementById(
+        "info"
+      );
+
+    const next =
+      document.getElementById(
+        "next"
+      );
+
+    const context =
+      document.getElementById(
+        "context"
+      );
+
+    const move =
+      document.getElementById(
+        "move"
+      );
+
+    const reset =
+      document.getElementById(
+        "reset"
+      );
+
+    const debug =
+      document.getElementById(
+        "debug"
+      );
+
+    const pin =
+      document.getElementById(
+        "pin"
+      );
+
+    const close =
+      document.getElementById(
+        "close"
+      );
+
+    function render(
+      state
+    ) {
+      const pinned =
+        Boolean(
+          state?.pinned
+        );
+
+      const editing =
+        Boolean(
+          state?.editing
+        );
+
+      const debugging =
+        Boolean(
+          state?.debugging
+        );
+
+      const debugAvailable =
+        Boolean(
+          state?.debugAvailable
+        );
+
+      const debugCounts =
+        state?.debugCounts ||
+        {};
+
+      const count =
+        Number(
+          state?.blockCount ||
+          0
+        );
+
+      const panelMode =
+        state?.mode ===
+        "panel";
+
+      const session =
+        state?.session ||
+        null;
+
+      const sessionActive =
+        Boolean(
+          panelMode &&
+          session?.active
+        );
+
+      next.hidden =
+        !sessionActive;
+
+      context.hidden =
+        !sessionActive;
+
+      context.classList.toggle(
+        "active",
+        Boolean(
+          state?.sessionInspectorVisible
+        )
+      );
+
+      context.title =
+        sessionActive
+          ? `Context Manga · ${Number(session?.contextItems || 0)}/10 · Chapter ${Number(session?.chapterNumber || 1)}`
+          : "Xem Manga Session Context";
+
+      next.title =
+        sessionActive
+          ? `Dịch trang ${Number(session?.nextPageNumber || 1)} · ${session?.nextShortcut || "Ctrl+Shift+Y"}`
+          : "Dịch trang manga tiếp theo";
+
+      pin.classList.toggle(
+        "active",
+        pinned
+      );
+
+      move.classList.toggle(
+        "active",
+        editing
+      );
+
+      debug.classList.toggle(
+        "active",
+        debugging
+      );
+
+      debug.hidden =
+        !debugAvailable;
+
+      debug.title =
+        debugging
+          ? "Tắt Bubble Debug"
+          : "Bubble Debug · đỏ OCR · xanh lá speech bubble · xanh dương fallback";
+
+      move.title =
+        editing
+          ? "Xong — trở lại chế độ click-through"
+          : "Kéo hoặc đổi kích thước từng khung dịch";
+
+      pin.title =
+        pinned
+          ? "Bỏ ghim bản dịch"
+          : "Ghim bản dịch";
+
+      info.textContent =
+        debugging
+          ? `Debug · B${Number(debugCounts.bubbles || 0)} · OCR${Number(debugCounts.ocr || 0)}`
+          : editing
+            ? `Sắp xếp · ${count} vùng`
+            : sessionActive
+              ? Number(session?.pageNumber || 0) > 0
+                ? `Trang ${Number(session.pageNumber)} · ${count} vùng · ${state?.targetLanguage || "VI"}`
+                : `Chapter ${Number(session?.chapterNumber || 1)} · sẵn sàng trang 1`
+              : `${panelMode ? "Khung" : "Screen"} · ${count} vùng · ${state?.targetLanguage || "VI"}`;
+    }
+
+    window.electronAPI
+      ?.getFullScreenOverlayState?.()
+      .then(render)
+      .catch(() => {});
+
+    window.electronAPI
+      ?.onFullScreenOverlayState?.(
+        render
+      );
+
+    next.addEventListener(
+      "click",
+      async () => {
+        next.disabled = true;
+
+        try {
+          await window
+            .electronAPI
+            .translatePanelNextPage();
+        } finally {
+          next.disabled = false;
+        }
+      }
+    );
+
+    context.addEventListener(
+      "click",
+      async () => {
+        await window
+          .electronAPI
+          .toggleMangaSessionInspector();
+      }
+    );
+
+    move.addEventListener(
+      "click",
+      async () => {
+        const state =
+          await window
+            .electronAPI
+            .toggleFullScreenOverlayEditMode();
+
+        render(state);
+      }
+    );
+
+    reset.addEventListener(
+      "click",
+      async () => {
+        const state =
+          await window
+            .electronAPI
+            .resetFullScreenOverlayLayout();
+
+        render(state);
+      }
+    );
+
+    debug.addEventListener(
+      "click",
+      async () => {
+        const state =
+          await window
+            .electronAPI
+            .toggleFullScreenOverlayDebug();
+
+        render(state);
+      }
+    );
+
+    pin.addEventListener(
+      "click",
+      async () => {
+        const state =
+          await window
+            .electronAPI
+            .toggleFullScreenOverlayPin();
+
+        render(state);
+      }
+    );
+
+    close.addEventListener(
+      "click",
+      () => {
+        window
+          .electronAPI
+          .closeFullScreenOverlay();
+      }
+    );
+  </script>
+</body>
+</html>
