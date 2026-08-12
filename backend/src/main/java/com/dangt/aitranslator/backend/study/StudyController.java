@@ -2,6 +2,7 @@ package com.dangt.aitranslator.backend.study;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
 import com.dangt.aitranslator.backend.common.ApiError;
+import com.dangt.aitranslator.backend.entitlement.EntitlementService;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,16 +29,21 @@ public class StudyController {
 
     private final StudyService studyService;
     private final CurrentUserService currentUserService;
+    private final EntitlementService entitlementService;
 
     public StudyController(
             StudyService studyService,
-            CurrentUserService currentUserService
+            CurrentUserService currentUserService,
+            EntitlementService entitlementService
     ) {
         this.studyService =
                 studyService;
 
         this.currentUserService =
                 currentUserService;
+
+        this.entitlementService =
+                entitlementService;
     }
 
     @Operation(
@@ -111,6 +117,13 @@ public class StudyController {
         UserAccount user =
                 currentUserService
                         .requireActiveUser(jwt);
+
+        entitlementService.requireFeature(
+                user,
+                "studyMode",
+                "Study Mode",
+                "PRO"
+        );
 
         return studyService.analyze(
                 user.getId(),

@@ -108,6 +108,12 @@ const BACKEND_LOGOUT_URL =
 const BACKEND_ME_URL =
   `${BACKEND_BASE_URL}/api/v1/me`;
 
+const BACKEND_ENTITLEMENTS_URL =
+  `${BACKEND_BASE_URL}/api/v1/account/entitlements`;
+
+const BACKEND_LICENSE_ACTIVATE_URL =
+  `${BACKEND_BASE_URL}/api/v1/account/license/activate`;
+
 const BACKEND_DEVICES_URL =
   `${BACKEND_BASE_URL}/api/v1/me/devices`;
 
@@ -272,14 +278,227 @@ let mangaPanelSession = null;
 
 
 /*
- * Batch 11 - Continuous Manga Mode
+ * Batch 12 - Plans / Entitlements / License
  *
- * Capability hiện được bật ở Desktop để test. Batch 12 sẽ thay nguồn này bằng
- * entitlement/license do backend trả về, không cần đổi controller Auto Manga.
+ * Backend là source-of-truth cho plan/features/limits.
+ * Desktop chỉ giữ một snapshot an toàn để UI/overlay feature-gate.
+ * Nếu chưa đăng nhập hoặc backend chưa trả entitlement, paid feature mặc định OFF.
  */
-const DESKTOP_FEATURE_CAPABILITIES = Object.freeze({
-  continuousManga: true,
+const DEFAULT_ACCOUNT_ENTITLEMENTS = Object.freeze({
+  planCode: "FREE",
+  planName: "Free",
+  subscriptionStatus: "ACTIVE",
+  subscriptionSource: "DEFAULT",
+  periodEnd: null,
+  features: Object.freeze({
+    quickTranslate: true,
+    studyMode: false,
+    mangaPanel: false,
+    mangaSession: false,
+    translationMemory: true,
+    continuousManga: false,
+    novelReaderTxt: false,
+    novelReaderEpub: false,
+  }),
+  limits: Object.freeze({
+    monthlyTranslations: 300,
+    mangaPagesPerDay: 0,
+    continuousMangaPagesPerDay: 0,
+    contextItems: 5,
+    devices: 1,
+  }),
+  usage: Object.freeze({
+    monthlyTranslationsUsed: 0,
+  }),
+  developmentOverride: false,
 });
+
+let accountEntitlements = {
+  ...DEFAULT_ACCOUNT_ENTITLEMENTS,
+  features: {
+    ...DEFAULT_ACCOUNT_ENTITLEMENTS.features,
+  },
+  limits: {
+    ...DEFAULT_ACCOUNT_ENTITLEMENTS.limits,
+  },
+  usage: {
+    ...DEFAULT_ACCOUNT_ENTITLEMENTS.usage,
+  },
+};
+
+function normalizeAccountEntitlements(payload) {
+  const raw =
+    payload &&
+    typeof payload === "object"
+      ? payload
+      : {};
+
+  const rawFeatures =
+    raw.features &&
+    typeof raw.features === "object"
+      ? raw.features
+      : {};
+
+  const rawLimits =
+    raw.limits &&
+    typeof raw.limits === "object"
+      ? raw.limits
+      : {};
+
+  const rawUsage =
+    raw.usage &&
+    typeof raw.usage === "object"
+      ? raw.usage
+      : {};
+
+  const features = {
+    ...DEFAULT_ACCOUNT_ENTITLEMENTS.features,
+  };
+
+  for (const [
+    key,
+    value,
+  ] of Object.entries(
+    rawFeatures
+  )) {
+    features[
+      String(key)
+    ] = Boolean(value);
+  }
+
+  const limits = {
+    ...DEFAULT_ACCOUNT_ENTITLEMENTS.limits,
+  };
+
+  for (const [
+    key,
+    value,
+  ] of Object.entries(
+    rawLimits
+  )) {
+    const numeric =
+      Number(value);
+
+    if (
+      Number.isFinite(numeric)
+    ) {
+      limits[
+        String(key)
+      ] = numeric;
+    }
+  }
+
+  const usage = {
+    ...DEFAULT_ACCOUNT_ENTITLEMENTS.usage,
+  };
+
+  for (const [
+    key,
+    value,
+  ] of Object.entries(
+    rawUsage
+  )) {
+    const numeric =
+      Number(value);
+
+    if (
+      Number.isFinite(numeric)
+    ) {
+      usage[
+        String(key)
+      ] = numeric;
+    }
+  }
+
+  return {
+    planCode:
+      String(
+        raw.planCode ||
+        "FREE"
+      )
+        .trim()
+        .toUpperCase(),
+    planName:
+      String(
+        raw.planName ||
+        raw.planCode ||
+        "Free"
+      ).trim(),
+    subscriptionStatus:
+      String(
+        raw.subscriptionStatus ||
+        "ACTIVE"
+      ).trim(),
+    subscriptionSource:
+      String(
+        raw.subscriptionSource ||
+        "DEFAULT"
+      ).trim(),
+    periodEnd:
+      raw.periodEnd ||
+      null,
+    features,
+    limits,
+    usage,
+    developmentOverride:
+      Boolean(
+        raw.developmentOverride
+      ),
+  };
+}
+
+function getAccountEntitlementsSnapshot() {
+  return {
+    ...accountEntitlements,
+    features: {
+      ...accountEntitlements.features,
+    },
+    limits: {
+      ...accountEntitlements.limits,
+    },
+    usage: {
+      ...accountEntitlements.usage,
+    },
+  };
+}
+
+function resetAccountEntitlements({
+  notify = true,
+} = {}) {
+  accountEntitlements =
+    normalizeAccountEntitlements(
+      DEFAULT_ACCOUNT_ENTITLEMENTS
+    );
+
+  if (mangaPanelSession) {
+    endMangaPanelSession(
+      "entitlement-reset"
+    );
+  } else if (
+    mangaContinuousState.enabled
+  ) {
+    stopMangaContinuousMode(
+      "entitlement-reset",
+      false
+    );
+  }
+
+  if (notify) {
+    sendToMainWindow(
+      "account-entitlements-changed",
+      getAccountEntitlementsSnapshot()
+    );
+  }
+
+  return getAccountEntitlementsSnapshot();
+}
+
+function getDesktopFeatureCapabilities() {
+  return {
+    ...DEFAULT_ACCOUNT_ENTITLEMENTS.features,
+    ...accountEntitlements.features,
+  };
+}
 
 const MANGA_CONTINUOUS_POLL_MS = 1400;
 const MANGA_CONTINUOUS_CHANGE_THRESHOLD = 0.12;
@@ -304,9 +523,109 @@ let mangaContinuousState = {
 
 function hasDesktopFeatureCapability(name) {
   return Boolean(
-    DESKTOP_FEATURE_CAPABILITIES[
+    getDesktopFeatureCapabilities()[
       String(name || "")
     ]
+  );
+}
+
+const PAID_FEATURE_REQUIREMENTS = Object.freeze({
+  studyMode: Object.freeze({
+    featureKey: "studyMode",
+    featureName: "Study Mode",
+    requiredPlan: "PRO",
+  }),
+  mangaPanel: Object.freeze({
+    featureKey: "mangaPanel",
+    featureName: "Manga Translation",
+    requiredPlan: "PRO",
+  }),
+  mangaSession: Object.freeze({
+    featureKey: "mangaSession",
+    featureName: "Manga Session",
+    requiredPlan: "PRO",
+  }),
+  continuousManga: Object.freeze({
+    featureKey: "continuousManga",
+    featureName: "Continuous Manga",
+    requiredPlan: "MANGA_PLUS",
+  }),
+});
+
+function getPaidFeatureRequirement(featureKey) {
+  return PAID_FEATURE_REQUIREMENTS[
+    String(featureKey || "")
+  ] || {
+    featureKey:
+      String(featureKey || ""),
+    featureName:
+      String(featureKey || "Tính năng"),
+    requiredPlan: "PRO",
+  };
+}
+
+function paidFeatureRequiredMessage(featureKey) {
+  const requirement =
+    getPaidFeatureRequirement(featureKey);
+
+  return (
+    `${requirement.featureName} yêu cầu gói ${requirement.requiredPlan} hoặc cao hơn. ` +
+    "Mở Settings → Plan & License để nâng cấp."
+  );
+}
+
+function notifyPaidFeatureRequired(featureKey) {
+  const requirement =
+    getPaidFeatureRequirement(featureKey);
+  const payload = {
+    ...requirement,
+    currentPlan:
+      accountEntitlements.planCode ||
+      "FREE",
+    message:
+      paidFeatureRequiredMessage(
+        featureKey
+      ),
+  };
+
+  if (
+    mainWindow &&
+    !mainWindow.isDestroyed()
+  ) {
+    mainWindow.show();
+    mainWindow.focus();
+  }
+
+  sendToMainWindow(
+    "paid-feature-required",
+    payload
+  );
+
+  return payload;
+}
+
+function requireDesktopFeatureCapability(
+  featureKey,
+  { notify = true } = {}
+) {
+  if (
+    hasDesktopFeatureCapability(
+      featureKey
+    )
+  ) {
+    return true;
+  }
+
+  if (notify) {
+    notifyPaidFeatureRequired(
+      featureKey
+    );
+  }
+
+  throw new Error(
+    paidFeatureRequiredMessage(
+      featureKey
+    )
   );
 }
 
@@ -848,8 +1167,8 @@ function setMangaContinuousEnabled(
         "continuousManga"
       )
     ) {
-      throw new Error(
-        "Continuous Manga không có trong gói hiện tại."
+      requireDesktopFeatureCapability(
+        "continuousManga"
       );
     }
 
@@ -993,9 +1312,8 @@ function getMangaPanelSessionState() {
         shortcutDisplay(
           shortcutSettings.panelNext
         ),
-      capabilities: {
-        ...DESKTOP_FEATURE_CAPABILITIES,
-      },
+      capabilities:
+        getDesktopFeatureCapabilities(),
       continuous:
         getMangaContinuousPublicState(),
     };
@@ -1035,9 +1353,8 @@ function getMangaPanelSessionState() {
       shortcutDisplay(
         shortcutSettings.panelNext
       ),
-    capabilities: {
-      ...DESKTOP_FEATURE_CAPABILITIES,
-    },
+    capabilities:
+      getDesktopFeatureCapabilities(),
     continuous:
       getMangaContinuousPublicState(),
   };
@@ -2281,6 +2598,7 @@ async function hasStoredRefreshToken() {
 function clearAccessSession() {
   accessToken = "";
   currentUser = null;
+  resetAccountEntitlements();
 }
 
 function sendAuthChanged() {
@@ -2428,6 +2746,11 @@ async function applyAuthPayload(
   );
 
   sendAuthChanged();
+
+  await refreshAccountEntitlements({
+    silent: true,
+    retryAfterRefresh: false,
+  });
 }
 
 async function loginDesktop(
@@ -2708,6 +3031,164 @@ async function authorizedBackendFetch(
   }
 
   return response;
+}
+
+
+async function refreshAccountEntitlements({
+  silent = false,
+  retryAfterRefresh = true,
+} = {}) {
+  if (
+    !accessToken ||
+    !currentUser
+  ) {
+    return resetAccountEntitlements();
+  }
+
+  try {
+    const response =
+      await authorizedBackendFetch(
+        BACKEND_ENTITLEMENTS_URL,
+        {
+          method: "GET",
+          headers: {
+            Accept:
+              "application/json",
+          },
+        },
+        retryAfterRefresh
+      );
+
+    const payload =
+      await parseBackendJson(
+        response
+      );
+
+    if (!response.ok) {
+      throw new Error(
+        payload?.error ||
+        `Không tải được entitlement (HTTP ${response.status}).`
+      );
+    }
+
+    accountEntitlements =
+      normalizeAccountEntitlements(
+        payload
+      );
+
+    if (
+      mangaPanelSession &&
+      !hasDesktopFeatureCapability(
+        "mangaSession"
+      )
+    ) {
+      endMangaPanelSession(
+        "entitlement-revoked"
+      );
+    }
+
+    if (
+      mangaContinuousState.enabled &&
+      !hasDesktopFeatureCapability(
+        "continuousManga"
+      )
+    ) {
+      stopMangaContinuousMode(
+        "entitlement-revoked",
+        false
+      );
+    } else {
+      publishMangaSessionState();
+    }
+
+    const snapshot =
+      getAccountEntitlementsSnapshot();
+
+    sendToMainWindow(
+      "account-entitlements-changed",
+      snapshot
+    );
+
+    return snapshot;
+  } catch (error) {
+    const fallback =
+      resetAccountEntitlements();
+
+    console.error(
+      "ACCOUNT ENTITLEMENTS ERROR:",
+      error
+    );
+
+    if (silent) {
+      return fallback;
+    }
+
+    throw error;
+  }
+}
+
+async function activateDesktopLicense(
+  licenseKey
+) {
+  const cleanKey =
+    String(
+      licenseKey ||
+      ""
+    ).trim();
+
+  if (!cleanKey) {
+    throw new Error(
+      "Nhập license key trước khi kích hoạt."
+    );
+  }
+
+  const response =
+    await authorizedBackendFetch(
+      BACKEND_LICENSE_ACTIVATE_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json; charset=utf-8",
+          Accept:
+            "application/json",
+        },
+        body:
+          JSON.stringify({
+            licenseKey:
+              cleanKey,
+          }),
+      }
+    );
+
+  const payload =
+    await parseBackendJson(
+      response
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.error ||
+      `Kích hoạt license thất bại (HTTP ${response.status}).`
+    );
+  }
+
+  accountEntitlements =
+    normalizeAccountEntitlements(
+      payload
+    );
+
+  const snapshot =
+    getAccountEntitlementsSnapshot();
+
+  sendToMainWindow(
+    "account-entitlements-changed",
+    snapshot
+  );
+
+  publishMangaSessionState();
+
+  return snapshot;
 }
 
 
@@ -4463,6 +4944,16 @@ async function runShortcutScan(
     await ensureAuthenticated();
     ensureWorkspaceScanAllowed();
 
+    if (mode === "panel") {
+      requireDesktopFeatureCapability(
+        "mangaPanel"
+      );
+    } else if (mode === "study") {
+      requireDesktopFeatureCapability(
+        "studyMode"
+      );
+    }
+
     /*
      * Hotkeys may be used before the renderer has finished loading Profiles.
      * Resolve one in the main process so Translate / Panel / Study all work
@@ -5973,6 +6464,16 @@ async function translateBatchBlocks(
       currentTranslationTargetLanguage
     );
 
+  const purpose =
+    String(
+      options?.purpose ||
+      "GENERAL"
+    )
+      .trim()
+      .toUpperCase() === "MANGA"
+      ? "MANGA"
+      : "GENERAL";
+
   const normalizedBlocks =
     (Array.isArray(blocks)
       ? blocks
@@ -6040,6 +6541,8 @@ async function translateBatchBlocks(
               profileId:
                 profile?.id ||
                 null,
+
+              purpose,
 
               sourceLanguage,
               targetLanguage,
@@ -8029,6 +8532,13 @@ async function processMangaPanelTranslation({
   targetWindow = null,
   startNewSession = false,
 } = {}) {
+  requireDesktopFeatureCapability(
+    startNewSession
+      ? "mangaPanel"
+      : "mangaSession",
+    { notify: false }
+  );
+
   const panelStartedAt =
     performance.now();
 
@@ -8112,6 +8622,8 @@ async function processMangaPanelTranslation({
         })
       ),
       {
+        purpose:
+          "MANGA",
         sourceLanguage:
           source,
         targetLanguage:
@@ -8399,6 +8911,9 @@ async function runMangaSessionNextPage(
 
   await ensureAuthenticated();
   ensureWorkspaceScanAllowed();
+  requireDesktopFeatureCapability(
+    "mangaSession"
+  );
 
   const profile =
     await ensureActiveTranslationProfile();
@@ -9224,6 +9739,9 @@ ipcMain.handle(
   async (_event, options) => {
     await ensureAuthenticated();
     ensureWorkspaceScanAllowed();
+    requireDesktopFeatureCapability(
+      "mangaPanel"
+    );
 
     if (
       options &&
@@ -9275,9 +9793,7 @@ ipcMain.handle(
 ipcMain.handle(
   "translation:feature-capabilities",
   async () => {
-    return {
-      ...DESKTOP_FEATURE_CAPABILITIES,
-    };
+    return getDesktopFeatureCapabilities();
   }
 );
 
@@ -9486,6 +10002,9 @@ ipcMain.handle(
   async (_event, options) => {
     await ensureAuthenticated();
     ensureWorkspaceScanAllowed();
+    requireDesktopFeatureCapability(
+      "studyMode"
+    );
 
     if (
       options &&
@@ -10330,6 +10849,22 @@ ipcMain.handle(
   "auth:logout",
   async () => {
     return logoutDesktop();
+  }
+);
+
+ipcMain.handle(
+  "account:get-entitlements",
+  async () => {
+    return refreshAccountEntitlements();
+  }
+);
+
+ipcMain.handle(
+  "account:activate-license",
+  async (_event, licenseKey) => {
+    return activateDesktopLicense(
+      licenseKey
+    );
   }
 );
 

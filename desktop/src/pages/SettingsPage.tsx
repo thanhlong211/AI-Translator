@@ -8,6 +8,7 @@ import type {
 } from "react";
 
 import type {
+    AccountEntitlements,
     AppPreferences,
     AuthStatus,
     BackendStatus,
@@ -19,6 +20,9 @@ import type {
 interface SettingsPageProps {
     backend: BackendStatus;
     auth: AuthStatus;
+    entitlements: AccountEntitlements;
+    entitlementMessage: string;
+    isEntitlementLoading: boolean;
     authMode: "login" | "register";
     email: string;
     password: string;
@@ -78,11 +82,20 @@ interface SettingsPageProps {
 
     onRevokeDevice:
         (sessionId: number) => void;
+
+    onRefreshEntitlements:
+        () => void;
+
+    onActivateLicense:
+        (licenseKey: string) => Promise<void>;
 }
 
 export function SettingsPage({
     backend,
     auth,
+    entitlements,
+    entitlementMessage,
+    isEntitlementLoading,
     authMode,
     email,
     password,
@@ -107,7 +120,9 @@ export function SettingsPage({
     onRestoreSession,
     onRefreshBackend,
     onLoadDevices,
-    onRevokeDevice
+    onRevokeDevice,
+    onRefreshEntitlements,
+    onActivateLicense
 }: SettingsPageProps) {
     const [
         translateShortcut,
@@ -203,6 +218,47 @@ export function SettingsPage({
         isResetting,
         setIsResetting
     ] = useState(false);
+
+    const [
+        licenseKey,
+        setLicenseKey
+    ] = useState("");
+
+    const [
+        isActivatingLicense,
+        setIsActivatingLicense
+    ] = useState(false);
+
+    async function submitLicense(
+        event: FormEvent
+    ) {
+        event.preventDefault();
+
+        const cleanKey =
+            licenseKey.trim();
+
+        if (!cleanKey) {
+            return;
+        }
+
+        try {
+            setIsActivatingLicense(
+                true
+            );
+
+            await onActivateLicense(
+                cleanKey
+            );
+
+            setLicenseKey("");
+        } catch {
+            // Parent owns the user-visible error message.
+        } finally {
+            setIsActivatingLicense(
+                false
+            );
+        }
+    }
 
     useEffect(() => {
         setTranslateShortcut(
@@ -499,6 +555,229 @@ export function SettingsPage({
                     </div>
                 )}
             </section>
+
+            {auth.authenticated && (
+                <section
+                    className="settings-section"
+                    id="plan-license"
+                >
+                    <div className="settings-section-header">
+                        <div>
+                            <span className="eyebrow violet">
+                                PLAN & LICENSE
+                            </span>
+
+                            <h2>
+                                Gói sử dụng
+                            </h2>
+
+                            <p>
+                                Quyền tính năng được lấy từ backend.
+                                Desktop không tự quyết định gói trả phí.
+                            </p>
+                        </div>
+
+                        <button
+                            className="secondary-action"
+                            onClick={
+                                onRefreshEntitlements
+                            }
+                            disabled={
+                                isEntitlementLoading
+                            }
+                        >
+                            {isEntitlementLoading
+                                ? "Đang tải..."
+                                : "Làm mới quyền"}
+                        </button>
+                    </div>
+
+                    <div className="account-summary">
+                        <div className="large-avatar">
+                            {entitlements
+                                .planCode
+                                .slice(0, 1)}
+                        </div>
+
+                        <div>
+                            <strong>
+                                {entitlements.planName}
+                            </strong>
+
+                            <span>
+                                {entitlements.planCode}
+                                {" · "}
+                                {entitlements
+                                    .subscriptionStatus}
+                                {entitlements
+                                    .developmentOverride
+                                    ? " · DEV OVERRIDE"
+                                    : ""}
+                            </span>
+
+                            {entitlements.periodEnd && (
+                                <span>
+                                    Hết hạn:
+                                    {" "}
+                                    {new Date(
+                                        entitlements.periodEnd
+                                    ).toLocaleDateString(
+                                        "vi-VN"
+                                    )}
+                                </span>
+                            )}
+                        </div>
+
+                        <div className="verified-badge">
+                            {entitlements.features
+                                .continuousManga
+                                ? "✓ Continuous Manga"
+                                : entitlements.features
+                                      .mangaPanel
+                                    ? "✓ Manga PRO"
+                                    : "Quick only"}
+                        </div>
+                    </div>
+
+                    <div className="device-table">
+                        {[
+                            [
+                                "Quick Translate",
+                                "quickTranslate"
+                            ],
+                            [
+                                "Study Mode",
+                                "studyMode"
+                            ],
+                            [
+                                "Manga Panel",
+                                "mangaPanel"
+                            ],
+                            [
+                                "Manga Session",
+                                "mangaSession"
+                            ],
+                            [
+                                "Translation Memory",
+                                "translationMemory"
+                            ],
+                            [
+                                "Continuous Manga",
+                                "continuousManga"
+                            ],
+                            [
+                                "Novel TXT",
+                                "novelReaderTxt"
+                            ],
+                            [
+                                "Novel EPUB",
+                                "novelReaderEpub"
+                            ]
+                        ].map(
+                            ([label, key]) => (
+                                <div
+                                    className="device-row"
+                                    key={key}
+                                >
+                                    <div>
+                                        <strong>
+                                            {label}
+                                        </strong>
+
+                                        <span>
+                                            Feature:
+                                            {" "}
+                                            {key}
+                                        </span>
+                                    </div>
+
+                                    <div
+                                        className={
+                                            entitlements
+                                                .features[
+                                                    key
+                                                ]
+                                                ? "verified-badge"
+                                                : ""
+                                        }
+                                    >
+                                        {entitlements
+                                            .features[key]
+                                            ? "✓ Có"
+                                            : "— Chưa có"}
+                                    </div>
+                                </div>
+                            )
+                        )}
+                    </div>
+
+                    <div className="notice info">
+                        Quota tháng:
+                        {" "}
+                        {entitlements
+                            .usage
+                            .monthlyTranslationsUsed ?? 0}
+                        /
+                        {entitlements
+                            .limits
+                            .monthlyTranslations ?? 0}
+                        {" "}lượt ·
+                        {" "}
+                        {entitlements
+                            .limits
+                            .mangaPagesPerDay ?? 0}
+                        {" "}trang manga/ngày ·
+                        {" "}
+                        {entitlements
+                            .limits
+                            .devices ?? 0}
+                        {" "}thiết bị.
+                    </div>
+
+                    <form
+                        className="auth-form"
+                        onSubmit={submitLicense}
+                    >
+                        <label className="control-field">
+                            <span>
+                                License key
+                            </span>
+
+                            <input
+                                type="text"
+                                value={licenseKey}
+                                onChange={(event) => {
+                                    setLicenseKey(
+                                        event.target.value
+                                    );
+                                }}
+                                placeholder="AIT-XXXX-XXXX-XXXX"
+                                autoComplete="off"
+                            />
+                        </label>
+
+                        <button
+                            className="primary-action"
+                            type="submit"
+                            disabled={
+                                isActivatingLicense ||
+                                isEntitlementLoading ||
+                                !licenseKey.trim()
+                            }
+                        >
+                            {isActivatingLicense
+                                ? "Đang kích hoạt..."
+                                : "Kích hoạt license"}
+                        </button>
+                    </form>
+
+                    {entitlementMessage && (
+                        <div className="notice info">
+                            {entitlementMessage}
+                        </div>
+                    )}
+                </section>
+            )}
 
             {auth.authenticated && (
                 <section className="settings-section">

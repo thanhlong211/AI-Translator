@@ -8,6 +8,7 @@ import type {
 } from "react";
 
 import type {
+    AccountEntitlements,
     AppPreferences,
     AuthStatus,
     BackendStatus,
@@ -596,6 +597,48 @@ function App() {
     });
 
     const [
+        entitlements,
+        setEntitlements
+    ] = useState<AccountEntitlements>({
+        planCode: "FREE",
+        planName: "Free",
+        subscriptionStatus: "ACTIVE",
+        subscriptionSource: "DEFAULT",
+        periodEnd: null,
+        features: {
+            quickTranslate: true,
+            studyMode: false,
+            mangaPanel: false,
+            mangaSession: false,
+            translationMemory: true,
+            continuousManga: false,
+            novelReaderTxt: false,
+            novelReaderEpub: false
+        },
+        limits: {
+            monthlyTranslations: 300,
+            mangaPagesPerDay: 0,
+            continuousMangaPagesPerDay: 0,
+            contextItems: 5,
+            devices: 1
+        },
+        usage: {
+            monthlyTranslationsUsed: 0
+        },
+        developmentOverride: false
+    });
+
+    const [
+        entitlementMessage,
+        setEntitlementMessage
+    ] = useState("");
+
+    const [
+        isEntitlementLoading,
+        setIsEntitlementLoading
+    ] = useState(false);
+
+    const [
         authMode,
         setAuthMode
     ] = useState<
@@ -1061,11 +1104,52 @@ function App() {
                 }
             );
 
+        const removeEntitlementListener =
+            api.onAccountEntitlementsChanged?.(
+                (
+                    nextEntitlements:
+                        AccountEntitlements
+                ) => {
+                    setEntitlements(
+                        nextEntitlements
+                    );
+                    setEntitlementMessage("");
+                }
+            );
+
+        const removePaidFeatureListener =
+            api.onPaidFeatureRequired?.(
+                (requirement: any) => {
+                    setEntitlementMessage(
+                        String(
+                            requirement?.message ||
+                            "Tính năng này yêu cầu gói trả phí."
+                        )
+                    );
+                    setActivePage(
+                        "settings"
+                    );
+
+                    window.setTimeout(() => {
+                        document
+                            .getElementById(
+                                "plan-license"
+                            )
+                            ?.scrollIntoView({
+                                behavior: "smooth",
+                                block: "start"
+                            });
+                    }, 0);
+                }
+            );
+
         return () => {
             removeScanListener?.();
             removeStudyFastListener?.();
             removeStudyListener?.();
             removeAuthListener?.();
+            removeEntitlementListener?.();
+            removePaidFeatureListener?.();
         };
     }, []);
 
@@ -1303,7 +1387,35 @@ function App() {
         if (auth.authenticated) {
             void loadDevices();
             void loadProfiles();
+            void refreshEntitlements();
         } else {
+            setEntitlements({
+                planCode: "FREE",
+                planName: "Free",
+                subscriptionStatus: "ACTIVE",
+                subscriptionSource: "DEFAULT",
+                periodEnd: null,
+                features: {
+                    quickTranslate: true,
+                    studyMode: false,
+                    mangaPanel: false,
+                    mangaSession: false,
+                    translationMemory: true,
+                    continuousManga: false,
+                    novelReaderTxt: false,
+                    novelReaderEpub: false
+                },
+                limits: {
+                    monthlyTranslations: 300,
+                    mangaPagesPerDay: 0,
+                    continuousMangaPagesPerDay: 0,
+                    contextItems: 5,
+                    devices: 1
+                },
+                developmentOverride: false
+            });
+            setEntitlementMessage("");
+
             setDevices([]);
             setProfiles([]);
             setProfileDraft(null);
@@ -1515,6 +1627,33 @@ function App() {
                 user: null
             });
 
+            setEntitlements({
+                planCode: "FREE",
+                planName: "Free",
+                subscriptionStatus: "ACTIVE",
+                subscriptionSource: "DEFAULT",
+                periodEnd: null,
+                features: {
+                    quickTranslate: true,
+                    studyMode: false,
+                    mangaPanel: false,
+                    mangaSession: false,
+                    translationMemory: true,
+                    continuousManga: false,
+                    novelReaderTxt: false,
+                    novelReaderEpub: false
+                },
+                limits: {
+                    monthlyTranslations: 300,
+                    mangaPagesPerDay: 0,
+                    continuousMangaPagesPerDay: 0,
+                    contextItems: 5,
+                    devices: 1
+                },
+                developmentOverride: false
+            });
+            setEntitlementMessage("");
+
             setDevices([]);
             setProfiles([]);
             setProfileDraft(null);
@@ -1593,6 +1732,64 @@ function App() {
             );
         } finally {
             setIsAuthLoading(false);
+        }
+    }
+
+    async function refreshEntitlements() {
+        if (!auth.authenticated) {
+            return;
+        }
+
+        try {
+            setIsEntitlementLoading(true);
+
+            const result:
+                AccountEntitlements =
+                await api
+                    .getAccountEntitlements();
+
+            setEntitlements(result);
+            setEntitlementMessage("");
+        } catch (error) {
+            setEntitlementMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+        } finally {
+            setIsEntitlementLoading(false);
+        }
+    }
+
+    async function activateLicense(
+        licenseKey: string
+    ) {
+        try {
+            setIsEntitlementLoading(true);
+            setEntitlementMessage("");
+
+            const result:
+                AccountEntitlements =
+                await api
+                    .activateLicense(
+                        licenseKey
+                    );
+
+            setEntitlements(result);
+
+            setEntitlementMessage(
+                `Đã kích hoạt gói ${result.planName}.`
+            );
+        } catch (error) {
+            setEntitlementMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+
+            throw error;
+        } finally {
+            setIsEntitlementLoading(false);
         }
     }
 
@@ -3380,6 +3577,35 @@ function App() {
             return;
         }
 
+        if (!entitlements.features.mangaPanel) {
+            const message =
+                "Manga Translation yêu cầu gói PRO hoặc cao hơn.";
+
+            setTranslation(
+                (current) => ({
+                    ...current,
+                    status: message
+                })
+            );
+            setEntitlementMessage(
+                `${message} Kích hoạt license hoặc nâng cấp tại Plan & License.`
+            );
+            setActivePage(
+                "settings"
+            );
+            window.setTimeout(() => {
+                document
+                    .getElementById(
+                        "plan-license"
+                    )
+                    ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+            }, 0);
+            return;
+        }
+
         if (!profileDraft) {
             setTranslation(
                 (current) => ({
@@ -3660,6 +3886,35 @@ function App() {
             setActivePage(
                 "settings"
             );
+            return;
+        }
+
+        if (!entitlements.features.studyMode) {
+            const message =
+                "Study Mode yêu cầu gói PRO hoặc cao hơn.";
+
+            setStudy(
+                (current) => ({
+                    ...current,
+                    status: message
+                })
+            );
+            setEntitlementMessage(
+                `${message} Kích hoạt license hoặc nâng cấp tại Plan & License.`
+            );
+            setActivePage(
+                "settings"
+            );
+            window.setTimeout(() => {
+                document
+                    .getElementById(
+                        "plan-license"
+                    )
+                    ?.scrollIntoView({
+                        behavior: "smooth",
+                        block: "start"
+                    });
+            }, 0);
             return;
         }
 
@@ -4250,6 +4505,15 @@ function App() {
                     <SettingsPage
                         backend={backend}
                         auth={auth}
+                        entitlements={
+                            entitlements
+                        }
+                        entitlementMessage={
+                            entitlementMessage
+                        }
+                        isEntitlementLoading={
+                            isEntitlementLoading
+                        }
                         authMode={authMode}
                         email={email}
                         password={password}
@@ -4324,6 +4588,12 @@ function App() {
                         }
                         onRevokeDevice={
                             revokeDevice
+                        }
+                        onRefreshEntitlements={
+                            refreshEntitlements
+                        }
+                        onActivateLicense={
+                            activateLicense
                         }
                     />
                 );
