@@ -56,6 +56,8 @@ interface NovelBlock {
 interface NovelTranslation {
     translatedText: string;
     source: string;
+    sourceLanguage?: TranslationLanguage;
+    targetLanguage?: TargetTranslationLanguage;
 }
 
 interface SavedNovelProgress {
@@ -337,6 +339,61 @@ function parseNovelText(text: string): NovelBlock[] {
     );
 }
 
+
+function translationMatchesLanguagePair(
+    translation: NovelTranslation | undefined,
+    sourceLanguage: TranslationLanguage,
+    targetLanguage: TargetTranslationLanguage
+) {
+    if (!translation?.translatedText) {
+        return false;
+    }
+
+    // Batch 13/13.1 cache entries did not store language metadata.
+    // Those historical entries were Vietnamese by default. Treat them as VI
+    // so switching to EN/other targets never reuses stale Vietnamese output.
+    const savedTarget = translation.targetLanguage || "VI";
+
+    if (savedTarget !== targetLanguage) {
+        return false;
+    }
+
+    if (
+        translation.sourceLanguage &&
+        sourceLanguage !== "AUTO" &&
+        translation.sourceLanguage !== "AUTO" &&
+        translation.sourceLanguage !== sourceLanguage
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
+function languageToHtmlLang(
+    language: TranslationLanguage | TargetTranslationLanguage,
+    text = ""
+) {
+    switch (language) {
+        case "JA": return "ja";
+        case "EN": return "en";
+        case "VI": return "vi";
+        case "KO": return "ko";
+        case "ZH": return "zh-Hans";
+        case "ZH_TW": return "zh-Hant";
+        case "FR": return "fr";
+        case "DE": return "de";
+        case "ES": return "es";
+        case "TH": return "th";
+        case "ID": return "id";
+        default:
+            if (/[ぁ-んァ-ヶー]/u.test(text)) return "ja";
+            if (/[가-힣]/u.test(text)) return "ko";
+            if (/[\u3400-\u9FFF]/u.test(text)) return "zh";
+            return "und";
+    }
+}
+
 function formatFileSize(bytes: number) {
     if (!Number.isFinite(bytes) || bytes <= 0) {
         return "0 KB";
@@ -525,8 +582,15 @@ export function NovelReaderPage({
     );
 
     const translatedCount = useMemo(
-        () => Object.keys(translations).length,
-        [translations]
+        () => Object.values(translations).filter(
+            (translation) =>
+                translationMatchesLanguagePair(
+                    translation,
+                    sourceLanguage,
+                    targetLanguage
+                )
+        ).length,
+        [translations, sourceLanguage, targetLanguage]
     );
 
     const visibleBlocks = useMemo(
@@ -703,17 +767,18 @@ export function NovelReaderPage({
             .filter(
                 (block) =>
                     Boolean(
-                        translations[
-                            String(block.index)
-                        ]?.translatedText
+                        translationMatchesLanguagePair(
+                            translations[String(block.index)],
+                            sourceLanguage,
+                            targetLanguage
+                        )
                     )
             )
             .slice(-10)
             .map((block) => {
                 const translatedText =
-                    translations[
-                        String(block.index)
-                    ].translatedText;
+                    translations[String(block.index)]
+                        .translatedText;
 
                 return {
                     original: block.text,
@@ -770,7 +835,11 @@ export function NovelReaderPage({
         if (requestedCount > 1) {
             while (
                 start < blocks.length &&
-                translations[String(start)]
+                translationMatchesLanguagePair(
+                    translations[String(start)],
+                    sourceLanguage,
+                    targetLanguage
+                )
             ) {
                 start++;
             }
@@ -843,7 +912,9 @@ export function NovelReaderPage({
                             translatedText,
                             source: String(
                                 item?.source || "AI"
-                            )
+                            ),
+                            sourceLanguage,
+                            targetLanguage
                         };
                     }
                 }
@@ -994,8 +1065,12 @@ export function NovelReaderPage({
                         value={sourceLanguage}
                         disabled={isTranslating}
                         onChange={(event) => {
-                            onSourceLanguageChange(
-                                event.target.value as TranslationLanguage
+                            const nextLanguage =
+                                event.target.value as TranslationLanguage;
+
+                            onSourceLanguageChange(nextLanguage);
+                            setStatus(
+                                `Đã chuyển ngôn ngữ nguồn sang ${translationLanguageLabels[nextLanguage]}.`
                             );
                         }}
                     >
@@ -1018,8 +1093,29 @@ export function NovelReaderPage({
                         value={targetLanguage}
                         disabled={isTranslating}
                         onChange={(event) => {
-                            onTargetLanguageChange(
-                                event.target.value as TargetTranslationLanguage
+                            const nextLanguage =
+                                event.target.value as TargetTranslationLanguage;
+
+                            onTargetLanguageChange(nextLanguage);
+
+                            const firstMissing = blocks.findIndex(
+                                (block) =>
+                                    !translationMatchesLanguagePair(
+                                        translations[String(block.index)],
+                                        sourceLanguage,
+                                        nextLanguage
+                                    )
+                            );
+
+                            if (firstMissing >= 0) {
+                                setCurrentIndex(firstMissing);
+                                setWindowStart(
+                                    Math.max(0, firstMissing - 3)
+                                );
+                            }
+
+                            setStatus(
+                                `Đã chuyển ngôn ngữ đích sang ${translationLanguageLabels[nextLanguage]}. Reader đã chuyển tới đoạn cần dịch bằng ngôn ngữ mới.`
                             );
                         }}
                     >
@@ -1313,8 +1409,16 @@ export function NovelReaderPage({
                     </div>
 
                     {visibleBlocks.map((block) => {
-                        const translated =
+                        const cachedTranslation =
                             translations[String(block.index)];
+                        const translated =
+                            translationMatchesLanguagePair(
+                                cachedTranslation,
+                                sourceLanguage,
+                                targetLanguage
+                            )
+                                ? cachedTranslation
+                                : undefined;
                         const isCurrent =
                             block.index === currentIndex;
 
@@ -1342,7 +1446,14 @@ export function NovelReaderPage({
                                             </span>
                                         )}
                                     </div>
-                                    <p>{block.text}</p>
+                                    <p
+                                        lang={languageToHtmlLang(
+                                            sourceLanguage,
+                                            block.text
+                                        )}
+                                    >
+                                        {block.text}
+                                    </p>
                                 </div>
 
                                 <div className="novel-translation-pane">
@@ -1356,7 +1467,14 @@ export function NovelReaderPage({
                                                         : "AI"}
                                                 </span>
                                             </div>
-                                            <p>{translated.translatedText}</p>
+                                            <p
+                                                lang={languageToHtmlLang(
+                                                    targetLanguage,
+                                                    translated.translatedText
+                                                )}
+                                            >
+                                                {translated.translatedText}
+                                            </p>
                                         </>
                                     ) : (
                                         <div className="novel-empty-translation">

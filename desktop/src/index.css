@@ -5030,3 +5030,38 @@ button:disabled {
         padding: 20px;
     }
 }
+
+/* Batch 13.1.1: language-aware Novel Reader font fallback. */
+.novel-reader-page .novel-source-pane p,
+.novel-reader-page .novel-translation-pane p {
+    font-family: "Segoe UI", "Noto Sans", Arial, sans-serif;
+    font-synthesis: none;
+}
+
+.novel-reader-page p:lang(ja) {
+    font-family: "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
+    letter-spacing: 0.015em;
+}
+
+.novel-reader-page p:lang(zh),
+.novel-reader-page p:lang(zh-Hans),
+.novel-reader-page p:lang(zh-Hant) {
+    font-family: "Microsoft YaHei UI", "Microsoft JhengHei UI", "Noto Sans CJK SC", "Noto Sans CJK TC", sans-serif;
+}
+
+.novel-reader-page p:lang(ko) {
+    font-family: "Malgun Gothic", "Noto Sans KR", sans-serif;
+}
+
+.novel-reader-page p:lang(en),
+.novel-reader-page p:lang(vi),
+.novel-reader-page p:lang(fr),
+.novel-reader-page p:lang(de),
+.novel-reader-page p:lang(es),
+.novel-reader-page p:lang(id) {
+    font-family: Georgia, "Times New Roman", "Segoe UI", serif;
+}
+
+.novel-reader-page p:lang(th) {
+    font-family: "Leelawadee UI", "Noto Sans Thai", "Segoe UI", sans-serif;
+}
