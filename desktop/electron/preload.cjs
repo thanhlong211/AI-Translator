@@ -23,6 +23,26 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+
+  setMangaContinuousMode: (enabled) => {
+    return ipcRenderer.invoke(
+      "translation:manga-continuous-toggle",
+      Boolean(enabled)
+    );
+  },
+
+  toggleMangaContinuousPause: () => {
+    return ipcRenderer.invoke(
+      "translation:manga-continuous-pause"
+    );
+  },
+
+  getFeatureCapabilities: () => {
+    return ipcRenderer.invoke(
+      "translation:feature-capabilities"
+    );
+  },
+
   getMangaPanelSessionState: () => {
     return ipcRenderer.invoke(
       "translation:manga-session-state"
