@@ -270,6 +270,657 @@ const translationContextByProfile =
  */
 let mangaPanelSession = null;
 
+
+/*
+ * Batch 11 - Continuous Manga Mode
+ *
+ * Capability hiện được bật ở Desktop để test. Batch 12 sẽ thay nguồn này bằng
+ * entitlement/license do backend trả về, không cần đổi controller Auto Manga.
+ */
+const DESKTOP_FEATURE_CAPABILITIES = Object.freeze({
+  continuousManga: true,
+});
+
+const MANGA_CONTINUOUS_POLL_MS = 1400;
+const MANGA_CONTINUOUS_CHANGE_THRESHOLD = 0.12;
+const MANGA_CONTINUOUS_STABLE_THRESHOLD = 0.035;
+const MANGA_CONTINUOUS_COOLDOWN_MS = 2600;
+
+let mangaContinuousTimer = null;
+let mangaContinuousPollBusy = false;
+let mangaContinuousState = {
+  enabled: false,
+  paused: false,
+  status: "OFF",
+  baselineFingerprint: null,
+  candidateFingerprint: null,
+  stableHits: 0,
+  lastDifference: 0,
+  lastCheckedAt: null,
+  lastTriggeredAt: null,
+  cooldownUntil: 0,
+  error: "",
+};
+
+function hasDesktopFeatureCapability(name) {
+  return Boolean(
+    DESKTOP_FEATURE_CAPABILITIES[
+      String(name || "")
+    ]
+  );
+}
+
+function getMangaContinuousPublicState() {
+  return {
+    available:
+      hasDesktopFeatureCapability(
+        "continuousManga"
+      ),
+    enabled:
+      Boolean(
+        mangaContinuousState.enabled
+      ),
+    paused:
+      Boolean(
+        mangaContinuousState.paused
+      ),
+    status:
+      String(
+        mangaContinuousState.status ||
+        "OFF"
+      ),
+    lastDifference:
+      Number(
+        mangaContinuousState.lastDifference ||
+        0
+      ),
+    lastCheckedAt:
+      mangaContinuousState.lastCheckedAt,
+    lastTriggeredAt:
+      mangaContinuousState.lastTriggeredAt,
+    error:
+      String(
+        mangaContinuousState.error ||
+        ""
+      ),
+    pollMs:
+      MANGA_CONTINUOUS_POLL_MS,
+  };
+}
+
+function clearMangaContinuousTimer() {
+  if (mangaContinuousTimer) {
+    clearTimeout(
+      mangaContinuousTimer
+    );
+    mangaContinuousTimer = null;
+  }
+}
+
+function resetMangaContinuousDetection(
+  status = null
+) {
+  mangaContinuousState = {
+    ...mangaContinuousState,
+    status:
+      status ||
+      (
+        mangaContinuousState.enabled
+          ? mangaContinuousState.paused
+            ? "PAUSED"
+            : "CALIBRATING"
+          : "OFF"
+      ),
+    baselineFingerprint: null,
+    candidateFingerprint: null,
+    stableHits: 0,
+    lastDifference: 0,
+    error: "",
+  };
+}
+
+function stopMangaContinuousMode(
+  reason = "manual",
+  notify = true
+) {
+  clearMangaContinuousTimer();
+
+  mangaContinuousState = {
+    enabled: false,
+    paused: false,
+    status: "OFF",
+    baselineFingerprint: null,
+    candidateFingerprint: null,
+    stableHits: 0,
+    lastDifference: 0,
+    lastCheckedAt: null,
+    lastTriggeredAt:
+      mangaContinuousState.lastTriggeredAt,
+    cooldownUntil: 0,
+    error: "",
+  };
+
+  console.log(
+    "MANGA CONTINUOUS STOPPED:",
+    reason
+  );
+
+  if (notify && mangaPanelSession) {
+    publishMangaSessionState();
+  }
+
+  return getMangaContinuousPublicState();
+}
+
+function scheduleMangaContinuousPoll(
+  waitMs = MANGA_CONTINUOUS_POLL_MS
+) {
+  clearMangaContinuousTimer();
+
+  if (
+    !mangaContinuousState.enabled ||
+    mangaContinuousState.paused ||
+    !mangaPanelSession
+  ) {
+    return;
+  }
+
+  mangaContinuousTimer =
+    setTimeout(
+      () => {
+        void pollMangaContinuousMode();
+      },
+      Math.max(
+        250,
+        Number(waitMs) ||
+        MANGA_CONTINUOUS_POLL_MS
+      )
+    );
+}
+
+async function buildMangaSelectionFingerprint(
+  screenshotBuffer,
+  selection
+) {
+  if (!screenshotBuffer) {
+    throw new Error(
+      "Không có screenshot để kiểm tra trang manga."
+    );
+  }
+
+  const normalizedSelection =
+    normalizeMangaSessionSelection(
+      selection
+    );
+
+  if (!normalizedSelection) {
+    throw new Error(
+      "Vùng Manga Session không hợp lệ."
+    );
+  }
+
+  const metadata =
+    await sharp(
+      screenshotBuffer
+    ).metadata();
+
+  if (
+    !metadata.width ||
+    !metadata.height
+  ) {
+    throw new Error(
+      "Không đọc được kích thước screenshot khi theo dõi manga."
+    );
+  }
+
+  const display =
+    screen.getPrimaryDisplay();
+
+  const scaleX =
+    metadata.width /
+    display.bounds.width;
+  const scaleY =
+    metadata.height /
+    display.bounds.height;
+
+  const left =
+    Math.max(
+      0,
+      Math.min(
+        metadata.width - 1,
+        Math.round(
+          normalizedSelection.x *
+          scaleX
+        )
+      )
+    );
+
+  const top =
+    Math.max(
+      0,
+      Math.min(
+        metadata.height - 1,
+        Math.round(
+          normalizedSelection.y *
+          scaleY
+        )
+      )
+    );
+
+  const width =
+    Math.max(
+      1,
+      Math.min(
+        metadata.width - left,
+        Math.round(
+          normalizedSelection.width *
+          scaleX
+        )
+      )
+    );
+
+  const height =
+    Math.max(
+      1,
+      Math.min(
+        metadata.height - top,
+        Math.round(
+          normalizedSelection.height *
+          scaleY
+        )
+      )
+    );
+
+  return sharp(
+    screenshotBuffer
+  )
+    .extract({
+      left,
+      top,
+      width,
+      height,
+    })
+    .resize(
+      48,
+      48,
+      {
+        fit: "fill",
+      }
+    )
+    .grayscale()
+    .raw()
+    .toBuffer();
+}
+
+function mangaFingerprintDifference(
+  left,
+  right
+) {
+  if (
+    !left ||
+    !right ||
+    left.length !== right.length ||
+    !left.length
+  ) {
+    return 1;
+  }
+
+  let total = 0;
+
+  for (
+    let index = 0;
+    index < left.length;
+    index += 1
+  ) {
+    total += Math.abs(
+      left[index] -
+      right[index]
+    );
+  }
+
+  return total /
+    left.length /
+    255;
+}
+
+async function captureMangaContinuousFingerprint() {
+  if (!mangaPanelSession) {
+    return null;
+  }
+
+  const image =
+    await screenshot({
+      format: "png",
+    });
+
+  return buildMangaSelectionFingerprint(
+    image,
+    mangaPanelSession.selection
+  );
+}
+
+function markMangaContinuousPageTranslated() {
+  if (!mangaContinuousState.enabled) {
+    return;
+  }
+
+  resetMangaContinuousDetection(
+    mangaContinuousState.paused
+      ? "PAUSED"
+      : "CALIBRATING"
+  );
+
+  mangaContinuousState.cooldownUntil =
+    Date.now() +
+    MANGA_CONTINUOUS_COOLDOWN_MS;
+
+  publishMangaSessionState();
+  scheduleMangaContinuousPoll(
+    MANGA_CONTINUOUS_POLL_MS
+  );
+}
+
+async function pollMangaContinuousMode() {
+  clearMangaContinuousTimer();
+
+  if (
+    mangaContinuousPollBusy ||
+    !mangaContinuousState.enabled ||
+    mangaContinuousState.paused ||
+    !mangaPanelSession
+  ) {
+    scheduleMangaContinuousPoll();
+    return;
+  }
+
+  if (
+    selectorIsOpen ||
+    isProcessingSelection ||
+    isFullScreenProcessing ||
+    isMangaSessionProcessing
+  ) {
+    scheduleMangaContinuousPoll();
+    return;
+  }
+
+  const overlayState =
+    getFullScreenOverlayState();
+
+  if (
+    overlayState?.editing ||
+    overlayState?.debugging
+  ) {
+    mangaContinuousState.status =
+      overlayState?.editing
+        ? "WAITING_EDIT"
+        : "WAITING_DEBUG";
+    publishMangaSessionState();
+    scheduleMangaContinuousPoll();
+    return;
+  }
+
+  mangaContinuousPollBusy = true;
+
+  try {
+    const current =
+      await captureMangaContinuousFingerprint();
+
+    if (!current) {
+      scheduleMangaContinuousPoll();
+      return;
+    }
+
+    mangaContinuousState.lastCheckedAt =
+      Date.now();
+    mangaContinuousState.error = "";
+
+    if (
+      !mangaContinuousState.baselineFingerprint
+    ) {
+      mangaContinuousState.baselineFingerprint =
+        current;
+      mangaContinuousState.candidateFingerprint =
+        null;
+      mangaContinuousState.stableHits = 0;
+      mangaContinuousState.status =
+        "WATCHING";
+      publishMangaSessionState();
+      scheduleMangaContinuousPoll();
+      return;
+    }
+
+    const difference =
+      mangaFingerprintDifference(
+        mangaContinuousState.baselineFingerprint,
+        current
+      );
+
+    mangaContinuousState.lastDifference =
+      Number(
+        difference.toFixed(4)
+      );
+
+    if (
+      Date.now() <
+      mangaContinuousState.cooldownUntil
+    ) {
+      mangaContinuousState.status =
+        "COOLDOWN";
+      publishMangaSessionState();
+      scheduleMangaContinuousPoll();
+      return;
+    }
+
+    if (
+      difference <
+      MANGA_CONTINUOUS_CHANGE_THRESHOLD
+    ) {
+      mangaContinuousState.candidateFingerprint =
+        null;
+      mangaContinuousState.stableHits = 0;
+      mangaContinuousState.status =
+        "WATCHING";
+      publishMangaSessionState();
+      scheduleMangaContinuousPoll();
+      return;
+    }
+
+    if (
+      !mangaContinuousState.candidateFingerprint
+    ) {
+      mangaContinuousState.candidateFingerprint =
+        current;
+      mangaContinuousState.stableHits = 0;
+      mangaContinuousState.status =
+        "WAITING_STABLE";
+      publishMangaSessionState();
+      scheduleMangaContinuousPoll();
+      return;
+    }
+
+    const candidateDifference =
+      mangaFingerprintDifference(
+        mangaContinuousState.candidateFingerprint,
+        current
+      );
+
+    if (
+      candidateDifference <=
+      MANGA_CONTINUOUS_STABLE_THRESHOLD
+    ) {
+      mangaContinuousState.stableHits += 1;
+    } else {
+      mangaContinuousState.candidateFingerprint =
+        current;
+      mangaContinuousState.stableHits = 0;
+    }
+
+    if (
+      mangaContinuousState.stableHits < 1
+    ) {
+      mangaContinuousState.status =
+        "WAITING_STABLE";
+      publishMangaSessionState();
+      scheduleMangaContinuousPoll();
+      return;
+    }
+
+    mangaContinuousState.status =
+      "TRANSLATING";
+    mangaContinuousState.lastTriggeredAt =
+      Date.now();
+    mangaContinuousState.cooldownUntil =
+      Date.now() +
+      MANGA_CONTINUOUS_COOLDOWN_MS;
+    publishMangaSessionState();
+
+    const autoResult =
+      await runMangaSessionNextPage(
+        "continuous-auto"
+      );
+
+    if (!autoResult?.success) {
+      mangaContinuousState.status =
+        "ERROR";
+      mangaContinuousState.error =
+        String(
+          autoResult?.error ||
+          "Không thể tự dịch trang mới."
+        );
+      mangaContinuousState.cooldownUntil =
+        Date.now() +
+        MANGA_CONTINUOUS_COOLDOWN_MS;
+      publishMangaSessionState();
+      scheduleMangaContinuousPoll(
+        MANGA_CONTINUOUS_POLL_MS * 2
+      );
+    }
+  } catch (error) {
+    console.error(
+      "MANGA CONTINUOUS POLL ERROR:",
+      error
+    );
+
+    mangaContinuousState.status =
+      "ERROR";
+    mangaContinuousState.error =
+      error instanceof Error
+        ? error.message
+        : String(error);
+    mangaContinuousState.cooldownUntil =
+      Date.now() +
+      MANGA_CONTINUOUS_COOLDOWN_MS;
+    publishMangaSessionState();
+    scheduleMangaContinuousPoll(
+      MANGA_CONTINUOUS_POLL_MS * 2
+    );
+  } finally {
+    mangaContinuousPollBusy = false;
+  }
+}
+
+function publishMangaSessionState() {
+  const state =
+    getMangaPanelSessionState();
+
+  updateFullScreenOverlaySession(
+    state.active
+      ? state
+      : null
+  );
+
+  notifyMangaSessionInspectorRefresh();
+
+  sendToMainWindow(
+    "manga-session-state",
+    state
+  );
+
+  return state;
+}
+
+function setMangaContinuousEnabled(
+  enabled
+) {
+  if (enabled) {
+    if (
+      !hasDesktopFeatureCapability(
+        "continuousManga"
+      )
+    ) {
+      throw new Error(
+        "Continuous Manga không có trong gói hiện tại."
+      );
+    }
+
+    if (!mangaPanelSession) {
+      throw new Error(
+        `Chưa có Manga Session. Hãy dùng ${shortcutDisplay(shortcutSettings.panel)} để chọn trang đầu tiên.`
+      );
+    }
+
+    mangaContinuousState = {
+      ...mangaContinuousState,
+      enabled: true,
+      paused: false,
+      status: "CALIBRATING",
+      baselineFingerprint: null,
+      candidateFingerprint: null,
+      stableHits: 0,
+      lastDifference: 0,
+      cooldownUntil:
+        Date.now() + 700,
+      error: "",
+    };
+
+    console.log(
+      "MANGA CONTINUOUS ENABLED"
+    );
+
+    publishMangaSessionState();
+    scheduleMangaContinuousPoll(
+      700
+    );
+
+    return getMangaContinuousPublicState();
+  }
+
+  return stopMangaContinuousMode(
+    "toggle-off",
+    true
+  );
+}
+
+function toggleMangaContinuousPause() {
+  if (!mangaContinuousState.enabled) {
+    throw new Error(
+      "Continuous Manga chưa được bật."
+    );
+  }
+
+  mangaContinuousState.paused =
+    !mangaContinuousState.paused;
+
+  if (mangaContinuousState.paused) {
+    clearMangaContinuousTimer();
+    mangaContinuousState.status =
+      "PAUSED";
+  } else {
+    resetMangaContinuousDetection(
+      "CALIBRATING"
+    );
+    mangaContinuousState.cooldownUntil =
+      Date.now() + 700;
+    scheduleMangaContinuousPoll(
+      700
+    );
+  }
+
+  publishMangaSessionState();
+
+  return getMangaContinuousPublicState();
+}
+
 function normalizeMangaSessionSelection(
   selection
 ) {
@@ -342,6 +993,11 @@ function getMangaPanelSessionState() {
         shortcutDisplay(
           shortcutSettings.panelNext
         ),
+      capabilities: {
+        ...DESKTOP_FEATURE_CAPABILITIES,
+      },
+      continuous:
+        getMangaContinuousPublicState(),
     };
   }
 
@@ -379,6 +1035,11 @@ function getMangaPanelSessionState() {
       shortcutDisplay(
         shortcutSettings.panelNext
       ),
+    capabilities: {
+      ...DESKTOP_FEATURE_CAPABILITIES,
+    },
+    continuous:
+      getMangaContinuousPublicState(),
   };
 }
 
@@ -409,6 +1070,11 @@ function beginMangaPanelSession({
     normalizeTranslationTargetLanguage(
       targetLanguage
     );
+
+  stopMangaContinuousMode(
+    "new-session",
+    false
+  );
 
   mangaPanelSession = {
     id:
@@ -449,6 +1115,11 @@ function endMangaPanelSession(
 ) {
   const previous =
     mangaPanelSession;
+
+  stopMangaContinuousMode(
+    reason,
+    false
+  );
 
   mangaPanelSession = null;
 
@@ -544,6 +1215,18 @@ function resetMangaPanelSessionChapter() {
     lastUsedAt:
       Date.now(),
   };
+
+  if (mangaContinuousState.enabled) {
+    resetMangaContinuousDetection(
+      mangaContinuousState.paused
+        ? "PAUSED"
+        : "CALIBRATING"
+    );
+    mangaContinuousState.cooldownUntil =
+      Date.now() +
+      MANGA_CONTINUOUS_COOLDOWN_MS;
+    scheduleMangaContinuousPoll();
+  }
 
   const state =
     getMangaPanelSessionState();
@@ -7849,6 +8532,8 @@ async function runMangaSessionNextPage(
     );
     loadingToken = null;
 
+    markMangaContinuousPageTranslated();
+
     return {
       success: true,
       mode: "panel-next",
@@ -8570,6 +9255,32 @@ ipcMain.handle(
   }
 );
 
+
+ipcMain.handle(
+  "translation:manga-continuous-toggle",
+  async (_event, enabled) => {
+    return setMangaContinuousEnabled(
+      Boolean(enabled)
+    );
+  }
+);
+
+ipcMain.handle(
+  "translation:manga-continuous-pause",
+  async () => {
+    return toggleMangaContinuousPause();
+  }
+);
+
+ipcMain.handle(
+  "translation:feature-capabilities",
+  async () => {
+    return {
+      ...DESKTOP_FEATURE_CAPABILITIES,
+    };
+  }
+);
+
 ipcMain.handle(
   "translation:manga-session-state",
   async () => {
@@ -8752,6 +9463,11 @@ ipcMain.handle(
 ipcMain.on(
   "full-screen-overlay:close",
   () => {
+    stopMangaContinuousMode(
+      "overlay-close",
+      false
+    );
+
     stopOverlayLifecycle();
 
     setFullScreenOverlayPinned(

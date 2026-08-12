@@ -1091,7 +1091,7 @@ function controlsBounds(
   const workArea =
     display.workArea;
 
-  const width = 348;
+  const width = 430;
   const height = 34;
   const gap = 8;
 

@@ -93,8 +93,33 @@
 
     #debug[hidden],
     #next[hidden],
+    #auto[hidden],
+    #pause[hidden],
     #context[hidden] {
       display: none;
+    }
+
+    #auto {
+      width: 42px;
+      font-size: 10px;
+      letter-spacing: .1px;
+    }
+
+    #auto.active {
+      color: #ffffff;
+      background: #059669;
+      border-color: #059669;
+    }
+
+    #auto.locked {
+      opacity: .52;
+      cursor: not-allowed;
+    }
+
+    #pause.active {
+      color: #ffffff;
+      background: #d97706;
+      border-color: #d97706;
     }
 
     #context.active {
@@ -134,6 +159,22 @@
       hidden
     >
       ▶
+    </button>
+
+    <button
+      id="auto"
+      title="Bật Continuous Manga Mode"
+      hidden
+    >
+      AUTO
+    </button>
+
+    <button
+      id="pause"
+      title="Tạm dừng Continuous Manga Mode"
+      hidden
+    >
+      ⏸
     </button>
 
     <button
@@ -189,6 +230,17 @@
     const next =
       document.getElementById(
         "next"
+      );
+
+
+    const auto =
+      document.getElementById(
+        "auto"
+      );
+
+    const pause =
+      document.getElementById(
+        "pause"
       );
 
     const context =
@@ -268,8 +320,72 @@
           session?.active
         );
 
+      const continuous =
+        session?.continuous ||
+        {};
+
+      const continuousAvailable =
+        Boolean(
+          continuous?.available ??
+          session?.capabilities?.continuousManga
+        );
+
+      const continuousEnabled =
+        Boolean(
+          continuous?.enabled
+        );
+
+      const continuousPaused =
+        Boolean(
+          continuous?.paused
+        );
+
       next.hidden =
         !sessionActive;
+
+      auto.hidden =
+        !sessionActive;
+
+      pause.hidden =
+        !sessionActive ||
+        !continuousEnabled;
+
+      auto.classList.toggle(
+        "active",
+        continuousEnabled
+      );
+
+      auto.classList.toggle(
+        "locked",
+        !continuousAvailable
+      );
+
+      pause.classList.toggle(
+        "active",
+        continuousPaused
+      );
+
+      auto.textContent =
+        continuousEnabled
+          ? "AUTO✓"
+          : "AUTO";
+
+      auto.title =
+        continuousAvailable
+          ? continuousEnabled
+            ? "Tắt Continuous Manga Mode"
+            : "Bật Continuous Manga Mode · tự phát hiện trang mới"
+          : "Continuous Manga không có trong gói hiện tại";
+
+      pause.title =
+        continuousPaused
+          ? "Tiếp tục Continuous Manga Mode"
+          : "Tạm dừng Continuous Manga Mode";
+
+      pause.textContent =
+        continuousPaused
+          ? "▶"
+          : "⏸";
 
       context.hidden =
         !sessionActive;
@@ -324,15 +440,35 @@
           ? "Bỏ ghim bản dịch"
           : "Ghim bản dịch";
 
+      const continuousStatusLabel =
+        {
+          CALIBRATING: "đang lấy mẫu",
+          WATCHING: "đang theo dõi",
+          WAITING_STABLE: "chờ trang ổn định",
+          WAITING_EDIT: "chờ sửa bubble",
+          WAITING_DEBUG: "chờ tắt debug",
+          COOLDOWN: "đang nghỉ",
+          TRANSLATING: "đang dịch",
+          ERROR: "lỗi",
+          PAUSED: "tạm dừng",
+        }[String(continuous?.status || "WATCHING")] ||
+        "đang theo dõi";
+
       info.textContent =
         debugging
           ? `Debug · B${Number(debugCounts.bubbles || 0)} · OCR${Number(debugCounts.ocr || 0)}`
           : editing
             ? `Sắp xếp · ${count} vùng`
             : sessionActive
-              ? Number(session?.pageNumber || 0) > 0
-                ? `Trang ${Number(session.pageNumber)} · ${count} vùng · ${state?.targetLanguage || "VI"}`
-                : `Chapter ${Number(session?.chapterNumber || 1)} · sẵn sàng trang 1`
+              ? continuousEnabled
+                ? continuousPaused
+                  ? `Auto Pause · Trang ${Number(session?.pageNumber || 0)}`
+                  : continuous?.status === "TRANSLATING"
+                    ? `Auto · đang dịch trang ${Number(session?.nextPageNumber || 1)}`
+                    : `Auto · Trang ${Number(session?.pageNumber || 0)} · ${continuousStatusLabel}`
+                : Number(session?.pageNumber || 0) > 0
+                  ? `Trang ${Number(session.pageNumber)} · ${count} vùng · ${state?.targetLanguage || "VI"}`
+                  : `Chapter ${Number(session?.chapterNumber || 1)} · sẵn sàng trang 1`
               : `${panelMode ? "Khung" : "Screen"} · ${count} vùng · ${state?.targetLanguage || "VI"}`;
     }
 
@@ -358,6 +494,48 @@
         } finally {
           next.disabled = false;
         }
+      }
+    );
+
+
+    auto.addEventListener(
+      "click",
+      async () => {
+        const state =
+          await window
+            .electronAPI
+            .getFullScreenOverlayState();
+
+        const session =
+          state?.session ||
+          {};
+
+        const available =
+          Boolean(
+            session?.continuous?.available ??
+            session?.capabilities?.continuousManga
+          );
+
+        if (!available) {
+          return;
+        }
+
+        await window
+          .electronAPI
+          .setMangaContinuousMode(
+            !Boolean(
+              session?.continuous?.enabled
+            )
+          );
+      }
+    );
+
+    pause.addEventListener(
+      "click",
+      async () => {
+        await window
+          .electronAPI
+          .toggleMangaContinuousPause();
       }
     );
 
