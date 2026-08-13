@@ -9,6 +9,7 @@ import type {
 
 import type {
     AccountEntitlements,
+    AccountIdentity,
     AppPreferences,
     AuthStatus,
     BackendStatus,
@@ -25,6 +26,8 @@ import type {
     ReviewQueue,
     ReviewStats,
     ShortcutSettings,
+    SocialAuthProviderCode,
+    SocialAuthProviderStatus,
     StudyGrammarPoint,
     StudyLevel,
     StudyState,
@@ -598,6 +601,21 @@ function App() {
     });
 
     const [
+        socialProviders,
+        setSocialProviders
+    ] = useState<SocialAuthProviderStatus[]>([]);
+
+    const [
+        accountIdentities,
+        setAccountIdentities
+    ] = useState<AccountIdentity[]>([]);
+
+    const [
+        socialAuthLoadingProvider,
+        setSocialAuthLoadingProvider
+    ] = useState<SocialAuthProviderCode | null>(null);
+
+    const [
         entitlements,
         setEntitlements
     ] = useState<AccountEntitlements>({
@@ -1163,6 +1181,14 @@ function App() {
         void loadAppPreferences();
     }, []);
 
+    useEffect(() => {
+        if (backend.connected) {
+            void loadSocialProviders();
+        } else {
+            setSocialProviders([]);
+        }
+    }, [backend.connected]);
+
     /*
      * Workspace mode cho Global Shortcut.
      * Chỉ tab Study dùng Study mode.
@@ -1389,6 +1415,7 @@ function App() {
             void loadDevices();
             void loadProfiles();
             void refreshEntitlements();
+            void loadAccountIdentities();
         } else {
             setEntitlements({
                 planCode: "FREE",
@@ -1413,11 +1440,15 @@ function App() {
                     contextItems: 5,
                     devices: 1
                 },
+                usage: {
+                    monthlyTranslationsUsed: 0
+                },
                 developmentOverride: false
             });
             setEntitlementMessage("");
 
             setDevices([]);
+            setAccountIdentities([]);
             setProfiles([]);
             setProfileDraft(null);
             setProfileDirty(false);
@@ -1553,6 +1584,132 @@ function App() {
         }
     }
 
+    async function loadSocialProviders() {
+        try {
+            const result =
+                await api
+                    .getSocialAuthProviders?.();
+
+            setSocialProviders(
+                Array.isArray(result)
+                    ? result
+                    : []
+            );
+        } catch (error) {
+            console.error(
+                "SOCIAL PROVIDERS ERROR:",
+                error
+            );
+            setSocialProviders([]);
+        }
+    }
+
+    async function socialLogin(
+        provider: SocialAuthProviderCode
+    ) {
+        if (!backend.connected) {
+            setAuthMessage(
+                "Java backend chưa kết nối."
+            );
+            return;
+        }
+
+        try {
+            setSocialAuthLoadingProvider(
+                provider
+            );
+            setAuthMessage(
+                `Đang mở ${provider === "GOOGLE" ? "Google" : "Facebook"} trong trình duyệt...`
+            );
+
+            const result: AuthStatus =
+                await api.socialLogin(
+                    provider
+                );
+
+            setAuth(result);
+            setPassword("");
+            setAuthMessage(
+                `Đăng nhập bằng ${provider === "GOOGLE" ? "Google" : "Facebook"} thành công.`
+            );
+        } catch (error) {
+            setAuthMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+        } finally {
+            setSocialAuthLoadingProvider(
+                null
+            );
+        }
+    }
+
+    async function loadAccountIdentities() {
+        if (!auth.authenticated) {
+            setAccountIdentities([]);
+            return;
+        }
+
+        try {
+            const result =
+                await api
+                    .getAccountIdentities?.();
+
+            setAccountIdentities(
+                Array.isArray(result)
+                    ? result
+                    : []
+            );
+        } catch (error) {
+            console.error(
+                "ACCOUNT IDENTITIES ERROR:",
+                error
+            );
+        }
+    }
+
+    async function linkAccountIdentity(
+        provider: SocialAuthProviderCode
+    ) {
+        try {
+            setSocialAuthLoadingProvider(
+                provider
+            );
+            setAuthMessage(
+                `Đang liên kết ${provider === "GOOGLE" ? "Google" : "Facebook"}...`
+            );
+
+            const result =
+                await api
+                    .linkAccountIdentity(
+                        provider
+                    );
+
+            setAccountIdentities(
+                Array.isArray(
+                    result?.identities
+                )
+                    ? result.identities
+                    : []
+            );
+
+            setAuthMessage(
+                `Đã liên kết ${provider === "GOOGLE" ? "Google" : "Facebook"}.`
+            );
+        } catch (error) {
+            setAuthMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+        } finally {
+            setSocialAuthLoadingProvider(
+                null
+            );
+        }
+    }
+
     async function submitAuth(
         event: FormEvent
     ) {
@@ -1650,6 +1807,9 @@ function App() {
                     continuousMangaPagesPerDay: 0,
                     contextItems: 5,
                     devices: 1
+                },
+                usage: {
+                    monthlyTranslationsUsed: 0
                 },
                 developmentOverride: false
             });
@@ -4558,6 +4718,15 @@ function App() {
                         isAuthLoading={
                             isAuthLoading
                         }
+                        socialProviders={
+                            socialProviders
+                        }
+                        accountIdentities={
+                            accountIdentities
+                        }
+                        socialAuthLoadingProvider={
+                            socialAuthLoadingProvider
+                        }
                         isCheckingBackend={
                             isCheckingBackend
                         }
@@ -4608,6 +4777,15 @@ function App() {
                         }
                         onSubmitAuth={
                             submitAuth
+                        }
+                        onSocialLogin={
+                            socialLogin
+                        }
+                        onLinkAccountIdentity={
+                            linkAccountIdentity
+                        }
+                        onRefreshAccountIdentities={
+                            loadAccountIdentities
                         }
                         onLogout={
                             logout

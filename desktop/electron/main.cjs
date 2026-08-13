@@ -8,7 +8,8 @@ const {
     Menu,
     nativeImage,
     safeStorage,
-    dialog
+    dialog,
+    shell
 } = require("electron");
 const { spawn } = require("child_process");
 const readline = require("readline");
@@ -111,6 +112,12 @@ const BACKEND_LOGIN_URL =
 
 const BACKEND_REGISTER_URL =
   `${BACKEND_AUTH_BASE_URL}/register`;
+
+const BACKEND_SOCIAL_AUTH_URL =
+  `${BACKEND_AUTH_BASE_URL}/social`;
+
+const BACKEND_IDENTITIES_URL =
+  `${BACKEND_BASE_URL}/api/v1/account/identities`;
 
 const BACKEND_REFRESH_URL =
   `${BACKEND_AUTH_BASE_URL}/refresh`;
@@ -2850,6 +2857,338 @@ async function registerDesktop(
   );
 
   return getDesktopAuthStatus();
+}
+
+
+async function getSocialProvidersDesktop() {
+  let response;
+
+  try {
+    response =
+      await fetchWithTimeout(
+        `${BACKEND_SOCIAL_AUTH_URL}/providers`,
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+          },
+        }
+      );
+  } catch (error) {
+    throw new Error(
+      "Không tải được cấu hình Social Login. " +
+      (
+        error instanceof Error
+          ? error.message
+          : String(error)
+      )
+    );
+  }
+
+  const payload =
+    await parseBackendJson(response);
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.error ||
+      `Backend lỗi HTTP ${response.status}.`
+    );
+  }
+
+  return Array.isArray(payload)
+    ? payload
+    : [];
+}
+
+function normalizeSocialProvider(provider) {
+  const value =
+    String(provider || "")
+      .trim()
+      .toLowerCase();
+
+  if (
+    value !== "google" &&
+    value !== "facebook"
+  ) {
+    throw new Error(
+      "Nhà cung cấp đăng nhập không được hỗ trợ."
+    );
+  }
+
+  return value;
+}
+
+function validateSocialAuthorizationUrl(
+  providerCode,
+  rawUrl
+) {
+  const parsed = new URL(
+    String(rawUrl || "")
+  );
+
+  const allowedHost =
+    providerCode === "google"
+      ? parsed.hostname ===
+        "accounts.google.com"
+      : parsed.hostname ===
+          "www.facebook.com" ||
+        parsed.hostname ===
+          "facebook.com";
+
+  if (
+    parsed.protocol !== "https:" ||
+    !allowedHost
+  ) {
+    throw new Error(
+      "Backend trả về OAuth URL không hợp lệ."
+    );
+  }
+
+  return parsed.toString();
+}
+
+function waitMs(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+let socialBrowserFlowPromise = null;
+
+async function startSocialBrowserFlow(
+  provider,
+  mode = "LOGIN"
+) {
+  if (socialBrowserFlowPromise) {
+    throw new Error(
+      "Một cửa sổ đăng nhập Social đang chờ hoàn tất."
+    );
+  }
+
+  const providerCode =
+    normalizeSocialProvider(provider);
+
+  socialBrowserFlowPromise =
+    (async () => {
+      const isLink =
+        String(mode).toUpperCase() ===
+        "LINK";
+
+      let startPayload;
+
+      if (isLink) {
+        const response =
+          await authorizedBackendFetch(
+            `${BACKEND_IDENTITIES_URL}/${providerCode}/link/start`,
+            {
+              method: "POST",
+              headers: {
+                Accept: "application/json",
+              },
+            }
+          );
+
+        startPayload =
+          await parseBackendJson(response);
+
+        if (!response.ok) {
+          throw new Error(
+            startPayload?.error ||
+            `Backend lỗi HTTP ${response.status}.`
+          );
+        }
+      } else {
+        startPayload =
+          await callPublicAuthApi(
+            `${BACKEND_SOCIAL_AUTH_URL}/${providerCode}/start`,
+            {
+              deviceId:
+                await ensureDeviceId(),
+              deviceName:
+                getDeviceName(),
+            }
+          );
+      }
+
+      if (
+        !startPayload?.success ||
+        !startPayload?.attemptId ||
+        !startPayload?.pollSecret ||
+        !startPayload?.authorizationUrl
+      ) {
+        throw new Error(
+          "Backend không tạo được phiên Social Login."
+        );
+      }
+
+      const authorizationUrl =
+        validateSocialAuthorizationUrl(
+          providerCode,
+          startPayload.authorizationUrl
+        );
+
+      await shell.openExternal(
+        authorizationUrl
+      );
+
+      const expiresAt =
+        new Date(
+          startPayload.expiresAt ||
+          Date.now() + 5 * 60 * 1000
+        ).getTime();
+
+      const pollDelay =
+        Math.max(
+          800,
+          Math.min(
+            2500,
+            Number(
+              startPayload.pollAfterMs ||
+              1200
+            )
+          )
+        );
+
+      while (
+        Date.now() <
+        expiresAt + 3000
+      ) {
+        await waitMs(pollDelay);
+
+        let poll;
+
+        try {
+          poll =
+            await callPublicAuthApi(
+              `${BACKEND_SOCIAL_AUTH_URL}/attempts/${encodeURIComponent(startPayload.attemptId)}/poll`,
+              {
+                pollSecret:
+                  startPayload.pollSecret,
+              }
+            );
+        } catch (error) {
+          if (
+            !error?.statusCode &&
+            Date.now() < expiresAt
+          ) {
+            continue;
+          }
+
+          throw error;
+        }
+
+        if (
+          poll?.status ===
+          "PENDING"
+        ) {
+          continue;
+        }
+
+        if (
+          isLink &&
+          poll?.status ===
+          "LINKED"
+        ) {
+          return {
+            success: true,
+            status: "LINKED",
+            provider:
+              poll.provider,
+            identity:
+              poll.identity || null,
+          };
+        }
+
+        if (
+          !isLink &&
+          poll?.status ===
+          "SUCCESS" &&
+          poll?.auth
+        ) {
+          await applyAuthPayload(
+            poll.auth
+          );
+
+          return {
+            success: true,
+            status: "SUCCESS",
+            provider:
+              poll.provider,
+            auth:
+              await getDesktopAuthStatus(),
+          };
+        }
+
+        throw new Error(
+          poll?.message ||
+          "Social Login không hoàn tất."
+        );
+      }
+
+      throw new Error(
+        "Phiên Social Login đã hết hạn. Vui lòng thử lại."
+      );
+    })();
+
+  try {
+    return await socialBrowserFlowPromise;
+  } finally {
+    socialBrowserFlowPromise = null;
+  }
+}
+
+async function socialLoginDesktop(provider) {
+  const result =
+    await startSocialBrowserFlow(
+      provider,
+      "LOGIN"
+    );
+
+  return result.auth ||
+    getDesktopAuthStatus();
+}
+
+async function getAccountIdentitiesDesktop() {
+  const response =
+    await authorizedBackendFetch(
+      BACKEND_IDENTITIES_URL,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+  const payload =
+    await parseBackendJson(response);
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.error ||
+      `Backend lỗi HTTP ${response.status}.`
+    );
+  }
+
+  return Array.isArray(payload)
+    ? payload
+    : [];
+}
+
+async function linkSocialIdentityDesktop(
+  provider
+) {
+  const result =
+    await startSocialBrowserFlow(
+      provider,
+      "LINK"
+    );
+
+  return {
+    ...result,
+    identities:
+      await getAccountIdentitiesDesktop(),
+  };
 }
 
 async function refreshDesktopSession() {
@@ -11266,6 +11605,38 @@ ipcMain.handle(
   "auth:logout",
   async () => {
     return logoutDesktop();
+  }
+);
+
+ipcMain.handle(
+  "auth:get-social-providers",
+  async () => {
+    return getSocialProvidersDesktop();
+  }
+);
+
+ipcMain.handle(
+  "auth:social-login",
+  async (_event, provider) => {
+    return socialLoginDesktop(
+      provider
+    );
+  }
+);
+
+ipcMain.handle(
+  "account:get-identities",
+  async () => {
+    return getAccountIdentitiesDesktop();
+  }
+);
+
+ipcMain.handle(
+  "account:link-identity",
+  async (_event, provider) => {
+    return linkSocialIdentityDesktop(
+      provider
+    );
   }
 );
 

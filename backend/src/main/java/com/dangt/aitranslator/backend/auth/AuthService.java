@@ -52,7 +52,7 @@ public class AuthService {
             throw new ConflictException("Email này đã được đăng ký.");
         }
 
-        return createSessionResponse(
+        return createSessionForUser(
                 user,
                 request.deviceId(),
                 request.deviceName()
@@ -81,7 +81,7 @@ public class AuthService {
             );
         }
 
-        return createSessionResponse(
+        return createSessionForUser(
                 user,
                 request.deviceId(),
                 request.deviceName()
@@ -117,7 +117,8 @@ public class AuthService {
         return new LogoutResponse(true);
     }
 
-    private AuthResponse createSessionResponse(
+    @Transactional
+    public AuthResponse createSessionForUser(
             UserAccount user,
             String deviceId,
             String deviceName

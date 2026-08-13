@@ -5504,3 +5504,177 @@ button:disabled {
 .pdf-ocr-next-pages {
     white-space: nowrap;
 }
+
+/* ======================================================
+   BATCH 14.4 · SOCIAL LOGIN / CONNECTED IDENTITIES
+   ====================================================== */
+
+.social-auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 18px 0 14px;
+    color: var(--muted, #7a7a7a);
+    font-size: 12px;
+}
+
+.social-auth-divider::before,
+.social-auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: rgba(120, 120, 120, 0.18);
+}
+
+.social-auth-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.social-auth-provider {
+    display: grid;
+    gap: 6px;
+}
+
+.social-auth-provider small,
+.social-auth-note,
+.social-auth-unavailable {
+    color: var(--muted, #777);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.social-auth-button {
+    min-height: 46px;
+    border: 1px solid rgba(120, 120, 120, 0.25);
+    border-radius: 12px;
+    background: var(--surface-elevated, #fff);
+    color: inherit;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+}
+
+.social-auth-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: rgba(90, 90, 90, 0.42);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.social-auth-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.social-auth-logo,
+.identity-provider-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    font-size: 15px;
+    font-weight: 800;
+    background: rgba(127, 127, 127, 0.10);
+}
+
+.social-auth-button.google .social-auth-logo {
+    font-family: Arial, sans-serif;
+}
+
+.social-auth-button.facebook .social-auth-logo,
+.identity-provider-card .identity-provider-mark {
+    font-family: Arial, sans-serif;
+}
+
+.social-auth-note {
+    margin: 10px 2px 0;
+}
+
+.social-auth-unavailable {
+    grid-column: 1 / -1;
+    padding: 12px 14px;
+    border: 1px dashed rgba(120, 120, 120, 0.26);
+    border-radius: 12px;
+}
+
+.identity-management {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px solid rgba(120, 120, 120, 0.16);
+}
+
+.identity-management-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.identity-management-header > div {
+    display: grid;
+    gap: 4px;
+}
+
+.identity-management-header span {
+    color: var(--muted, #777);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.identity-provider-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.identity-provider-card {
+    min-width: 0;
+    border: 1px solid rgba(120, 120, 120, 0.20);
+    border-radius: 14px;
+    padding: 13px;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    background: rgba(127, 127, 127, 0.035);
+}
+
+.identity-provider-card.linked {
+    border-color: rgba(34, 197, 94, 0.28);
+}
+
+.identity-provider-main {
+    min-width: 0;
+    flex: 1;
+    display: grid;
+    gap: 3px;
+}
+
+.identity-provider-main span,
+.identity-provider-main small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--muted, #777);
+    font-size: 12px;
+}
+
+.identity-provider-card.linked .identity-provider-main small {
+    color: #16a34a;
+    font-weight: 700;
+}
+
+@media (max-width: 760px) {
+    .social-auth-grid,
+    .identity-provider-grid {
+        grid-template-columns: 1fr;
+    }
+}

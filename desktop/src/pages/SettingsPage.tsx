@@ -9,11 +9,14 @@ import type {
 
 import type {
     AccountEntitlements,
+    AccountIdentity,
     AppPreferences,
     AuthStatus,
     BackendStatus,
     DeviceSession,
     ShortcutSettings,
+    SocialAuthProviderCode,
+    SocialAuthProviderStatus,
     StudyLevel
 } from "../app/types";
 
@@ -117,6 +120,9 @@ interface SettingsPageProps {
     password: string;
     authMessage: string;
     isAuthLoading: boolean;
+    socialProviders: SocialAuthProviderStatus[];
+    accountIdentities: AccountIdentity[];
+    socialAuthLoadingProvider: SocialAuthProviderCode | null;
     isCheckingBackend: boolean;
     devices: DeviceSession[];
     isLoadingDevices: boolean;
@@ -157,6 +163,15 @@ interface SettingsPageProps {
     onSubmitAuth:
         (event: FormEvent) => void;
 
+    onSocialLogin:
+        (provider: SocialAuthProviderCode) => void;
+
+    onLinkAccountIdentity:
+        (provider: SocialAuthProviderCode) => void;
+
+    onRefreshAccountIdentities:
+        () => void;
+
     onLogout:
         () => void;
 
@@ -190,6 +205,9 @@ export function SettingsPage({
     password,
     authMessage,
     isAuthLoading,
+    socialProviders,
+    accountIdentities,
+    socialAuthLoadingProvider,
     isCheckingBackend,
     devices,
     isLoadingDevices,
@@ -205,6 +223,9 @@ export function SettingsPage({
     onEmailChange,
     onPasswordChange,
     onSubmitAuth,
+    onSocialLogin,
+    onLinkAccountIdentity,
+    onRefreshAccountIdentities,
     onLogout,
     onRestoreSession,
     onRefreshBackend,
@@ -681,6 +702,73 @@ export function SettingsPage({
                             </button>
                         </form>
 
+                        <div className="social-auth-divider">
+                            <span>hoặc đăng nhập bằng</span>
+                        </div>
+
+                        <div className="social-auth-grid">
+                            {socialProviders.map(
+                                (provider) => {
+                                    const loading =
+                                        socialAuthLoadingProvider ===
+                                        provider.provider;
+
+                                    return (
+                                        <div
+                                            className="social-auth-provider"
+                                            key={provider.provider}
+                                        >
+                                            <button
+                                                type="button"
+                                                className={`social-auth-button ${provider.provider.toLowerCase()}`}
+                                                disabled={
+                                                    !backend.connected ||
+                                                    !provider.available ||
+                                                    isAuthLoading ||
+                                                    socialAuthLoadingProvider !== null
+                                                }
+                                                onClick={() => {
+                                                    onSocialLogin(
+                                                        provider.provider
+                                                    );
+                                                }}
+                                            >
+                                                <span className="social-auth-logo">
+                                                    {provider.provider === "GOOGLE"
+                                                        ? "G"
+                                                        : "f"}
+                                                </span>
+
+                                                <span>
+                                                    {loading
+                                                        ? `Đang chờ ${provider.displayName}...`
+                                                        : `Tiếp tục với ${provider.displayName}`}
+                                                </span>
+                                            </button>
+
+                                            {!provider.available && (
+                                                <small>
+                                                    {provider.reason ||
+                                                        "Chưa cấu hình trên backend."}
+                                                </small>
+                                            )}
+                                        </div>
+                                    );
+                                }
+                            )}
+
+                            {!socialProviders.length && (
+                                <div className="social-auth-unavailable">
+                                    Social Login chưa được cấu hình hoặc backend chưa sẵn sàng.
+                                </div>
+                            )}
+                        </div>
+
+                        <p className="social-auth-note">
+                            Google/Facebook mở bằng trình duyệt hệ thống.
+                            Desktop không lưu mật khẩu hoặc access token của nhà cung cấp.
+                        </p>
+
                         {auth.sessionStored && (
                             <button
                                 className="text-action"
@@ -691,29 +779,122 @@ export function SettingsPage({
                         )}
                     </div>
                 ) : (
-                    <div className="account-summary">
-                        <div className="large-avatar">
-                            {auth.user?.email
-                                ?.slice(0, 1)
-                                .toUpperCase()}
+                    <>
+                        <div className="account-summary">
+                            <div className="large-avatar">
+                                {auth.user?.email
+                                    ?.slice(0, 1)
+                                    .toUpperCase()}
+                            </div>
+
+                            <div>
+                                <strong>
+                                    {auth.user?.email}
+                                </strong>
+
+                                <span>
+                                    Role:
+                                    {" "}
+                                    {auth.user?.role}
+                                </span>
+                            </div>
+
+                            <div className="verified-badge">
+                                ✓ Đã xác thực
+                            </div>
                         </div>
 
-                        <div>
-                            <strong>
-                                {auth.user?.email}
-                            </strong>
+                        <div className="identity-management">
+                            <div className="identity-management-header">
+                                <div>
+                                    <strong>Tài khoản liên kết</strong>
+                                    <span>
+                                        Dùng cùng một AI Translator account khi đăng nhập bằng provider khác.
+                                    </span>
+                                </div>
 
-                            <span>
-                                Role:
-                                {" "}
-                                {auth.user?.role}
-                            </span>
-                        </div>
+                                <button
+                                    className="text-action"
+                                    type="button"
+                                    onClick={onRefreshAccountIdentities}
+                                >
+                                    Làm mới
+                                </button>
+                            </div>
 
-                        <div className="verified-badge">
-                            ✓ Đã xác thực
+                            <div className="identity-provider-grid">
+                                {socialProviders.map(
+                                    (provider) => {
+                                        const identity =
+                                            accountIdentities.find(
+                                                (item) =>
+                                                    item.provider ===
+                                                    provider.provider
+                                            );
+                                        const loading =
+                                            socialAuthLoadingProvider ===
+                                            provider.provider;
+
+                                        return (
+                                            <article
+                                                className={`identity-provider-card ${identity ? "linked" : ""}`}
+                                                key={provider.provider}
+                                            >
+                                                <div className="identity-provider-mark">
+                                                    {provider.provider === "GOOGLE"
+                                                        ? "G"
+                                                        : "f"}
+                                                </div>
+
+                                                <div className="identity-provider-main">
+                                                    <strong>
+                                                        {provider.displayName}
+                                                    </strong>
+
+                                                    {identity ? (
+                                                        <>
+                                                            <span>
+                                                                {identity.email ||
+                                                                    identity.displayName ||
+                                                                    "Đã liên kết"}
+                                                            </span>
+                                                            <small>
+                                                                ✓ Connected
+                                                            </small>
+                                                        </>
+                                                    ) : (
+                                                        <span>
+                                                            Chưa liên kết
+                                                        </span>
+                                                    )}
+                                                </div>
+
+                                                {!identity && (
+                                                    <button
+                                                        className="secondary-action compact"
+                                                        type="button"
+                                                        disabled={
+                                                            !provider.available ||
+                                                            socialAuthLoadingProvider !== null
+                                                        }
+                                                        onClick={() => {
+                                                            onLinkAccountIdentity(
+                                                                provider.provider
+                                                            );
+                                                        }}
+                                                    >
+                                                        {loading
+                                                            ? "Đang chờ..."
+                                                            : "Liên kết"}
+                                                    </button>
+                                                )}
+                                            </article>
+                                        );
+                                    }
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    </>
                 )}
 
                 {authMessage && (

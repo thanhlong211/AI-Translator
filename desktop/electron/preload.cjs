@@ -393,6 +393,19 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  getSocialAuthProviders: () => {
+    return ipcRenderer.invoke(
+      "auth:get-social-providers"
+    );
+  },
+
+  socialLogin: (provider) => {
+    return ipcRenderer.invoke(
+      "auth:social-login",
+      provider
+    );
+  },
+
   refreshSession: () => {
     return ipcRenderer.invoke(
       "auth:refresh"
@@ -415,6 +428,19 @@ contextBridge.exposeInMainWorld("electronAPI", {
     return ipcRenderer.invoke(
       "account:activate-license",
       licenseKey
+    );
+  },
+
+  getAccountIdentities: () => {
+    return ipcRenderer.invoke(
+      "account:get-identities"
+    );
+  },
+
+  linkAccountIdentity: (provider) => {
+    return ipcRenderer.invoke(
+      "account:link-identity",
+      provider
     );
   },
 

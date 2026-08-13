@@ -32,6 +32,27 @@ export interface AuthStatus {
     deviceName?: string;
 }
 
+export type SocialAuthProviderCode =
+    | "GOOGLE"
+    | "FACEBOOK";
+
+export interface SocialAuthProviderStatus {
+    provider: SocialAuthProviderCode;
+    displayName: string;
+    available: boolean;
+    reason?: string | null;
+}
+
+export interface AccountIdentity {
+    id: number;
+    provider: SocialAuthProviderCode;
+    email?: string | null;
+    displayName?: string | null;
+    avatarUrl?: string | null;
+    createdAt: string;
+    lastLoginAt?: string | null;
+}
+
 export interface DeviceSession {
     sessionId: number;
     deviceId: string;
