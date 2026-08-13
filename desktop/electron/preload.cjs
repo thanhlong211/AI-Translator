@@ -424,6 +424,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  getPricingCatalog: (currency) => {
+    return ipcRenderer.invoke(
+      "catalog:get-plans",
+      currency
+    );
+  },
+
   activateLicense: (licenseKey) => {
     return ipcRenderer.invoke(
       "account:activate-license",

@@ -131,6 +131,9 @@ const BACKEND_ME_URL =
 const BACKEND_ENTITLEMENTS_URL =
   `${BACKEND_BASE_URL}/api/v1/account/entitlements`;
 
+const BACKEND_PUBLIC_CATALOG_PLANS_URL =
+  `${BACKEND_BASE_URL}/api/v1/catalog/plans`;
+
 const BACKEND_LICENSE_ACTIVATE_URL =
   `${BACKEND_BASE_URL}/api/v1/account/license/activate`;
 
@@ -632,6 +635,20 @@ function requireDesktopFeatureCapability(
     paidFeatureRequiredMessage(
       featureKey
     )
+  );
+}
+
+async function requireFreshDesktopFeatureCapability(
+  featureKey,
+  { notify = true } = {}
+) {
+  await refreshAccountEntitlements({
+    silent: true,
+  });
+
+  return requireDesktopFeatureCapability(
+    featureKey,
+    { notify }
   );
 }
 
@@ -3465,6 +3482,59 @@ async function refreshAccountEntitlements({
   }
 }
 
+async function getPublicPricingCatalog(
+  currency
+) {
+  const cleanCurrency =
+    String(currency || "")
+      .trim()
+      .toUpperCase();
+
+  const url = new URL(
+    BACKEND_PUBLIC_CATALOG_PLANS_URL
+  );
+
+  if (cleanCurrency) {
+    url.searchParams.set(
+      "currency",
+      cleanCurrency
+    );
+  }
+
+  const response =
+    await fetchWithTimeout(
+      url.toString(),
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      },
+      BACKEND_TIMEOUT_MS
+    );
+
+  const payload =
+    await parseBackendJson(
+      response
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.error ||
+      `Không tải được bảng giá (HTTP ${response.status}).`
+    );
+  }
+
+  if (!Array.isArray(payload)) {
+    throw new Error(
+      "Backend trả về pricing catalog không hợp lệ."
+    );
+  }
+
+  return payload;
+}
+
+
 async function activateDesktopLicense(
   licenseKey
 ) {
@@ -3495,6 +3565,8 @@ async function activateDesktopLicense(
           JSON.stringify({
             licenseKey:
               cleanKey,
+            deviceId:
+              await ensureDeviceId(),
           }),
       }
     );
@@ -5283,11 +5355,11 @@ async function runShortcutScan(
     ensureWorkspaceScanAllowed();
 
     if (mode === "panel") {
-      requireDesktopFeatureCapability(
+      await requireFreshDesktopFeatureCapability(
         "mangaPanel"
       );
     } else if (mode === "study") {
-      requireDesktopFeatureCapability(
+      await requireFreshDesktopFeatureCapability(
         "studyMode"
       );
     }
@@ -5992,6 +6064,12 @@ function createWindow() {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
+  });
+
+  mainWindow.on("focus", () => {
+    void refreshAccountEntitlements({
+      silent: true,
+    });
   });
 
   mainWindow.on("close", (event) => {
@@ -7113,6 +7191,9 @@ async function readNovelDocumentPath(
   requestedFormat = null
 ) {
   await ensureAuthenticated();
+  await refreshAccountEntitlements({
+    silent: true,
+  });
 
   const payload = await readDocumentPath(
     filePathValue,
@@ -7130,6 +7211,9 @@ async function openNovelDocumentFiles(
   requestedFormat
 ) {
   await ensureAuthenticated();
+  await refreshAccountEntitlements({
+    silent: true,
+  });
 
   const payload = await openDocumentFiles({
     dialog,
@@ -7164,7 +7248,7 @@ async function ocrNovelPdfPages(
   countValue = 3
 ) {
   await ensureAuthenticated();
-  requireDesktopFeatureCapability("pdfOcrReader");
+  await requireFreshDesktopFeatureCapability("pdfOcrReader");
 
   const documentPayload = await readDocumentPath(
     filePathValue,
@@ -7295,7 +7379,7 @@ async function translateNovelBlocks(
       payload?.format || "TXT"
     );
 
-  requireDesktopFeatureCapability(
+  await requireFreshDesktopFeatureCapability(
     route.capability
   );
 
@@ -9258,7 +9342,7 @@ async function processMangaPanelTranslation({
   targetWindow = null,
   startNewSession = false,
 } = {}) {
-  requireDesktopFeatureCapability(
+  await requireFreshDesktopFeatureCapability(
     startNewSession
       ? "mangaPanel"
       : "mangaSession",
@@ -9637,7 +9721,7 @@ async function runMangaSessionNextPage(
 
   await ensureAuthenticated();
   ensureWorkspaceScanAllowed();
-  requireDesktopFeatureCapability(
+  await requireFreshDesktopFeatureCapability(
     "mangaSession"
   );
 
@@ -10465,7 +10549,7 @@ ipcMain.handle(
   async (_event, options) => {
     await ensureAuthenticated();
     ensureWorkspaceScanAllowed();
-    requireDesktopFeatureCapability(
+    await requireFreshDesktopFeatureCapability(
       "mangaPanel"
     );
 
@@ -10503,8 +10587,17 @@ ipcMain.handle(
 ipcMain.handle(
   "translation:manga-continuous-toggle",
   async (_event, enabled) => {
+    const nextEnabled = Boolean(enabled);
+
+    if (nextEnabled) {
+      await ensureAuthenticated();
+      await requireFreshDesktopFeatureCapability(
+        "continuousManga"
+      );
+    }
+
     return setMangaContinuousEnabled(
-      Boolean(enabled)
+      nextEnabled
     );
   }
 );
@@ -10728,7 +10821,7 @@ ipcMain.handle(
   async (_event, options) => {
     await ensureAuthenticated();
     ensureWorkspaceScanAllowed();
-    requireDesktopFeatureCapability(
+    await requireFreshDesktopFeatureCapability(
       "studyMode"
     );
 
@@ -11614,6 +11707,15 @@ ipcMain.handle(
   "account:get-entitlements",
   async () => {
     return refreshAccountEntitlements();
+  }
+);
+
+ipcMain.handle(
+  "catalog:get-plans",
+  async (_event, currency) => {
+    return getPublicPricingCatalog(
+      currency
+    );
   }
 );
 
