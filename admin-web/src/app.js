@@ -11,8 +11,19 @@ const state = {
   usersTotal: 0,
   plans: [],
   planSchema: null,
+  prices: [],
+  pricePlanFilter: "",
+  licenses: [],
+  licensePlanFilter: "",
+  licenseStatusFilter: "",
+  transactions: [],
+  transactionStatusFilter: "",
+  transactionPlanFilter: "",
   selectedUserId: null,
-  selectedPlanCode: null
+  selectedPlanCode: null,
+  selectedPriceId: null,
+  selectedLicenseId: null,
+  selectedTransactionId: null
 };
 
 const escapeHtml = (value) => String(value ?? "")
@@ -97,12 +108,15 @@ async function loadView(view) {
   $$(".nav-item[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   $$(".view").forEach((section) => section.classList.add("hidden"));
   $(`#${view}View`).classList.remove("hidden");
-  const labels = { dashboard: "Tổng quan", users: "Người dùng", plans: "Plans & Features", audit: "Audit log" };
+  const labels = { dashboard: "Tổng quan", users: "Người dùng", plans: "Plans & Features", pricing: "Pricing", licenses: "Licenses", transactions: "Transactions", audit: "Audit log" };
   $("#pageTitle").textContent = labels[view] || "Admin";
   try {
     if (view === "dashboard") await loadDashboard();
     if (view === "users") await loadUsers();
     if (view === "plans") await loadPlans();
+    if (view === "pricing") await loadPricing();
+    if (view === "licenses") await loadLicenses();
+    if (view === "transactions") await loadTransactions();
     if (view === "audit") await loadAudit();
   } catch (error) {
     toast(error.message, "error");
@@ -136,7 +150,7 @@ async function loadDashboard() {
     <article class="card roadmap-card">
       <span class="eyebrow">COMMERCIAL FOUNDATION</span>
       <h3>Admin core đã hoạt động</h3>
-      <div class="roadmap-grid"><span class="done">✓ Users & access</span><span class="working">→ 14.6 Plans & features</span><span>14.7 Pricing</span><span>14.8 AI costs</span><span>14.9 Security & operations</span></div>
+      <div class="roadmap-grid"><span class="done">✓ Users & access</span><span class="done">✓ 14.6 Plans & features</span><span class="done">✓ 14.7 Pricing / subscription / license</span><span class="working">→ 14.7.5 Transactions</span><span>14.8 AI costs</span><span>14.9 Security & operations</span></div>
     </article>`;
   $("[data-open-audit]")?.addEventListener("click", () => void loadView("audit"));
 }
@@ -168,9 +182,654 @@ const LIMIT_LABELS = {
 
 const humanKey = (key, labels) => labels[key] || key.replace(/([a-z])([A-Z])/g, "$1 $2");
 
+const BILLING_LABELS = {
+  MONTHLY: "Hàng tháng",
+  YEARLY: "Hàng năm",
+  LIFETIME: "Trọn đời"
+};
+
+const fmtMoneyMinor = (amount, currency) => {
+  const value = Number(amount ?? 0);
+  const code = String(currency || "VND").toUpperCase();
+  try {
+    const formatter = new Intl.NumberFormat("vi-VN", { style: "currency", currency: code });
+    const fractionDigits = formatter.resolvedOptions().maximumFractionDigits;
+    return formatter.format(value / (10 ** fractionDigits));
+  } catch {
+    return `${fmtNumber(value)} ${code}`;
+  }
+};
+
+const priceAvailability = (price) => {
+  if (price.currentlyAvailable) return { label: "ON SALE", kind: "ok" };
+  if (!price.active) return { label: "INACTIVE", kind: "warn" };
+  if (!price.sellable) return { label: "HIDDEN", kind: "warn" };
+  const now = Date.now();
+  const starts = price.startsAt ? new Date(price.startsAt).getTime() : null;
+  const ends = price.endsAt ? new Date(price.endsAt).getTime() : null;
+  if (starts != null && starts > now) return { label: "SCHEDULED", kind: "info" };
+  if (ends != null && ends <= now) return { label: "EXPIRED", kind: "warn" };
+  return { label: "NOT LIVE", kind: "warn" };
+};
+
+const toLocalDateTimeValue = (value) => {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+};
+
+const localDateTimeToIso = (value) => {
+  const clean = String(value || "").trim();
+  if (!clean) return null;
+  const date = new Date(clean);
+  if (Number.isNaN(date.getTime())) throw new Error("Ngày/giờ không hợp lệ.");
+  return date.toISOString();
+};
+
+const subscriptionStatusKind = (status) => {
+  const value = String(status || "").toUpperCase();
+  if (["ACTIVE", "TRIAL", "GRANDFATHERED"].includes(value)) return "ok";
+  if (value === "SCHEDULED") return "info";
+  return "warn";
+};
+
+const subscriptionRows = (items = []) => {
+  if (!items.length) return '<div class="empty">User chưa có subscription.</div>';
+  return `<div class="subscription-list">${items.map((sub) => {
+    const editable = sub.source === "ADMIN" && sub.status !== "CANCELED";
+    const canExtend = editable && !!sub.periodEnd;
+    const price = sub.priceId == null
+      ? "Không gắn price"
+      : `#${sub.priceId} · ${escapeHtml(BILLING_LABELS[sub.priceBillingPeriod] || sub.priceBillingPeriod || "PRICE")}${sub.priceCurrency ? ` · ${escapeHtml(fmtMoneyMinor(sub.priceAmountMinor, sub.priceCurrency))}` : ""}`;
+    return `<article class="subscription-card" data-subscription-id="${sub.id}">
+      <div class="subscription-head"><div><span class="plan-pill">${escapeHtml(sub.planCode)}</span><strong>Subscription #${sub.id}</strong></div><span class="status-badge ${subscriptionStatusKind(sub.effectiveStatus)}">${escapeHtml(sub.effectiveStatus)}</span></div>
+      <div class="subscription-meta">
+        <span>Source <strong>${escapeHtml(sub.source)}</strong></span>
+        <span>Status DB <strong>${escapeHtml(sub.status)}</strong></span>
+        <span>Price <strong>${price}</strong></span>
+        <span>Quota snapshot <strong>${fmtNumber(sub.monthlyTranslationLimit)}</strong></span>
+        <span>Bắt đầu <strong>${fmtDate(sub.periodStart)}</strong></span>
+        <span>Kết thúc <strong>${fmtDate(sub.periodEnd)}</strong></span>
+      </div>
+      ${sub.cancelReason ? `<div class="notice warn">Đã hủy: ${escapeHtml(sub.cancelReason)} · ${fmtDate(sub.canceledAt)}</div>` : ""}
+      ${editable ? `<div class="subscription-actions">
+        ${canExtend ? `<input type="datetime-local" data-subscription-end="${sub.id}" value="${escapeHtml(toLocalDateTimeValue(sub.periodEnd))}" />
+        <button class="ghost" data-extend-subscription="${sub.id}">Gia hạn</button>` : '<span class="muted">Không giới hạn thời gian</span>'}
+        <button class="danger-button" data-cancel-subscription="${sub.id}">Hủy subscription</button>
+      </div>` : `<small class="muted">Source ${escapeHtml(sub.source)} chỉ xem tại đây; lifecycle được quản lý ở module tương ứng.</small>`}
+    </article>`;
+  }).join("")}</div>`;
+};
+
+async function ensurePlans() {
+  if (!state.plans.length) state.plans = await api("/api/v1/admin/plans");
+  return state.plans;
+}
+
+async function loadPricing() {
+  await ensurePlans();
+  const filter = state.pricePlanFilter || "";
+  const query = filter ? `?planCode=${encodeURIComponent(filter)}` : "";
+  state.prices = await api(`/api/v1/admin/prices${query}`);
+
+  const activePlans = state.plans.filter((plan) => plan.active);
+  const current = state.prices.filter((price) => price.currentlyAvailable).length;
+  const scheduled = state.prices.filter((price) => price.active && price.sellable && price.startsAt && new Date(price.startsAt) > new Date()).length;
+  const notLive = state.prices.filter((price) => !price.currentlyAvailable && priceAvailability(price).label !== "SCHEDULED").length;
+
+  $("#pricingPlanFilter").innerHTML = `<option value="">Tất cả plan</option>${state.plans.map((plan) => `<option value="${escapeHtml(plan.code)}" ${plan.code === filter ? "selected" : ""}>${escapeHtml(plan.displayName)} · ${escapeHtml(plan.code)}</option>`).join("")}`;
+  $("#pricingMetrics").innerHTML = `
+    ${metric("Price records", state.prices.length, filter || "all plans")}
+    ${metric("Đang bán", current, "currently available")}
+    ${metric("Đã lên lịch", scheduled, "future start")}
+    ${metric("Không live", notLive, "inactive / hidden / expired")}`;
+
+  $("#pricesTable").innerHTML = state.prices.length ? `
+    <table><thead><tr><th>Plan</th><th>Chu kỳ</th><th>Giá bán</th><th>Niêm yết</th><th>Hiệu lực</th><th>Trạng thái</th></tr></thead>
+    <tbody>${state.prices.map((price) => `
+      <tr class="clickable" data-price-id="${price.id}">
+        <td><strong>${escapeHtml(price.planDisplayName)}</strong><small>${escapeHtml(price.planCode)} · #${price.id}</small></td>
+        <td><span class="period-pill">${escapeHtml(BILLING_LABELS[price.billingPeriod] || price.billingPeriod)}</span><small>${escapeHtml(price.currency)}</small></td>
+        <td><strong class="money-value">${escapeHtml(fmtMoneyMinor(price.amountMinor, price.currency))}</strong><small>${fmtNumber(price.amountMinor)} minor units</small></td>
+        <td>${price.compareAtAmountMinor == null ? '<span class="muted">—</span>' : `<span class="compare-price">${escapeHtml(fmtMoneyMinor(price.compareAtAmountMinor, price.currency))}</span>`}</td>
+        <td><span>${price.startsAt ? fmtDate(price.startsAt) : "Ngay lập tức"}</span><small>→ ${price.endsAt ? fmtDate(price.endsAt) : "Không giới hạn"}</small></td>
+        <td>${(() => { const status = priceAvailability(price); return `<span class="status-badge ${status.kind}">${status.label}</span>`; })()}</td>
+      </tr>`).join("")}</tbody></table>`
+    : '<div class="empty large">Chưa có cấu hình giá cho bộ lọc này.</div>';
+
+  $$('[data-price-id]').forEach((row) => row.addEventListener("click", () => void openPrice(Number(row.dataset.priceId))));
+  $("#createPriceButton").disabled = activePlans.length === 0;
+}
+
+async function openPrice(priceId) {
+  state.selectedUserId = null;
+  state.selectedPlanCode = null;
+  state.selectedPriceId = priceId;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải cấu hình giá...</div>';
+  try {
+    const [price] = await Promise.all([
+      api(`/api/v1/admin/prices/${priceId}`),
+      ensurePlans()
+    ]);
+    renderPriceDrawer(price, false);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function openCreatePrice() {
+  state.selectedUserId = null;
+  state.selectedPlanCode = null;
+  state.selectedPriceId = null;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerBody").innerHTML = '<div class="loading">Đang chuẩn bị cấu hình giá...</div>';
+  try {
+    await ensurePlans();
+    const preferred = state.pricePlanFilter && state.plans.some((plan) => plan.code === state.pricePlanFilter && plan.active)
+      ? state.pricePlanFilter
+      : state.plans.find((plan) => plan.active)?.code || "";
+    renderPriceDrawer({
+      id: null, planCode: preferred, billingPeriod: "MONTHLY", currency: "VND",
+      amountMinor: 0, compareAtAmountMinor: null, active: true, sellable: false,
+      startsAt: null, endsAt: null, currentlyAvailable: false
+    }, true);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function renderPriceDrawer(price, isCreate) {
+  $("#drawerTitle").textContent = isCreate ? "Tạo cấu hình giá" : `${price.planCode} · ${price.billingPeriod} · #${price.id}`;
+  const planOptions = state.plans.map((plan) => `
+    <option value="${escapeHtml(plan.code)}" ${plan.code === price.planCode ? "selected" : ""} ${!plan.active && plan.code !== price.planCode ? "disabled" : ""}>
+      ${escapeHtml(plan.displayName)} · ${escapeHtml(plan.code)}${plan.active ? "" : " (disabled)"}
+    </option>`).join("");
+
+  $("#drawerBody").innerHTML = `
+    <section class="drawer-section plan-section first">
+      <div class="section-heading"><div><span class="eyebrow">PRICE DEFINITION</span><h3>${isCreate ? "Giá mới" : `Price #${price.id}`}</h3></div>${(() => { const status = priceAvailability(price); return `<span class="status-badge ${status.kind}">${status.label}</span>`; })()}</div>
+      <div class="form-grid">
+        <label><span>Plan</span><select id="pricePlanCode">${planOptions}</select></label>
+        <label><span>Chu kỳ</span><select id="priceBillingPeriod">
+          ${["MONTHLY", "YEARLY", "LIFETIME"].map((period) => `<option value="${period}" ${period === price.billingPeriod ? "selected" : ""}>${escapeHtml(BILLING_LABELS[period])} · ${period}</option>`).join("")}
+        </select></label>
+        <label><span>Currency</span><input id="priceCurrency" maxlength="3" value="${escapeHtml(price.currency || "VND")}" placeholder="VND" /></label>
+        <label><span>Giá bán (minor unit)</span><input id="priceAmountMinor" type="number" min="0" step="1" value="${Number(price.amountMinor || 0)}" /></label>
+        <label><span>Giá niêm yết (tùy chọn)</span><input id="priceCompareAt" type="number" min="0" step="1" value="${price.compareAtAmountMinor == null ? "" : Number(price.compareAtAmountMinor)}" placeholder="Để trống nếu không giảm giá" /></label>
+        <div class="price-preview"><span>Xem trước</span><strong id="pricePreview">${escapeHtml(fmtMoneyMinor(price.amountMinor, price.currency))}</strong><small id="priceComparePreview">${price.compareAtAmountMinor == null ? "Không có giá niêm yết" : `Niêm yết ${escapeHtml(fmtMoneyMinor(price.compareAtAmountMinor, price.currency))}`}</small></div>
+      </div>
+      <div class="notice info"><code>amount_minor</code> lưu số nguyên nhỏ nhất của currency. VND/JPY nhập trực tiếp số tiền; USD/EUR nhập cent, ví dụ 19.99 USD = 1999.</div>
+    </section>
+    <section class="drawer-section plan-section">
+      <div class="section-heading"><div><span class="eyebrow">SALE WINDOW</span><h3>Trạng thái & thời gian</h3></div><small class="muted">Backend chặn price đang bán bị overlap</small></div>
+      <div class="form-grid">
+        <label><span>Bắt đầu</span><input id="priceStartsAt" type="datetime-local" value="${escapeHtml(toLocalDateTimeValue(price.startsAt))}" /></label>
+        <label><span>Kết thúc</span><input id="priceEndsAt" type="datetime-local" value="${escapeHtml(toLocalDateTimeValue(price.endsAt))}" /></label>
+        <label class="toggle-field"><span>Active</span><span class="toggle-line"><input id="priceActive" type="checkbox" ${price.active ? "checked" : ""} /> Active</span></label>
+        <label class="toggle-field"><span>Sellable</span><span class="toggle-line"><input id="priceSellable" type="checkbox" ${price.sellable ? "checked" : ""} /> Cho phép bán</span></label>
+      </div>
+      <div id="priceWindowHint" class="notice">${price.currentlyAvailable ? "Giá này hiện đang được public bán." : "Giá này hiện chưa được bán."}</div>
+    </section>
+    <section class="drawer-section plan-section">
+      <label><span>Lý do ${isCreate ? "tạo" : "thay đổi"}</span><textarea id="priceReason" rows="2" maxlength="500" placeholder="Bắt buộc để ghi audit..."></textarea></label>
+      <div class="action-row"><button id="savePrice" class="primary">${isCreate ? "Tạo giá" : "Lưu thay đổi"}</button></div>
+      ${!isCreate ? `<small class="muted">Tạo: ${fmtDate(price.createdAt)} · cập nhật: ${fmtDate(price.updatedAt)}</small>` : ""}
+    </section>`;
+
+  const refreshPreview = () => {
+    const currency = $("#priceCurrency").value.trim().toUpperCase() || "VND";
+    const amount = Number($("#priceAmountMinor").value || 0);
+    const compareRaw = $("#priceCompareAt").value.trim();
+    $("#pricePreview").textContent = fmtMoneyMinor(amount, currency);
+    $("#priceComparePreview").textContent = compareRaw ? `Niêm yết ${fmtMoneyMinor(Number(compareRaw), currency)}` : "Không có giá niêm yết";
+    const active = $("#priceActive").checked;
+    const sellable = $("#priceSellable").checked;
+    $("#priceWindowHint").textContent = sellable && active
+      ? "Giá được phép bán trong khoảng thời gian cấu hình; backend sẽ kiểm tra overlap khi lưu."
+      : sellable && !active
+        ? "Không hợp lệ: price sellable phải active."
+        : "Price được lưu nhưng không xuất hiện trong catalog bán hàng.";
+    $("#priceWindowHint").className = `notice ${sellable && !active ? "warn" : "info"}`;
+  };
+  ["#priceCurrency", "#priceAmountMinor", "#priceCompareAt", "#priceActive", "#priceSellable"].forEach((selector) => {
+    $(selector).addEventListener("input", refreshPreview);
+    $(selector).addEventListener("change", refreshPreview);
+  });
+
+  $("#savePrice").addEventListener("click", async () => {
+    const planCode = $("#pricePlanCode").value;
+    const billingPeriod = $("#priceBillingPeriod").value;
+    const currency = $("#priceCurrency").value.trim().toUpperCase();
+    const amountMinor = Number($("#priceAmountMinor").value);
+    const compareRaw = $("#priceCompareAt").value.trim();
+    const compareAtAmountMinor = compareRaw === "" ? null : Number(compareRaw);
+    const active = $("#priceActive").checked;
+    const sellable = $("#priceSellable").checked;
+    const reason = $("#priceReason").value.trim();
+
+    if (!planCode || !currency || !reason) {
+      toast("Plan, currency và lý do là bắt buộc.", "error");
+      return;
+    }
+    if (!/^[A-Z]{3}$/.test(currency)) {
+      toast("Currency phải là mã ISO 3 ký tự, ví dụ VND hoặc USD.", "error");
+      return;
+    }
+    if (!Number.isSafeInteger(amountMinor) || amountMinor < 0) {
+      toast("Giá bán phải là số nguyên không âm.", "error");
+      return;
+    }
+    if (compareAtAmountMinor != null && (!Number.isSafeInteger(compareAtAmountMinor) || compareAtAmountMinor < amountMinor)) {
+      toast("Giá niêm yết phải là số nguyên và lớn hơn hoặc bằng giá bán.", "error");
+      return;
+    }
+    if (sellable && !active) {
+      toast("Price đang bán phải ở trạng thái Active.", "error");
+      return;
+    }
+
+    let startsAt;
+    let endsAt;
+    try {
+      startsAt = localDateTimeToIso($("#priceStartsAt").value);
+      endsAt = localDateTimeToIso($("#priceEndsAt").value);
+    } catch (error) {
+      toast(error.message, "error");
+      return;
+    }
+    if (startsAt && endsAt && new Date(startsAt) >= new Date(endsAt)) {
+      toast("Ngày kết thúc phải sau ngày bắt đầu.", "error");
+      return;
+    }
+
+    const body = { planCode, billingPeriod, currency, amountMinor, compareAtAmountMinor, active, sellable, startsAt, endsAt, reason };
+    try {
+      const saved = await api(isCreate ? "/api/v1/admin/prices" : `/api/v1/admin/prices/${price.id}`, {
+        method: isCreate ? "POST" : "PUT",
+        body: JSON.stringify(body)
+      });
+      toast(isCreate ? `Đã tạo price #${saved.id}.` : `Đã cập nhật price #${saved.id}.`, "success");
+      closeDrawer();
+      await loadPricing();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+}
+
+
+const LICENSE_DURATION_LABELS = {
+  MONTHLY: "1 tháng",
+  YEARLY: "1 năm",
+  LIFETIME: "Lifetime",
+  LEGACY_EXPIRY: "Legacy expiry"
+};
+
+const licenseAvailability = (license) => {
+  if (license.status !== "AVAILABLE") return { label: "DISABLED", kind: "warn" };
+  const now = Date.now();
+  const starts = license.startsAt ? new Date(license.startsAt).getTime() : null;
+  const expires = license.expiresAt ? new Date(license.expiresAt).getTime() : null;
+  if (starts != null && starts > now) return { label: "SCHEDULED", kind: "info" };
+  if (expires != null && expires <= now) return { label: "EXPIRED", kind: "warn" };
+  if (Number(license.activationCount || 0) >= Number(license.maxActivations || 0)) return { label: "FULL", kind: "warn" };
+  return { label: "AVAILABLE", kind: "ok" };
+};
+
+async function loadLicenses() {
+  await ensurePlans();
+  const params = new URLSearchParams();
+  if (state.licensePlanFilter) params.set("planCode", state.licensePlanFilter);
+  if (state.licenseStatusFilter) params.set("status", state.licenseStatusFilter);
+  const query = params.toString() ? `?${params.toString()}` : "";
+  state.licenses = await api(`/api/v1/admin/licenses${query}`);
+
+  $("#licensePlanFilter").innerHTML = `<option value="">Tất cả plan</option>${state.plans.map((plan) => `<option value="${escapeHtml(plan.code)}" ${plan.code === state.licensePlanFilter ? "selected" : ""}>${escapeHtml(plan.displayName)} · ${escapeHtml(plan.code)}</option>`).join("")}`;
+  $("#licenseStatusFilter").value = state.licenseStatusFilter;
+
+  const activeCount = state.licenses.filter((license) => licenseAvailability(license).label === "AVAILABLE").length;
+  const totalCapacity = state.licenses.reduce((sum, license) => sum + Number(license.maxActivations || 0), 0);
+  const used = state.licenses.reduce((sum, license) => sum + Number(license.activationCount || 0), 0);
+  const disabled = state.licenses.filter((license) => license.status === "DISABLED").length;
+  $("#licenseMetrics").innerHTML = `
+    ${metric("License records", state.licenses.length, state.licensePlanFilter || "all plans")}
+    ${metric("Có thể kích hoạt", activeCount, "available now")}
+    ${metric("Activations", used, `capacity ${fmtNumber(totalCapacity)}`)}
+    ${metric("Disabled", disabled, "future activation blocked")}`;
+
+  $("#licensesTable").innerHTML = state.licenses.length ? `
+    <table><thead><tr><th>License</th><th>Plan</th><th>Thời hạn</th><th>Activation</th><th>Redeem window</th><th>Trạng thái</th></tr></thead>
+    <tbody>${state.licenses.map((license) => {
+      const status = licenseAvailability(license);
+      return `<tr class="clickable" data-license-id="${license.id}">
+        <td><strong>License #${license.id}</strong><small>${escapeHtml(license.keyHint || "legacy key")}</small></td>
+        <td><span class="plan-pill">${escapeHtml(license.planCode)}</span></td>
+        <td><span class="period-pill">${escapeHtml(LICENSE_DURATION_LABELS[license.durationType] || license.durationType)}</span></td>
+        <td><strong>${fmtNumber(license.activationCount)} / ${fmtNumber(license.maxActivations)}</strong><small>active users</small></td>
+        <td><span>${license.startsAt ? fmtDate(license.startsAt) : "Ngay lập tức"}</span><small>→ ${license.expiresAt ? fmtDate(license.expiresAt) : "Không giới hạn"}</small></td>
+        <td><span class="status-badge ${status.kind}">${status.label}</span></td>
+      </tr>`;
+    }).join("")}</tbody></table>` : '<div class="empty large">Chưa có license cho bộ lọc này.</div>';
+
+  $$('[data-license-id]').forEach((row) => row.addEventListener("click", () => void openLicense(Number(row.dataset.licenseId))));
+  $("#createLicenseButton").disabled = !state.plans.some((plan) => plan.active);
+}
+
+async function openLicense(licenseId) {
+  state.selectedUserId = null;
+  state.selectedPlanCode = null;
+  state.selectedPriceId = null;
+  state.selectedLicenseId = licenseId;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải license...</div>';
+  try {
+    const [license] = await Promise.all([api(`/api/v1/admin/licenses/${licenseId}`), ensurePlans()]);
+    renderLicenseDrawer(license, false);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function openCreateLicense() {
+  state.selectedUserId = null;
+  state.selectedPlanCode = null;
+  state.selectedPriceId = null;
+  state.selectedLicenseId = null;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerBody").innerHTML = '<div class="loading">Đang chuẩn bị license...</div>';
+  try {
+    await ensurePlans();
+    const preferred = state.licensePlanFilter && state.plans.some((plan) => plan.code === state.licensePlanFilter && plan.active)
+      ? state.licensePlanFilter
+      : state.plans.find((plan) => plan.active)?.code || "";
+    renderLicenseDrawer({
+      id: null,
+      planCode: preferred,
+      status: "AVAILABLE",
+      durationType: "MONTHLY",
+      maxActivations: 1,
+      activationCount: 0,
+      startsAt: null,
+      expiresAt: null,
+      note: "",
+      issuedKey: null,
+      activations: []
+    }, true);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function licenseActivationRows(license) {
+  const rows = license.activations || [];
+  if (!rows.length) return '<div class="empty">License chưa được kích hoạt.</div>';
+  return `<div class="license-activation-list">${rows.map((activation) => `
+    <article class="license-activation-card">
+      <div class="subscription-head"><div><strong>${escapeHtml(activation.userEmail || `User #${activation.userId}`)}</strong><span class="identity-pill">#${activation.userId}</span></div><span class="status-badge ${activation.status === "ACTIVE" ? "ok" : "warn"}">${escapeHtml(activation.status)}</span></div>
+      <div class="subscription-meta">
+        <span>Device <strong>${escapeHtml(activation.deviceId || "Không ghi nhận")}</strong></span>
+        <span>Activated <strong>${fmtDate(activation.activatedAt)}</strong></span>
+        <span>Subscription <strong>${activation.latestSubscriptionId ? `#${activation.latestSubscriptionId}` : "—"}</strong></span>
+        <span>Revoked <strong>${activation.revokedAt ? fmtDate(activation.revokedAt) : "—"}</strong></span>
+      </div>
+      ${activation.revokeReason ? `<div class="notice warn">${escapeHtml(activation.revokeReason)}${activation.revokedByEmail ? ` · ${escapeHtml(activation.revokedByEmail)}` : ""}</div>` : ""}
+      ${activation.status === "ACTIVE" ? `<div class="action-row"><button class="danger-button" data-revoke-license-activation="${activation.id}">Revoke activation</button></div>` : ""}
+    </article>`).join("")}</div>`;
+}
+
+function renderLicenseDrawer(license, isCreate) {
+  const status = licenseAvailability(license);
+  $("#drawerTitle").textContent = isCreate ? "Tạo license" : `License #${license.id} · ${license.planCode}`;
+  const planOptions = state.plans.map((plan) => `<option value="${escapeHtml(plan.code)}" ${plan.code === license.planCode ? "selected" : ""} ${!plan.active && plan.code !== license.planCode ? "disabled" : ""}>${escapeHtml(plan.displayName)} · ${escapeHtml(plan.code)}${plan.active ? "" : " (disabled)"}</option>`).join("");
+
+  $("#drawerBody").innerHTML = `
+    ${license.issuedKey ? `<section class="issued-key-card"><span class="eyebrow">CHỈ HIỂN THỊ MỘT LẦN</span><h3>License key đã tạo</h3><code id="issuedLicenseKey">${escapeHtml(license.issuedKey)}</code><div class="action-row"><button id="copyIssuedLicense" class="primary">Copy key</button></div><small>Backend chỉ lưu SHA-256 hash. Hãy lưu key trước khi đóng drawer.</small></section>` : ""}
+    <section class="drawer-section plan-section ${license.issuedKey ? "" : "first"}">
+      <div class="section-heading"><div><span class="eyebrow">LICENSE DEFINITION</span><h3>${isCreate ? "Key mới" : `#${license.id} · ${escapeHtml(license.keyHint || "legacy")}`}</h3></div><span class="status-badge ${status.kind}">${status.label}</span></div>
+      <div class="form-grid">
+        <label><span>Plan</span><select id="licensePlanCode" ${isCreate ? "" : "disabled"}>${planOptions}</select></label>
+        <label><span>Thời hạn entitlement</span><select id="licenseDuration" ${isCreate ? "" : "disabled"}>${["MONTHLY", "YEARLY", "LIFETIME"].map((duration) => `<option value="${duration}" ${duration === license.durationType ? "selected" : ""}>${escapeHtml(LICENSE_DURATION_LABELS[duration])} · ${duration}</option>`).join("")}${!isCreate && license.durationType === "LEGACY_EXPIRY" ? '<option value="LEGACY_EXPIRY" selected>Legacy expiry</option>' : ""}</select></label>
+        ${!isCreate ? `<label><span>Status key</span><select id="licenseStatus"><option value="AVAILABLE" ${license.status === "AVAILABLE" ? "selected" : ""}>AVAILABLE</option><option value="DISABLED" ${license.status === "DISABLED" ? "selected" : ""}>DISABLED</option></select></label>` : ""}
+        <label><span>Max activations</span><input id="licenseMaxActivations" type="number" min="1" max="10000" step="1" value="${Number(license.maxActivations || 1)}" /></label>
+        <label><span>Cho phép redeem từ</span><input id="licenseStartsAt" type="datetime-local" value="${escapeHtml(toLocalDateTimeValue(license.startsAt))}" /></label>
+        <label><span>Hết hạn redeem</span><input id="licenseExpiresAt" type="datetime-local" value="${escapeHtml(toLocalDateTimeValue(license.expiresAt))}" /></label>
+      </div>
+      <div class="notice info">MONTHLY/YEARLY tính subscription từ thời điểm user kích hoạt. <strong>Hết hạn redeem</strong> chỉ khóa activation mới, không cắt subscription đã cấp.</div>
+      <label><span>Ghi chú nội bộ</span><textarea id="licenseNote" rows="2" maxlength="500" placeholder="Đơn hàng, chiến dịch, khách hàng..."></textarea></label>
+    </section>
+    <section class="drawer-section plan-section">
+      <label><span>Lý do ${isCreate ? "tạo" : "thay đổi"}</span><textarea id="licenseReason" rows="2" maxlength="500" placeholder="Bắt buộc để ghi audit..."></textarea></label>
+      <div class="action-row"><button id="saveLicense" class="primary">${isCreate ? "Tạo license" : "Lưu license"}</button>${!isCreate && Number(license.activationCount || 0) > 0 ? '<button id="resetLicenseActivations" class="danger-button">Reset mọi activation</button>' : ""}</div>
+      ${!isCreate ? `<small class="muted">Tạo: ${fmtDate(license.createdAt)}${license.createdByEmail ? ` bởi ${escapeHtml(license.createdByEmail)}` : ""} · cập nhật: ${fmtDate(license.updatedAt)}</small>` : ""}
+    </section>
+    ${!isCreate ? `<section class="drawer-section plan-section"><div class="section-heading"><div><span class="eyebrow">ACTIVATIONS</span><h3>${fmtNumber(license.activationCount)} / ${fmtNumber(license.maxActivations)} đang hoạt động</h3></div></div>${licenseActivationRows(license)}</section>` : ""}`;
+
+  $("#licenseNote").value = license.note || "";
+  if (license.issuedKey) {
+    $("#copyIssuedLicense")?.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(license.issuedKey);
+        toast("Đã copy license key.", "success");
+      } catch {
+        toast("Không thể copy tự động. Hãy copy key thủ công.", "error");
+      }
+    });
+  }
+
+  $("#saveLicense").addEventListener("click", async () => {
+    const reason = $("#licenseReason").value.trim();
+    const maxActivations = Number($("#licenseMaxActivations").value);
+    if (!reason) { toast("Lý do thao tác là bắt buộc.", "error"); return; }
+    if (!Number.isInteger(maxActivations) || maxActivations < 1 || maxActivations > 10000) { toast("Max activations phải từ 1 đến 10000.", "error"); return; }
+    let startsAt;
+    let expiresAt;
+    try {
+      startsAt = localDateTimeToIso($("#licenseStartsAt").value);
+      expiresAt = localDateTimeToIso($("#licenseExpiresAt").value);
+    } catch (error) { toast(error.message, "error"); return; }
+    if (startsAt && expiresAt && new Date(startsAt) >= new Date(expiresAt)) { toast("Hạn redeem phải sau ngày bắt đầu.", "error"); return; }
+
+    const body = isCreate
+      ? { planCode: $("#licensePlanCode").value, durationType: $("#licenseDuration").value, maxActivations, startsAt, expiresAt, note: $("#licenseNote").value.trim(), reason }
+      : { status: $("#licenseStatus").value, maxActivations, startsAt, expiresAt, note: $("#licenseNote").value.trim(), reason };
+    try {
+      const saved = await api(isCreate ? "/api/v1/admin/licenses" : `/api/v1/admin/licenses/${license.id}`, { method: isCreate ? "POST" : "PUT", body: JSON.stringify(body) });
+      toast(isCreate ? `Đã tạo license #${saved.id}.` : `Đã cập nhật license #${saved.id}.`, "success");
+      if (isCreate) {
+        state.selectedLicenseId = saved.id;
+        renderLicenseDrawer(saved, false);
+      } else {
+        renderLicenseDrawer(saved, false);
+      }
+      await loadLicenses();
+    } catch (error) { toast(error.message, "error"); }
+  });
+
+  $$('[data-revoke-license-activation]').forEach((button) => button.addEventListener("click", async () => {
+    const activationId = Number(button.dataset.revokeLicenseActivation);
+    const reason = window.prompt("Lý do revoke activation:", "Revoke license activation")?.trim();
+    if (!reason) return;
+    if (!window.confirm(`Revoke activation #${activationId}? Subscription LICENSE của user sẽ bị hủy.`)) return;
+    try {
+      const saved = await api(`/api/v1/admin/licenses/${license.id}/activations/${activationId}/revoke`, { method: "POST", body: JSON.stringify({ reason }) });
+      toast(`Đã revoke activation #${activationId}.`, "success");
+      renderLicenseDrawer(saved, false);
+      await loadLicenses();
+    } catch (error) { toast(error.message, "error"); }
+  }));
+
+  $("#resetLicenseActivations")?.addEventListener("click", async () => {
+    const reason = window.prompt("Lý do reset tất cả activation:", "Reset license activations")?.trim();
+    if (!reason) return;
+    if (!window.confirm(`Reset toàn bộ activation của license #${license.id}? Tất cả subscription LICENSE liên quan sẽ bị hủy.`)) return;
+    try {
+      const saved = await api(`/api/v1/admin/licenses/${license.id}/activations/reset`, { method: "POST", body: JSON.stringify({ reason }) });
+      toast(`Đã reset activation của license #${license.id}.`, "success");
+      renderLicenseDrawer(saved, false);
+      await loadLicenses();
+    } catch (error) { toast(error.message, "error"); }
+  });
+}
+
 async function ensurePlanSchema() {
   if (!state.planSchema) state.planSchema = await api("/api/v1/admin/plan-schema");
   return state.planSchema;
+}
+
+
+const transactionStatusKind = (status) => {
+  const value = String(status || "").toUpperCase();
+  if (value === "SUCCEEDED") return "ok";
+  if (value === "PENDING") return "info";
+  return "warn";
+};
+
+async function loadTransactions() {
+  await ensurePlans();
+  const params = new URLSearchParams();
+  if (state.transactionStatusFilter) params.set("status", state.transactionStatusFilter);
+  if (state.transactionPlanFilter) params.set("planCode", state.transactionPlanFilter);
+  params.set("limit", "300");
+  state.transactions = await api(`/api/v1/admin/transactions?${params.toString()}`);
+
+  $("#transactionStatusFilter").value = state.transactionStatusFilter;
+  $("#transactionPlanFilter").innerHTML = `<option value="">Tất cả plan</option>${state.plans.map((plan) => `<option value="${escapeHtml(plan.code)}" ${plan.code === state.transactionPlanFilter ? "selected" : ""}>${escapeHtml(plan.displayName)} · ${escapeHtml(plan.code)}</option>`).join("")}`;
+  const pending = state.transactions.filter((tx) => tx.status === "PENDING").length;
+  const succeeded = state.transactions.filter((tx) => tx.status === "SUCCEEDED").length;
+  const refunded = state.transactions.filter((tx) => tx.status === "REFUNDED").length;
+  $("#transactionMetrics").innerHTML = `
+    ${metric("Transactions", state.transactions.length, state.transactionPlanFilter || "all plans")}
+    ${metric("Pending", pending, "awaiting settlement")}
+    ${metric("Succeeded", succeeded, "payment granted")}
+    ${metric("Refunded", refunded, "full refunds")}`;
+
+  $("#createTransactionButton").disabled = state.admin?.role !== "SUPER_ADMIN";
+  $("#transactionsTable").innerHTML = state.transactions.length ? `
+    <table><thead><tr><th>Transaction</th><th>User</th><th>Plan / Price</th><th>Amount</th><th>Provider</th><th>Status</th><th>Created</th></tr></thead>
+    <tbody>${state.transactions.map((tx) => `<tr class="clickable" data-transaction-id="${tx.id}">
+      <td><strong>#${tx.id}</strong><small>${escapeHtml(tx.publicId)}</small></td>
+      <td><strong>${escapeHtml(tx.userEmail)}</strong><small>User #${tx.userId}</small></td>
+      <td><span class="plan-pill">${escapeHtml(tx.planCode)}</span><small>${escapeHtml(BILLING_LABELS[tx.billingPeriod] || tx.billingPeriod)} · Price ${tx.priceId == null ? "—" : `#${tx.priceId}`}</small></td>
+      <td><strong class="money-value">${escapeHtml(fmtMoneyMinor(tx.amountMinor, tx.currency))}</strong>${Number(tx.refundedAmountMinor || 0) > 0 ? `<small>Refund ${escapeHtml(fmtMoneyMinor(tx.refundedAmountMinor, tx.currency))}</small>` : `<small>${escapeHtml(tx.currency)}</small>`}</td>
+      <td><strong>${escapeHtml(tx.provider)}</strong><small>${escapeHtml(tx.providerReference || "—")}</small></td>
+      <td><span class="status-badge ${transactionStatusKind(tx.status)}">${escapeHtml(tx.status)}</span>${tx.subscriptionId ? `<small>Sub #${tx.subscriptionId}</small>` : ""}</td>
+      <td>${fmtDate(tx.createdAt)}</td>
+    </tr>`).join("")}</tbody></table>` : '<div class="empty large">Chưa có payment transaction.</div>';
+  $$('[data-transaction-id]').forEach((row) => row.addEventListener("click", () => void openTransaction(Number(row.dataset.transactionId))));
+}
+
+async function openTransaction(transactionId) {
+  state.selectedTransactionId = transactionId;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải transaction...</div>';
+  try {
+    const transaction = await api(`/api/v1/admin/transactions/${transactionId}`);
+    renderTransactionDrawer(transaction);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function openCreateTransaction() {
+  if (state.admin?.role !== "SUPER_ADMIN") {
+    toast("Chỉ SUPER_ADMIN được tạo manual transaction.", "error");
+    return;
+  }
+  state.selectedTransactionId = null;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải price đang bán...</div>';
+  try {
+    const prices = (await api("/api/v1/admin/prices")).filter((price) => price.currentlyAvailable);
+    $("#drawerTitle").textContent = "Tạo manual transaction";
+    $("#drawerBody").innerHTML = `
+      <section class="drawer-section first">
+        <div class="section-heading"><div><span class="eyebrow">PAYMENT FOUNDATION</span><h3>Manual transaction</h3></div><span class="status-badge info">PENDING</span></div>
+        <div class="notice info">Dùng để test lifecycle trước khi tích hợp gateway thật. Amount/plan/currency được snapshot từ price đang ON SALE và không nhập tay.</div>
+        <div class="form-grid">
+          <label><span>User ID</span><input id="transactionUserId" type="number" min="1" step="1" placeholder="Ví dụ 42" /></label>
+          <label><span>Price</span><select id="transactionPriceId">${prices.map((price) => `<option value="${price.id}">${escapeHtml(price.planCode)} · ${escapeHtml(BILLING_LABELS[price.billingPeriod] || price.billingPeriod)} · ${escapeHtml(fmtMoneyMinor(price.amountMinor, price.currency))} · #${price.id}</option>`).join("")}</select></label>
+          <label class="full"><span>Provider reference (tùy chọn)</span><input id="transactionProviderRef" maxlength="190" placeholder="Mã đối soát/manual reference" /></label>
+          <label class="full"><span>Lý do / audit</span><textarea id="transactionReason" maxlength="500" placeholder="Ví dụ: test payment lifecycle 14.7.5"></textarea></label>
+        </div>
+        <div class="action-row"><button id="saveTransaction" class="primary" ${prices.length ? "" : "disabled"}>Tạo PENDING transaction</button></div>
+      </section>`;
+    if (!prices.length) $("#drawerBody").insertAdjacentHTML("afterbegin", '<div class="notice warn">Không có price ON SALE. Hãy mở bán một price trước.</div>');
+    $("#saveTransaction")?.addEventListener("click", async () => {
+      const userId = Number($("#transactionUserId").value);
+      const priceId = Number($("#transactionPriceId").value);
+      const reason = $("#transactionReason").value.trim();
+      if (!Number.isInteger(userId) || userId <= 0 || !Number.isInteger(priceId) || priceId <= 0 || !reason) {
+        toast("User ID, price và lý do là bắt buộc.", "error"); return;
+      }
+      try {
+        const created = await api("/api/v1/admin/transactions/manual", { method: "POST", body: JSON.stringify({ userId, priceId, providerReference: $("#transactionProviderRef").value.trim() || null, reason }) });
+        toast(`Đã tạo transaction #${created.id}.`, "success");
+        renderTransactionDrawer(created);
+        await loadTransactions();
+      } catch (error) { toast(error.message, "error"); }
+    });
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function renderTransactionDrawer(tx) {
+  state.selectedTransactionId = tx.id;
+  $("#drawerTitle").textContent = `Transaction #${tx.id}`;
+  const isSuperAdmin = state.admin?.role === "SUPER_ADMIN";
+  const pending = tx.status === "PENDING";
+  const succeeded = tx.status === "SUCCEEDED";
+  $("#drawerBody").innerHTML = `
+    <section class="drawer-section first">
+      <div class="section-heading"><div><span class="eyebrow">PAYMENT TRANSACTION</span><h3>${escapeHtml(tx.publicId)}</h3></div><span class="status-badge ${transactionStatusKind(tx.status)}">${escapeHtml(tx.status)}</span></div>
+      <div class="transaction-summary">
+        <div><span>User</span><strong>${escapeHtml(tx.userEmail)}</strong><small>#${tx.userId}</small></div>
+        <div><span>Plan</span><strong>${escapeHtml(tx.planCode)}</strong><small>${escapeHtml(BILLING_LABELS[tx.billingPeriod] || tx.billingPeriod)}</small></div>
+        <div><span>Amount</span><strong>${escapeHtml(fmtMoneyMinor(tx.amountMinor, tx.currency))}</strong><small>${fmtNumber(tx.amountMinor)} minor units</small></div>
+        <div><span>Provider</span><strong>${escapeHtml(tx.provider)}</strong><small>${escapeHtml(tx.providerReference || "—")}</small></div>
+        <div><span>Price</span><strong>${tx.priceId == null ? "—" : `#${tx.priceId}`}</strong><small>snapshot at create</small></div>
+        <div><span>Subscription</span><strong>${tx.subscriptionId == null ? "—" : `#${tx.subscriptionId}`}</strong><small>${tx.subscriptionId ? "source=PAYMENT" : "not granted"}</small></div>
+      </div>
+      ${tx.failureCode || tx.failureMessage ? `<div class="notice warn">${escapeHtml(tx.failureCode || "FAILED")}: ${escapeHtml(tx.failureMessage || "Không có chi tiết")}</div>` : ""}
+      ${Number(tx.refundedAmountMinor || 0) > 0 ? `<div class="notice warn">Đã refund ${escapeHtml(fmtMoneyMinor(tx.refundedAmountMinor, tx.currency))} lúc ${fmtDate(tx.refundedAt)}.</div>` : ""}
+      <div class="compact-list"><div><strong>Created</strong><span>${fmtDate(tx.createdAt)}</span></div>${tx.paidAt ? `<div><strong>Paid</strong><span>${fmtDate(tx.paidAt)}</span></div>` : ""}${tx.failedAt ? `<div><strong>Failed</strong><span>${fmtDate(tx.failedAt)}</span></div>` : ""}${tx.canceledAt ? `<div><strong>Canceled</strong><span>${fmtDate(tx.canceledAt)}</span></div>` : ""}</div>
+    </section>
+    ${isSuperAdmin && (pending || succeeded) ? `<section class="drawer-section"><div class="section-heading"><div><span class="eyebrow">LIFECYCLE</span><h3>Thay đổi trạng thái</h3></div></div>
+      <label><span>Lý do / audit</span><textarea id="transactionActionReason" maxlength="500" placeholder="Bắt buộc cho mọi thao tác"></textarea></label>
+      ${pending ? `<div class="form-grid"><label><span>Provider reference</span><input id="transactionSettleRef" maxlength="190" value="${escapeHtml(tx.providerReference || "")}" /></label><label><span>Failure code</span><input id="transactionFailureCode" maxlength="100" placeholder="PAYMENT_DECLINED" /></label><label class="full"><span>Failure message</span><input id="transactionFailureMessage" maxlength="500" /></label></div>
+      <div class="action-row"><button id="settleTransaction" class="primary">Mark SUCCEEDED</button><button id="failTransaction" class="ghost danger">Mark FAILED</button><button id="cancelTransaction" class="danger-button">Cancel</button></div>` : `<div class="notice warn">Refund là full refund và sẽ hủy subscription PAYMENT liên kết.</div><div class="action-row"><button id="refundTransaction" class="danger-button">Refund transaction</button></div>`}
+    </section>` : ""}`;
+
+  const actionReason = () => {
+    const reason = $("#transactionActionReason")?.value.trim();
+    if (!reason) { toast("Hãy nhập lý do để ghi audit.", "error"); return ""; }
+    return reason;
+  };
+  $("#settleTransaction")?.addEventListener("click", async () => {
+    const reason = actionReason(); if (!reason) return;
+    try { const saved = await api(`/api/v1/admin/transactions/${tx.id}/settle`, { method: "POST", body: JSON.stringify({ providerReference: $("#transactionSettleRef").value.trim() || null, reason }) }); toast("Transaction đã SUCCEEDED và subscription PAYMENT đã được tạo.", "success"); renderTransactionDrawer(saved); await loadTransactions(); } catch (error) { toast(error.message, "error"); }
+  });
+  $("#failTransaction")?.addEventListener("click", async () => {
+    const reason = actionReason(); if (!reason) return;
+    try { const saved = await api(`/api/v1/admin/transactions/${tx.id}/fail`, { method: "POST", body: JSON.stringify({ failureCode: $("#transactionFailureCode").value.trim() || null, failureMessage: $("#transactionFailureMessage").value.trim() || null, reason }) }); toast("Transaction đã được đánh dấu FAILED.", "success"); renderTransactionDrawer(saved); await loadTransactions(); } catch (error) { toast(error.message, "error"); }
+  });
+  $("#cancelTransaction")?.addEventListener("click", async () => {
+    const reason = actionReason(); if (!reason || !window.confirm(`Cancel transaction #${tx.id}?`)) return;
+    try { const saved = await api(`/api/v1/admin/transactions/${tx.id}/cancel`, { method: "POST", body: JSON.stringify({ reason }) }); toast("Transaction đã CANCELED.", "success"); renderTransactionDrawer(saved); await loadTransactions(); } catch (error) { toast(error.message, "error"); }
+  });
+  $("#refundTransaction")?.addEventListener("click", async () => {
+    const reason = actionReason(); if (!reason || !window.confirm(`Full refund transaction #${tx.id} và hủy subscription PAYMENT?`)) return;
+    try { const saved = await api(`/api/v1/admin/transactions/${tx.id}/refund`, { method: "POST", body: JSON.stringify({ reason }) }); toast("Transaction đã REFUNDED và subscription PAYMENT đã bị hủy.", "success"); renderTransactionDrawer(saved); await loadTransactions(); } catch (error) { toast(error.message, "error"); }
+  });
 }
 
 async function loadPlans() {
@@ -326,7 +985,13 @@ async function openUser(userId) {
   $("#userDrawer").classList.remove("hidden");
   $("#drawerBody").innerHTML = '<div class="loading">Đang tải user...</div>';
   try {
-    const detail = await api(`/api/v1/admin/users/${userId}`);
+    const [detail, subscriptions, prices] = await Promise.all([
+      api(`/api/v1/admin/users/${userId}`),
+      api(`/api/v1/admin/users/${userId}/subscriptions`),
+      api("/api/v1/admin/prices")
+    ]);
+    detail.subscriptions = subscriptions || [];
+    state.prices = prices || [];
     renderUserDrawer(detail);
   } catch (error) {
     $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
@@ -360,6 +1025,21 @@ function renderUserDrawer(detail) {
       <div class="action-row"><button id="savePlan" class="primary">Áp dụng override</button><button id="clearPlan" class="ghost">Trả về license/subscription</button></div>
       <small class="muted">Override không sửa hoặc xóa license gốc. Xóa override sẽ quay lại quyền thực tế.</small>
     </section>
+    <section class="drawer-section">
+      <div class="section-heading"><div><span class="eyebrow">SUBSCRIPTIONS</span><h3>Lịch sử & cấp subscription</h3></div><small class="muted">14.7.3</small></div>
+      <div class="subscription-create">
+        <div class="form-grid">
+          <label><span>Plan</span><select id="subscriptionPlan">${state.plans.filter((p) => p.active).map((p) => `<option value="${escapeHtml(p.code)}">${escapeHtml(p.displayName)} · ${escapeHtml(p.code)}</option>`).join("")}</select></label>
+          <label><span>Price (tùy chọn)</span><select id="subscriptionPrice"><option value="">Không gắn price</option></select></label>
+          <label><span>Status</span><select id="subscriptionStatus"><option value="ACTIVE">ACTIVE</option><option value="TRIAL">TRIAL</option><option value="GRANDFATHERED">GRANDFATHERED</option></select></label>
+          <label><span>Bắt đầu</span><input id="subscriptionStart" type="datetime-local" value="${escapeHtml(toLocalDateTimeValue(new Date().toISOString()))}" /></label>
+          <label><span>Kết thúc</span><input id="subscriptionEnd" type="datetime-local" /></label>
+        </div>
+        <div class="notice info">Nếu chọn price MONTHLY/YEARLY và để trống ngày kết thúc, backend tự tính 1 chu kỳ. LIFETIME sẽ không có ngày hết hạn.</div>
+        <div class="action-row"><button id="createSubscription" class="primary">Cấp subscription</button></div>
+      </div>
+      ${subscriptionRows(detail.subscriptions || [])}
+    </section>
     <section class="drawer-section"><div class="section-heading"><div><span class="eyebrow">SESSIONS</span><h3>Phiên đang hoạt động</h3></div></div>${sessionRows(detail.sessions || [])}</section>
     <section class="drawer-section"><div class="section-heading"><div><span class="eyebrow">AUDIT</span><h3>Lịch sử user</h3></div></div>${auditRows(detail.recentAudit || [], true)}</section>`;
 
@@ -381,6 +1061,66 @@ function renderUserDrawer(detail) {
     const reason = requireReason(); if (!reason) return;
     await userAction(`/api/v1/admin/users/${user.id}/plan-override/clear`, "POST", { reason });
   });
+
+  const refreshSubscriptionPrices = () => {
+    const planCode = $("#subscriptionPlan").value;
+    const matching = state.prices.filter((price) => price.planCode === planCode && price.active);
+    $("#subscriptionPrice").innerHTML = `<option value="">Không gắn price</option>${matching.map((price) => `<option value="${price.id}">#${price.id} · ${escapeHtml(BILLING_LABELS[price.billingPeriod] || price.billingPeriod)} · ${escapeHtml(fmtMoneyMinor(price.amountMinor, price.currency))}${price.currentlyAvailable ? " · ON SALE" : ""}</option>`).join("")}`;
+  };
+  refreshSubscriptionPrices();
+  $("#subscriptionPlan").addEventListener("change", refreshSubscriptionPrices);
+
+  $("#createSubscription").addEventListener("click", async () => {
+    const reason = requireReason(); if (!reason) return;
+    let startsAt;
+    let endsAt;
+    try {
+      startsAt = localDateTimeToIso($("#subscriptionStart").value);
+      endsAt = localDateTimeToIso($("#subscriptionEnd").value);
+    } catch (error) { toast(error.message, "error"); return; }
+    const priceRaw = $("#subscriptionPrice").value;
+    const body = {
+      planCode: $("#subscriptionPlan").value,
+      priceId: priceRaw ? Number(priceRaw) : null,
+      status: $("#subscriptionStatus").value,
+      startsAt,
+      endsAt,
+      reason
+    };
+    try {
+      const created = await api(`/api/v1/admin/users/${user.id}/subscriptions`, { method: "POST", body: JSON.stringify(body) });
+      toast(`Đã cấp subscription #${created.id} · ${created.planCode}.`, "success");
+      await openUser(user.id);
+      if (state.currentView === "users") await loadUsers();
+    } catch (error) { toast(error.message, "error"); }
+  });
+
+  $$('[data-extend-subscription]').forEach((button) => button.addEventListener("click", async () => {
+    const reason = requireReason(); if (!reason) return;
+    const id = Number(button.dataset.extendSubscription);
+    let endsAt;
+    try { endsAt = localDateTimeToIso($(`[data-subscription-end="${id}"]`).value); }
+    catch (error) { toast(error.message, "error"); return; }
+    if (!endsAt) { toast("Hãy chọn ngày hết hạn mới.", "error"); return; }
+    try {
+      await api(`/api/v1/admin/subscriptions/${id}/extend`, { method: "POST", body: JSON.stringify({ endsAt, reason }) });
+      toast(`Đã gia hạn subscription #${id}.`, "success");
+      await openUser(user.id);
+      if (state.currentView === "users") await loadUsers();
+    } catch (error) { toast(error.message, "error"); }
+  }));
+
+  $$('[data-cancel-subscription]').forEach((button) => button.addEventListener("click", async () => {
+    const reason = requireReason(); if (!reason) return;
+    const id = Number(button.dataset.cancelSubscription);
+    if (!window.confirm(`Hủy subscription #${id}?`)) return;
+    try {
+      await api(`/api/v1/admin/subscriptions/${id}/cancel`, { method: "POST", body: JSON.stringify({ reason }) });
+      toast(`Đã hủy subscription #${id}.`, "success");
+      await openUser(user.id);
+      if (state.currentView === "users") await loadUsers();
+    } catch (error) { toast(error.message, "error"); }
+  }));
 }
 
 function requireReason() {
@@ -418,6 +1158,9 @@ function closeDrawer() {
   $("#userDrawer").classList.add("hidden");
   state.selectedUserId = null;
   state.selectedPlanCode = null;
+  state.selectedPriceId = null;
+  state.selectedLicenseId = null;
+  state.selectedTransactionId = null;
 }
 
 $("#loginForm").addEventListener("submit", async (event) => {
@@ -447,6 +1190,14 @@ $("#refreshButton").addEventListener("click", () => void loadView(state.currentV
 $("#logoutButton").addEventListener("click", () => { clearSession(); showLogin(); });
 $("#searchUsersButton").addEventListener("click", () => { state.usersPage = 0; void loadUsers(); });
 $("#createPlanButton").addEventListener("click", () => void openCreatePlan());
+$("#createPriceButton").addEventListener("click", () => void openCreatePrice());
+$("#pricingPlanFilter").addEventListener("change", () => { state.pricePlanFilter = $("#pricingPlanFilter").value; void loadPricing(); });
+$("#createLicenseButton").addEventListener("click", () => void openCreateLicense());
+$("#licensePlanFilter").addEventListener("change", () => { state.licensePlanFilter = $("#licensePlanFilter").value; void loadLicenses(); });
+$("#licenseStatusFilter").addEventListener("change", () => { state.licenseStatusFilter = $("#licenseStatusFilter").value; void loadLicenses(); });
+$("#createTransactionButton").addEventListener("click", () => void openCreateTransaction());
+$("#transactionStatusFilter").addEventListener("change", () => { state.transactionStatusFilter = $("#transactionStatusFilter").value; void loadTransactions(); });
+$("#transactionPlanFilter").addEventListener("change", () => { state.transactionPlanFilter = $("#transactionPlanFilter").value; void loadTransactions(); });
 $("#userSearch").addEventListener("keydown", (event) => { if (event.key === "Enter") { state.usersPage = 0; void loadUsers(); } });
 $("#statusFilter").addEventListener("change", () => { state.usersPage = 0; void loadUsers(); });
 $("#prevUsers").addEventListener("click", () => { if (state.usersPage > 0) { state.usersPage -= 1; void loadUsers(); } });

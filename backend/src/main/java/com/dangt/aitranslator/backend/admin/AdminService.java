@@ -670,6 +670,7 @@ public class AdminService {
                 WHERE plan_code = ?
                   AND status = 'AVAILABLE'
                   AND activation_count < max_activations
+                  AND (starts_at IS NULL OR starts_at <= CURRENT_TIMESTAMP(6))
                   AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP(6))
                 """,
                 Long.class,

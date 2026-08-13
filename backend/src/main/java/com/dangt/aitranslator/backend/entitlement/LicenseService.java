@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
@@ -32,7 +33,8 @@ public class LicenseService {
     @Transactional
     public EntitlementResponse activate(
             UserAccount user,
-            String rawLicenseKey
+            String rawLicenseKey,
+            String requestedDeviceId
     ) {
         if (user == null || user.getId() == null) {
             throw new IllegalArgumentException("Không xác định được tài khoản.");
@@ -42,13 +44,13 @@ public class LicenseService {
         if (normalizedKey.length() < 12) {
             throw new IllegalArgumentException("License key không hợp lệ.");
         }
-
+        String deviceId = normalizeDeviceId(requestedDeviceId);
         String keyHash = sha256(normalizedKey);
 
         List<LicenseRow> rows = jdbcTemplate.query(
                 """
-                SELECT id, plan_code, status, max_activations,
-                       activation_count, expires_at
+                SELECT id, plan_code, duration_type, status, max_activations,
+                       activation_count, starts_at, expires_at
                 FROM license_keys
                 WHERE key_hash = ?
                 LIMIT 1
@@ -57,9 +59,11 @@ public class LicenseService {
                 (rs, rowNum) -> new LicenseRow(
                         rs.getLong("id"),
                         rs.getString("plan_code"),
+                        rs.getString("duration_type"),
                         rs.getString("status"),
                         rs.getInt("max_activations"),
                         rs.getInt("activation_count"),
+                        toInstant(rs.getTimestamp("starts_at")),
                         toInstant(rs.getTimestamp("expires_at"))
                 ),
                 keyHash
@@ -70,81 +74,156 @@ public class LicenseService {
         }
 
         LicenseRow license = rows.getFirst();
+        requireActivePlan(license.planCode());
 
-        Integer activePlan = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM plan_catalog WHERE code = ? AND active = TRUE",
-                Integer.class,
-                EntitlementService.normalizePlan(license.planCode())
-        );
-        if (activePlan == null || activePlan == 0) {
-            throw new IllegalArgumentException(
-                    "Gói " + EntitlementService.normalizePlan(license.planCode())
-                            + " hiện đang tạm ngừng và không thể kích hoạt license."
-            );
-        }
-
-        if (!"AVAILABLE".equalsIgnoreCase(license.status())) {
-            throw new IllegalArgumentException("License key hiện không thể kích hoạt.");
-        }
-
-        if (license.expiresAt() != null && !license.expiresAt().isAfter(Instant.now())) {
-            throw new IllegalArgumentException("License key đã hết hạn.");
-        }
-
-        Integer alreadyActivated = jdbcTemplate.queryForObject(
+        List<ActivationRow> activationRows = jdbcTemplate.query(
                 """
-                SELECT COUNT(*)
+                SELECT id, status, activated_at
                 FROM license_activations
                 WHERE license_key_id = ? AND user_id = ?
+                LIMIT 1
+                FOR UPDATE
                 """,
-                Integer.class,
+                (rs, rowNum) -> new ActivationRow(
+                        rs.getLong("id"),
+                        rs.getString("status"),
+                        toInstant(rs.getTimestamp("activated_at"))
+                ),
                 license.id(),
                 user.getId()
         );
 
-        if (alreadyActivated != null && alreadyActivated > 0) {
-            ensureLicenseSubscription(user.getId(), license);
+        if (!activationRows.isEmpty()
+                && "ACTIVE".equalsIgnoreCase(activationRows.getFirst().status())) {
+            ActivationRow activation = activationRows.getFirst();
+            if (!deviceId.isEmpty()) {
+                jdbcTemplate.update(
+                        "UPDATE license_activations SET device_id = ? WHERE id = ?",
+                        deviceId,
+                        activation.id()
+                );
+            }
+            ensureLicenseSubscription(user.getId(), license, activation.activatedAt());
             return entitlementService.resolve(user);
         }
+
+        validateRedeemable(license);
 
         if (license.activationCount() >= license.maxActivations()) {
             throw new IllegalArgumentException("License key đã đạt số lần kích hoạt tối đa.");
         }
 
-        try {
+        Instant activatedAt = Instant.now();
+        if (!activationRows.isEmpty()) {
+            ActivationRow previous = activationRows.getFirst();
             jdbcTemplate.update(
                     """
-                    INSERT INTO license_activations (
-                        license_key_id,
-                        user_id,
-                        activated_at
-                    ) VALUES (?, ?, CURRENT_TIMESTAMP(6))
+                    UPDATE license_activations
+                    SET device_id = ?,
+                        status = 'ACTIVE',
+                        activated_at = ?,
+                        revoked_at = NULL,
+                        revoked_by_user_id = NULL,
+                        revoke_reason = NULL
+                    WHERE id = ?
                     """,
-                    license.id(),
-                    user.getId()
+                    deviceId.isEmpty() ? null : deviceId,
+                    Timestamp.from(activatedAt),
+                    previous.id()
             );
-        } catch (DuplicateKeyException ignored) {
-            ensureLicenseSubscription(user.getId(), license);
-            return entitlementService.resolve(user);
+        } else {
+            try {
+                jdbcTemplate.update(
+                        """
+                        INSERT INTO license_activations (
+                            license_key_id,
+                            user_id,
+                            device_id,
+                            status,
+                            activated_at
+                        ) VALUES (?, ?, ?, 'ACTIVE', ?)
+                        """,
+                        license.id(),
+                        user.getId(),
+                        deviceId.isEmpty() ? null : deviceId,
+                        Timestamp.from(activatedAt)
+                );
+            } catch (DuplicateKeyException ignored) {
+                List<ActivationRow> duplicateRows = jdbcTemplate.query(
+                        """
+                        SELECT id, status, activated_at
+                        FROM license_activations
+                        WHERE license_key_id = ? AND user_id = ?
+                        LIMIT 1
+                        FOR UPDATE
+                        """,
+                        (rs, rowNum) -> new ActivationRow(
+                                rs.getLong("id"),
+                                rs.getString("status"),
+                                toInstant(rs.getTimestamp("activated_at"))
+                        ),
+                        license.id(),
+                        user.getId()
+                );
+                if (!duplicateRows.isEmpty()
+                        && "ACTIVE".equalsIgnoreCase(duplicateRows.getFirst().status())) {
+                    ensureLicenseSubscription(
+                            user.getId(),
+                            license,
+                            duplicateRows.getFirst().activatedAt()
+                    );
+                    return entitlementService.resolve(user);
+                }
+                throw new IllegalStateException("Không thể ghi nhận activation license.");
+            }
         }
 
         jdbcTemplate.update(
                 """
                 UPDATE license_keys
-                SET activation_count = activation_count + 1
+                SET activation_count = activation_count + 1,
+                    updated_at = CURRENT_TIMESTAMP(6)
                 WHERE id = ?
                 """,
                 license.id()
         );
 
-        ensureLicenseSubscription(user.getId(), license);
-
+        ensureLicenseSubscription(user.getId(), license, activatedAt);
         return entitlementService.resolve(user);
+    }
+
+    private void requireActivePlan(String planCode) {
+        Integer activePlan = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM plan_catalog WHERE code = ? AND active = TRUE",
+                Integer.class,
+                EntitlementService.normalizePlan(planCode)
+        );
+        if (activePlan == null || activePlan == 0) {
+            throw new IllegalArgumentException(
+                    "Gói " + EntitlementService.normalizePlan(planCode)
+                            + " hiện đang tạm ngừng và không thể kích hoạt license."
+            );
+        }
+    }
+
+    private void validateRedeemable(LicenseRow license) {
+        if (!"AVAILABLE".equalsIgnoreCase(license.status())) {
+            throw new IllegalArgumentException("License key hiện không thể kích hoạt.");
+        }
+
+        Instant now = Instant.now();
+        if (license.startsAt() != null && license.startsAt().isAfter(now)) {
+            throw new IllegalArgumentException("License key chưa tới thời gian được phép kích hoạt.");
+        }
+        if (license.expiresAt() != null && !license.expiresAt().isAfter(now)) {
+            throw new IllegalArgumentException("License key đã hết hạn kích hoạt.");
+        }
     }
 
     private void ensureLicenseSubscription(
             long userId,
-            LicenseRow license
+            LicenseRow license,
+            Instant activatedAt
     ) {
         Integer existing = jdbcTemplate.queryForObject(
                 """
@@ -176,6 +255,9 @@ public class LicenseService {
                 license.planCode()
         );
 
+        Instant start = activatedAt == null ? Instant.now() : activatedAt;
+        Instant end = subscriptionEnd(start, license);
+
         jdbcTemplate.update(
                 """
                 INSERT INTO subscriptions (
@@ -184,21 +266,35 @@ public class LicenseService {
                     status,
                     source,
                     reference_id,
+                    price_id,
                     monthly_translation_limit,
                     period_start,
                     period_end,
+                    canceled_at,
+                    cancel_reason,
                     created_at,
                     updated_at
-                ) VALUES (?, ?, 'ACTIVE', 'LICENSE', ?, ?, CURRENT_TIMESTAMP(6), ?, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6))
+                ) VALUES (?, ?, 'ACTIVE', 'LICENSE', ?, NULL, ?, ?, ?, NULL, NULL, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6))
                 """,
                 userId,
                 EntitlementService.normalizePlan(license.planCode()),
                 license.id(),
                 monthlyLimit == null ? 0L : monthlyLimit,
-                license.expiresAt() == null
-                        ? null
-                        : Timestamp.from(license.expiresAt())
+                Timestamp.from(start),
+                end == null ? null : Timestamp.from(end)
         );
+    }
+
+    private static Instant subscriptionEnd(Instant activatedAt, LicenseRow license) {
+        String duration = String.valueOf(license.durationType() == null
+                ? "LEGACY_EXPIRY"
+                : license.durationType()).toUpperCase(Locale.ROOT);
+        return switch (duration) {
+            case "MONTHLY" -> activatedAt.atZone(ZoneOffset.UTC).plusMonths(1).toInstant();
+            case "YEARLY" -> activatedAt.atZone(ZoneOffset.UTC).plusYears(1).toInstant();
+            case "LIFETIME" -> null;
+            default -> license.expiresAt();
+        };
     }
 
     static String normalizeLicenseKey(String value) {
@@ -219,6 +315,14 @@ public class LicenseService {
         }
     }
 
+    private static String normalizeDeviceId(String value) {
+        String clean = String.valueOf(value == null ? "" : value).trim();
+        if (clean.length() > 100) {
+            return clean.substring(0, 100);
+        }
+        return clean;
+    }
+
     private static Instant toInstant(Timestamp timestamp) {
         return timestamp == null ? null : timestamp.toInstant();
     }
@@ -226,10 +330,19 @@ public class LicenseService {
     private record LicenseRow(
             long id,
             String planCode,
+            String durationType,
             String status,
             int maxActivations,
             int activationCount,
+            Instant startsAt,
             Instant expiresAt
+    ) {
+    }
+
+    private record ActivationRow(
+            long id,
+            String status,
+            Instant activatedAt
     ) {
     }
 }

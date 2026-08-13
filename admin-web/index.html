@@ -50,7 +50,9 @@
         <button class="nav-item" data-view="audit"><span>≡</span> Audit log</button>
         <div class="nav-separator">COMMERCIAL</div>
         <button class="nav-item" data-view="plans"><span>◇</span> Plans & Features <em>14.6</em></button>
-        <button class="nav-item disabled" disabled><span>₫</span> Pricing <em>14.7</em></button>
+        <button class="nav-item" data-view="pricing"><span>₫</span> Pricing <em>14.7</em></button>
+        <button class="nav-item" data-view="licenses"><span>⌁</span> Licenses <em>14.7.4</em></button>
+        <button class="nav-item" data-view="transactions"><span>⇄</span> Transactions <em>14.7.5</em></button>
         <button class="nav-item disabled" disabled><span>∿</span> AI Costs <em>14.8</em></button>
       </nav>
       <div class="sidebar-footer">
@@ -89,10 +91,49 @@
 
       <section id="plansView" class="view hidden">
         <div class="plans-toolbar card">
-          <div><span class="eyebrow">ENTITLEMENTS</span><h3>Plans & Features</h3><small>Feature/limit được lấy từ backend. Pricing được quản lý ở Batch 14.7.</small></div>
+          <div><span class="eyebrow">ENTITLEMENTS</span><h3>Plans & Features</h3><small>Feature/limit được lấy từ backend và tách riêng khỏi Pricing.</small></div>
           <button id="createPlanButton" class="primary compact">+ Tạo plan</button>
         </div>
         <div class="card table-card"><div id="plansTable"></div></div>
+      </section>
+
+      <section id="pricingView" class="view hidden">
+        <div class="pricing-toolbar card">
+          <div><span class="eyebrow">COMMERCIAL PRICING</span><h3>Pricing</h3><small>Quản lý giá theo plan, chu kỳ, currency và thời gian hiệu lực.</small></div>
+          <div class="pricing-actions">
+            <select id="pricingPlanFilter"><option value="">Tất cả plan</option></select>
+            <button id="createPriceButton" class="primary compact">+ Tạo giá</button>
+          </div>
+        </div>
+        <div id="pricingMetrics" class="metric-grid pricing-metrics"></div>
+        <div class="card table-card"><div id="pricesTable"></div></div>
+      </section>
+
+
+      <section id="licensesView" class="view hidden">
+        <div class="license-toolbar card">
+          <div><span class="eyebrow">LICENSE OPERATIONS</span><h3>Licenses</h3><small>Tạo key, quản lý activation và revoke quyền license.</small></div>
+          <div class="license-actions">
+            <select id="licensePlanFilter"><option value="">Tất cả plan</option></select>
+            <select id="licenseStatusFilter"><option value="">Tất cả trạng thái</option><option value="AVAILABLE">AVAILABLE</option><option value="DISABLED">DISABLED</option></select>
+            <button id="createLicenseButton" class="primary compact">+ Tạo license</button>
+          </div>
+        </div>
+        <div id="licenseMetrics" class="metric-grid pricing-metrics"></div>
+        <div class="card table-card"><div id="licensesTable"></div></div>
+      </section>
+
+      <section id="transactionsView" class="view hidden">
+        <div class="transaction-toolbar card">
+          <div><span class="eyebrow">PAYMENT OPERATIONS</span><h3>Transactions</h3><small>Foundation giao dịch thanh toán; gateway thật sẽ tích hợp sau.</small></div>
+          <div class="transaction-actions">
+            <select id="transactionStatusFilter"><option value="">Tất cả trạng thái</option><option value="PENDING">PENDING</option><option value="SUCCEEDED">SUCCEEDED</option><option value="FAILED">FAILED</option><option value="CANCELED">CANCELED</option><option value="REFUNDED">REFUNDED</option></select>
+            <select id="transactionPlanFilter"><option value="">Tất cả plan</option></select>
+            <button id="createTransactionButton" class="primary compact">+ Manual transaction</button>
+          </div>
+        </div>
+        <div id="transactionMetrics" class="metric-grid pricing-metrics"></div>
+        <div class="card table-card"><div id="transactionsTable"></div></div>
       </section>
 
       <section id="auditView" class="view hidden">

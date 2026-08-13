@@ -14,15 +14,27 @@ public class AdminController {
 
     private final AdminGuard adminGuard;
     private final AdminService adminService;
+    private final AdminPricingService pricingService;
+    private final AdminSubscriptionService subscriptionService;
+    private final AdminLicenseService licenseService;
+    private final AdminTransactionService transactionService;
     private final AdminAuditService auditService;
 
     public AdminController(
             AdminGuard adminGuard,
             AdminService adminService,
+            AdminPricingService pricingService,
+            AdminSubscriptionService subscriptionService,
+            AdminLicenseService licenseService,
+            AdminTransactionService transactionService,
             AdminAuditService auditService
     ) {
         this.adminGuard = adminGuard;
         this.adminService = adminService;
+        this.pricingService = pricingService;
+        this.subscriptionService = subscriptionService;
+        this.licenseService = licenseService;
+        this.transactionService = transactionService;
         this.auditService = auditService;
     }
 
@@ -78,6 +90,172 @@ public class AdminController {
         return adminService.updatePlan(actor, planCode, request);
     }
 
+    @GetMapping("/prices")
+    public List<AdminPriceResponse> prices(
+            @RequestParam(defaultValue = "") String planCode,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return pricingService.listPrices(planCode);
+    }
+
+    @GetMapping("/prices/{priceId}")
+    public AdminPriceResponse price(
+            @PathVariable long priceId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return pricingService.price(priceId);
+    }
+
+    @PostMapping("/prices")
+    public AdminPriceResponse createPrice(
+            @Valid @RequestBody AdminPriceCreateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return pricingService.createPrice(actor, request);
+    }
+
+    @PutMapping("/prices/{priceId}")
+    public AdminPriceResponse updatePrice(
+            @PathVariable long priceId,
+            @Valid @RequestBody AdminPriceUpdateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return pricingService.updatePrice(actor, priceId, request);
+    }
+
+    @GetMapping("/licenses")
+    public List<AdminLicenseResponse> licenses(
+            @RequestParam(defaultValue = "") String planCode,
+            @RequestParam(defaultValue = "") String status,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return licenseService.list(planCode, status);
+    }
+
+    @GetMapping("/licenses/{licenseId}")
+    public AdminLicenseResponse license(
+            @PathVariable long licenseId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return licenseService.detail(licenseId);
+    }
+
+    @PostMapping("/licenses")
+    public AdminLicenseResponse createLicense(
+            @Valid @RequestBody AdminLicenseCreateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return licenseService.create(actor, request);
+    }
+
+    @PutMapping("/licenses/{licenseId}")
+    public AdminLicenseResponse updateLicense(
+            @PathVariable long licenseId,
+            @Valid @RequestBody AdminLicenseUpdateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return licenseService.update(actor, licenseId, request);
+    }
+
+    @PostMapping("/licenses/{licenseId}/activations/{activationId}/revoke")
+    public AdminLicenseResponse revokeLicenseActivation(
+            @PathVariable long licenseId,
+            @PathVariable long activationId,
+            @Valid @RequestBody AdminReasonRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return licenseService.revokeActivation(actor, licenseId, activationId, request);
+    }
+
+    @PostMapping("/licenses/{licenseId}/activations/reset")
+    public AdminLicenseResponse resetLicenseActivations(
+            @PathVariable long licenseId,
+            @Valid @RequestBody AdminReasonRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return licenseService.resetActivations(actor, licenseId, request);
+    }
+
+    @GetMapping("/transactions")
+    public List<AdminTransactionResponse> transactions(
+            @RequestParam(defaultValue = "") String status,
+            @RequestParam(defaultValue = "") String planCode,
+            @RequestParam(defaultValue = "") String provider,
+            @RequestParam(defaultValue = "200") int limit,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return transactionService.list(status, planCode, provider, limit);
+    }
+
+    @GetMapping("/transactions/{transactionId}")
+    public AdminTransactionResponse transaction(
+            @PathVariable long transactionId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return transactionService.detail(transactionId);
+    }
+
+    @PostMapping("/transactions/manual")
+    public AdminTransactionResponse createManualTransaction(
+            @Valid @RequestBody AdminTransactionCreateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return transactionService.createManual(actor, request);
+    }
+
+    @PostMapping("/transactions/{transactionId}/settle")
+    public AdminTransactionResponse settleTransaction(
+            @PathVariable long transactionId,
+            @Valid @RequestBody AdminTransactionSettleRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return transactionService.settle(actor, transactionId, request);
+    }
+
+    @PostMapping("/transactions/{transactionId}/fail")
+    public AdminTransactionResponse failTransaction(
+            @PathVariable long transactionId,
+            @Valid @RequestBody AdminTransactionFailureRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return transactionService.fail(actor, transactionId, request);
+    }
+
+    @PostMapping("/transactions/{transactionId}/cancel")
+    public AdminTransactionResponse cancelTransaction(
+            @PathVariable long transactionId,
+            @Valid @RequestBody AdminReasonRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return transactionService.cancel(actor, transactionId, request);
+    }
+
+    @PostMapping("/transactions/{transactionId}/refund")
+    public AdminTransactionResponse refundTransaction(
+            @PathVariable long transactionId,
+            @Valid @RequestBody AdminReasonRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return transactionService.refund(actor, transactionId, request);
+    }
+
     @GetMapping("/users")
     public AdminUserPageResponse users(
             @RequestParam(defaultValue = "") String query,
@@ -88,6 +266,46 @@ public class AdminController {
     ) {
         adminGuard.requireAdmin(jwt);
         return adminService.listUsers(query, status, page, size);
+    }
+
+
+    @GetMapping("/users/{userId}/subscriptions")
+    public List<AdminSubscriptionResponse> subscriptions(
+            @PathVariable long userId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return subscriptionService.listForUser(userId);
+    }
+
+    @PostMapping("/users/{userId}/subscriptions")
+    public AdminSubscriptionResponse createSubscription(
+            @PathVariable long userId,
+            @Valid @RequestBody AdminSubscriptionCreateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return subscriptionService.create(actor, userId, request);
+    }
+
+    @PostMapping("/subscriptions/{subscriptionId}/extend")
+    public AdminSubscriptionResponse extendSubscription(
+            @PathVariable long subscriptionId,
+            @Valid @RequestBody AdminSubscriptionExtendRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return subscriptionService.extend(actor, subscriptionId, request);
+    }
+
+    @PostMapping("/subscriptions/{subscriptionId}/cancel")
+    public AdminSubscriptionResponse cancelSubscription(
+            @PathVariable long subscriptionId,
+            @Valid @RequestBody AdminReasonRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return subscriptionService.cancel(actor, subscriptionId, request);
     }
 
     @GetMapping("/users/{userId}")

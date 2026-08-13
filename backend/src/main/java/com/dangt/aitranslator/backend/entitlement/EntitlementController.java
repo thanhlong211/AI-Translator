@@ -51,6 +51,6 @@ public class EntitlementController {
             @Valid @RequestBody LicenseActivationRequest request
     ) {
         UserAccount user = currentUserService.requireActiveUser(jwt);
-        return licenseService.activate(user, request.licenseKey());
+        return licenseService.activate(user, request.licenseKey(), request.deviceId());
     }
 }

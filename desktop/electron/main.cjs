@@ -635,6 +635,20 @@ function requireDesktopFeatureCapability(
   );
 }
 
+async function requireFreshDesktopFeatureCapability(
+  featureKey,
+  { notify = true } = {}
+) {
+  await refreshAccountEntitlements({
+    silent: true,
+  });
+
+  return requireDesktopFeatureCapability(
+    featureKey,
+    { notify }
+  );
+}
+
 function getMangaContinuousPublicState() {
   return {
     available:
@@ -3495,6 +3509,8 @@ async function activateDesktopLicense(
           JSON.stringify({
             licenseKey:
               cleanKey,
+            deviceId:
+              await ensureDeviceId(),
           }),
       }
     );
@@ -5283,11 +5299,11 @@ async function runShortcutScan(
     ensureWorkspaceScanAllowed();
 
     if (mode === "panel") {
-      requireDesktopFeatureCapability(
+      await requireFreshDesktopFeatureCapability(
         "mangaPanel"
       );
     } else if (mode === "study") {
-      requireDesktopFeatureCapability(
+      await requireFreshDesktopFeatureCapability(
         "studyMode"
       );
     }
@@ -5992,6 +6008,12 @@ function createWindow() {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
+  });
+
+  mainWindow.on("focus", () => {
+    void refreshAccountEntitlements({
+      silent: true,
+    });
   });
 
   mainWindow.on("close", (event) => {
@@ -7113,6 +7135,9 @@ async function readNovelDocumentPath(
   requestedFormat = null
 ) {
   await ensureAuthenticated();
+  await refreshAccountEntitlements({
+    silent: true,
+  });
 
   const payload = await readDocumentPath(
     filePathValue,
@@ -7130,6 +7155,9 @@ async function openNovelDocumentFiles(
   requestedFormat
 ) {
   await ensureAuthenticated();
+  await refreshAccountEntitlements({
+    silent: true,
+  });
 
   const payload = await openDocumentFiles({
     dialog,
@@ -7164,7 +7192,7 @@ async function ocrNovelPdfPages(
   countValue = 3
 ) {
   await ensureAuthenticated();
-  requireDesktopFeatureCapability("pdfOcrReader");
+  await requireFreshDesktopFeatureCapability("pdfOcrReader");
 
   const documentPayload = await readDocumentPath(
     filePathValue,
@@ -7295,7 +7323,7 @@ async function translateNovelBlocks(
       payload?.format || "TXT"
     );
 
-  requireDesktopFeatureCapability(
+  await requireFreshDesktopFeatureCapability(
     route.capability
   );
 
@@ -9258,7 +9286,7 @@ async function processMangaPanelTranslation({
   targetWindow = null,
   startNewSession = false,
 } = {}) {
-  requireDesktopFeatureCapability(
+  await requireFreshDesktopFeatureCapability(
     startNewSession
       ? "mangaPanel"
       : "mangaSession",
@@ -9637,7 +9665,7 @@ async function runMangaSessionNextPage(
 
   await ensureAuthenticated();
   ensureWorkspaceScanAllowed();
-  requireDesktopFeatureCapability(
+  await requireFreshDesktopFeatureCapability(
     "mangaSession"
   );
 
@@ -10465,7 +10493,7 @@ ipcMain.handle(
   async (_event, options) => {
     await ensureAuthenticated();
     ensureWorkspaceScanAllowed();
-    requireDesktopFeatureCapability(
+    await requireFreshDesktopFeatureCapability(
       "mangaPanel"
     );
 
@@ -10503,8 +10531,17 @@ ipcMain.handle(
 ipcMain.handle(
   "translation:manga-continuous-toggle",
   async (_event, enabled) => {
+    const nextEnabled = Boolean(enabled);
+
+    if (nextEnabled) {
+      await ensureAuthenticated();
+      await requireFreshDesktopFeatureCapability(
+        "continuousManga"
+      );
+    }
+
     return setMangaContinuousEnabled(
-      Boolean(enabled)
+      nextEnabled
     );
   }
 );
@@ -10728,7 +10765,7 @@ ipcMain.handle(
   async (_event, options) => {
     await ensureAuthenticated();
     ensureWorkspaceScanAllowed();
-    requireDesktopFeatureCapability(
+    await requireFreshDesktopFeatureCapability(
       "studyMode"
     );
 
