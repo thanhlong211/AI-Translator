@@ -9,6 +9,28 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
 
+  listNovelDocumentFormats: () => {
+    return ipcRenderer.invoke(
+      "novel:list-formats"
+    );
+  },
+
+  openNovelDocument: (format) => {
+    return ipcRenderer.invoke(
+      "novel:open-document",
+      format
+    );
+  },
+
+  readNovelDocument: (filePath, format) => {
+    return ipcRenderer.invoke(
+      "novel:read-document",
+      filePath,
+      format
+    );
+  },
+
+
   openNovelTxt: () => {
     return ipcRenderer.invoke(
       "novel:open-txt"
