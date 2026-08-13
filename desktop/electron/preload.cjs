@@ -30,6 +30,15 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  ocrNovelPdfPages: (filePath, startPage, count) => {
+    return ipcRenderer.invoke(
+      "novel:ocr-pdf-pages",
+      filePath,
+      startPage,
+      count
+    );
+  },
+
 
   openNovelTxt: () => {
     return ipcRenderer.invoke(

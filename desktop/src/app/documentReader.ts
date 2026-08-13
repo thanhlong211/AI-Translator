@@ -1,4 +1,4 @@
-export type DocumentReaderFormat = "TXT" | "EPUB" | "PDF_TEXT";
+export type DocumentReaderFormat = "TXT" | "EPUB" | "PDF_TEXT" | "PDF_OCR";
 
 export interface DocumentReaderFileInfo {
     path: string;
@@ -21,6 +21,7 @@ export interface DocumentReaderBlock {
     spineIndex?: number;
     sourcePath?: string;
     pageNumber?: number;
+    ocrSource?: boolean;
 }
 
 export interface DocumentReaderChapter {
@@ -45,6 +46,11 @@ export interface DocumentReaderOpenPayload {
         format?: DocumentReaderFormat;
         pageCount?: number;
         textCharacterCount?: number;
+        ocrPages?: number[];
+        ocrPageCount?: number;
+        sampledImagePages?: number;
+        sampledPages?: number;
+        filters?: string[];
     };
     error?: string;
 }
@@ -60,7 +66,8 @@ export interface DocumentReaderFormatDescriptor {
 export const documentReaderFormats: ReadonlyArray<DocumentReaderFormat> = [
     "TXT",
     "EPUB",
-    "PDF_TEXT"
+    "PDF_TEXT",
+    "PDF_OCR"
 ] as const;
 
 export function normalizeDocumentReaderFormat(
@@ -71,6 +78,10 @@ export function normalizeDocumentReaderFormat(
 
     if (normalized === "EPUB") {
         return "EPUB";
+    }
+
+    if (normalized === "PDF_OCR") {
+        return "PDF_OCR";
     }
 
     if (normalized === "PDF_TEXT" || normalized === "PDF") {
@@ -111,7 +122,8 @@ export function normalizeDocumentReaderBlocks(
                     : undefined,
                 pageNumber: Number.isFinite(block.pageNumber)
                     ? Number(block.pageNumber)
-                    : undefined
+                    : undefined,
+                ocrSource: Boolean(block.ocrSource)
             } as DocumentReaderBlock;
         })
         .filter((block) => Boolean(block.text));

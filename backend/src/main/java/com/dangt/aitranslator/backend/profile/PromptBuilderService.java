@@ -225,8 +225,17 @@ public class PromptBuilderService {
 
                     YÊU CẦU BẮT BUỘC:
                     """);
-        } else if (resolvedPurpose == BatchTranslationPurpose.PDF_TEXT) {
-            prompt.append("""
+        } else if (resolvedPurpose == BatchTranslationPurpose.PDF_TEXT
+                || resolvedPurpose == BatchTranslationPurpose.PDF_OCR) {
+            prompt.append(resolvedPurpose == BatchTranslationPurpose.PDF_OCR
+                    ? """
+                    Bạn đang dịch các đoạn văn LIÊN TIẾP được OCR từ cùng một tài liệu PDF scan.
+                    Hãy giữ nhất quán thuật ngữ, tên riêng, đại từ, cấu trúc và giọng văn giữa các đoạn.
+                    Text nguồn có thể có lỗi OCR nhỏ; chỉ sửa lỗi hiển nhiên khi ngữ cảnh xác nhận, không tự bịa nội dung bị thiếu.
+
+                    YÊU CẦU BẮT BUỘC:
+                    """
+                    : """
                     Bạn đang dịch các đoạn văn LIÊN TIẾP được trích xuất từ cùng một tài liệu PDF có text.
                     Hãy giữ nhất quán thuật ngữ, tên riêng, đại từ, cấu trúc và giọng văn giữa các đoạn.
 
@@ -271,11 +280,12 @@ public class PromptBuilderService {
                     - Giữ văn phong tự nhiên như văn xuôi, không biến thành giải thích hay tóm tắt.
                     - Nếu một câu/ý nối qua ranh giới block, ưu tiên nghĩa tự nhiên nhưng KHÔNG gộp output của hai block.
                     """);
-        } else if (resolvedPurpose == BatchTranslationPurpose.PDF_TEXT) {
+        } else if (resolvedPurpose == BatchTranslationPurpose.PDF_TEXT
+                || resolvedPurpose == BatchTranslationPurpose.PDF_OCR) {
             prompt.append("""
                     - Các block là các đoạn liên tiếp trong tài liệu; dùng block trước/sau để hiểu ngữ cảnh nhưng vẫn dịch từng block riêng.
                     - Giữ nguyên ý nghĩa và cấp độ văn phong của tài liệu; không biến thành giải thích hay tóm tắt.
-                    - Nếu câu bị ngắt do layout PDF, ưu tiên nghĩa tự nhiên nhưng KHÔNG gộp output của hai block.
+                    - Nếu câu bị ngắt do layout/OCR PDF, ưu tiên nghĩa tự nhiên nhưng KHÔNG gộp output của hai block.
                     """);
         } else {
             prompt.append("""
