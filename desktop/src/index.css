@@ -5472,3 +5472,35 @@ button:disabled {
     font-size: 0.67rem;
     letter-spacing: 0.02em;
 }
+
+/* Batch 14.3 · PDF OCR Reader */
+.novel-file-icon.pdf_ocr,
+.novel-library-cover.pdf_ocr {
+    border-style: dashed;
+    border-width: 1px;
+    border-color: var(--novel-border-strong);
+    background: var(--novel-surface-raised);
+    color: var(--novel-accent);
+}
+
+.novel-file-icon.pdf_ocr {
+    font-size: 0.62rem;
+    letter-spacing: 0.015em;
+}
+
+.novel-page-chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 20px;
+    padding: 2px 7px;
+    border: 1px solid var(--novel-border);
+    border-radius: 999px;
+    background: var(--novel-surface-soft);
+    color: var(--novel-muted);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.pdf-ocr-next-pages {
+    white-space: nowrap;
+}

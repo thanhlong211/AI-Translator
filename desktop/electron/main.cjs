@@ -67,6 +67,11 @@ const {
 } = require("./documentReaderCore.cjs");
 
 const {
+  extractPdfPagePng,
+  ocrResultToPageBlocks,
+} = require("./pdfOcrParser.cjs");
+
+const {
   startForegroundWindowTracker,
   stopForegroundWindowTracker,
   getForegroundWindowSnapshot,
@@ -308,6 +313,7 @@ const DEFAULT_ACCOUNT_ENTITLEMENTS = Object.freeze({
     novelReaderTxt: false,
     novelReaderEpub: false,
     pdfTextReader: false,
+    pdfOcrReader: false,
   }),
   limits: Object.freeze({
     monthlyTranslations: 300,
@@ -572,6 +578,11 @@ const PAID_FEATURE_REQUIREMENTS = Object.freeze({
   pdfTextReader: Object.freeze({
     featureKey: "pdfTextReader",
     featureName: "PDF Text Reader",
+    requiredPlan: "PRO",
+  }),
+  pdfOcrReader: Object.freeze({
+    featureKey: "pdfOcrReader",
+    featureName: "PDF OCR Reader",
     requiredPlan: "PRO",
   }),
 });
@@ -6634,13 +6645,167 @@ function novelReaderOwnerWindow() {
   );
 }
 
+function pdfOcrCacheDir() {
+  return path.join(
+    app.getPath("userData"),
+    "pdf-ocr-cache"
+  );
+}
+
+async function pdfOcrFileIdentity(filePathValue) {
+  const filePath = path.resolve(String(filePathValue || ""));
+  const stat = await fs.stat(filePath);
+  const identity = `${filePath}\n${stat.size}\n${stat.mtime.toISOString()}`;
+  const key = crypto
+    .createHash("sha256")
+    .update(identity, "utf8")
+    .digest("hex");
+  return {
+    filePath,
+    sizeBytes: stat.size,
+    modifiedAt: stat.mtime.toISOString(),
+    key,
+  };
+}
+
+async function loadPdfOcrCache(filePathValue) {
+  const identity = await pdfOcrFileIdentity(filePathValue);
+  const cachePath = path.join(pdfOcrCacheDir(), `${identity.key}.json`);
+  try {
+    const raw = await fs.readFile(cachePath, "utf8");
+    const parsed = JSON.parse(raw);
+    if (
+      parsed?.version !== 1 ||
+      parsed?.modifiedAt !== identity.modifiedAt ||
+      Number(parsed?.sizeBytes) !== identity.sizeBytes
+    ) {
+      return {
+        identity,
+        cachePath,
+        cache: {
+          version: 1,
+          modifiedAt: identity.modifiedAt,
+          sizeBytes: identity.sizeBytes,
+          pages: {},
+        },
+      };
+    }
+    return {
+      identity,
+      cachePath,
+      cache: {
+        version: 1,
+        modifiedAt: identity.modifiedAt,
+        sizeBytes: identity.sizeBytes,
+        pages:
+          parsed.pages && typeof parsed.pages === "object"
+            ? parsed.pages
+            : {},
+      },
+    };
+  } catch (error) {
+    if (error?.code !== "ENOENT") {
+      console.warn("PDF OCR CACHE READ:", error?.message || error);
+    }
+    return {
+      identity,
+      cachePath,
+      cache: {
+        version: 1,
+        modifiedAt: identity.modifiedAt,
+        sizeBytes: identity.sizeBytes,
+        pages: {},
+      },
+    };
+  }
+}
+
+async function savePdfOcrCache(cacheState) {
+  await fs.mkdir(pdfOcrCacheDir(), { recursive: true });
+  const temporary = `${cacheState.cachePath}.tmp`;
+  await fs.writeFile(
+    temporary,
+    JSON.stringify(cacheState.cache),
+    "utf8"
+  );
+  await fs.rename(temporary, cacheState.cachePath);
+}
+
+function mergePdfOcrCachedBlocks(cache, pageCount = 0) {
+  const pages = Object.entries(cache?.pages || {})
+    .map(([pageNumber, value]) => ({
+      pageNumber: Number(pageNumber),
+      blocks: Array.isArray(value?.blocks) ? value.blocks : [],
+      ocrAt: Number(value?.ocrAt || 0),
+    }))
+    .filter((page) => Number.isFinite(page.pageNumber) && page.pageNumber > 0)
+    .sort((a, b) => a.pageNumber - b.pageNumber);
+
+  const blocks = [];
+  for (const page of pages) {
+    for (const block of page.blocks) {
+      const text = String(block?.text || "").trim();
+      if (!text) continue;
+      blocks.push({
+        ...block,
+        id:
+          String(block?.id || "").trim() ||
+          `pdf-ocr-p${page.pageNumber}-b${blocks.length + 1}`,
+        index: blocks.length,
+        text,
+        heading: false,
+        pageNumber: page.pageNumber,
+        sourcePath: `page:${page.pageNumber}`,
+        ocrSource: true,
+      });
+    }
+  }
+
+  return {
+    blocks,
+    chapters: pages
+      .filter((page) => page.blocks.some((block) => String(block?.text || "").trim()))
+      .map((page) => {
+        const index = blocks.findIndex((block) => block.pageNumber === page.pageNumber);
+        return {
+          label: `Trang ${page.pageNumber}`,
+          index: Math.max(0, index),
+          pageNumber: page.pageNumber,
+          sourcePath: `page:${page.pageNumber}`,
+        };
+      }),
+    ocrPages: pages.map((page) => page.pageNumber),
+    pageCount: Number(pageCount || 0),
+  };
+}
+
+async function attachPdfOcrCache(payload) {
+  if (payload?.file?.format !== "PDF_OCR") return payload;
+  const cacheState = await loadPdfOcrCache(payload.file.path);
+  const merged = mergePdfOcrCachedBlocks(
+    cacheState.cache,
+    payload?.metadata?.pageCount
+  );
+  return {
+    ...payload,
+    blocks: merged.blocks,
+    chapters: merged.chapters,
+    metadata: {
+      ...(payload.metadata || {}),
+      pageCount: merged.pageCount || payload?.metadata?.pageCount || 0,
+      ocrPages: merged.ocrPages,
+      ocrPageCount: merged.ocrPages.length,
+    },
+  };
+}
+
 async function readNovelDocumentPath(
   filePathValue,
   requestedFormat = null
 ) {
   await ensureAuthenticated();
 
-  return readDocumentPath(
+  const payload = await readDocumentPath(
     filePathValue,
     {
       requestedFormat,
@@ -6648,6 +6813,8 @@ async function readNovelDocumentPath(
         requireDesktopFeatureCapability,
     }
   );
+
+  return attachPdfOcrCache(payload);
 }
 
 async function openNovelDocumentFiles(
@@ -6655,7 +6822,7 @@ async function openNovelDocumentFiles(
 ) {
   await ensureAuthenticated();
 
-  return openDocumentFiles({
+  const payload = await openDocumentFiles({
     dialog,
     ownerWindow:
       novelReaderOwnerWindow(),
@@ -6663,6 +6830,122 @@ async function openNovelDocumentFiles(
     requireCapability:
       requireDesktopFeatureCapability,
   });
+
+  if (requestedFormat === "PDF_OCR") {
+    if (Array.isArray(payload?.files)) {
+      const files = [];
+      for (const item of payload.files) {
+        files.push(await attachPdfOcrCache(item));
+      }
+      return {
+        ...files[0],
+        files,
+        errors: payload.errors || [],
+      };
+    }
+    return attachPdfOcrCache(payload);
+  }
+
+  return payload;
+}
+
+async function ocrNovelPdfPages(
+  filePathValue,
+  startPageValue = 1,
+  countValue = 3
+) {
+  await ensureAuthenticated();
+  requireDesktopFeatureCapability("pdfOcrReader");
+
+  const documentPayload = await readDocumentPath(
+    filePathValue,
+    {
+      requestedFormat: "PDF_OCR",
+      requireCapability:
+        requireDesktopFeatureCapability,
+    }
+  );
+
+  const pageCount = Math.max(
+    1,
+    Number(documentPayload?.metadata?.pageCount || 1)
+  );
+  const startPage = Math.max(
+    1,
+    Math.min(pageCount, Number(startPageValue) || 1)
+  );
+  const count = Math.max(1, Math.min(4, Number(countValue) || 3));
+  const endPage = Math.min(pageCount, startPage + count - 1);
+  const cacheState = await loadPdfOcrCache(filePathValue);
+  const pdfBuffer = await fs.readFile(cacheState.identity.filePath);
+  let processed = 0;
+  let cacheHits = 0;
+  const failures = [];
+
+  for (let pageNumber = startPage; pageNumber <= endPage; pageNumber += 1) {
+    const cached = cacheState.cache.pages[String(pageNumber)];
+    if (Array.isArray(cached?.blocks) && cached.blocks.length) {
+      cacheHits += 1;
+      continue;
+    }
+
+    let temporaryPath = null;
+    try {
+      const rendered = await extractPdfPagePng(pdfBuffer, pageNumber);
+      const temporaryName = `ai-translator-pdf-ocr-${process.pid}-${Date.now()}-${pageNumber}.png`;
+      temporaryPath = path.join(os.tmpdir(), temporaryName);
+      await fs.writeFile(temporaryPath, rendered.png);
+
+      const rawOcr = await requestOcr(temporaryPath);
+      const cleanOcr = cleanOcrResult(rawOcr);
+      const blocks = ocrResultToPageBlocks(
+        cleanOcr,
+        pageNumber,
+        rendered.width,
+        rendered.height
+      );
+
+      cacheState.cache.pages[String(pageNumber)] = {
+        blocks,
+        ocrAt: Date.now(),
+        lineCount: Array.isArray(cleanOcr?.lines) ? cleanOcr.lines.length : 0,
+      };
+      processed += 1;
+    } catch (error) {
+      failures.push({
+        pageNumber,
+        error: error instanceof Error ? error.message : String(error),
+      });
+    } finally {
+      if (temporaryPath) {
+        await fs.unlink(temporaryPath).catch(() => {});
+      }
+    }
+  }
+
+  await savePdfOcrCache(cacheState);
+  const merged = mergePdfOcrCachedBlocks(cacheState.cache, pageCount);
+  return {
+    success: true,
+    file: documentPayload.file,
+    document: documentPayload.file,
+    blocks: merged.blocks,
+    chapters: merged.chapters,
+    metadata: {
+      ...(documentPayload.metadata || {}),
+      pageCount,
+      ocrPages: merged.ocrPages,
+      ocrPageCount: merged.ocrPages.length,
+    },
+    ocr: {
+      startPage,
+      endPage,
+      requestedPages: endPage - startPage + 1,
+      processed,
+      cacheHits,
+      failures,
+    },
+  };
 }
 
 // Legacy wrappers are intentionally kept during the Reader refactor so an
@@ -11044,6 +11327,17 @@ ipcMain.handle(
     return readNovelDocumentPath(
       filePath,
       format
+    );
+  }
+);
+
+ipcMain.handle(
+  "novel:ocr-pdf-pages",
+  async (_event, filePath, startPage, count) => {
+    return ocrNovelPdfPages(
+      filePath,
+      startPage,
+      count
     );
   }
 );

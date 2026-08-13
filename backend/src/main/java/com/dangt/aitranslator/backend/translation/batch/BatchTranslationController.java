@@ -103,6 +103,15 @@ public class BatchTranslationController {
             );
         }
 
+        if (request.purpose() == BatchTranslationPurpose.PDF_OCR) {
+            entitlementService.requireFeature(
+                    user,
+                    "pdfOcrReader",
+                    "PDF OCR Reader",
+                    "PRO"
+            );
+        }
+
         entitlementService
                 .requireTranslationQuota(user);
 

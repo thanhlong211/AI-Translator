@@ -90,6 +90,9 @@ interface NovelLibraryEntry {
     targetLanguage: TargetTranslationLanguage;
     profileId: number | null;
     readerPreferences: NovelReaderPreferences;
+    pageCount?: number;
+    ocrPages?: number[];
+    currentPage?: number;
 }
 
 type NovelReaderTheme = "light" | "sepia" | "dark";
@@ -306,7 +309,16 @@ function loadNovelLibrary(): NovelLibraryEntry[] {
                 readerPreferences: {
                     ...DEFAULT_READER_PREFERENCES,
                     ...(item.readerPreferences || {})
-                }
+                },
+                pageCount: Number.isFinite(item.pageCount)
+                    ? Number(item.pageCount)
+                    : undefined,
+                ocrPages: Array.isArray(item.ocrPages)
+                    ? item.ocrPages.filter(Number.isFinite).map(Number)
+                    : [],
+                currentPage: Number.isFinite(item.currentPage)
+                    ? Number(item.currentPage)
+                    : undefined
             }))
             .sort((a, b) => b.lastOpenedAt - a.lastOpenedAt)
             .slice(0, MAX_LIBRARY_ITEMS);
@@ -368,7 +380,7 @@ let novelSessionCache: NovelSessionCache = {
     translations: {},
     currentIndex: 0,
     windowStart: 0,
-    status: "Mở hoặc thêm TXT / EPUB để bắt đầu đọc."
+    status: "Mở hoặc thêm TXT / EPUB / PDF để bắt đầu đọc."
 };
 
 function translationMatchesLanguagePair(
@@ -423,6 +435,12 @@ function languageToHtmlLang(
             if (/[\u3400-\u9FFF]/u.test(text)) return "zh";
             return "und";
     }
+}
+
+function documentFormatLabel(format: NovelDocumentFormat | undefined) {
+    if (format === "PDF_TEXT") return "PDF Text";
+    if (format === "PDF_OCR") return "PDF OCR";
+    return format || "TXT";
 }
 
 function formatFileSize(bytes: number) {
@@ -601,6 +619,11 @@ export function NovelReaderPage({
     ] = useState(false);
 
     const [
+        isOcrProcessing,
+        setIsOcrProcessing
+    ] = useState(false);
+
+    const [
         status,
         setStatus
     ] = useState(
@@ -642,7 +665,12 @@ export function NovelReaderPage({
         entitlements.features.pdfTextReader
     );
 
-    const novelAvailable = txtAvailable || epubAvailable || pdfAvailable;
+    const pdfOcrAvailable = Boolean(
+        (entitlements.features as Record<string, boolean>).pdfOcrReader
+    );
+
+    const novelAvailable =
+        txtAvailable || epubAvailable || pdfAvailable || pdfOcrAvailable;
 
     const chapters = useMemo(
         () =>
@@ -811,14 +839,34 @@ export function NovelReaderPage({
                     ? {
                           ...entry,
                           currentIndex,
-                          currentChapter: chapterAtIndex(
-                              blocks,
-                              currentIndex
-                          ),
+                          currentChapter:
+                              file.format === "PDF_OCR"
+                                  ? `Trang ${blocks[currentIndex]?.pageNumber || entry.currentPage || 1}`
+                                  : chapterAtIndex(
+                                        blocks,
+                                        currentIndex
+                                    ),
                           sourceLanguage,
                           targetLanguage,
                           profileId: activeProfile?.id ?? null,
-                          readerPreferences
+                          readerPreferences,
+                          totalBlocks: blocks.length,
+                          currentPage:
+                              blocks[currentIndex]?.pageNumber ||
+                              entry.currentPage,
+                          ocrPages:
+                              file.format === "PDF_OCR"
+                                  ? Array.from(
+                                        new Set(
+                                            blocks
+                                                .map((block) => block.pageNumber)
+                                                .filter(
+                                                    (value): value is number =>
+                                                        Number.isFinite(value)
+                                                )
+                                        )
+                                    ).sort((a, b) => a - b)
+                                  : entry.ocrPages
                       }
                     : entry
             )
@@ -937,7 +985,17 @@ export function NovelReaderPage({
                 readerPreferences:
                     options?.readerPreferences ||
                     existing?.readerPreferences ||
-                    readerPreferences
+                    readerPreferences,
+                pageCount:
+                    options?.pageCount ??
+                    existing?.pageCount,
+                ocrPages:
+                    options?.ocrPages ||
+                    existing?.ocrPages ||
+                    [],
+                currentPage:
+                    options?.currentPage ??
+                    existing?.currentPage
             };
 
             return [
@@ -1024,17 +1082,32 @@ export function NovelReaderPage({
             {
                 ...(knownEntry || {}),
                 currentIndex: restoredIndex,
-                currentChapter: chapterAtIndex(
-                    parsed,
-                    restoredIndex
-                ),
-                lastOpenedAt: Date.now()
+                currentChapter:
+                    nextFile.format === "PDF_OCR"
+                        ? `Trang ${parsed[restoredIndex]?.pageNumber || 1}`
+                        : chapterAtIndex(
+                              parsed,
+                              restoredIndex
+                          ),
+                lastOpenedAt: Date.now(),
+                pageCount:
+                    Number(normalizedPayload.metadata?.pageCount || 0) ||
+                    knownEntry?.pageCount,
+                ocrPages:
+                    Array.isArray(normalizedPayload.metadata?.ocrPages)
+                        ? normalizedPayload.metadata?.ocrPages
+                        : knownEntry?.ocrPages || [],
+                currentPage:
+                    parsed[restoredIndex]?.pageNumber ||
+                    knownEntry?.currentPage
             }
         );
         setStatus(
-            saved || knownEntry
-                ? `Tiếp tục đọc · đoạn ${restoredIndex + 1}/${parsed.length}.`
-                : `Đã mở ${parsed.length} đoạn văn.`
+            nextFile.format === "PDF_OCR"
+                ? `PDF OCR · ${normalizedPayload.metadata?.ocrPageCount || normalizedPayload.metadata?.ocrPages?.length || 0}/${normalizedPayload.metadata?.pageCount || "?"} trang đã OCR · ${parsed.length} đoạn.`
+                : saved || knownEntry
+                    ? `Tiếp tục đọc · đoạn ${restoredIndex + 1}/${parsed.length}.`
+                    : `Đã mở ${parsed.length} đoạn văn.`
         );
     }
 
@@ -1262,12 +1335,179 @@ export function NovelReaderPage({
         }
     }
 
+    async function runPdfOcrPages(
+        pdfFile: NovelFileInfo,
+        startPage: number,
+        count = 3
+    ): Promise<NovelOpenPayload> {
+        if (!pdfOcrAvailable) {
+            onUpgrade();
+            throw new Error("PDF OCR Reader yêu cầu gói PRO.");
+        }
+
+        if (!api.ocrNovelPdfPages) {
+            throw new Error(
+                "Electron preload chưa có PDF OCR API. Hãy restart Desktop sau khi áp patch."
+            );
+        }
+
+        try {
+            setIsOcrProcessing(true);
+            setStatus(
+                `Đang OCR PDF · trang ${startPage}–${startPage + count - 1}...`
+            );
+
+            const result = await api.ocrNovelPdfPages(
+                pdfFile.path,
+                startPage,
+                count
+            ) as NovelOpenPayload & {
+                ocr?: {
+                    processed?: number;
+                    cacheHits?: number;
+                    failures?: Array<{ pageNumber: number; error: string }>;
+                };
+            };
+
+            if (!result?.success) {
+                throw new Error(result?.error || "PDF OCR thất bại.");
+            }
+
+            const parsed = normalizeDocumentReaderBlocks(result.blocks);
+            if (!parsed.length) {
+                const firstFailure = result.ocr?.failures?.[0];
+                throw new Error(
+                    firstFailure?.error ||
+                    "Không nhận diện được text ở các trang PDF đã chọn."
+                );
+            }
+
+            return result;
+        } finally {
+            setIsOcrProcessing(false);
+        }
+    }
+
+    async function openPdfOcr() {
+        if (!pdfOcrAvailable) {
+            onUpgrade();
+            return;
+        }
+
+        try {
+            setIsOpening(true);
+            setStatus("Đang kiểm tra PDF scan...");
+
+            const result = await api.openNovelDocument?.("PDF_OCR");
+
+            if (result?.canceled) {
+                setStatus("Đã hủy chọn PDF OCR.");
+                return;
+            }
+
+            const items: NovelOpenPayload[] =
+                Array.isArray(result?.files) && result.files.length
+                    ? result.files
+                    : [result];
+
+            let firstPayload: NovelOpenPayload | null = null;
+            let addedCount = 0;
+
+            for (const item of items) {
+                if (!item?.success || !item.file) continue;
+                const parsed = normalizeDocumentReaderBlocks(item.blocks);
+                upsertLibraryItem(item.file, parsed, {
+                    lastOpenedAt: Date.now(),
+                    pageCount: Number(item.metadata?.pageCount || 0) || undefined,
+                    ocrPages: Array.isArray(item.metadata?.ocrPages)
+                        ? item.metadata?.ocrPages
+                        : [],
+                    currentPage: parsed[0]?.pageNumber || 1
+                });
+                addedCount += 1;
+                firstPayload ||= item;
+            }
+
+            if (!firstPayload?.file) {
+                throw new Error(
+                    result?.error || "Không mở được PDF scan nào."
+                );
+            }
+
+            let readyPayload = firstPayload;
+            if (!normalizeDocumentReaderBlocks(firstPayload.blocks).length) {
+                readyPayload = await runPdfOcrPages(
+                    firstPayload.file,
+                    1,
+                    3
+                );
+            }
+
+            loadNovelPayload(readyPayload, null);
+            setStatus(
+                addedCount > 1
+                    ? `Đã thêm ${addedCount} PDF scan vào Library · đã OCR các trang đầu của ${firstPayload.file.title || firstPayload.file.name}.`
+                    : `Đã mở PDF scan · OCR cache sẽ được tái sử dụng ở lần đọc sau.`
+            );
+        } catch (error) {
+            setStatus(
+                error instanceof Error ? error.message : String(error)
+            );
+        } finally {
+            setIsOpening(false);
+        }
+    }
+
+    async function ocrNextPdfPages() {
+        if (!file || file.format !== "PDF_OCR") return;
+
+        const entry = library.find((item) => item.path === file.path) || null;
+        const pageCount = Number(entry?.pageCount || 0);
+        const knownPages = Array.from(
+            new Set(
+                blocks
+                    .map((block) => block.pageNumber)
+                    .filter((value): value is number => Number.isFinite(value))
+            )
+        ).sort((a, b) => a - b);
+        const nextPage = knownPages.length
+            ? Math.max(...knownPages) + 1
+            : 1;
+
+        if (pageCount > 0 && nextPage > pageCount) {
+            setStatus(`PDF OCR đã xử lý đủ ${pageCount} trang.`);
+            return;
+        }
+
+        try {
+            const result = await runPdfOcrPages(file, nextPage, 3);
+            loadNovelPayload(
+                result,
+                entry
+                    ? { ...entry, currentIndex }
+                    : null
+            );
+            const failures = (result as any)?.ocr?.failures || [];
+            if (failures.length) {
+                setStatus(
+                    `OCR đã cập nhật Reader nhưng ${failures.length} trang không đọc được. ${failures[0]?.error || ""}`
+                );
+            }
+        } catch (error) {
+            setStatus(
+                error instanceof Error ? error.message : String(error)
+            );
+        }
+    }
+
     async function openLibraryNovel(entry: NovelLibraryEntry) {
         const canOpen = entry.format === "EPUB"
             ? epubAvailable
             : entry.format === "PDF_TEXT"
                 ? pdfAvailable
-                : txtAvailable;
+                : entry.format === "PDF_OCR"
+                    ? pdfOcrAvailable
+                    : txtAvailable;
 
         if (!canOpen) {
             onUpgrade();
@@ -1278,7 +1518,7 @@ export function NovelReaderPage({
             setIsOpening(true);
             setStatus(`Đang mở ${entry.name}...`);
 
-            const result = api.readNovelDocument
+            let result = api.readNovelDocument
                 ? await api.readNovelDocument(
                       entry.path,
                       entry.format
@@ -1288,6 +1528,17 @@ export function NovelReaderPage({
                     : entry.format === "PDF_TEXT"
                         ? await api.readNovelDocument?.(entry.path, "PDF_TEXT")
                         : await api.readNovelTxt?.(entry.path);
+
+            if (
+                entry.format === "PDF_OCR" &&
+                !normalizeDocumentReaderBlocks(result?.blocks).length
+            ) {
+                const pdfFile = result?.file || result?.document;
+                if (!pdfFile) {
+                    throw new Error("Không đọc được metadata PDF OCR.");
+                }
+                result = await runPdfOcrPages(pdfFile, 1, 3);
+            }
 
             loadNovelPayload(result, entry);
         } catch (error) {
@@ -1386,7 +1637,7 @@ export function NovelReaderPage({
         requestedCount = batchSize
     ) {
         if (!file || !blocks.length) {
-            setStatus("Hãy mở TXT hoặc EPUB trước.");
+            setStatus("Hãy mở TXT, EPUB hoặc PDF trước.");
             return;
         }
 
@@ -1400,7 +1651,15 @@ export function NovelReaderPage({
             return;
         }
 
-        if (!novelAvailable) {
+        const formatAllowed = file.format === "EPUB"
+            ? epubAvailable
+            : file.format === "PDF_TEXT"
+                ? pdfAvailable
+                : file.format === "PDF_OCR"
+                    ? pdfOcrAvailable
+                    : txtAvailable;
+
+        if (!formatAllowed) {
             onUpgrade();
             return;
         }
@@ -1565,7 +1824,7 @@ export function NovelReaderPage({
                     </h2>
 
                     <p>
-                        FREE vẫn dùng Quick Translate. PRO mở Novel Reader TXT/EPUB/PDF Text,
+                        FREE vẫn dùng Quick Translate. PRO mở Novel Reader TXT/EPUB/PDF Text/PDF OCR,
                         Study Mode và Manga Session; MANGA+ mở thêm Continuous Manga.
                     </p>
 
@@ -1580,11 +1839,28 @@ export function NovelReaderPage({
         );
     }
 
-    const progressPercent = blocks.length
-        ? Math.round(
-              ((currentIndex + 1) / blocks.length) * 100
-          )
-        : 0;
+    const currentPdfOcrPage =
+        file?.format === "PDF_OCR"
+            ? blocks[currentIndex]?.pageNumber ||
+              activeLibraryEntry?.currentPage ||
+              1
+            : null;
+
+    const progressPercent =
+        file?.format === "PDF_OCR" && activeLibraryEntry?.pageCount
+            ? Math.min(
+                  100,
+                  Math.round(
+                      ((currentPdfOcrPage || 1) /
+                          activeLibraryEntry.pageCount) *
+                          100
+                  )
+              )
+            : blocks.length
+                ? Math.round(
+                      ((currentIndex + 1) / blocks.length) * 100
+                  )
+                : 0;
 
     const readerStyle = {
         "--novel-font-size": `${readerPreferences.fontSize}px`,
@@ -1609,7 +1885,7 @@ export function NovelReaderPage({
             <section className="novel-reader-hero">
                 <div>
                     <span className="eyebrow violet">
-                        DOCUMENT READER · TXT + EPUB + PDF · PRO
+                        DOCUMENT READER · TXT + EPUB + PDF TEXT + PDF OCR · PRO
                     </span>
 
                     <h2>
@@ -1617,8 +1893,8 @@ export function NovelReaderPage({
                     </h2>
 
                     <p>
-                        TXT, EPUB và PDF có text được đọc cục bộ trên Desktop. Chỉ những đoạn
-                        bạn yêu cầu dịch mới được gửi backend; toàn bộ sách không bị upload.
+                        TXT, EPUB, PDF có text và PDF scan đều được xử lý cục bộ trên Desktop.
+                        PDF scan dùng PaddleOCR local; chỉ text bạn yêu cầu dịch mới được gửi backend.
                     </p>
                 </div>
 
@@ -1640,12 +1916,20 @@ export function NovelReaderPage({
                         + EPUB
                     </button>
                     <button
-                        className="scan-primary"
+                        className="secondary-action"
                         onClick={() => void openPdf()}
-                        disabled={isOpening || isTranslating || !pdfAvailable}
+                        disabled={isOpening || isTranslating || isOcrProcessing || !pdfAvailable}
                         title={!pdfAvailable ? "PDF Text Reader yêu cầu gói PRO" : "Thêm PDF có text"}
                     >
-                        {isOpening ? "Đang mở..." : "+ PDF"}
+                        + PDF Text
+                    </button>
+                    <button
+                        className="scan-primary"
+                        onClick={() => void openPdfOcr()}
+                        disabled={isOpening || isTranslating || isOcrProcessing || !pdfOcrAvailable}
+                        title={!pdfOcrAvailable ? "PDF OCR Reader yêu cầu gói PRO" : "Thêm PDF scan / ảnh"}
+                    >
+                        {isOcrProcessing ? "Đang OCR..." : "+ PDF OCR"}
                     </button>
                 </div>
             </section>
@@ -1656,7 +1940,7 @@ export function NovelReaderPage({
                         <span className="eyebrow">NOVEL LIBRARY</span>
                         <h3>Thư viện của bạn</h3>
                         <p>
-                            {library.length} tài liệu · TXT/EPUB/PDF lưu cục bộ · không xóa file gốc khi gỡ khỏi Library.
+                            {library.length} tài liệu · TXT/EPUB/PDF Text/PDF OCR lưu cục bộ · không xóa file gốc khi gỡ khỏi Library.
                         </p>
                     </div>
 
@@ -1675,13 +1959,23 @@ export function NovelReaderPage({
                 {filteredLibrary.length ? (
                     <div className="novel-library-grid">
                         {filteredLibrary.map((entry) => {
-                            const percent = entry.totalBlocks
-                                ? Math.round(
-                                      ((entry.currentIndex + 1) /
-                                          entry.totalBlocks) *
-                                          100
-                                  )
-                                : 0;
+                            const percent =
+                                entry.format === "PDF_OCR" && entry.pageCount
+                                    ? Math.min(
+                                          100,
+                                          Math.round(
+                                              ((entry.currentPage || entry.ocrPages?.[0] || 1) /
+                                                  entry.pageCount) *
+                                                  100
+                                          )
+                                      )
+                                    : entry.totalBlocks
+                                        ? Math.round(
+                                              ((entry.currentIndex + 1) /
+                                                  entry.totalBlocks) *
+                                                  100
+                                          )
+                                        : 0;
                             const active = file?.path === entry.path;
 
                             return (
@@ -1693,7 +1987,7 @@ export function NovelReaderPage({
                                     }
                                     key={entry.path}
                                 >
-                                    <div className={`novel-library-cover ${entry.format.toLowerCase()}`}>{entry.format === "PDF_TEXT" ? "PDF" : entry.format}</div>
+                                    <div className={`novel-library-cover ${entry.format.toLowerCase()}`}>{documentFormatLabel(entry.format)}</div>
                                     <div className="novel-library-item-main">
                                         <strong title={entry.title || entry.name}>
                                             {entry.title || entry.name}
@@ -1707,7 +2001,7 @@ export function NovelReaderPage({
                                             {percent}% · {entry.currentChapter}
                                         </span>
                                         <small>
-                                            {entry.format === "PDF_TEXT" ? "PDF" : entry.format} · {entry.chapterCount} chapter · {entry.bookmarks.length} bookmark · {translationLanguageLabels[entry.targetLanguage]}
+                                            {documentFormatLabel(entry.format)} · {entry.format === "PDF_OCR" ? `${entry.ocrPages?.length || 0}/${entry.pageCount || "?"} trang OCR` : `${entry.chapterCount} chapter`} · {entry.bookmarks.length} bookmark · {translationLanguageLabels[entry.targetLanguage]}
                                         </small>
                                         <div className="novel-library-progress">
                                             <span style={{ width: `${percent}%` }} />
@@ -1716,7 +2010,7 @@ export function NovelReaderPage({
                                     <div className="novel-library-actions">
                                         <button
                                             className="primary-action compact"
-                                            disabled={isOpening || isTranslating}
+                                            disabled={isOpening || isTranslating || isOcrProcessing}
                                             onClick={() => {
                                                 void openLibraryNovel(entry);
                                             }}
@@ -1725,7 +2019,7 @@ export function NovelReaderPage({
                                         </button>
                                         <button
                                             className="text-action danger-text"
-                                            disabled={isOpening || isTranslating}
+                                            disabled={isOpening || isTranslating || isOcrProcessing}
                                             onClick={() => {
                                                 removeLibraryNovel(entry.path);
                                             }}
@@ -1741,7 +2035,7 @@ export function NovelReaderPage({
                     <div className="novel-library-empty">
                         {library.length
                             ? "Không tìm thấy novel phù hợp."
-                            : "Chưa có tài liệu. Thêm TXT, EPUB hoặc PDF có text để bắt đầu."}
+                            : "Chưa có tài liệu. Thêm TXT, EPUB, PDF Text hoặc PDF OCR để bắt đầu."}
                     </div>
                 )}
             </section>
@@ -2067,7 +2361,7 @@ export function NovelReaderPage({
             {file && (
                 <section className="novel-file-card">
                     <div className="novel-file-main">
-                        <div className={`novel-file-icon ${(file.format || "TXT").toLowerCase()}`}>{file.format === "PDF_TEXT" ? "PDF" : file.format || "TXT"}</div>
+                        <div className={`novel-file-icon ${(file.format || "TXT").toLowerCase()}`}>{documentFormatLabel(file.format)}</div>
                         <div>
                             <strong>{file.title || file.name}</strong>
                             {file.author && (
@@ -2075,9 +2369,11 @@ export function NovelReaderPage({
                             )}
                             <span>
                                 {formatFileSize(file.sizeBytes)} · {file.encoding}
-                                {chapters.length
-                                    ? ` · ${chapters.length} chapter`
-                                    : " · Không có chapter marker"}
+                                {file.format === "PDF_OCR"
+                                    ? ` · ${activeLibraryEntry?.ocrPages?.length || 0}/${activeLibraryEntry?.pageCount || "?"} trang đã OCR`
+                                    : chapters.length
+                                        ? ` · ${chapters.length} chapter`
+                                        : " · Không có chapter marker"}
                             </span>
                         </div>
                     </div>
@@ -2085,7 +2381,9 @@ export function NovelReaderPage({
                     <div className="novel-progress-summary">
                         <strong>{progressPercent}%</strong>
                         <span>
-                            Đoạn {currentIndex + 1}/{blocks.length} · đã dịch {translatedCount}
+                            {file.format === "PDF_OCR"
+                                ? `Trang ${currentPdfOcrPage || 1}/${activeLibraryEntry?.pageCount || "?"} · ${blocks.length} đoạn OCR · đã dịch ${translatedCount}`
+                                : `Đoạn ${currentIndex + 1}/${blocks.length} · đã dịch ${translatedCount}`}
                         </span>
                     </div>
 
@@ -2160,6 +2458,27 @@ export function NovelReaderPage({
                         </label>
                     )}
 
+                    {file.format === "PDF_OCR" && (
+                        <button
+                            className="secondary-action pdf-ocr-next-pages"
+                            onClick={() => {
+                                void ocrNextPdfPages();
+                            }}
+                            disabled={
+                                isOcrProcessing ||
+                                isTranslating ||
+                                (Boolean(activeLibraryEntry?.pageCount) &&
+                                    Math.max(...(activeLibraryEntry?.ocrPages?.length
+                                        ? activeLibraryEntry.ocrPages
+                                        : [0])) >= Number(activeLibraryEntry?.pageCount || 0))
+                            }
+                        >
+                            {isOcrProcessing
+                                ? "Đang OCR..."
+                                : "OCR 3 trang tiếp"}
+                        </button>
+                    )}
+
                     <button
                         className="primary-action novel-translate-next"
                         onClick={() => {
@@ -2167,6 +2486,7 @@ export function NovelReaderPage({
                         }}
                         disabled={
                             isTranslating ||
+                            isOcrProcessing ||
                             !backend.connected ||
                             !auth.authenticated ||
                             !activeProfile ||
@@ -2230,6 +2550,11 @@ export function NovelReaderPage({
                                 <div className="novel-source-pane">
                                     <div className="novel-row-meta">
                                         <span>#{block.index + 1}</span>
+                                        {block.pageNumber && (
+                                            <span className="novel-page-chip">
+                                                Trang {block.pageNumber}
+                                            </span>
+                                        )}
                                         <button
                                             type="button"
                                             className={
@@ -2300,7 +2625,7 @@ export function NovelReaderPage({
                                             <span>Chưa dịch</span>
                                             <button
                                                 className="text-action"
-                                                disabled={isTranslating}
+                                                disabled={isTranslating || isOcrProcessing}
                                                 onClick={(event) => {
                                                     event.stopPropagation();
                                                     setCurrentIndex(block.index);

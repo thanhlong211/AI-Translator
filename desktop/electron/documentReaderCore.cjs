@@ -6,6 +6,9 @@ const {
 const {
   parsePdfTextBuffer,
 } = require("./pdfTextParser.cjs");
+const {
+  inspectPdfOcrBuffer,
+} = require("./pdfOcrParser.cjs");
 
 const DOCUMENT_FORMATS = Object.freeze({
   TXT: Object.freeze({
@@ -37,6 +40,16 @@ const DOCUMENT_FORMATS = Object.freeze({
     maxSelections: 12,
     dialogTitle: "Thêm PDF có text vào thư viện",
     dialogName: "PDF Document",
+  }),
+  PDF_OCR: Object.freeze({
+    format: "PDF_OCR",
+    extensions: Object.freeze(["pdf"]),
+    capability: "pdfOcrReader",
+    translationPurpose: "PDF_OCR",
+    maxBytes: 120 * 1024 * 1024,
+    maxSelections: 8,
+    dialogTitle: "Thêm PDF scan / ảnh vào thư viện",
+    dialogName: "PDF Scan / Image PDF",
   }),
 });
 
@@ -93,15 +106,21 @@ function assertSupportedDocumentFormat(value) {
 
 function resolveDocumentFormat(filePathValue, requestedFormat) {
   const requested = normalizeDocumentFormat(requestedFormat);
-  const detected = detectDocumentFormatFromPath(filePathValue);
+  const extension = path.extname(String(filePathValue || ""))
+    .replace(/^\./, "")
+    .toLowerCase();
 
-  if (requested && detected && requested !== detected) {
-    throw new Error(
-      `File đã chọn là ${detected}, không phải ${requested}.`
-    );
+  if (requested) {
+    const definition = assertSupportedDocumentFormat(requested);
+    if (!definition.extensions.includes(extension)) {
+      throw new Error(
+        `File .${extension || "?"} không phù hợp định dạng ${requested}.`
+      );
+    }
+    return requested;
   }
 
-  return requested || detected;
+  return detectDocumentFormatFromPath(filePathValue);
 }
 
 function decodeNovelTextBuffer(buffer) {
@@ -453,6 +472,23 @@ function parseDocumentBuffer(definition, buffer, fileName) {
     };
   }
 
+  if (definition.format === "PDF_OCR") {
+    const metadata = inspectPdfOcrBuffer(buffer, fileName);
+
+    return {
+      encoding: "PDF OCR",
+      title:
+        metadata.title ||
+        path.basename(fileName, path.extname(fileName)),
+      author: metadata.author || "",
+      language: metadata.language || "",
+      blocks: [],
+      chapters: [],
+      metadata,
+      deferred: true,
+    };
+  }
+
   throw new Error(
     `Chưa có parser cho định dạng ${definition.format}.`
   );
@@ -500,7 +536,7 @@ async function readDocumentPath(
     blocks
   );
 
-  if (!blocks.length) {
+  if (!blocks.length && !parsed.deferred) {
     throw new Error(
       `Không tìm thấy đoạn văn nào trong file ${definition.format}.`
     );
