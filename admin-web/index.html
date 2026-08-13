@@ -53,7 +53,10 @@
         <button class="nav-item" data-view="pricing"><span>₫</span> Pricing <em>14.7</em></button>
         <button class="nav-item" data-view="licenses"><span>⌁</span> Licenses <em>14.7.4</em></button>
         <button class="nav-item" data-view="transactions"><span>⇄</span> Transactions <em>14.7.5</em></button>
-        <button class="nav-item disabled" disabled><span>∿</span> AI Costs <em>14.8</em></button>
+        <button class="nav-item" data-view="aiCosts"><span>∿</span> AI Costs <em>14.8.5</em></button>
+        <button class="nav-item" data-view="margin"><span>％</span> Revenue & Margin <em>14.8.6</em></button>
+        <div class="nav-separator">OPERATIONS</div>
+        <button class="nav-item" data-view="security"><span>⌾</span> Security Events <em>14.9.1</em></button>
       </nav>
       <div class="sidebar-footer">
         <div id="adminIdentity" class="admin-identity"></div>
@@ -134,6 +137,90 @@
         </div>
         <div id="transactionMetrics" class="metric-grid pricing-metrics"></div>
         <div class="card table-card"><div id="transactionsTable"></div></div>
+      </section>
+
+      <section id="aiCostsView" class="view hidden">
+        <div class="ai-analytics-toolbar card">
+          <div><span class="eyebrow">AI COST ANALYTICS</span><h3>Usage & Cost Dashboard</h3><small>Token, cost và reliability từ metadata-only AI usage ledger.</small></div>
+          <div class="ai-analytics-actions">
+            <select id="aiDashboardDays"><option value="1">Hôm nay</option><option value="7" selected>7 ngày</option><option value="30">30 ngày</option></select>
+            <button id="backfillAiCostsButton" class="ghost compact">Backfill missing cost</button>
+          </div>
+        </div>
+        <div id="aiAnalyticsNotice"></div>
+        <div id="aiAnalyticsMetrics" class="metric-grid ai-analytics-metrics"></div>
+        <div class="ai-dashboard-grid">
+          <article class="card"><div id="aiCostTrend"></div></article>
+          <article class="card"><div id="aiCostRecent"></div></article>
+        </div>
+        <div class="ai-breakdown-grid">
+          <article class="card"><div id="aiCostByUser"></div></article>
+          <article class="card"><div id="aiCostByProvider"></div></article>
+          <article class="card"><div id="aiCostByModel"></div></article>
+          <article class="card"><div id="aiCostByFeature"></div></article>
+          <article class="card"><div id="aiCostByPlan"></div></article>
+        </div>
+
+        <div class="ai-cost-toolbar card">
+          <div><span class="eyebrow">AI COST CONFIGURATION</span><h3>Provider / Model Costs</h3><small>Giá cost trên mỗi 1M tokens. Chỉ SUPER_ADMIN được thay đổi.</small></div>
+          <div class="ai-cost-actions">
+            <input id="aiCostProviderFilter" type="search" placeholder="Provider: openai" />
+            <input id="aiCostModelFilter" type="search" placeholder="Model chính xác" />
+            <select id="aiCostActiveFilter"><option value="">Tất cả trạng thái</option><option value="true">ACTIVE</option><option value="false">INACTIVE</option></select>
+            <button id="createAiCostButton" class="primary compact">+ Model cost</button>
+          </div>
+        </div>
+        <div id="aiCostMetrics" class="metric-grid pricing-metrics"></div>
+        <div class="card table-card"><div id="aiCostsTable"></div></div>
+      </section>
+
+      <section id="marginView" class="view hidden">
+        <div class="margin-toolbar card">
+          <div><span class="eyebrow">COMMERCIAL ANALYTICS</span><h3>Revenue & Gross Margin</h3><small>Revenue và AI cost chỉ được trừ sau khi cùng reporting currency.</small></div>
+          <div class="margin-actions">
+            <select id="marginDays"><option value="1">Hôm nay</option><option value="7" selected>7 ngày</option><option value="30">30 ngày</option></select>
+            <button id="backfillRevenueButton" class="ghost compact">Backfill revenue</button>
+          </div>
+        </div>
+        <div id="marginNotice"></div>
+        <div id="marginMetrics" class="metric-grid margin-metrics"></div>
+        <div class="margin-grid">
+          <article class="card"><div id="marginDaily"></div></article>
+          <article class="card"><div id="marginByPlan"></div></article>
+          <article class="card"><div id="marginByUser"></div></article>
+        </div>
+
+        <div class="fx-toolbar card">
+          <div><span class="eyebrow">FX CONFIGURATION</span><h3>Exchange Rates</h3><small>1 đơn vị base currency = rate đơn vị reporting currency. Rate được snapshot khi payment settle.</small></div>
+          <div class="fx-actions">
+            <input id="fxBaseFilter" maxlength="3" placeholder="Base: VND" />
+            <input id="fxQuoteFilter" maxlength="3" placeholder="Quote: USD" />
+            <select id="fxActiveFilter"><option value="">Tất cả</option><option value="true">ACTIVE</option><option value="false">INACTIVE</option></select>
+            <button id="createFxRateButton" class="primary compact">+ FX rate</button>
+          </div>
+        </div>
+        <div id="fxMetrics" class="metric-grid pricing-metrics"></div>
+        <div class="card table-card"><div id="fxRatesTable"></div></div>
+      </section>
+
+      <section id="securityView" class="view hidden">
+        <div class="security-toolbar card">
+          <div><span class="eyebrow">ADMIN SECURITY</span><h3>Session & Security Events</h3><small>Login, authorization failures và thao tác Admin nhạy cảm. Không lưu password, JWT hoặc request body.</small></div>
+          <div class="security-actions">
+            <select id="securityDays"><option value="1">Hôm nay</option><option value="7" selected>7 ngày</option><option value="30">30 ngày</option><option value="90">90 ngày</option></select>
+            <select id="securitySeverity"><option value="">Mọi severity</option><option value="INFO">INFO</option><option value="WARNING">WARNING</option><option value="CRITICAL">CRITICAL</option></select>
+            <select id="securityOutcome"><option value="">Mọi outcome</option><option value="SUCCESS">SUCCESS</option><option value="DENIED">DENIED</option><option value="FAILED">FAILED</option></select>
+            <select id="securityCategory"><option value="">Mọi category</option><option value="AUTHENTICATION">AUTHENTICATION</option><option value="AUTHORIZATION">AUTHORIZATION</option><option value="ADMIN_ACTION">ADMIN_ACTION</option></select>
+          </div>
+        </div>
+        <div class="security-search card">
+          <input id="securityQuery" type="search" placeholder="Event, email, request ID, path, IP..." />
+          <input id="securityEventType" type="search" placeholder="Event type chính xác (tùy chọn)" />
+          <button id="securitySearchButton" class="primary compact">Lọc</button>
+          <button id="securityClearButton" class="ghost compact">Xóa lọc</button>
+        </div>
+        <div id="securityMetrics" class="metric-grid security-metrics"></div>
+        <div class="card table-card"><div id="securityEventsTable"></div></div>
       </section>
 
       <section id="auditView" class="view hidden">

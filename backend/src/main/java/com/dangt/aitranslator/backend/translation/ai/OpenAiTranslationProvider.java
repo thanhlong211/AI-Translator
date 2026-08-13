@@ -1,5 +1,7 @@
 package com.dangt.aitranslator.backend.translation.ai;
 
+import com.dangt.aitranslator.backend.usage.AiProviderUsage;
+import com.dangt.aitranslator.backend.usage.OpenAiUsageExtractor;
 import com.openai.client.OpenAIClient;
 import com.openai.models.ChatModel;
 import com.openai.models.responses.Response;
@@ -28,6 +30,16 @@ public class OpenAiTranslationProvider
         this.openAIClient = openAIClient;
         this.modelName = modelName;
         this.model = ChatModel.of(modelName);
+    }
+
+    @Override
+    public String providerName() {
+        return "openai";
+    }
+
+    @Override
+    public String modelName() {
+        return modelName;
     }
 
     @Override
@@ -83,10 +95,17 @@ public class OpenAiTranslationProvider
             );
         }
 
+        AiProviderUsage usage =
+                OpenAiUsageExtractor.from(
+                        response,
+                        modelName
+                );
+
         return new TranslationAiResult(
                 text,
-                "openai",
-                modelName
+                usage.provider(),
+                usage.model(),
+                usage
         );
     }
 }

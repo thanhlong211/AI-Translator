@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.admin;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 public record AdminTransactionResponse(
@@ -14,6 +15,14 @@ public record AdminTransactionResponse(
         String currency,
         long amountMinor,
         long refundedAmountMinor,
+        String reportingCurrency,
+        Long fxRateId,
+        BigDecimal fxRate,
+        BigDecimal grossAmountReporting,
+        BigDecimal refundedAmountReporting,
+        BigDecimal netAmountReporting,
+        String revenueStatus,
+        Instant revenueNormalizedAt,
         String provider,
         String providerReference,
         String status,

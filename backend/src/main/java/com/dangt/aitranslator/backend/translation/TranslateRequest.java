@@ -51,6 +51,13 @@ public record TranslateRequest(
         )
         TranslationLanguage targetLanguage,
 
+        @Schema(
+                description =
+                        "Mục đích gọi /translate để phân loại AI usage. Client cũ mặc định QUICK_TRANSLATE.",
+                example = "QUICK_TRANSLATE"
+        )
+        TranslationPurpose purpose,
+
         @Valid
         @Size(max = 10)
         @Schema(
@@ -70,6 +77,11 @@ public record TranslateRequest(
                 targetLanguage == null
                         ? TranslationLanguage.VI
                         : targetLanguage;
+
+        purpose =
+                purpose == null
+                        ? TranslationPurpose.QUICK_TRANSLATE
+                        : purpose;
 
         context =
                 context == null

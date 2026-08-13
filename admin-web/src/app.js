@@ -19,11 +19,36 @@ const state = {
   transactions: [],
   transactionStatusFilter: "",
   transactionPlanFilter: "",
+  aiModelCosts: [],
+  aiCostDashboard: null,
+  aiRecentUsage: [],
+  aiDashboardDays: Number(sessionStorage.getItem("ait.admin.aiCostDays") || "7"),
+  aiCostProviderFilter: "",
+  aiCostModelFilter: "",
+  aiCostActiveFilter: "",
+  adminTimeZone: "Asia/Ho_Chi_Minh",
+  selectedAiDrilldown: null,
+  marginDashboard: null,
+  marginDays: Number(sessionStorage.getItem("ait.admin.marginDays") || "7"),
+  fxRates: [],
+  fxBaseFilter: "",
+  fxQuoteFilter: "",
+  fxActiveFilter: "",
+  securityDashboard: null,
+  securityDays: Number(sessionStorage.getItem("ait.admin.securityDays") || "7"),
+  securitySeverity: "",
+  securityOutcome: "",
+  securityCategory: "",
+  securityEventType: "",
+  securityQuery: "",
+  selectedSecurityEventId: null,
+  selectedFxRateId: null,
   selectedUserId: null,
   selectedPlanCode: null,
   selectedPriceId: null,
   selectedLicenseId: null,
-  selectedTransactionId: null
+  selectedTransactionId: null,
+  selectedAiCostId: null
 };
 
 const escapeHtml = (value) => String(value ?? "")
@@ -39,11 +64,28 @@ const fmtDate = (value) => {
   if (Number.isNaN(date.getTime())) return "—";
   return new Intl.DateTimeFormat("vi-VN", {
     year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit"
+    hour: "2-digit", minute: "2-digit",
+    timeZone: state.adminTimeZone || "Asia/Ho_Chi_Minh"
   }).format(date);
 };
 
 const fmtNumber = (value) => new Intl.NumberFormat("vi-VN").format(Number(value || 0));
+const fmtCompactNumber = (value) => {
+  const number = Number(value || 0);
+  const abs = Math.abs(number);
+  if (abs < 1000) return fmtNumber(number);
+  if (abs < 1_000_000) return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(number / 1000)}K`;
+  if (abs < 1_000_000_000) return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(number / 1_000_000)}M`;
+  return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(number / 1_000_000_000)}B`;
+};
+const fmtPercent = (value) => `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(Number(value || 0))}%`;
+const fmtCost = (value, currency = "USD") => {
+  const number = Number(value || 0);
+  const abs = Math.abs(number);
+  const maxDigits = abs > 0 && abs < 0.01 ? 8 : abs < 1 ? 6 : 4;
+  return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: maxDigits }).format(number)} ${String(currency || "USD").toUpperCase()}`;
+};
+const fmtLatency = (value) => `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 0 }).format(Number(value || 0))} ms`;
 
 function toast(message, kind = "info") {
   const el = $("#toast");
@@ -108,7 +150,7 @@ async function loadView(view) {
   $$(".nav-item[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   $$(".view").forEach((section) => section.classList.add("hidden"));
   $(`#${view}View`).classList.remove("hidden");
-  const labels = { dashboard: "Tổng quan", users: "Người dùng", plans: "Plans & Features", pricing: "Pricing", licenses: "Licenses", transactions: "Transactions", audit: "Audit log" };
+  const labels = { dashboard: "Tổng quan", users: "Người dùng", plans: "Plans & Features", pricing: "Pricing", licenses: "Licenses", transactions: "Transactions", aiCosts: "AI Costs", margin: "Revenue & Margin", security: "Security Events", audit: "Audit log" };
   $("#pageTitle").textContent = labels[view] || "Admin";
   try {
     if (view === "dashboard") await loadDashboard();
@@ -117,6 +159,9 @@ async function loadView(view) {
     if (view === "pricing") await loadPricing();
     if (view === "licenses") await loadLicenses();
     if (view === "transactions") await loadTransactions();
+    if (view === "aiCosts") await loadAiCosts();
+    if (view === "margin") await loadMargin();
+    if (view === "security") await loadSecurity();
     if (view === "audit") await loadAudit();
   } catch (error) {
     toast(error.message, "error");
@@ -150,7 +195,7 @@ async function loadDashboard() {
     <article class="card roadmap-card">
       <span class="eyebrow">COMMERCIAL FOUNDATION</span>
       <h3>Admin core đã hoạt động</h3>
-      <div class="roadmap-grid"><span class="done">✓ Users & access</span><span class="done">✓ 14.6 Plans & features</span><span class="done">✓ 14.7 Pricing / subscription / license</span><span class="working">→ 14.7.5 Transactions</span><span>14.8 AI costs</span><span>14.9 Security & operations</span></div>
+      <div class="roadmap-grid"><span class="done">✓ Users & access</span><span class="done">✓ 14.6 Plans & features</span><span class="done">✓ 14.7 Pricing / subscription / license</span><span class="done">✓ 14.7 Transactions</span><span class="done">✓ 14.8 AI cost & margin</span><span class="done">✓ 14.9.1 Security events</span><span>14.9.2 Audit viewer</span></div>
     </article>`;
   $("[data-open-audit]")?.addEventListener("click", () => void loadView("audit"));
 }
@@ -719,7 +764,7 @@ async function loadTransactions() {
       <td><span class="plan-pill">${escapeHtml(tx.planCode)}</span><small>${escapeHtml(BILLING_LABELS[tx.billingPeriod] || tx.billingPeriod)} · Price ${tx.priceId == null ? "—" : `#${tx.priceId}`}</small></td>
       <td><strong class="money-value">${escapeHtml(fmtMoneyMinor(tx.amountMinor, tx.currency))}</strong>${Number(tx.refundedAmountMinor || 0) > 0 ? `<small>Refund ${escapeHtml(fmtMoneyMinor(tx.refundedAmountMinor, tx.currency))}</small>` : `<small>${escapeHtml(tx.currency)}</small>`}</td>
       <td><strong>${escapeHtml(tx.provider)}</strong><small>${escapeHtml(tx.providerReference || "—")}</small></td>
-      <td><span class="status-badge ${transactionStatusKind(tx.status)}">${escapeHtml(tx.status)}</span>${tx.subscriptionId ? `<small>Sub #${tx.subscriptionId}</small>` : ""}</td>
+      <td><span class="status-badge ${transactionStatusKind(tx.status)}">${escapeHtml(tx.status)}</span>${tx.subscriptionId ? `<small>Sub #${tx.subscriptionId}</small>` : ""}${tx.paidAt ? `<small>Revenue: ${escapeHtml(tx.revenueStatus || "PENDING")}</small>` : ""}</td>
       <td>${fmtDate(tx.createdAt)}</td>
     </tr>`).join("")}</tbody></table>` : '<div class="empty large">Chưa có payment transaction.</div>';
   $$('[data-transaction-id]').forEach((row) => row.addEventListener("click", () => void openTransaction(Number(row.dataset.transactionId))));
@@ -801,6 +846,7 @@ function renderTransactionDrawer(tx) {
       </div>
       ${tx.failureCode || tx.failureMessage ? `<div class="notice warn">${escapeHtml(tx.failureCode || "FAILED")}: ${escapeHtml(tx.failureMessage || "Không có chi tiết")}</div>` : ""}
       ${Number(tx.refundedAmountMinor || 0) > 0 ? `<div class="notice warn">Đã refund ${escapeHtml(fmtMoneyMinor(tx.refundedAmountMinor, tx.currency))} lúc ${fmtDate(tx.refundedAt)}.</div>` : ""}
+      ${tx.paidAt ? `<div class="notice ${tx.revenueStatus === "NORMALIZED" ? "ok" : "warn"}"><strong>Revenue snapshot: ${escapeHtml(tx.revenueStatus || "PENDING")}</strong>${tx.revenueStatus === "NORMALIZED" ? ` · Gross ${escapeHtml(fmtCost(tx.grossAmountReporting, tx.reportingCurrency))} · Refund ${escapeHtml(fmtCost(tx.refundedAmountReporting, tx.reportingCurrency))} · Net ${escapeHtml(fmtCost(tx.netAmountReporting, tx.reportingCurrency))}${tx.fxRate ? ` · FX ${escapeHtml(String(tx.fxRate))}${tx.fxRateId ? ` (#${tx.fxRateId})` : " (implicit 1)"}` : ""}` : " · Hãy cấu hình FX đúng currency/time window rồi Backfill revenue trong Revenue & Margin."}</div>` : ""}
       <div class="compact-list"><div><strong>Created</strong><span>${fmtDate(tx.createdAt)}</span></div>${tx.paidAt ? `<div><strong>Paid</strong><span>${fmtDate(tx.paidAt)}</span></div>` : ""}${tx.failedAt ? `<div><strong>Failed</strong><span>${fmtDate(tx.failedAt)}</span></div>` : ""}${tx.canceledAt ? `<div><strong>Canceled</strong><span>${fmtDate(tx.canceledAt)}</span></div>` : ""}</div>
     </section>
     ${isSuperAdmin && (pending || succeeded) ? `<section class="drawer-section"><div class="section-heading"><div><span class="eyebrow">LIFECYCLE</span><h3>Thay đổi trạng thái</h3></div></div>
@@ -1123,6 +1169,773 @@ function renderUserDrawer(detail) {
   }));
 }
 
+const aiCostStatus = (cost) => {
+  if (cost.currentlyEffective) return { label: "EFFECTIVE", kind: "ok" };
+  if (!cost.active) return { label: "INACTIVE", kind: "warn" };
+  const now = Date.now();
+  const starts = cost.effectiveFrom ? new Date(cost.effectiveFrom).getTime() : null;
+  const ends = cost.effectiveTo ? new Date(cost.effectiveTo).getTime() : null;
+  if (starts != null && starts > now) return { label: "SCHEDULED", kind: "info" };
+  if (ends != null && ends <= now) return { label: "EXPIRED", kind: "warn" };
+  return { label: "NOT EFFECTIVE", kind: "warn" };
+};
+
+const fmtAiRate = (value, currency) => {
+  const number = Number(value ?? 0);
+  const code = String(currency || "USD").toUpperCase();
+  const digits = Math.abs(number) < 0.01 && number !== 0 ? 8 : 6;
+  return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: digits }).format(number)} ${code} / 1M`;
+};
+
+function rawMetric(label, value, hint) {
+  return `<article class="metric-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(hint)}</small></article>`;
+}
+
+function renderAiCostTrend(daily, currency) {
+  const rows = Array.isArray(daily) ? daily : [];
+  const maxCost = Math.max(0, ...rows.map((row) => Number(row.estimatedCost || 0)));
+  const totalCost = rows.reduce((sum, row) => sum + Number(row.estimatedCost || 0), 0);
+  const bars = rows.length ? rows.map((row) => {
+    const value = Number(row.estimatedCost || 0);
+    const height = maxCost > 0 ? Math.max(value > 0 ? 6 : 2, Math.round((value / maxCost) * 100)) : 2;
+    const dateLabel = String(row.date || "").slice(5).replace("-", "/");
+    return `<div class="cost-trend-point" title="${escapeHtml(`${row.date} · ${fmtCost(value, currency)} · ${fmtNumber(row.requests)} requests`)}">
+      <div class="cost-trend-column"><i style="height:${height}%"></i></div>
+      <small>${escapeHtml(dateLabel)}</small>
+    </div>`;
+  }).join("") : '<div class="empty">Chưa có dữ liệu.</div>';
+
+  return `<div class="card-heading"><div><span class="eyebrow">COST TREND</span><h3>AI cost theo ngày</h3></div><strong class="money-value">${escapeHtml(fmtCost(totalCost, currency))}</strong></div>
+    <div class="cost-trend-chart">${bars}</div>`;
+}
+
+function renderAiBreakdown(title, eyebrow, rows, currency, dimension = "") {
+  const values = Array.isArray(rows) ? rows : [];
+  const maxCost = Math.max(0, ...values.map((row) => Number(row.estimatedCost || 0)));
+  const maxRequests = Math.max(0, ...values.map((row) => Number(row.requests || 0)));
+  if (!values.length) {
+    return `<div class="card-heading"><div><span class="eyebrow">${escapeHtml(eyebrow)}</span><h3>${escapeHtml(title)}</h3></div></div><div class="empty">Chưa có dữ liệu.</div>`;
+  }
+  return `<div class="card-heading"><div><span class="eyebrow">${escapeHtml(eyebrow)}</span><h3>${escapeHtml(title)}</h3></div>${dimension ? '<small class="muted">click để drill-down</small>' : ''}</div>
+    <div class="cost-breakdown-list">${values.map((row) => {
+      const cost = Number(row.estimatedCost || 0);
+      const requests = Number(row.requests || 0);
+      const basis = maxCost > 0 ? cost : requests;
+      const max = maxCost > 0 ? maxCost : maxRequests;
+      const width = max > 0 ? Math.max(4, Math.round((basis / max) * 100)) : 4;
+      const drillAttrs = dimension
+        ? ` role="button" tabindex="0" data-ai-drilldown-dimension="${escapeHtml(dimension)}" data-ai-drilldown-key="${escapeHtml(row.key || '')}" data-ai-drilldown-label="${escapeHtml(row.label || row.key || '—')}"`
+        : "";
+      return `<div class="cost-breakdown-row ${dimension ? 'drillable' : ''}"${drillAttrs}>
+        <div class="cost-breakdown-head"><strong title="${escapeHtml(row.label || row.key)}">${escapeHtml(row.label || row.key || "—")}</strong><span>${escapeHtml(fmtCost(cost, currency))}</span></div>
+        <div class="bar-track"><i style="width:${width}%"></i></div>
+        <small>${fmtNumber(requests)} req · ${fmtCompactNumber(row.inputTokens)} in · ${fmtCompactNumber(row.outputTokens)} out${Number(row.missingRateEvents || 0) ? ` · <b>${fmtNumber(row.missingRateEvents)} missing rate</b>` : ""}</small>
+      </div>`;
+    }).join("")}</div>`;
+}
+
+function renderRecentAiUsage(rows, clickable = true) {
+  const values = Array.isArray(rows) ? rows : [];
+  if (!values.length) return '<div class="empty">Chưa có AI usage event.</div>';
+  return `<div class="ai-recent-list">${values.slice(0, 50).map((row) => {
+    const statusKind = row.successful ? "ok" : "warn";
+    const costKind = row.costStatus === "CALCULATED" ? "ok" : row.costStatus === "MISSING_RATE" ? "warn" : "info";
+    const attrs = clickable ? ` role="button" tabindex="0" data-ai-usage-id="${Number(row.id)}"` : "";
+    return `<div class="ai-recent-row ${clickable ? 'drillable' : ''}"${attrs}>
+      <div><strong>${escapeHtml(row.feature || "GENERAL")}</strong><span>${escapeHtml(row.provider)} · ${escapeHtml(row.model)}</span><small>${escapeHtml(row.userEmail || `User #${row.userId || "—"}`)} · ${fmtDate(row.createdAt)}</small></div>
+      <div class="ai-recent-meta"><span>${fmtCompactNumber(row.totalTokens)} tokens</span><strong>${escapeHtml(row.costStatus === "CALCULATED" ? fmtCost(row.estimatedCost, row.costCurrency) : row.costStatus || "—")}</strong><small>${fmtLatency(row.latencyMs)}</small></div>
+      <div><span class="status-badge ${statusKind}">${row.successful ? "OK" : "FAILED"}</span><span class="status-badge ${costKind}">${escapeHtml(row.costStatus || "NO COST")}</span></div>
+    </div>`;
+  }).join("")}</div>`;
+}
+
+function renderAiAnalytics(dashboard, recent) {
+  const currency = dashboard.reportingCurrency || "USD";
+  state.adminTimeZone = dashboard.analyticsTimeZone || state.adminTimeZone || "Asia/Ho_Chi_Minh";
+  const costCoverage = Number(dashboard.requests || 0) > 0
+    ? (Number(dashboard.calculatedCostEvents || 0) / Number(dashboard.requests || 1)) * 100
+    : 100;
+
+  $("#aiAnalyticsMetrics").innerHTML = `
+    ${rawMetric("Requests", fmtNumber(dashboard.requests), `${fmtNumber(dashboard.failedRequests)} failed`)}
+    ${rawMetric("AI Cost", Number(dashboard.requests || 0) > 0 && costCoverage === 0 ? "Chưa tính được" : fmtCost(dashboard.estimatedCost, currency), `${fmtPercent(costCoverage)} cost coverage`)}
+    ${rawMetric("Input tokens", fmtCompactNumber(dashboard.inputTokens), `${fmtCompactNumber(dashboard.cachedTokens)} cached`)}
+    ${rawMetric("Output tokens", fmtCompactNumber(dashboard.outputTokens), `${fmtCompactNumber(dashboard.totalTokens)} total`)}
+    ${rawMetric("Success rate", fmtPercent(dashboard.successRatePercent), `${fmtNumber(dashboard.successfulRequests)} successful`)}
+    ${rawMetric("Avg latency", fmtLatency(dashboard.averageLatencyMs), `${dashboard.days} day window`)}
+  `;
+
+  const missing = Number(dashboard.missingRateEvents || 0);
+  const unavailable = Number(dashboard.tokenUsageUnavailableEvents || 0);
+  $("#aiAnalyticsNotice").innerHTML = missing || unavailable
+    ? `<div class="notice warn ai-analytics-notice"><strong>Cost coverage chưa hoàn chỉnh.</strong> ${fmtNumber(missing)} event thiếu model rate, ${fmtNumber(unavailable)} event thiếu token metadata. Total cost chỉ cộng các event CALCULATED.</div>`
+    : `<div class="notice info ai-analytics-notice">Cost coverage đầy đủ cho khoảng đang xem. Currency báo cáo: <strong>${escapeHtml(currency)}</strong>. Dashboard chỉ dùng metadata, không lưu prompt/OCR/document/translation content.</div>`;
+
+  $("#aiCostTrend").innerHTML = renderAiCostTrend(dashboard.daily, currency);
+  $("#aiCostByUser").innerHTML = renderAiBreakdown("Theo user", "USERS", dashboard.users, currency, "USER");
+  $("#aiCostByProvider").innerHTML = renderAiBreakdown("Theo provider", "PROVIDERS", dashboard.providers, currency, "PROVIDER");
+  $("#aiCostByModel").innerHTML = renderAiBreakdown("Theo model", "MODELS", dashboard.models, currency, "MODEL");
+  $("#aiCostByFeature").innerHTML = renderAiBreakdown("Theo feature", "FEATURES", dashboard.features, currency, "FEATURE");
+  $("#aiCostByPlan").innerHTML = renderAiBreakdown("Theo plan", "PLANS", dashboard.plans, currency, "PLAN");
+  $("#aiCostRecent").innerHTML = `<div class="card-heading"><div><span class="eyebrow">RECENT USAGE</span><h3>AI requests gần nhất</h3></div><span class="muted">latest 12 · ${escapeHtml(state.adminTimeZone)}</span></div>${renderRecentAiUsage(recent)}`;
+  bindAiDrilldownLinks();
+  bindAiUsageLinks();
+}
+
+function bindAiDrilldownLinks(root = document) {
+  root.querySelectorAll?.("[data-ai-drilldown-dimension]").forEach((row) => {
+    const open = () => void openAiCostDrilldown(
+      row.dataset.aiDrilldownDimension,
+      row.dataset.aiDrilldownKey,
+      row.dataset.aiDrilldownLabel
+    );
+    row.addEventListener("click", open);
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        open();
+      }
+    });
+  });
+}
+
+function bindAiUsageLinks(root = document) {
+  root.querySelectorAll?.("[data-ai-usage-id]").forEach((row) => {
+    const open = () => void openAiUsageEvent(Number(row.dataset.aiUsageId));
+    row.addEventListener("click", open);
+    row.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        open();
+      }
+    });
+  });
+}
+
+async function openAiCostDrilldown(dimension, key, fallbackLabel = "") {
+  if (!dimension || key == null || key === "") return;
+  state.selectedUserId = null;
+  state.selectedPlanCode = null;
+  state.selectedPriceId = null;
+  state.selectedLicenseId = null;
+  state.selectedTransactionId = null;
+  state.selectedAiCostId = null;
+  state.selectedAiDrilldown = { dimension, key, label: fallbackLabel };
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerTitle").textContent = fallbackLabel || `${dimension}: ${key}`;
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải cost drill-down...</div>';
+
+  try {
+    const params = new URLSearchParams({
+      days: String(state.aiDashboardDays || 7),
+      dimension: String(dimension),
+      key: String(key)
+    });
+    const data = await api(`/api/v1/admin/ai-cost-drilldown?${params}`);
+    state.adminTimeZone = data.analyticsTimeZone || state.adminTimeZone;
+    renderAiCostDrilldownDrawer(data);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function renderAiCostDrilldownDrawer(data) {
+  const summary = data.summary || {};
+  const currency = data.reportingCurrency || "USD";
+  const requests = Number(summary.requests || 0);
+  const coverage = requests > 0 ? Number(summary.calculatedCostEvents || 0) / requests * 100 : 100;
+  const dimensionLabel = {
+    USER: "USER",
+    PLAN: "PLAN",
+    FEATURE: "FEATURE",
+    PROVIDER: "PROVIDER",
+    MODEL: "MODEL"
+  }[data.dimension] || data.dimension;
+
+  $("#drawerTitle").textContent = data.label || data.key || "AI Cost Drill-down";
+  $("#drawerBody").innerHTML = `
+    <section class="drawer-section first ai-drilldown-hero">
+      <div class="section-heading">
+        <div><span class="eyebrow">AI COST DRILL-DOWN · ${escapeHtml(dimensionLabel)}</span><h3>${escapeHtml(data.label || data.key || "—")}</h3></div>
+        <span class="status-badge info">${data.days} ngày</span>
+      </div>
+      <div class="ai-scope-meta"><span>${fmtDate(data.from)} → ${fmtDate(data.to)}</span><span>${escapeHtml(data.analyticsTimeZone || state.adminTimeZone)}</span><span>${escapeHtml(currency)}</span></div>
+      <div class="metric-grid drawer-metrics">
+        ${rawMetric("Requests", fmtNumber(summary.requests), `${fmtNumber(summary.failedRequests)} failed`)}
+        ${rawMetric("AI Cost", requests > 0 && coverage === 0 ? "Chưa tính được" : fmtCost(summary.estimatedCost, currency), `${fmtPercent(coverage)} coverage`)}
+        ${rawMetric("Input", fmtCompactNumber(summary.inputTokens), `${fmtCompactNumber(summary.cachedTokens)} cached`)}
+        ${rawMetric("Output", fmtCompactNumber(summary.outputTokens), `${fmtCompactNumber(summary.totalTokens)} total`)}
+        ${rawMetric("Success", fmtPercent(summary.successRatePercent), `${fmtNumber(summary.successfulRequests)} successful`)}
+        ${rawMetric("Latency", fmtLatency(summary.averageLatencyMs), "average")}
+      </div>
+      ${Number(summary.missingRateEvents || 0) || Number(summary.tokenUsageUnavailableEvents || 0)
+        ? `<div class="notice warn"><strong>Cost coverage chưa đầy đủ.</strong> ${fmtNumber(summary.missingRateEvents)} missing rate · ${fmtNumber(summary.tokenUsageUnavailableEvents)} thiếu token metadata.</div>`
+        : '<div class="notice info">Cost coverage đầy đủ trong scope này.</div>'}
+    </section>
+
+    <section class="drawer-section">
+      <div class="section-heading"><div><span class="eyebrow">BREAKDOWN</span><h3>Phân rã cost trong scope</h3></div><small>Click một dòng để đi sâu hơn</small></div>
+      <div class="ai-drilldown-grid">
+        <article class="mini-card">${renderAiBreakdown("Theo user", "USERS", data.users, currency, "USER")}</article>
+        <article class="mini-card">${renderAiBreakdown("Theo plan", "PLANS", data.plans, currency, "PLAN")}</article>
+        <article class="mini-card">${renderAiBreakdown("Theo feature", "FEATURES", data.features, currency, "FEATURE")}</article>
+        <article class="mini-card">${renderAiBreakdown("Theo provider", "PROVIDERS", data.providers, currency, "PROVIDER")}</article>
+        <article class="mini-card">${renderAiBreakdown("Theo model", "MODELS", data.models, currency, "MODEL")}</article>
+      </div>
+    </section>
+
+    <section class="drawer-section">
+      <div class="section-heading"><div><span class="eyebrow">REQUESTS</span><h3>AI requests trong scope</h3></div><small>${Math.min(50, (data.recent || []).length)} gần nhất</small></div>
+      ${renderRecentAiUsage(data.recent, true)}
+    </section>`;
+
+  bindAiDrilldownLinks($("#drawerBody"));
+  bindAiUsageLinks($("#drawerBody"));
+}
+
+async function openAiUsageEvent(eventId) {
+  if (!eventId) return;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerTitle").textContent = `AI Request #${eventId}`;
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải AI request metadata...</div>';
+  try {
+    const row = await api(`/api/v1/admin/ai-usage/${eventId}`);
+    renderAiUsageEventDrawer(row);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function renderAiUsageEventDrawer(row) {
+  const calculated = row.costStatus === "CALCULATED";
+  const successKind = row.successful ? "ok" : "warn";
+  const costKind = calculated ? "ok" : row.costStatus === "MISSING_RATE" ? "warn" : "info";
+  $("#drawerTitle").textContent = `AI Request #${row.id}`;
+  $("#drawerBody").innerHTML = `
+    <section class="drawer-section first">
+      <div class="section-heading">
+        <div><span class="eyebrow">AI REQUEST METADATA</span><h3>${escapeHtml(row.feature || "GENERAL")}</h3></div>
+        <div><span class="status-badge ${successKind}">${row.successful ? "SUCCESS" : "FAILED"}</span> <span class="status-badge ${costKind}">${escapeHtml(row.costStatus || "NO COST")}</span></div>
+      </div>
+      <div class="detail-grid ai-event-detail">
+        <div><span>Thời gian</span><strong>${fmtDate(row.createdAt)}</strong><small>${escapeHtml(state.adminTimeZone)}</small></div>
+        <div><span>User</span><strong>${escapeHtml(row.userEmail || `User #${row.userId || "—"}`)}</strong><small>Plan snapshot: ${escapeHtml(row.planCode || "—")}</small></div>
+        <div><span>Provider / Model</span><strong>${escapeHtml(row.provider || "—")} · ${escapeHtml(row.model || "—")}</strong><small>Provider request: ${escapeHtml(row.providerRequestId || "—")}</small></div>
+        <div><span>Request ID</span><strong class="mono-value">${escapeHtml(row.requestId || "—")}</strong><small>Ledger event #${row.id}</small></div>
+        <div><span>Input tokens</span><strong>${fmtNumber(row.inputTokens)}</strong><small>${fmtNumber(row.cachedTokens)} cached</small></div>
+        <div><span>Output tokens</span><strong>${fmtNumber(row.outputTokens)}</strong><small>${fmtNumber(row.totalTokens)} total</small></div>
+        <div><span>Latency</span><strong>${fmtLatency(row.latencyMs)}</strong><small>${row.errorCode ? escapeHtml(row.errorCode) : "No error"}</small></div>
+        <div><span>Total cost</span><strong>${calculated ? escapeHtml(fmtCost(row.estimatedCost, row.costCurrency)) : escapeHtml(row.costStatus || "—")}</strong><small>Model cost #${escapeHtml(row.modelCostId || "—")}</small></div>
+      </div>
+    </section>
+    <section class="drawer-section">
+      <div class="section-heading"><div><span class="eyebrow">COST SNAPSHOT</span><h3>Rate và cost tại thời điểm request</h3></div></div>
+      <div class="detail-grid ai-event-detail">
+        <div><span>Input rate / 1M</span><strong>${row.inputRatePerMillion == null ? "—" : escapeHtml(fmtAiRate(row.inputRatePerMillion, row.costCurrency))}</strong><small>non-cached input</small></div>
+        <div><span>Cached rate / 1M</span><strong>${row.cachedInputRatePerMillion == null ? "—" : escapeHtml(fmtAiRate(row.cachedInputRatePerMillion, row.costCurrency))}</strong><small>cached input</small></div>
+        <div><span>Output rate / 1M</span><strong>${row.outputRatePerMillion == null ? "—" : escapeHtml(fmtAiRate(row.outputRatePerMillion, row.costCurrency))}</strong><small>output</small></div>
+        <div><span>Input cost</span><strong>${row.inputCost == null ? "—" : escapeHtml(fmtCost(row.inputCost, row.costCurrency))}</strong></div>
+        <div><span>Cached cost</span><strong>${row.cachedInputCost == null ? "—" : escapeHtml(fmtCost(row.cachedInputCost, row.costCurrency))}</strong></div>
+        <div><span>Output cost</span><strong>${row.outputCost == null ? "—" : escapeHtml(fmtCost(row.outputCost, row.costCurrency))}</strong></div>
+        <div><span>Calculated at</span><strong>${row.costCalculatedAt ? fmtDate(row.costCalculatedAt) : "—"}</strong></div>
+        <div><span>Content privacy</span><strong>Metadata only</strong><small>Không lưu prompt/OCR/document/translation text.</small></div>
+      </div>
+    </section>`;
+}
+
+async function loadAiCosts() {
+  const params = new URLSearchParams();
+  if (state.aiCostProviderFilter) params.set("provider", state.aiCostProviderFilter);
+  if (state.aiCostModelFilter) params.set("model", state.aiCostModelFilter);
+  if (state.aiCostActiveFilter) params.set("active", state.aiCostActiveFilter);
+  params.set("limit", "500");
+
+  const safeDays = [1, 7, 30].includes(Number(state.aiDashboardDays)) ? Number(state.aiDashboardDays) : 7;
+  state.aiDashboardDays = safeDays;
+  $("#aiDashboardDays").value = String(safeDays);
+
+  const [dashboard, recent, modelCosts] = await Promise.all([
+    api(`/api/v1/admin/ai-cost-dashboard?days=${safeDays}`),
+    api("/api/v1/admin/ai-usage?limit=20"),
+    api(`/api/v1/admin/ai-model-costs?${params}`)
+  ]);
+  state.aiCostDashboard = dashboard;
+  state.aiRecentUsage = recent;
+  state.aiModelCosts = modelCosts;
+  renderAiAnalytics(dashboard, recent);
+
+  const effective = state.aiModelCosts.filter((cost) => cost.currentlyEffective).length;
+  const scheduled = state.aiModelCosts.filter((cost) => aiCostStatus(cost).label === "SCHEDULED").length;
+  const historical = state.aiModelCosts.filter((cost) => ["EXPIRED", "INACTIVE"].includes(aiCostStatus(cost).label)).length;
+  const models = new Set(state.aiModelCosts.map((cost) => `${cost.provider}/${cost.model}`)).size;
+
+  $("#aiCostMetrics").innerHTML = `
+    ${metric("Cost records", state.aiModelCosts.length, "versioned configurations")}
+    ${metric("Đang hiệu lực", effective, "current rate")}
+    ${metric("Models", models, "provider / model")}
+    ${metric("Scheduled / history", scheduled + historical, `${scheduled} scheduled`)}
+  `;
+
+  $("#createAiCostButton").disabled = state.admin?.role !== "SUPER_ADMIN";
+  $("#createAiCostButton").title = state.admin?.role === "SUPER_ADMIN" ? "Tạo model cost" : "Chỉ SUPER_ADMIN được thay đổi cost";
+  $("#backfillAiCostsButton").disabled = state.admin?.role !== "SUPER_ADMIN";
+  $("#backfillAiCostsButton").title = state.admin?.role === "SUPER_ADMIN" ? "Backfill event đang MISSING_RATE" : "Chỉ SUPER_ADMIN được backfill cost";
+
+  $("#aiCostsTable").innerHTML = state.aiModelCosts.length ? `
+    <table><thead><tr><th>Provider / Model</th><th>Input / 1M</th><th>Cached / 1M</th><th>Output / 1M</th><th>Hiệu lực</th><th>Trạng thái</th></tr></thead>
+    <tbody>${state.aiModelCosts.map((cost) => {
+      const status = aiCostStatus(cost);
+      return `<tr class="clickable" data-ai-cost-id="${cost.id}">
+        <td><strong>${escapeHtml(cost.provider)} · ${escapeHtml(cost.model)}</strong><small>#${cost.id} · ${escapeHtml(cost.currency)}</small></td>
+        <td><strong class="ai-rate input">${escapeHtml(fmtAiRate(cost.inputCostPerMillion, cost.currency))}</strong></td>
+        <td><strong class="ai-rate cached">${escapeHtml(fmtAiRate(cost.cachedInputCostPerMillion, cost.currency))}</strong></td>
+        <td><strong class="ai-rate output">${escapeHtml(fmtAiRate(cost.outputCostPerMillion, cost.currency))}</strong></td>
+        <td><span>${cost.effectiveFrom ? fmtDate(cost.effectiveFrom) : "Ngay lập tức"}</span><small>→ ${cost.effectiveTo ? fmtDate(cost.effectiveTo) : "Không giới hạn"}</small></td>
+        <td><span class="status-badge ${status.kind}">${status.label}</span></td>
+      </tr>`;
+    }).join("")}</tbody></table>`
+    : '<div class="empty large">Chưa có AI model cost configuration cho bộ lọc này.</div>';
+
+  $$('[data-ai-cost-id]').forEach((row) => row.addEventListener("click", () => void openAiCost(Number(row.dataset.aiCostId))));
+}
+
+async function openAiCost(costId) {
+  state.selectedUserId = null;
+  state.selectedPlanCode = null;
+  state.selectedPriceId = null;
+  state.selectedLicenseId = null;
+  state.selectedTransactionId = null;
+  state.selectedAiCostId = costId;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải AI model cost...</div>';
+  try {
+    const cost = await api(`/api/v1/admin/ai-model-costs/${costId}`);
+    renderAiCostDrawer(cost, false);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function openCreateAiCost() {
+  if (state.admin?.role !== "SUPER_ADMIN") {
+    toast("Chỉ SUPER_ADMIN được thay đổi AI model cost.", "error");
+    return;
+  }
+  state.selectedUserId = null;
+  state.selectedPlanCode = null;
+  state.selectedPriceId = null;
+  state.selectedLicenseId = null;
+  state.selectedTransactionId = null;
+  state.selectedAiCostId = null;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  renderAiCostDrawer({
+    id: null,
+    provider: state.aiCostProviderFilter || "openai",
+    model: state.aiCostModelFilter || "",
+    currency: "USD",
+    inputCostPerMillion: 0,
+    cachedInputCostPerMillion: 0,
+    outputCostPerMillion: 0,
+    active: true,
+    currentlyEffective: false,
+    effectiveFrom: null,
+    effectiveTo: null,
+    notes: ""
+  }, true);
+}
+
+function renderAiCostDrawer(cost, isCreate) {
+  const canEdit = state.admin?.role === "SUPER_ADMIN";
+  const disabled = canEdit ? "" : "disabled";
+  const status = aiCostStatus(cost);
+  $("#drawerTitle").textContent = isCreate ? "Tạo AI model cost" : `${cost.provider} · ${cost.model} · #${cost.id}`;
+  $("#drawerBody").innerHTML = `
+    <section class="drawer-section plan-section first">
+      <div class="section-heading"><div><span class="eyebrow">MODEL COST</span><h3>${isCreate ? "Cost configuration mới" : `Cost #${cost.id}`}</h3></div><span class="status-badge ${status.kind}">${status.label}</span></div>
+      ${canEdit ? "" : '<div class="notice info">Bạn đang ở chế độ chỉ xem. Chỉ SUPER_ADMIN được thay đổi bảng giá AI.</div>'}
+      <div class="form-grid">
+        <label><span>Provider</span><input id="aiCostProvider" maxlength="50" value="${escapeHtml(cost.provider || "")}" placeholder="openai" ${disabled} /></label>
+        <label><span>Model</span><input id="aiCostModel" maxlength="120" value="${escapeHtml(cost.model || "")}" placeholder="model-id" ${disabled} /></label>
+        <label><span>Currency</span><input id="aiCostCurrency" maxlength="3" value="${escapeHtml(cost.currency || "USD")}" placeholder="USD" ${disabled} /></label>
+        <label class="toggle-field"><span>Active</span><span class="toggle-line"><input id="aiCostActive" type="checkbox" ${cost.active ? "checked" : ""} ${disabled} /> Active</span></label>
+        <label><span>Input / 1M tokens</span><input id="aiCostInput" type="number" min="0" step="0.00000001" value="${escapeHtml(cost.inputCostPerMillion ?? 0)}" ${disabled} /></label>
+        <label><span>Cached input / 1M</span><input id="aiCostCached" type="number" min="0" step="0.00000001" value="${escapeHtml(cost.cachedInputCostPerMillion ?? 0)}" ${disabled} /></label>
+        <label><span>Output / 1M tokens</span><input id="aiCostOutput" type="number" min="0" step="0.00000001" value="${escapeHtml(cost.outputCostPerMillion ?? 0)}" ${disabled} /></label>
+        <div class="price-preview"><span>Đơn vị</span><strong id="aiCostPreview">${escapeHtml(cost.currency || "USD")} / 1M tokens</strong><small>14.8.3 sẽ dùng rate theo thời điểm request</small></div>
+      </div>
+      <div class="notice info">Cost là chi phí nhà cung cấp AI trên <strong>1.000.000 tokens</strong>, không phải giá bán cho khách hàng.</div>
+    </section>
+    <section class="drawer-section plan-section">
+      <div class="section-heading"><div><span class="eyebrow">EFFECTIVE WINDOW</span><h3>Thời gian hiệu lực</h3></div><small class="muted">Active windows cùng provider/model/currency không được overlap</small></div>
+      <div class="form-grid">
+        <label><span>Bắt đầu</span><input id="aiCostEffectiveFrom" type="datetime-local" value="${escapeHtml(toLocalDateTimeValue(cost.effectiveFrom))}" ${disabled} /></label>
+        <label><span>Kết thúc</span><input id="aiCostEffectiveTo" type="datetime-local" value="${escapeHtml(toLocalDateTimeValue(cost.effectiveTo))}" ${disabled} /></label>
+      </div>
+      <label><span>Ghi chú nội bộ</span><textarea id="aiCostNotes" rows="3" maxlength="500" ${disabled}>${escapeHtml(cost.notes || "")}</textarea></label>
+      ${canEdit ? `<label><span>Lý do thao tác</span><textarea id="aiCostReason" rows="3" maxlength="500" placeholder="Bắt buộc để ghi audit"></textarea></label>
+      <div class="action-row"><button id="saveAiCostButton" class="primary">${isCreate ? "Tạo cost configuration" : "Lưu thay đổi"}</button></div>` : ""}
+      ${!isCreate ? `<small class="muted">Created by ${escapeHtml(cost.createdByEmail || `User #${cost.createdByUserId || "system"}`)} · ${fmtDate(cost.createdAt)} · Updated ${fmtDate(cost.updatedAt)}</small>` : ""}
+    </section>`;
+
+  if (!canEdit) return;
+
+  const updatePreview = () => {
+    $("#aiCostPreview").textContent = `${String($("#aiCostCurrency").value || "USD").toUpperCase()} / 1M tokens`;
+  };
+  $("#aiCostCurrency").addEventListener("input", updatePreview);
+  $("#saveAiCostButton").addEventListener("click", async () => {
+    const provider = $("#aiCostProvider").value.trim();
+    const model = $("#aiCostModel").value.trim();
+    const currency = $("#aiCostCurrency").value.trim().toUpperCase();
+    const reason = $("#aiCostReason").value.trim();
+    if (!provider || !model || !currency || !reason) {
+      toast("Provider, model, currency và lý do là bắt buộc.", "error");
+      return;
+    }
+    const body = {
+      provider,
+      model,
+      currency,
+      inputCostPerMillion: Number($("#aiCostInput").value),
+      cachedInputCostPerMillion: Number($("#aiCostCached").value),
+      outputCostPerMillion: Number($("#aiCostOutput").value),
+      active: $("#aiCostActive").checked,
+      effectiveFrom: localDateTimeToIso($("#aiCostEffectiveFrom").value),
+      effectiveTo: localDateTimeToIso($("#aiCostEffectiveTo").value),
+      notes: $("#aiCostNotes").value.trim() || null,
+      reason
+    };
+    if ([body.inputCostPerMillion, body.cachedInputCostPerMillion, body.outputCostPerMillion].some((value) => !Number.isFinite(value) || value < 0)) {
+      toast("Các mức cost phải là số không âm.", "error");
+      return;
+    }
+    try {
+      const saved = await api(isCreate ? "/api/v1/admin/ai-model-costs" : `/api/v1/admin/ai-model-costs/${cost.id}`, {
+        method: isCreate ? "POST" : "PUT",
+        body: JSON.stringify(body)
+      });
+      state.selectedAiCostId = saved.id;
+      toast(isCreate ? "Đã tạo AI model cost." : "Đã cập nhật AI model cost.", "success");
+      renderAiCostDrawer(saved, false);
+      await loadAiCosts();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+}
+
+
+const fxRateStatus = (rate) => {
+  if (rate.currentlyEffective) return { label: "EFFECTIVE", kind: "ok" };
+  if (!rate.active) return { label: "INACTIVE", kind: "warn" };
+  const now = Date.now();
+  const from = rate.effectiveFrom ? new Date(rate.effectiveFrom).getTime() : null;
+  const to = rate.effectiveTo ? new Date(rate.effectiveTo).getTime() : null;
+  if (from != null && from > now) return { label: "SCHEDULED", kind: "info" };
+  if (to != null && to <= now) return { label: "EXPIRED", kind: "warn" };
+  return { label: "NOT LIVE", kind: "warn" };
+};
+
+const marginMetric = (label, value, hint, muted = false) => `<article class="metric-card ${muted ? "metric-muted" : ""}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(hint)}</small></article>`;
+
+const fmtMarginMoney = (value, currency, available = true) => available ? fmtCost(value, currency) : "Chưa tính được";
+
+function renderMarginBreakdown(title, rows = [], currency = "USD") {
+  return `<div class="card-heading"><div><span class="eyebrow">MARGIN BREAKDOWN</span><h3>${escapeHtml(title)}</h3></div></div>
+    ${rows.length ? `<div class="margin-breakdown-list">${rows.map((row) => `
+      <div class="margin-breakdown-row">
+        <div><strong>${escapeHtml(row.label || row.key)}</strong><small>${fmtNumber(row.revenueEvents)} revenue events · ${fmtNumber(row.aiEvents)} AI calls</small></div>
+        <div><span>Net revenue</span><strong>${escapeHtml(fmtCost(row.netRevenue, currency))}</strong></div>
+        <div><span>AI cost</span><strong>${escapeHtml(fmtCost(row.aiCost, currency))}</strong></div>
+        <div><span>Gross profit</span><strong>${escapeHtml(fmtMarginMoney(row.grossProfit, currency, row.marginAvailable))}</strong><small>${row.marginAvailable && row.grossMarginPercent != null ? fmtPercent(row.grossMarginPercent) : "coverage incomplete"}</small></div>
+      </div>`).join("")}</div>` : '<div class="empty">Chưa có dữ liệu trong khoảng thời gian này.</div>'}`;
+}
+
+async function loadMargin() {
+  const safeDays = [1, 7, 30].includes(Number(state.marginDays)) ? Number(state.marginDays) : 7;
+  state.marginDays = safeDays;
+  $("#marginDays").value = String(safeDays);
+
+  const params = new URLSearchParams();
+  if (state.fxBaseFilter) params.set("baseCurrency", state.fxBaseFilter);
+  if (state.fxQuoteFilter) params.set("quoteCurrency", state.fxQuoteFilter);
+  if (state.fxActiveFilter) params.set("active", state.fxActiveFilter);
+  params.set("limit", "500");
+
+  const [dashboard, fxRates] = await Promise.all([
+    api(`/api/v1/admin/margin-dashboard?days=${safeDays}`),
+    api(`/api/v1/admin/fx-rates?${params}`)
+  ]);
+  state.marginDashboard = dashboard;
+  state.fxRates = fxRates;
+  if (dashboard.analyticsTimeZone) state.adminTimeZone = dashboard.analyticsTimeZone;
+  const currency = dashboard.reportingCurrency || "USD";
+
+  const notices = [];
+  if (dashboard.missingFxEvents > 0) notices.push(`${fmtNumber(dashboard.missingFxEvents)} revenue event thiếu FX snapshot.`);
+  if (dashboard.missingAiCostEvents > 0) notices.push(`${fmtNumber(dashboard.missingAiCostEvents)} AI event chưa tính được cost.`);
+  $("#marginNotice").innerHTML = notices.length
+    ? `<div class="notice warn"><strong>Margin coverage chưa hoàn chỉnh.</strong> ${escapeHtml(notices.join(" "))} Gross profit không được suy đoán khi thiếu coverage.</div>`
+    : `<div class="notice ok"><strong>Margin coverage hoàn chỉnh.</strong> Revenue và AI cost đều đã chuẩn hóa về ${escapeHtml(currency)}.</div>`;
+
+  const revenueComplete = Number(dashboard.revenueCoveragePercent || 0) >= 100;
+  const aiComplete = Number(dashboard.aiCostCoveragePercent || 0) >= 100;
+  $("#marginMetrics").innerHTML = `
+    ${marginMetric(revenueComplete ? "Gross revenue" : "Gross revenue (partial)", fmtCost(dashboard.grossRevenue, currency), `${fmtNumber(dashboard.paidTransactions)} paid transactions`)}
+    ${marginMetric(revenueComplete ? "Refunds" : "Refunds (partial)", fmtCost(dashboard.refunds, currency), `${fmtNumber(dashboard.refundTransactions)} refunds`)}
+    ${marginMetric(revenueComplete ? "Net revenue" : "Net revenue (partial)", fmtCost(dashboard.netRevenue, currency), `${fmtPercent(dashboard.revenueCoveragePercent)} revenue coverage`, !revenueComplete)}
+    ${marginMetric(aiComplete ? "AI Cost" : "AI Cost (partial)", dashboard.aiCostCoveragePercent > 0 ? fmtCost(dashboard.aiCost, currency) : "Chưa tính được", `${fmtPercent(dashboard.aiCostCoveragePercent)} AI cost coverage`, !aiComplete)}
+    ${marginMetric("Gross profit", fmtMarginMoney(dashboard.grossProfit, currency, dashboard.marginAvailable), dashboard.marginAvailable && dashboard.grossMarginPercent != null ? `${fmtPercent(dashboard.grossMarginPercent)} gross margin` : "coverage incomplete", !dashboard.marginAvailable)}
+    ${marginMetric("Reporting", currency, `${safeDays} day window · ${dashboard.analyticsTimeZone}`)}
+  `;
+
+  $("#marginDaily").innerHTML = `<div class="card-heading"><div><span class="eyebrow">DAILY</span><h3>Revenue / Cost / Margin</h3></div></div>
+    <div class="margin-daily-list">${(dashboard.daily || []).map((row) => `<div class="margin-daily-row">
+      <strong>${escapeHtml(row.date)}</strong>
+      <span>Revenue <b>${escapeHtml(fmtCost(row.netRevenue, currency))}</b></span>
+      <span>AI <b>${escapeHtml(fmtCost(row.aiCost, currency))}</b></span>
+      <span>Profit <b>${escapeHtml(fmtMarginMoney(row.grossProfit, currency, row.marginAvailable))}</b></span>
+      <small>${row.marginAvailable && row.grossMarginPercent != null ? fmtPercent(row.grossMarginPercent) : "coverage incomplete"}</small>
+    </div>`).join("")}</div>`;
+  $("#marginByPlan").innerHTML = renderMarginBreakdown("Theo plan", dashboard.plans || [], currency);
+  $("#marginByUser").innerHTML = renderMarginBreakdown("Theo user", dashboard.users || [], currency);
+
+  const effective = fxRates.filter((rate) => rate.currentlyEffective).length;
+  const scheduled = fxRates.filter((rate) => fxRateStatus(rate).label === "SCHEDULED").length;
+  $("#fxMetrics").innerHTML = `
+    ${metric("FX records", fxRates.length, "versioned rates")}
+    ${metric("Đang hiệu lực", effective, "EFFECTIVE")}
+    ${metric("Đã lên lịch", scheduled, "SCHEDULED")}
+    ${marginMetric("Reporting currency", currency, "normalized target")}
+  `;
+
+  $("#createFxRateButton").disabled = state.admin?.role !== "SUPER_ADMIN";
+  $("#backfillRevenueButton").disabled = state.admin?.role !== "SUPER_ADMIN";
+  $("#fxRatesTable").innerHTML = fxRates.length ? `<table><thead><tr><th>Currency pair</th><th>Rate</th><th>Hiệu lực</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead><tbody>${fxRates.map((rate) => {
+    const status = fxRateStatus(rate);
+    return `<tr class="clickable" data-fx-rate-id="${rate.id}">
+      <td><strong>${escapeHtml(rate.baseCurrency)} → ${escapeHtml(rate.quoteCurrency)}</strong><small>#${rate.id}</small></td>
+      <td><strong class="mono-value">${escapeHtml(String(rate.rate))}</strong><small>1 ${escapeHtml(rate.baseCurrency)} = rate ${escapeHtml(rate.quoteCurrency)}</small></td>
+      <td><span>${fmtDate(rate.effectiveFrom)}</span><small>→ ${rate.effectiveTo ? fmtDate(rate.effectiveTo) : "Không giới hạn"}</small></td>
+      <td><span class="status-badge ${status.kind}">${status.label}</span></td>
+      <td>${escapeHtml(rate.notes || "—")}</td>
+    </tr>`;
+  }).join("")}</tbody></table>` : '<div class="empty large">Chưa có FX rate cho bộ lọc này. Cùng currency không cần cấu hình vì hệ thống tự dùng rate 1.</div>';
+  $$('[data-fx-rate-id]').forEach((row) => row.addEventListener("click", () => void openFxRate(Number(row.dataset.fxRateId))));
+}
+
+async function openFxRate(rateId) {
+  state.selectedFxRateId = rateId;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải FX rate...</div>';
+  try {
+    const rate = await api(`/api/v1/admin/fx-rates/${rateId}`);
+    renderFxRateDrawer(rate, false);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function openCreateFxRate() {
+  if (state.admin?.role !== "SUPER_ADMIN") {
+    toast("Chỉ SUPER_ADMIN được thay đổi FX rate.", "error");
+    return;
+  }
+  state.selectedFxRateId = null;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  renderFxRateDrawer({
+    id: null,
+    baseCurrency: state.fxBaseFilter || "VND",
+    quoteCurrency: state.marginDashboard?.reportingCurrency || "USD",
+    rate: "",
+    active: true,
+    effectiveFrom: new Date().toISOString(),
+    effectiveTo: null,
+    notes: ""
+  }, true);
+}
+
+function renderFxRateDrawer(rate, isCreate) {
+  const canEdit = state.admin?.role === "SUPER_ADMIN";
+  const disabled = canEdit ? "" : "disabled";
+  const status = fxRateStatus(rate);
+  $("#drawerTitle").textContent = isCreate ? "Tạo FX rate" : `${rate.baseCurrency} → ${rate.quoteCurrency} · #${rate.id}`;
+  $("#drawerBody").innerHTML = `<section class="drawer-section plan-section first">
+    <div class="section-heading"><div><span class="eyebrow">FX SNAPSHOT SOURCE</span><h3>${isCreate ? "FX rate mới" : `FX rate #${rate.id}`}</h3></div><span class="status-badge ${status.kind}">${status.label}</span></div>
+    ${canEdit ? "" : '<div class="notice info">Chỉ SUPER_ADMIN được thay đổi FX rate.</div>'}
+    <div class="form-grid">
+      <label><span>Base currency</span><input id="fxBaseCurrency" maxlength="3" value="${escapeHtml(rate.baseCurrency || "VND")}" ${disabled} /></label>
+      <label><span>Quote / reporting currency</span><input id="fxQuoteCurrency" maxlength="3" value="${escapeHtml(rate.quoteCurrency || state.marginDashboard?.reportingCurrency || "USD")}" ${disabled} /></label>
+      <label><span>Rate</span><input id="fxRateValue" type="number" min="0.000000000001" step="0.000000000001" value="${escapeHtml(rate.rate ?? "")}" ${disabled} /></label>
+      <label class="toggle-field"><span>Active</span><span class="toggle-line"><input id="fxRateActive" type="checkbox" ${rate.active ? "checked" : ""} ${disabled} /> Active</span></label>
+      <label><span>Bắt đầu</span><input id="fxEffectiveFrom" type="datetime-local" value="${escapeHtml(toLocalDateTimeValue(rate.effectiveFrom))}" ${disabled} /></label>
+      <label><span>Kết thúc</span><input id="fxEffectiveTo" type="datetime-local" value="${escapeHtml(toLocalDateTimeValue(rate.effectiveTo))}" ${disabled} /></label>
+    </div>
+    <div class="notice info">Ví dụ VND → USD: nhập số USD tương ứng với <strong>1 VND</strong>. Payment sẽ snapshot rate tại thời điểm settle; sửa rate sau này không làm đổi revenue lịch sử đã NORMALIZED.</div>
+    <label><span>Ghi chú nội bộ</span><textarea id="fxNotes" rows="3" maxlength="500" ${disabled}>${escapeHtml(rate.notes || "")}</textarea></label>
+    ${canEdit ? `<label><span>Lý do thao tác</span><textarea id="fxReason" rows="3" maxlength="500" placeholder="Bắt buộc để ghi audit"></textarea></label><div class="action-row"><button id="saveFxRateButton" class="primary">${isCreate ? "Tạo FX rate" : "Lưu thay đổi"}</button></div>` : ""}
+    ${!isCreate ? `<small class="muted">Created by ${escapeHtml(rate.createdByEmail || `User #${rate.createdByUserId || "system"}`)} · ${fmtDate(rate.createdAt)} · Updated ${fmtDate(rate.updatedAt)}</small>` : ""}
+  </section>`;
+
+  if (!canEdit) return;
+  $("#saveFxRateButton").addEventListener("click", async () => {
+    const body = {
+      baseCurrency: $("#fxBaseCurrency").value.trim().toUpperCase(),
+      quoteCurrency: $("#fxQuoteCurrency").value.trim().toUpperCase(),
+      rate: Number($("#fxRateValue").value),
+      active: $("#fxRateActive").checked,
+      effectiveFrom: localDateTimeToIso($("#fxEffectiveFrom").value),
+      effectiveTo: localDateTimeToIso($("#fxEffectiveTo").value),
+      notes: $("#fxNotes").value.trim() || null,
+      reason: $("#fxReason").value.trim()
+    };
+    if (!/^[A-Z]{3}$/.test(body.baseCurrency) || !/^[A-Z]{3}$/.test(body.quoteCurrency) || !Number.isFinite(body.rate) || body.rate <= 0 || !body.reason) {
+      toast("Currency, FX rate > 0 và lý do là bắt buộc.", "error");
+      return;
+    }
+    try {
+      const saved = await api(isCreate ? "/api/v1/admin/fx-rates" : `/api/v1/admin/fx-rates/${rate.id}`, {
+        method: isCreate ? "POST" : "PUT",
+        body: JSON.stringify(body)
+      });
+      state.selectedFxRateId = saved.id;
+      toast(isCreate ? "Đã tạo FX rate." : "Đã cập nhật FX rate.", "success");
+      renderFxRateDrawer(saved, false);
+      await loadMargin();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
+}
+
+
+function securitySeverityClass(severity) {
+  if (severity === "CRITICAL") return "critical";
+  if (severity === "WARNING") return "warn";
+  return "ok";
+}
+
+function securityOutcomeClass(outcome) {
+  if (outcome === "SUCCESS") return "ok";
+  if (outcome === "DENIED") return "warn";
+  return "critical";
+}
+
+function securityActorLabel(event) {
+  if (event.actorEmail) return event.actorEmail;
+  if (event.attemptedEmail) return event.attemptedEmail;
+  if (event.actorUserId) return `User #${event.actorUserId}`;
+  return "Anonymous / unknown";
+}
+
+function securityTargetLabel(event) {
+  if (event.targetEmail) return event.targetEmail;
+  if (event.targetUserId) return `User #${event.targetUserId}`;
+  return "—";
+}
+
+async function loadSecurity() {
+  const params = new URLSearchParams();
+  params.set("days", String(state.securityDays || 7));
+  params.set("limit", "300");
+  if (state.securitySeverity) params.set("severity", state.securitySeverity);
+  if (state.securityOutcome) params.set("outcome", state.securityOutcome);
+  if (state.securityCategory) params.set("category", state.securityCategory);
+  if (state.securityEventType) params.set("eventType", state.securityEventType);
+  if (state.securityQuery) params.set("query", state.securityQuery);
+
+  const data = await api(`/api/v1/admin/security-events?${params.toString()}`);
+  state.securityDashboard = data;
+  if (data.summary?.timeZone) state.adminTimeZone = data.summary.timeZone;
+
+  $("#securityDays").value = String(state.securityDays || 7);
+  $("#securitySeverity").value = state.securitySeverity;
+  $("#securityOutcome").value = state.securityOutcome;
+  $("#securityCategory").value = state.securityCategory;
+  $("#securityEventType").value = state.securityEventType;
+  $("#securityQuery").value = state.securityQuery;
+
+  const summary = data.summary || {};
+  $("#securityMetrics").innerHTML = `
+    ${metric("Security events", summary.totalEvents, `${state.securityDays} day window`)}
+    ${metric("Login success", summary.loginSuccess, "Admin authentication")}
+    ${metric("Login failed", summary.loginFailure, "Denied login attempts")}
+    ${metric("Access denied", summary.deniedAccess, "401 / 403 admin access")}
+    ${metric("Admin actions", summary.sensitiveActions, "Audited sensitive writes")}
+    ${metric("Warnings", Number(summary.warningEvents || 0) + Number(summary.criticalEvents || 0), `${fmtNumber(summary.criticalEvents || 0)} critical`)}
+  `;
+
+  renderSecurityEvents(data.events || []);
+}
+
+function renderSecurityEvents(events) {
+  const target = $("#securityEventsTable");
+  if (!events.length) {
+    target.innerHTML = '<div class="empty large">Không có security event phù hợp bộ lọc.</div>';
+    return;
+  }
+
+  target.innerHTML = `
+    <table class="security-table">
+      <thead><tr><th>Time / Event</th><th>Actor</th><th>Request</th><th>Severity</th><th>Outcome</th></tr></thead>
+      <tbody>${events.map((event) => `
+        <tr class="clickable" data-security-event-id="${event.id}">
+          <td><strong>${escapeHtml(event.eventType)}</strong><small>${escapeHtml(event.category)} · ${fmtDate(event.createdAt)}</small></td>
+          <td><strong>${escapeHtml(securityActorLabel(event))}</strong><small>${escapeHtml(event.actorRole || "—")}${event.targetUserId ? ` → ${escapeHtml(securityTargetLabel(event))}` : ""}</small></td>
+          <td><strong class="mono-value">${escapeHtml(event.requestId || "—")}</strong><small>${escapeHtml([event.httpMethod, event.requestPath].filter(Boolean).join(" ") || "—")}</small></td>
+          <td><span class="status-badge ${securitySeverityClass(event.severity)}">${escapeHtml(event.severity)}</span></td>
+          <td><span class="status-badge ${securityOutcomeClass(event.outcome)}">${escapeHtml(event.outcome)}</span></td>
+        </tr>`).join("")}</tbody>
+    </table>`;
+
+  $$('[data-security-event-id]').forEach((row) => row.addEventListener("click", () => {
+    openSecurityEvent(Number(row.dataset.securityEventId));
+  }));
+}
+
+function openSecurityEvent(eventId) {
+  const event = (state.securityDashboard?.events || []).find((item) => Number(item.id) === Number(eventId));
+  if (!event) return;
+
+  state.selectedSecurityEventId = eventId;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerTitle").textContent = `${event.eventType} · #${event.id}`;
+  $("#drawerBody").innerHTML = `
+    <section class="drawer-section first security-event-detail">
+      <div class="section-heading"><div><span class="eyebrow">SECURITY EVENT</span><h3>${escapeHtml(event.category)}</h3></div><div class="security-badges"><span class="status-badge ${securitySeverityClass(event.severity)}">${escapeHtml(event.severity)}</span><span class="status-badge ${securityOutcomeClass(event.outcome)}">${escapeHtml(event.outcome)}</span></div></div>
+      <div class="detail-grid">
+        <div><span>Created</span><strong>${fmtDate(event.createdAt)}</strong><small>${escapeHtml(state.adminTimeZone)}</small></div>
+        <div><span>Actor</span><strong>${escapeHtml(securityActorLabel(event))}</strong><small>${escapeHtml(event.actorRole || "—")}${event.actorUserId ? ` · #${event.actorUserId}` : ""}</small></div>
+        <div><span>Target</span><strong>${escapeHtml(securityTargetLabel(event))}</strong><small>${event.targetUserId ? `#${event.targetUserId}` : "No target user"}</small></div>
+        <div><span>Attempted email</span><strong>${escapeHtml(event.attemptedEmail || "—")}</strong><small>Login metadata only</small></div>
+      </div>
+    </section>
+    <section class="drawer-section security-event-detail">
+      <div class="section-heading"><div><span class="eyebrow">REQUEST METADATA</span><h3>Request context</h3></div></div>
+      <div class="detail-grid">
+        <div><span>Request ID</span><strong class="mono-value">${escapeHtml(event.requestId || "—")}</strong></div>
+        <div><span>Method</span><strong>${escapeHtml(event.httpMethod || "—")}</strong></div>
+        <div><span>Path</span><strong class="mono-value">${escapeHtml(event.requestPath || "—")}</strong></div>
+        <div><span>Remote IP</span><strong class="mono-value">${escapeHtml(event.remoteIp || "—")}</strong></div>
+        <div><span>X-Forwarded-For</span><strong class="mono-value">${escapeHtml(event.forwardedFor || "—")}</strong><small>Không được coi là trusted client IP nếu proxy chưa được cấu hình.</small></div>
+        <div><span>User-Agent</span><strong class="mono-value">${escapeHtml(event.userAgent || "—")}</strong></div>
+      </div>
+    </section>
+    <section class="drawer-section security-event-detail">
+      <div class="section-heading"><div><span class="eyebrow">DETAILS</span><h3>Security metadata</h3></div></div>
+      <div class="notice info mono-value">${escapeHtml(event.details || "No additional details")}</div>
+      <small class="muted">Security ledger không lưu password, JWT, request body, prompt, OCR hoặc nội dung dịch.</small>
+    </section>`;
+}
+
+
 function requireReason() {
   const reason = $("#actionReason")?.value.trim();
   if (!reason) { toast("Hãy nhập lý do để ghi audit.", "error"); return ""; }
@@ -1161,6 +1974,10 @@ function closeDrawer() {
   state.selectedPriceId = null;
   state.selectedLicenseId = null;
   state.selectedTransactionId = null;
+  state.selectedAiCostId = null;
+  state.selectedFxRateId = null;
+  state.selectedAiDrilldown = null;
+  state.selectedSecurityEventId = null;
 }
 
 $("#loginForm").addEventListener("submit", async (event) => {
@@ -1185,6 +2002,35 @@ $("#loginForm").addEventListener("submit", async (event) => {
   }
 });
 
+
+$("#securityDays").addEventListener("change", () => {
+  state.securityDays = Number($("#securityDays").value || 7);
+  sessionStorage.setItem("ait.admin.securityDays", String(state.securityDays));
+  void loadSecurity();
+});
+$("#securitySeverity").addEventListener("change", () => { state.securitySeverity = $("#securitySeverity").value; void loadSecurity(); });
+$("#securityOutcome").addEventListener("change", () => { state.securityOutcome = $("#securityOutcome").value; void loadSecurity(); });
+$("#securityCategory").addEventListener("change", () => { state.securityCategory = $("#securityCategory").value; void loadSecurity(); });
+$("#securitySearchButton").addEventListener("click", () => {
+  state.securityEventType = $("#securityEventType").value.trim().toUpperCase();
+  state.securityQuery = $("#securityQuery").value.trim();
+  void loadSecurity();
+});
+$("#securityClearButton").addEventListener("click", () => {
+  state.securitySeverity = "";
+  state.securityOutcome = "";
+  state.securityCategory = "";
+  state.securityEventType = "";
+  state.securityQuery = "";
+  void loadSecurity();
+});
+$("#securityQuery").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") $("#securitySearchButton").click();
+});
+$("#securityEventType").addEventListener("keydown", (event) => {
+  if (event.key === "Enter") $("#securitySearchButton").click();
+});
+
 $$(".nav-item[data-view]").forEach((button) => button.addEventListener("click", () => void loadView(button.dataset.view)));
 $("#refreshButton").addEventListener("click", () => void loadView(state.currentView));
 $("#logoutButton").addEventListener("click", () => { clearSession(); showLogin(); });
@@ -1198,6 +2044,62 @@ $("#licenseStatusFilter").addEventListener("change", () => { state.licenseStatus
 $("#createTransactionButton").addEventListener("click", () => void openCreateTransaction());
 $("#transactionStatusFilter").addEventListener("change", () => { state.transactionStatusFilter = $("#transactionStatusFilter").value; void loadTransactions(); });
 $("#transactionPlanFilter").addEventListener("change", () => { state.transactionPlanFilter = $("#transactionPlanFilter").value; void loadTransactions(); });
+$("#aiDashboardDays").addEventListener("change", () => {
+  state.aiDashboardDays = Number($("#aiDashboardDays").value || 7);
+  sessionStorage.setItem("ait.admin.aiCostDays", String(state.aiDashboardDays));
+  void loadAiCosts();
+});
+$("#backfillAiCostsButton").addEventListener("click", async () => {
+  if (state.admin?.role !== "SUPER_ADMIN") {
+    toast("Chỉ SUPER_ADMIN được backfill AI cost.", "error");
+    return;
+  }
+  const reason = window.prompt("Lý do backfill AI cost:", "Backfill missing model rates");
+  if (!reason?.trim()) return;
+  try {
+    const result = await api("/api/v1/admin/ai-usage/costs/backfill?limit=5000", {
+      method: "POST",
+      body: JSON.stringify({ reason: reason.trim() })
+    });
+    toast(`Backfill: ${result.calculated} calculated · ${result.missingRate} missing rate.`, result.missingRate ? "info" : "success");
+    await loadAiCosts();
+  } catch (error) {
+    toast(error.message, "error");
+  }
+});
+$("#createAiCostButton").addEventListener("click", openCreateAiCost);
+$("#aiCostProviderFilter").addEventListener("change", () => { state.aiCostProviderFilter = $("#aiCostProviderFilter").value.trim(); void loadAiCosts(); });
+$("#aiCostModelFilter").addEventListener("change", () => { state.aiCostModelFilter = $("#aiCostModelFilter").value.trim(); void loadAiCosts(); });
+$("#aiCostActiveFilter").addEventListener("change", () => { state.aiCostActiveFilter = $("#aiCostActiveFilter").value; void loadAiCosts(); });
+$("#aiCostProviderFilter").addEventListener("keydown", (event) => { if (event.key === "Enter") { state.aiCostProviderFilter = $("#aiCostProviderFilter").value.trim(); void loadAiCosts(); } });
+$("#aiCostModelFilter").addEventListener("keydown", (event) => { if (event.key === "Enter") { state.aiCostModelFilter = $("#aiCostModelFilter").value.trim(); void loadAiCosts(); } });
+$("#marginDays").addEventListener("change", () => {
+  state.marginDays = Number($("#marginDays").value || 7);
+  sessionStorage.setItem("ait.admin.marginDays", String(state.marginDays));
+  void loadMargin();
+});
+$("#backfillRevenueButton").addEventListener("click", async () => {
+  if (state.admin?.role !== "SUPER_ADMIN") {
+    toast("Chỉ SUPER_ADMIN được backfill revenue.", "error");
+    return;
+  }
+  const reason = window.prompt("Lý do backfill revenue:", "Backfill revenue after FX configuration");
+  if (!reason?.trim()) return;
+  try {
+    const result = await api("/api/v1/admin/revenue/backfill?limit=5000", {
+      method: "POST",
+      body: JSON.stringify({ reason: reason.trim() })
+    });
+    toast(`Revenue backfill: ${result.normalized} normalized · ${result.missingFx} missing FX.`, result.missingFx ? "info" : "success");
+    await loadMargin();
+  } catch (error) {
+    toast(error.message, "error");
+  }
+});
+$("#createFxRateButton").addEventListener("click", openCreateFxRate);
+$("#fxBaseFilter").addEventListener("change", () => { state.fxBaseFilter = $("#fxBaseFilter").value.trim().toUpperCase(); void loadMargin(); });
+$("#fxQuoteFilter").addEventListener("change", () => { state.fxQuoteFilter = $("#fxQuoteFilter").value.trim().toUpperCase(); void loadMargin(); });
+$("#fxActiveFilter").addEventListener("change", () => { state.fxActiveFilter = $("#fxActiveFilter").value; void loadMargin(); });
 $("#userSearch").addEventListener("keydown", (event) => { if (event.key === "Enter") { state.usersPage = 0; void loadUsers(); } });
 $("#statusFilter").addEventListener("change", () => { state.usersPage = 0; void loadUsers(); });
 $("#prevUsers").addEventListener("click", () => { if (state.usersPage > 0) { state.usersPage -= 1; void loadUsers(); } });

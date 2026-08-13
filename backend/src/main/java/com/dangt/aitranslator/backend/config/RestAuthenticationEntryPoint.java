@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.config;
 
+import com.dangt.aitranslator.backend.admin.AdminSecurityEventService;
 import com.dangt.aitranslator.backend.common.RequestCorrelation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,12 +15,26 @@ import java.time.Instant;
 public class RestAuthenticationEntryPoint
         implements AuthenticationEntryPoint {
 
+    private final AdminSecurityEventService securityEventService;
+
+    public RestAuthenticationEntryPoint(
+            AdminSecurityEventService securityEventService
+    ) {
+        this.securityEventService = securityEventService;
+    }
+
     @Override
     public void commence(
             HttpServletRequest request,
             HttpServletResponse response,
             AuthenticationException authException
     ) throws java.io.IOException {
+        securityEventService.recordAdminAccessDenied(
+                request,
+                "ADMIN_ACCESS_UNAUTHENTICATED",
+                "MISSING_OR_INVALID_TOKEN"
+        );
+
         String requestId =
                 RequestCorrelation
                         .currentId();
