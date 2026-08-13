@@ -1,41 +1,67 @@
-# Batch 14.2 · PDF Text Reader
+# Batch 14.5 — Admin Console MVP
 
-Branch: `feature/batch-14-2-pdf-text-reader`
+## Included
 
-## What changes
+- Separate `admin-web/` application on port 4174, zero npm runtime dependencies.
+- Dedicated Admin login endpoint with short-lived JWT and no refresh session.
+- Roles: existing `USER`, plus `ADMIN` and `SUPER_ADMIN` values supported by Admin guard.
+- Dashboard: users, active/suspended users, active sessions, translation usage today/month, effective plan distribution, recent audit.
+- User management: search, detail, identities, active sessions, monthly usage.
+- User actions: suspend/reactivate, revoke all sessions.
+- Plan override: FREE/PRO/MANGA_PLUS or any active plan from `plan_catalog`, optional expiry, with reversible override semantics.
+- Admin audit log for successful login and all mutating Admin actions.
+- Configurable CORS for Desktop + Admin Web.
 
-- Adds `PDF_TEXT` to Generic Document Reader Core.
-- Adds local Electron PDF text extraction (`pdfTextParser.cjs`).
-- Reader Library can import/reopen TXT, EPUB and text-based PDF.
-- PDF uses existing progress, bookmarks, search, themes, font settings, profiles, language switching and Translation Memory.
-- Adds backend `BatchTranslationPurpose.PDF_TEXT` and feature gate `pdfTextReader`.
-- Adds Flyway `V14__add_pdf_text_reader_entitlement.sql`.
-- FREE: PDF Text OFF. PRO/MANGA_PLUS: PDF Text ON.
-- Settings → Plan & License shows PDF Text Reader capability.
+## Migration
 
-## Safety / limitations
+Adds only:
 
-PDF stays local; only blocks selected for translation go to backend. Encrypted PDF is rejected. Image-only/scan PDF reports that PDF OCR Reader is needed (planned Batch 14.3).
+`backend/src/main/resources/db/migration/V17__add_admin_console_foundation.sql`
 
-The parser supports common PDF text streams including Flate/ASCII85/ASCIIHex, ToUnicode CMaps, WinAnsi and common CJK UCS2 encodings. Some highly compressed object-stream-only PDFs may still be unsupported in this lightweight baseline.
+Do not edit V1–V16.
 
-## Test
+## First Admin
 
-Use `samples/pdf-text-reader-test.pdf` (3 pages / 3 chapters) or `samples/pdf-text-reader-japanese-test.pdf`.
+1. Register/login an ordinary local email/password account.
+2. Open `backend/mysql/promote-super-admin.sql` locally.
+3. Replace `CHANGE_ME_ADMIN_EMAIL@example.com` with that account email.
+4. Run the SQL against schema `ai_translator`.
+5. Restart/login to Admin Web.
 
-1. Login with PRO/MANGA_PLUS.
-2. Reader → `+ PDF`.
-3. Open a sample PDF.
-4. Verify chapter navigation, search, bookmark and progress.
-5. Translate several blocks to VI, then switch target to EN and translate again.
-6. Reopen the PDF from Library with Continue Reading.
-7. FREE account must not be allowed to open/translate PDF.
+Never commit a real admin password. The SQL file contains no password.
 
-## Validation completed
+## Run Admin Web
 
-- `node --check`: main/preload/documentReaderCore/pdfTextParser PASS.
-- TypeScript strict semantic check: NovelReaderPage + SettingsPage + documentReader PASS.
-- Java compile with dependency stubs: purpose/controller/prompt PASS.
-- Parser tests: Latin PDF PASS, Japanese UniJIS-UCS2 PDF PASS, direct ToUnicode CMap PASS.
-- Image-only PDF detection PASS.
-- No V1-V13 migration was edited.
+```bash
+cd admin-web
+npm run dev
+```
+
+Open:
+
+`http://localhost:4174`
+
+Backend default:
+
+`http://localhost:8080`
+
+## Runtime test checklist
+
+1. Flyway reaches V17 and backend starts.
+2. Normal USER cannot login through Admin Console.
+3. SUPER_ADMIN can login.
+4. Dashboard loads.
+5. Search a user and open detail.
+6. Change PRO/FREE/MANGA_PLUS override with a reason.
+7. Desktop entitlement for that user changes after refresh/re-login.
+8. Clear override: entitlement returns to underlying license/subscription.
+9. Suspend user: all refresh sessions are revoked and authenticated APIs reject the suspended account.
+10. Reactivate user and verify login works again.
+11. Audit view shows every mutation with actor, target, reason and time.
+
+## Deliberately deferred
+
+- Batch 14.6: editable plan catalog, features and quota limits.
+- Batch 14.7: prices, billing intervals, promotions and transaction model.
+- Batch 14.8: provider/model token usage and estimated AI cost analytics.
+- Batch 14.9: Admin MFA/SSO, rate limiting, richer audit metadata and production operations.

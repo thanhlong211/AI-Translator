@@ -134,6 +134,29 @@ public class EntitlementService {
     }
 
     private EffectiveSubscription findEffectiveSubscription(long userId) {
+        List<EffectiveSubscription> adminOverrides = jdbcTemplate.query(
+                """
+                SELECT plan_code, expires_at
+                FROM user_plan_overrides
+                WHERE user_id = ?
+                  AND active = TRUE
+                  AND effective_from <= CURRENT_TIMESTAMP(6)
+                  AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP(6))
+                LIMIT 1
+                """,
+                (rs, rowNum) -> new EffectiveSubscription(
+                        normalizePlan(rs.getString("plan_code")),
+                        "ACTIVE",
+                        "ADMIN",
+                        toInstant(rs.getTimestamp("expires_at"))
+                ),
+                userId
+        );
+
+        if (!adminOverrides.isEmpty()) {
+            return adminOverrides.getFirst();
+        }
+
         List<EffectiveSubscription> matches = jdbcTemplate.query(
                 """
                 SELECT s.plan, s.status, s.source, s.period_end

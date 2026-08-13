@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="color-scheme" content="dark" />
+  <title>AI Translator · Admin</title>
+  <link rel="stylesheet" href="./src/styles.css" />
+</head>
+<body>
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <section id="loginView" class="login-shell">
+    <div class="login-card">
+      <div class="brand-mark">訳</div>
+      <div>
+        <div class="eyebrow">AI TRANSLATOR</div>
+        <h1>Admin Console</h1>
+        <p>Quản lý người dùng, quyền truy cập và vận hành hệ thống.</p>
+      </div>
+      <form id="loginForm" class="login-form">
+        <label>
+          <span>Backend URL</span>
+          <input id="backendUrl" type="url" value="http://localhost:8080" required />
+        </label>
+        <label>
+          <span>Email Admin</span>
+          <input id="email" type="email" autocomplete="username" required />
+        </label>
+        <label>
+          <span>Mật khẩu</span>
+          <input id="password" type="password" autocomplete="current-password" required />
+        </label>
+        <button id="loginButton" class="primary" type="submit">Đăng nhập Admin</button>
+      </form>
+      <div id="loginError" class="inline-error hidden"></div>
+      <small class="security-note">Admin JWT chỉ lưu trong session của tab trình duyệt và tự mất khi đóng session.</small>
+    </div>
+  </section>
+
+  <div id="appView" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="brand-row">
+        <div class="brand-mark small">訳</div>
+        <div><strong>AI Translator</strong><span>Admin Console</span></div>
+      </div>
+      <nav>
+        <button class="nav-item active" data-view="dashboard"><span>◫</span> Tổng quan</button>
+        <button class="nav-item" data-view="users"><span>◎</span> Người dùng</button>
+        <button class="nav-item" data-view="audit"><span>≡</span> Audit log</button>
+        <div class="nav-separator">COMMERCIAL</div>
+        <button class="nav-item disabled" disabled><span>◇</span> Plans & Features <em>14.6</em></button>
+        <button class="nav-item disabled" disabled><span>₫</span> Pricing <em>14.7</em></button>
+        <button class="nav-item disabled" disabled><span>∿</span> AI Costs <em>14.8</em></button>
+      </nav>
+      <div class="sidebar-footer">
+        <div id="adminIdentity" class="admin-identity"></div>
+        <button id="logoutButton" class="ghost danger">Đăng xuất</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div><span class="eyebrow">ADMINISTRATION</span><h2 id="pageTitle">Tổng quan</h2></div>
+        <div class="top-actions"><span id="backendStatus" class="status-pill">Backend</span><button id="refreshButton" class="ghost">↻ Làm mới</button></div>
+      </header>
+
+      <section id="dashboardView" class="view"></section>
+
+      <section id="usersView" class="view hidden">
+        <div class="toolbar card">
+          <input id="userSearch" type="search" placeholder="Tìm email hoặc User ID..." />
+          <select id="statusFilter">
+            <option value="">Tất cả trạng thái</option>
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="SUSPENDED">SUSPENDED</option>
+          </select>
+          <button id="searchUsersButton" class="primary compact">Tìm</button>
+        </div>
+        <div class="card table-card">
+          <div id="usersTable"></div>
+          <div class="pager">
+            <button id="prevUsers" class="ghost compact">← Trước</button>
+            <span id="usersPageMeta"></span>
+            <button id="nextUsers" class="ghost compact">Sau →</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="auditView" class="view hidden">
+        <div class="card table-card"><div id="auditTable"></div></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="drawerBackdrop" class="drawer-backdrop hidden"></div>
+  <aside id="userDrawer" class="drawer hidden" aria-label="Chi tiết người dùng">
+    <div class="drawer-header">
+      <div><span class="eyebrow">USER CONTROL</span><h2 id="drawerTitle">User</h2></div>
+      <button id="closeDrawer" class="icon-button" aria-label="Đóng">×</button>
+    </div>
+    <div id="drawerBody" class="drawer-body"></div>
+  </aside>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

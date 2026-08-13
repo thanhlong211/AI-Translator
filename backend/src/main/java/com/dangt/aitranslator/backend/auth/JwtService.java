@@ -36,7 +36,7 @@ public class JwtService {
         Instant expiresAt =
                 now.plus(accessTokenLifetime);
 
-        JwtClaimsSet claims =
+        JwtClaimsSet.Builder builder =
                 JwtClaimsSet.builder()
                         .issuer(issuer)
                         .issuedAt(now)
@@ -45,9 +45,13 @@ public class JwtService {
                                 String.valueOf(user.getId())
                         )
                         .claim("email", user.getEmail())
-                        .claim("role", user.getRole())
-                        .claim("sid", sessionId)
-                        .build();
+                        .claim("role", user.getRole());
+
+        if (sessionId != null) {
+            builder.claim("sid", sessionId);
+        }
+
+        JwtClaimsSet claims = builder.build();
 
         String token =
                 jwtEncoder
@@ -60,6 +64,10 @@ public class JwtService {
                 token,
                 accessTokenLifetime.toSeconds()
         );
+    }
+
+    public IssuedToken issueAdminAccessToken(UserAccount user) {
+        return issueAccessToken(user, null);
     }
 
     public record IssuedToken(
