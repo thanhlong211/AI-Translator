@@ -71,6 +71,18 @@ public class LicenseService {
 
         LicenseRow license = rows.getFirst();
 
+        Integer activePlan = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM plan_catalog WHERE code = ? AND active = TRUE",
+                Integer.class,
+                EntitlementService.normalizePlan(license.planCode())
+        );
+        if (activePlan == null || activePlan == 0) {
+            throw new IllegalArgumentException(
+                    "Gói " + EntitlementService.normalizePlan(license.planCode())
+                            + " hiện đang tạm ngừng và không thể kích hoạt license."
+            );
+        }
+
         if (!"AVAILABLE".equalsIgnoreCase(license.status())) {
             throw new IllegalArgumentException("License key hiện không thể kích hoạt.");
         }

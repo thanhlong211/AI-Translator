@@ -227,6 +227,8 @@ function renderPlanDrawer(plan, schema, isCreate) {
   $("#drawerTitle").textContent = isCreate ? "Tạo plan mới" : `${plan.displayName} · ${plan.code}`;
   const featureKeys = schema.featureKeys || Object.keys(plan.features || {});
   const limitKeys = schema.limitKeys || Object.keys(plan.limits || {});
+  const activeAssignments = Number(plan.usage?.activeOverrides || 0) + Number(plan.usage?.activeSubscriptions || 0);
+  const cannotDeactivate = !isCreate && plan.active && activeAssignments > 0;
   $("#drawerBody").innerHTML = `
     <section class="drawer-section plan-section first">
       <div class="section-heading"><div><span class="eyebrow">PLAN DEFINITION</span><h3>Thông tin plan</h3></div></div>
@@ -234,10 +236,20 @@ function renderPlanDrawer(plan, schema, isCreate) {
         <label><span>Code</span><input id="planCodeField" maxlength="30" value="${escapeHtml(plan.code)}" ${isCreate ? "" : "readonly"} placeholder="ULTIMATE" /></label>
         <label><span>Tên hiển thị</span><input id="planDisplayName" maxlength="80" value="${escapeHtml(plan.displayName)}" placeholder="Ultimate" /></label>
         <label><span>Rank</span><input id="planRank" type="number" min="0" max="100000" value="${Number(plan.rankOrder || 0)}" /></label>
-        <label class="toggle-field"><span>Trạng thái</span><span class="toggle-line"><input id="planActive" type="checkbox" ${plan.active ? "checked" : ""} ${plan.code === "FREE" && !isCreate ? "disabled" : ""} /> Active</span></label>
+        <label class="toggle-field"><span>Trạng thái</span><span class="toggle-line"><input id="planActive" type="checkbox" ${plan.active ? "checked" : ""} ${(plan.code === "FREE" && !isCreate) || cannotDeactivate ? "disabled" : ""} /> Active</span></label>
       </div>
       <label><span>Mô tả</span><textarea id="planDescription" rows="2" maxlength="500" placeholder="Mô tả nội bộ cho plan...">${escapeHtml(plan.description || "")}</textarea></label>
     </section>
+    ${!isCreate ? `<section class="drawer-section plan-section">
+      <div class="section-heading"><div><span class="eyebrow">LIFECYCLE</span><h3>Plan đang được sử dụng</h3></div><small class="muted">Bảo vệ trước khi tắt plan</small></div>
+      <div class="detail-grid">
+        <div><span>Subscription hiệu lực</span><strong>${fmtNumber(plan.usage?.activeSubscriptions || 0)}</strong><small>user đang nhận plan</small></div>
+        <div><span>Admin override</span><strong>${fmtNumber(plan.usage?.activeOverrides || 0)}</strong><small>override còn hiệu lực</small></div>
+        <div><span>License còn dùng được</span><strong>${fmtNumber(plan.usage?.usableLicenses || 0)}</strong><small>license AVAILABLE chưa hết hạn</small></div>
+      </div>
+      ${cannotDeactivate ? `<div class="notice warn">Không thể tắt plan khi còn subscription hoặc Admin override hiệu lực. Hãy chuyển user sang plan khác trước.</div>` : ""}
+      ${Number(plan.usage?.usableLicenses || 0) > 0 ? `<div class="notice info">Nếu tắt plan, các license chưa kích hoạt của plan này sẽ tạm thời không thể kích hoạt cho tới khi plan được bật lại.</div>` : ""}
+    </section>` : ""}
     <section class="drawer-section plan-section">
       <div class="section-heading"><div><span class="eyebrow">FEATURES</span><h3>Quyền tính năng</h3></div><small class="muted">Bật/tắt không cần rebuild Desktop</small></div>
       <div class="feature-grid">${featureKeys.map((key) => `

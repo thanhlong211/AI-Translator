@@ -632,7 +632,9 @@ function App() {
             translationMemory: true,
             continuousManga: false,
             novelReaderTxt: false,
-            novelReaderEpub: false
+            novelReaderEpub: false,
+            pdfTextReader: false,
+            pdfOcrReader: false
         },
         limits: {
             monthlyTranslations: 300,
@@ -1431,7 +1433,9 @@ function App() {
                     translationMemory: true,
                     continuousManga: false,
                     novelReaderTxt: false,
-                    novelReaderEpub: false
+                    novelReaderEpub: false,
+                    pdfTextReader: false,
+                    pdfOcrReader: false
                 },
                 limits: {
                     monthlyTranslations: 300,
@@ -1799,7 +1803,9 @@ function App() {
                     translationMemory: true,
                     continuousManga: false,
                     novelReaderTxt: false,
-                    novelReaderEpub: false
+                    novelReaderEpub: false,
+                    pdfTextReader: false,
+                    pdfOcrReader: false
                 },
                 limits: {
                     monthlyTranslations: 300,

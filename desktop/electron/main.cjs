@@ -552,67 +552,31 @@ function hasDesktopFeatureCapability(name) {
 }
 
 const PAID_FEATURE_REQUIREMENTS = Object.freeze({
-  studyMode: Object.freeze({
-    featureKey: "studyMode",
-    featureName: "Study Mode",
-    requiredPlan: "PRO",
-  }),
-  mangaPanel: Object.freeze({
-    featureKey: "mangaPanel",
-    featureName: "Manga Translation",
-    requiredPlan: "PRO",
-  }),
-  mangaSession: Object.freeze({
-    featureKey: "mangaSession",
-    featureName: "Manga Session",
-    requiredPlan: "PRO",
-  }),
-  continuousManga: Object.freeze({
-    featureKey: "continuousManga",
-    featureName: "Continuous Manga",
-    requiredPlan: "MANGA_PLUS",
-  }),
-  novelReaderTxt: Object.freeze({
-    featureKey: "novelReaderTxt",
-    featureName: "Novel Reader TXT",
-    requiredPlan: "PRO",
-  }),
-  novelReaderEpub: Object.freeze({
-    featureKey: "novelReaderEpub",
-    featureName: "Novel Reader EPUB",
-    requiredPlan: "PRO",
-  }),
-  pdfTextReader: Object.freeze({
-    featureKey: "pdfTextReader",
-    featureName: "PDF Text Reader",
-    requiredPlan: "PRO",
-  }),
-  pdfOcrReader: Object.freeze({
-    featureKey: "pdfOcrReader",
-    featureName: "PDF OCR Reader",
-    requiredPlan: "PRO",
-  }),
+  studyMode: Object.freeze({ featureKey: "studyMode", featureName: "Study Mode" }),
+  mangaPanel: Object.freeze({ featureKey: "mangaPanel", featureName: "Manga Translation" }),
+  mangaSession: Object.freeze({ featureKey: "mangaSession", featureName: "Manga Session" }),
+  continuousManga: Object.freeze({ featureKey: "continuousManga", featureName: "Continuous Manga" }),
+  novelReaderTxt: Object.freeze({ featureKey: "novelReaderTxt", featureName: "Novel Reader TXT" }),
+  novelReaderEpub: Object.freeze({ featureKey: "novelReaderEpub", featureName: "Novel Reader EPUB" }),
+  pdfTextReader: Object.freeze({ featureKey: "pdfTextReader", featureName: "PDF Text Reader" }),
+  pdfOcrReader: Object.freeze({ featureKey: "pdfOcrReader", featureName: "PDF OCR Reader" }),
 });
 
 function getPaidFeatureRequirement(featureKey) {
-  return PAID_FEATURE_REQUIREMENTS[
-    String(featureKey || "")
-  ] || {
-    featureKey:
-      String(featureKey || ""),
-    featureName:
-      String(featureKey || "Tính năng"),
-    requiredPlan: "PRO",
+  return PAID_FEATURE_REQUIREMENTS[String(featureKey || "")] || {
+    featureKey: String(featureKey || ""),
+    featureName: String(featureKey || "Tính năng"),
   };
 }
 
 function paidFeatureRequiredMessage(featureKey) {
-  const requirement =
-    getPaidFeatureRequirement(featureKey);
+  const requirement = getPaidFeatureRequirement(featureKey);
+  const currentPlan =
+    String(accountEntitlements.planName || accountEntitlements.planCode || "gói hiện tại").trim();
 
   return (
-    `${requirement.featureName} yêu cầu gói ${requirement.requiredPlan} hoặc cao hơn. ` +
-    "Mở Settings → Plan & License để nâng cấp."
+    `${requirement.featureName} chưa được bật trong ${currentPlan}. ` +
+    "Mở Settings → Plan & License để xem quyền hiện tại hoặc đổi gói."
   );
 }
 
@@ -6846,12 +6810,18 @@ async function translateBatchBlocks(
       .trim()
       .toUpperCase();
 
-  const purpose =
-    requestedPurpose === "MANGA"
-      ? "MANGA"
-      : requestedPurpose === "NOVEL"
-        ? "NOVEL"
-        : "GENERAL";
+  const supportedPurposes = new Set([
+    "GENERAL",
+    "MANGA",
+    "NOVEL",
+    "NOVEL_EPUB",
+    "PDF_TEXT",
+    "PDF_OCR",
+  ]);
+
+  const purpose = supportedPurposes.has(requestedPurpose)
+    ? requestedPurpose
+    : "GENERAL";
 
   const normalizedBlocks =
     (Array.isArray(blocks)

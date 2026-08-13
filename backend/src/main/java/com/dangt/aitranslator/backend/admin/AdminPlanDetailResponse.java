@@ -9,6 +9,7 @@ public record AdminPlanDetailResponse(
         int rankOrder,
         boolean active,
         Map<String, Boolean> features,
-        Map<String, Long> limits
+        Map<String, Long> limits,
+        AdminPlanUsageResponse usage
 ) {
 }

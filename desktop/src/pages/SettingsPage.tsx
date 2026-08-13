@@ -977,13 +977,7 @@ export function SettingsPage({
                         </div>
 
                         <div className="verified-badge">
-                            {entitlements.features
-                                .continuousManga
-                                ? "✓ Continuous Manga"
-                                : entitlements.features
-                                      .mangaPanel
-                                    ? "✓ Manga PRO"
-                                    : "Quick only"}
+                            ✓ {Object.values(entitlements.features).filter(Boolean).length} quyền đang bật
                         </div>
                     </div>
 
@@ -1024,6 +1018,10 @@ export function SettingsPage({
                             [
                                 "PDF Text Reader",
                                 "pdfTextReader"
+                            ],
+                            [
+                                "PDF OCR Reader",
+                                "pdfOcrReader"
                             ]
                         ].map(
                             ([label, key]) => (
@@ -1070,9 +1068,9 @@ export function SettingsPage({
                             .usage
                             .monthlyTranslationsUsed ?? 0}
                         /
-                        {entitlements
-                            .limits
-                            .monthlyTranslations ?? 0}
+                        {(entitlements.limits.monthlyTranslations ?? 0) < 0
+                            ? "∞"
+                            : entitlements.limits.monthlyTranslations ?? 0}
                         {" "}lượt ·
                         {" "}
                         {entitlements

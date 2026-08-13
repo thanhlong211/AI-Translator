@@ -4,6 +4,7 @@ import com.dangt.aitranslator.backend.common.ForbiddenException;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -257,7 +258,7 @@ public class EntitlementService {
                 WHERE plan_code = ?
                 ORDER BY feature_key
                 """,
-                rs -> {
+                (RowCallbackHandler) rs -> {
                     features.put(
                             rs.getString("feature_key"),
                             rs.getBoolean("enabled")
@@ -304,7 +305,7 @@ public class EntitlementService {
                 WHERE plan_code = ?
                 ORDER BY limit_key
                 """,
-                rs -> {
+                (RowCallbackHandler) rs -> {
                     limits.put(
                             rs.getString("limit_key"),
                             rs.getLong("limit_value")

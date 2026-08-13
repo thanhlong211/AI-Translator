@@ -176,7 +176,8 @@ public class AdminService {
                 plan.rankOrder(),
                 plan.active(),
                 loadPlanFeatures(plan.code()),
-                loadPlanLimits(plan.code())
+                loadPlanLimits(plan.code()),
+                loadPlanUsage(plan.code())
         );
     }
 
@@ -254,8 +255,19 @@ public class AdminService {
             throw new IllegalArgumentException("Plan FREE là fallback hệ thống và không thể tắt.");
         }
 
+        if (before.active() && !active && before.usage().hasActiveAssignments()) {
+            throw new ConflictException(
+                    "Không thể tắt plan " + planCode
+                            + " vì đang có " + before.usage().activeSubscriptions()
+                            + " user subscription và " + before.usage().activeOverrides()
+                            + " user Admin override còn hiệu lực. Hãy chuyển quyền user trước."
+            );
+        }
+
         List<String> featureKeys = knownFeatureKeys();
         List<String> limitKeys = knownLimitKeys();
+        requireCompleteKeys(request.features(), featureKeys, "feature");
+        requireCompleteKeys(request.limits(), limitKeys, "limit");
         Map<String, Boolean> features = normalizedFeatures(request.features(), featureKeys);
         Map<String, Long> limits = normalizedLimits(request.limits(), limitKeys);
 
@@ -621,6 +633,74 @@ public class AdminService {
                 planCode
         );
         return Map.copyOf(limits);
+    }
+
+
+    private AdminPlanUsageResponse loadPlanUsage(String planCode) {
+        Long activeOverrides = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM user_plan_overrides
+                WHERE plan_code = ?
+                  AND active = TRUE
+                  AND effective_from <= CURRENT_TIMESTAMP(6)
+                  AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP(6))
+                """,
+                Long.class,
+                planCode
+        );
+
+        Long activeSubscriptions = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(DISTINCT user_id)
+                FROM subscriptions
+                WHERE plan = ?
+                  AND status IN ('ACTIVE', 'TRIAL', 'GRANDFATHERED')
+                  AND (period_start IS NULL OR period_start <= CURRENT_TIMESTAMP(6))
+                  AND (period_end IS NULL OR period_end > CURRENT_TIMESTAMP(6))
+                """,
+                Long.class,
+                planCode
+        );
+
+        Long usableLicenses = jdbcTemplate.queryForObject(
+                """
+                SELECT COUNT(*)
+                FROM license_keys
+                WHERE plan_code = ?
+                  AND status = 'AVAILABLE'
+                  AND activation_count < max_activations
+                  AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP(6))
+                """,
+                Long.class,
+                planCode
+        );
+
+        return new AdminPlanUsageResponse(
+                activeOverrides == null ? 0L : activeOverrides,
+                activeSubscriptions == null ? 0L : activeSubscriptions,
+                usableLicenses == null ? 0L : usableLicenses
+        );
+    }
+
+    private void requireCompleteKeys(
+            Map<String, ?> requested,
+            List<String> knownKeys,
+            String type
+    ) {
+        Map<String, ?> source = requested == null ? Map.of() : requested;
+        List<String> missing = new ArrayList<>();
+        for (String key : knownKeys) {
+            if (!source.containsKey(key)) {
+                missing.add(key);
+            }
+        }
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Thiếu " + type + " key: " + String.join(", ", missing)
+                            + ". Hãy tải lại Admin Console để lấy schema mới nhất."
+            );
+        }
     }
 
     private Map<String, Boolean> normalizedFeatures(
