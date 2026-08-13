@@ -5465,3 +5465,10 @@ button:disabled {
         flex: 1 1 120px;
     }
 }
+
+
+/* Batch 14.2 · PDF Text Reader */
+.novel-file-icon.pdf_text {
+    font-size: 0.67rem;
+    letter-spacing: 0.02em;
+}

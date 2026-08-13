@@ -3,6 +3,9 @@ const path = require("path");
 const {
   parseEpubBuffer,
 } = require("./epubParser.cjs");
+const {
+  parsePdfTextBuffer,
+} = require("./pdfTextParser.cjs");
 
 const DOCUMENT_FORMATS = Object.freeze({
   TXT: Object.freeze({
@@ -24,6 +27,16 @@ const DOCUMENT_FORMATS = Object.freeze({
     maxSelections: 20,
     dialogTitle: "Thêm EPUB vào thư viện",
     dialogName: "EPUB / eBook",
+  }),
+  PDF_TEXT: Object.freeze({
+    format: "PDF_TEXT",
+    extensions: Object.freeze(["pdf"]),
+    capability: "pdfTextReader",
+    translationPurpose: "PDF_TEXT",
+    maxBytes: 100 * 1024 * 1024,
+    maxSelections: 12,
+    dialogTitle: "Thêm PDF có text vào thư viện",
+    dialogName: "PDF Document",
   }),
 });
 
@@ -407,6 +420,25 @@ function parseDocumentBuffer(definition, buffer, fileName) {
 
     return {
       encoding: "EPUB",
+      title:
+        parsed.metadata?.title ||
+        path.basename(fileName, path.extname(fileName)),
+      author: parsed.metadata?.author || "",
+      language: parsed.metadata?.language || "",
+      blocks: normalizeDocumentBlocks(parsed.blocks),
+      chapters: normalizeDocumentChapters(
+        parsed.chapters,
+        parsed.blocks
+      ),
+      metadata: parsed.metadata || {},
+    };
+  }
+
+  if (definition.format === "PDF_TEXT") {
+    const parsed = parsePdfTextBuffer(buffer, fileName);
+
+    return {
+      encoding: "PDF Text",
       title:
         parsed.metadata?.title ||
         path.basename(fileName, path.extname(fileName)),

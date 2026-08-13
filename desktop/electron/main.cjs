@@ -307,6 +307,7 @@ const DEFAULT_ACCOUNT_ENTITLEMENTS = Object.freeze({
     continuousManga: false,
     novelReaderTxt: false,
     novelReaderEpub: false,
+    pdfTextReader: false,
   }),
   limits: Object.freeze({
     monthlyTranslations: 300,
@@ -566,6 +567,11 @@ const PAID_FEATURE_REQUIREMENTS = Object.freeze({
   novelReaderEpub: Object.freeze({
     featureKey: "novelReaderEpub",
     featureName: "Novel Reader EPUB",
+    requiredPlan: "PRO",
+  }),
+  pdfTextReader: Object.freeze({
+    featureKey: "pdfTextReader",
+    featureName: "PDF Text Reader",
     requiredPlan: "PRO",
   }),
 });
