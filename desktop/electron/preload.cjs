@@ -22,6 +22,19 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  openNovelEpub: () => {
+    return ipcRenderer.invoke(
+      "novel:open-epub"
+    );
+  },
+
+  readNovelEpub: (filePath) => {
+    return ipcRenderer.invoke(
+      "novel:read-epub",
+      filePath
+    );
+  },
+
   translateNovelBlocks: (payload) => {
     return ipcRenderer.invoke(
       "novel:translate-batch",

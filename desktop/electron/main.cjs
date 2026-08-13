@@ -60,6 +60,10 @@ const {
 } = require("./mangaBubbleDetector.cjs");
 
 const {
+  parseEpubBuffer,
+} = require("./epubParser.cjs");
+
+const {
   startForegroundWindowTracker,
   stopForegroundWindowTracker,
   getForegroundWindowSnapshot,
@@ -554,6 +558,11 @@ const PAID_FEATURE_REQUIREMENTS = Object.freeze({
   novelReaderTxt: Object.freeze({
     featureKey: "novelReaderTxt",
     featureName: "Novel Reader TXT",
+    requiredPlan: "PRO",
+  }),
+  novelReaderEpub: Object.freeze({
+    featureKey: "novelReaderEpub",
+    featureName: "Novel Reader EPUB",
     requiredPlan: "PRO",
   }),
 });
@@ -6610,6 +6619,9 @@ async function translateBatchBlocks(
 const NOVEL_TXT_MAX_BYTES =
   8 * 1024 * 1024;
 
+const NOVEL_EPUB_MAX_BYTES =
+  80 * 1024 * 1024;
+
 function decodeNovelTextBuffer(buffer) {
   if (!Buffer.isBuffer(buffer)) {
     return {
@@ -6761,6 +6773,11 @@ async function readNovelTxtPath(filePathValue) {
         stat.mtime.toISOString(),
       encoding:
         decoded.encoding,
+      format: "TXT",
+      title:
+        path.basename(filePath, path.extname(filePath)),
+      author: "",
+      language: "",
     },
     text,
   };
@@ -6855,12 +6872,189 @@ async function openNovelTxtFile() {
   };
 }
 
+async function readNovelEpubPath(filePathValue) {
+  await ensureAuthenticated();
+  requireDesktopFeatureCapability(
+    "novelReaderEpub"
+  );
+
+  const filePath =
+    path.resolve(
+      String(filePathValue || "")
+    );
+
+  if (
+    !filePath ||
+    path.extname(filePath)
+      .toLowerCase() !== ".epub"
+  ) {
+    throw new Error(
+      "Novel Reader EPUB chỉ hỗ trợ file .epub."
+    );
+  }
+
+  const stat =
+    await fs.stat(filePath);
+
+  if (!stat.isFile()) {
+    throw new Error(
+      "Đường dẫn đã chọn không phải file."
+    );
+  }
+
+  if (stat.size > NOVEL_EPUB_MAX_BYTES) {
+    throw new Error(
+      "File EPUB lớn hơn 80 MB. Hãy dùng bản EPUB nhẹ hơn để Reader hoạt động ổn định."
+    );
+  }
+
+  const buffer =
+    await fs.readFile(filePath);
+
+  const parsed =
+    parseEpubBuffer(
+      buffer,
+      path.basename(filePath)
+    );
+
+  return {
+    success: true,
+    file: {
+      path: filePath,
+      name:
+        path.basename(filePath),
+      sizeBytes: stat.size,
+      modifiedAt:
+        stat.mtime.toISOString(),
+      encoding: "EPUB",
+      format: "EPUB",
+      title:
+        parsed.metadata?.title ||
+        path.basename(filePath, ".epub"),
+      author:
+        parsed.metadata?.author || "",
+      language:
+        parsed.metadata?.language || "",
+    },
+    blocks:
+      Array.isArray(parsed.blocks)
+        ? parsed.blocks
+        : [],
+    chapters:
+      Array.isArray(parsed.chapters)
+        ? parsed.chapters
+        : [],
+    metadata:
+      parsed.metadata || {},
+  };
+}
+
+async function openNovelEpubFile() {
+  await ensureAuthenticated();
+  requireDesktopFeatureCapability(
+    "novelReaderEpub"
+  );
+
+  const ownerWindow =
+    mainWindow &&
+    !mainWindow.isDestroyed()
+      ? mainWindow
+      : undefined;
+
+  const dialogOptions = {
+    title:
+      "Thêm EPUB vào thư viện",
+    properties: [
+      "openFile",
+      "multiSelections",
+    ],
+    filters: [
+      {
+        name: "EPUB / eBook",
+        extensions: [
+          "epub",
+        ],
+      },
+    ],
+  };
+
+  const result =
+    ownerWindow
+      ? await dialog.showOpenDialog(
+          ownerWindow,
+          dialogOptions
+        )
+      : await dialog.showOpenDialog(
+          dialogOptions
+        );
+
+  if (
+    result.canceled ||
+    !result.filePaths?.length
+  ) {
+    return {
+      success: false,
+      canceled: true,
+    };
+  }
+
+  const items = [];
+  const errors = [];
+
+  for (
+    const selectedPath of
+      result.filePaths.slice(0, 20)
+  ) {
+    try {
+      items.push(
+        await readNovelEpubPath(
+          selectedPath
+        )
+      );
+    } catch (error) {
+      errors.push({
+        path: selectedPath,
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+      });
+    }
+  }
+
+  if (!items.length) {
+    throw new Error(
+      errors[0]?.error ||
+      "Không mở được file EPUB nào."
+    );
+  }
+
+  return {
+    success: true,
+    file: items[0].file,
+    blocks: items[0].blocks,
+    chapters: items[0].chapters,
+    metadata: items[0].metadata,
+    files: items,
+    errors,
+  };
+}
+
 async function translateNovelBlocks(
   payload
 ) {
   await ensureAuthenticated();
+
+  const readerFormat =
+    String(payload?.format || "TXT")
+      .toUpperCase() === "EPUB"
+      ? "EPUB"
+      : "TXT";
+
   requireDesktopFeatureCapability(
-    "novelReaderTxt"
+    readerFormat === "EPUB"
+      ? "novelReaderEpub"
+      : "novelReaderTxt"
   );
 
   const blocks =
@@ -6871,7 +7065,10 @@ async function translateNovelBlocks(
   return translateBatchBlocks(
     blocks,
     {
-      purpose: "NOVEL",
+      purpose:
+        readerFormat === "EPUB"
+          ? "NOVEL_EPUB"
+          : "NOVEL",
       sourceLanguage:
         payload?.sourceLanguage,
       targetLanguage:
@@ -11187,6 +11384,22 @@ ipcMain.handle(
   "novel:read-txt",
   async (_event, filePath) => {
     return readNovelTxtPath(
+      filePath
+    );
+  }
+);
+
+ipcMain.handle(
+  "novel:open-epub",
+  async () => {
+    return openNovelEpubFile();
+  }
+);
+
+ipcMain.handle(
+  "novel:read-epub",
+  async (_event, filePath) => {
+    return readNovelEpubPath(
       filePath
     );
   }

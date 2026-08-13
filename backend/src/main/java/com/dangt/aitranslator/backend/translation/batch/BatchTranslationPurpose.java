@@ -7,5 +7,6 @@ package com.dangt.aitranslator.backend.translation.batch;
 public enum BatchTranslationPurpose {
     GENERAL,
     MANGA,
-    NOVEL
+    NOVEL,
+    NOVEL_EPUB
 }

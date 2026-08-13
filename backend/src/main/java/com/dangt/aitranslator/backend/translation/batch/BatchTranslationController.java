@@ -85,6 +85,15 @@ public class BatchTranslationController {
             );
         }
 
+        if (request.purpose() == BatchTranslationPurpose.NOVEL_EPUB) {
+            entitlementService.requireFeature(
+                    user,
+                    "novelReaderEpub",
+                    "Novel Reader EPUB",
+                    "PRO"
+            );
+        }
+
         entitlementService
                 .requireTranslationQuota(user);
 
