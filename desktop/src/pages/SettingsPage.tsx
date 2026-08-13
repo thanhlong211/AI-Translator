@@ -36,6 +36,64 @@ interface NovelReaderFontSettings {
     customFamily: string;
 }
 
+interface PublicCatalogPrice {
+    id: number;
+    billingPeriod: "MONTHLY" | "YEARLY" | "LIFETIME";
+    currency: string;
+    amountMinor: number;
+    compareAtAmountMinor?: number | null;
+    startsAt?: string | null;
+    endsAt?: string | null;
+}
+
+interface PublicCatalogPlan {
+    code: string;
+    displayName: string;
+    description: string;
+    rankOrder: number;
+    features: Record<string, boolean>;
+    limits: Record<string, number>;
+    prices: PublicCatalogPrice[];
+}
+
+function billingPeriodLabel(value: PublicCatalogPrice["billingPeriod"]) {
+    switch (value) {
+        case "MONTHLY":
+            return "Hàng tháng";
+        case "YEARLY":
+            return "Hàng năm";
+        case "LIFETIME":
+            return "Trọn đời";
+        default:
+            return value;
+    }
+}
+
+function formatCatalogMoney(
+    amountMinor: number,
+    currency: string
+) {
+    try {
+        const formatter = new Intl.NumberFormat(
+            "vi-VN",
+            {
+                style: "currency",
+                currency
+            }
+        );
+
+        const exponent = formatter
+            .resolvedOptions()
+            .maximumFractionDigits;
+
+        return formatter.format(
+            amountMinor / Math.pow(10, exponent)
+        );
+    } catch {
+        return `${amountMinor.toLocaleString("vi-VN")} ${currency}`;
+    }
+}
+
 const NOVEL_READER_FONT_SETTINGS_KEY =
     "aiTranslator.novelReader.fontSettings.v1";
 
@@ -339,6 +397,21 @@ export function SettingsPage({
         setIsActivatingLicense
     ] = useState(false);
 
+    const [
+        pricingCatalog,
+        setPricingCatalog
+    ] = useState<PublicCatalogPlan[]>([]);
+
+    const [
+        isPricingCatalogLoading,
+        setIsPricingCatalogLoading
+    ] = useState(false);
+
+    const [
+        pricingCatalogMessage,
+        setPricingCatalogMessage
+    ] = useState("");
+
 
     const initialNovelFontSettings =
         loadNovelReaderFontSettings();
@@ -392,6 +465,44 @@ export function SettingsPage({
             );
         }
     }
+
+    async function loadPricingCatalog() {
+        const api = window.electronAPI
+            .getPricingCatalog;
+
+        if (!api) {
+            setPricingCatalogMessage(
+                "Desktop hiện tại chưa hỗ trợ public pricing catalog."
+            );
+            return;
+        }
+
+        try {
+            setIsPricingCatalogLoading(true);
+            setPricingCatalogMessage("");
+
+            const plans = await api();
+            setPricingCatalog(
+                Array.isArray(plans)
+                    ? plans
+                    : []
+            );
+        } catch (error) {
+            setPricingCatalogMessage(
+                error instanceof Error
+                    ? error.message
+                    : "Không tải được bảng giá từ backend."
+            );
+        } finally {
+            setIsPricingCatalogLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        if (backend.connected) {
+            void loadPricingCatalog();
+        }
+    }, [backend.connected]);
 
     useEffect(() => {
         setTranslateShortcut(
@@ -902,6 +1013,147 @@ export function SettingsPage({
                         {authMessage}
                     </div>
                 )}
+            </section>
+
+            <section
+                className="settings-section"
+                id="pricing-catalog"
+            >
+                <div className="settings-section-header">
+                    <div>
+                        <span className="eyebrow">
+                            BẢNG GIÁ ĐANG BÁN
+                        </span>
+
+                        <h2>
+                            Gói & giá
+                        </h2>
+
+                        <p>
+                            Plan, feature và giá dưới đây được tải trực tiếp từ backend.
+                            Thay đổi trong Admin không cần build lại Desktop.
+                        </p>
+                    </div>
+
+                    <button
+                        className="secondary-action"
+                        type="button"
+                        onClick={() => {
+                            void loadPricingCatalog();
+                        }}
+                        disabled={
+                            isPricingCatalogLoading ||
+                            !backend.connected
+                        }
+                    >
+                        {isPricingCatalogLoading
+                            ? "Đang tải..."
+                            : "Làm mới bảng giá"}
+                    </button>
+                </div>
+
+                {!backend.connected && (
+                    <div className="notice info">
+                        Kết nối backend để tải bảng giá hiện tại.
+                    </div>
+                )}
+
+                {pricingCatalogMessage && (
+                    <div className="notice info">
+                        {pricingCatalogMessage}
+                    </div>
+                )}
+
+                <div className="device-table">
+                    {pricingCatalog.map((plan) => {
+                        const enabledFeatures = Object.values(
+                            plan.features
+                        ).filter(Boolean).length;
+                        const current = auth.authenticated &&
+                                plan.code === entitlements.planCode;
+
+                        return (
+                            <div
+                                className="device-row"
+                                key={plan.code}
+                            >
+                                <div>
+                                    <strong>
+                                        {plan.displayName}
+                                        {current ? " · Đang dùng" : ""}
+                                    </strong>
+
+                                    <span>
+                                        {plan.code}
+                                        {" · "}
+                                        {enabledFeatures} quyền bật
+                                        {plan.description
+                                            ? ` · ${plan.description}`
+                                            : ""}
+                                    </span>
+                                </div>
+
+                                <div>
+                                    {plan.prices.length > 0
+                                        ? plan.prices.map((price) => (
+                                            <div key={price.id}>
+                                                <strong>
+                                                    {billingPeriodLabel(
+                                                        price.billingPeriod
+                                                    )}
+                                                    {": "}
+                                                    {formatCatalogMoney(
+                                                        price.amountMinor,
+                                                        price.currency
+                                                    )}
+                                                </strong>
+
+                                                {price.compareAtAmountMinor != null &&
+                                                    price.compareAtAmountMinor > price.amountMinor && (
+                                                    <span>
+                                                        {" · Niêm yết "}
+                                                        {formatCatalogMoney(
+                                                            price.compareAtAmountMinor,
+                                                            price.currency
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        ))
+                                        : (
+                                            <span>
+                                                {plan.code === "FREE"
+                                                    ? "Miễn phí"
+                                                    : "Chưa mở bán"}
+                                            </span>
+                                        )}
+                                </div>
+                            </div>
+                        );
+                    })}
+
+                    {backend.connected &&
+                        !isPricingCatalogLoading &&
+                        pricingCatalog.length === 0 &&
+                        !pricingCatalogMessage && (
+                        <div className="device-row">
+                            <div>
+                                <strong>
+                                    Chưa có plan đang mở bán
+                                </strong>
+                                <span>
+                                    Kiểm tra Plans & Features và Pricing trong Admin.
+                                </span>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="notice info">
+                    Bảng giá chỉ dùng để hiển thị sản phẩm. Quyền sử dụng thực tế
+                    vẫn do endpoint entitlement của tài khoản quyết định.
+                </div>
+
             </section>
 
             {auth.authenticated && (

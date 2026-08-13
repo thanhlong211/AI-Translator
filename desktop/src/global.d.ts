@@ -119,6 +119,26 @@ interface Window {
             >;
         }) => Promise<void>;
 
+        getPricingCatalog?: (
+            currency?: string
+        ) => Promise<Array<{
+            code: string;
+            displayName: string;
+            description: string;
+            rankOrder: number;
+            features: Record<string, boolean>;
+            limits: Record<string, number>;
+            prices: Array<{
+                id: number;
+                billingPeriod: "MONTHLY" | "YEARLY" | "LIFETIME";
+                currency: string;
+                amountMinor: number;
+                compareAtAmountMinor?: number | null;
+                startsAt?: string | null;
+                endsAt?: string | null;
+            }>;
+        }>>;
+
 
         translatePanel?: (options?: {
             sourceLanguage?: TranslationLanguageCode;

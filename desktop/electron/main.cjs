@@ -131,6 +131,9 @@ const BACKEND_ME_URL =
 const BACKEND_ENTITLEMENTS_URL =
   `${BACKEND_BASE_URL}/api/v1/account/entitlements`;
 
+const BACKEND_PUBLIC_CATALOG_PLANS_URL =
+  `${BACKEND_BASE_URL}/api/v1/catalog/plans`;
+
 const BACKEND_LICENSE_ACTIVATE_URL =
   `${BACKEND_BASE_URL}/api/v1/account/license/activate`;
 
@@ -3478,6 +3481,59 @@ async function refreshAccountEntitlements({
     throw error;
   }
 }
+
+async function getPublicPricingCatalog(
+  currency
+) {
+  const cleanCurrency =
+    String(currency || "")
+      .trim()
+      .toUpperCase();
+
+  const url = new URL(
+    BACKEND_PUBLIC_CATALOG_PLANS_URL
+  );
+
+  if (cleanCurrency) {
+    url.searchParams.set(
+      "currency",
+      cleanCurrency
+    );
+  }
+
+  const response =
+    await fetchWithTimeout(
+      url.toString(),
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      },
+      BACKEND_TIMEOUT_MS
+    );
+
+  const payload =
+    await parseBackendJson(
+      response
+    );
+
+  if (!response.ok) {
+    throw new Error(
+      payload?.error ||
+      `Không tải được bảng giá (HTTP ${response.status}).`
+    );
+  }
+
+  if (!Array.isArray(payload)) {
+    throw new Error(
+      "Backend trả về pricing catalog không hợp lệ."
+    );
+  }
+
+  return payload;
+}
+
 
 async function activateDesktopLicense(
   licenseKey
@@ -11651,6 +11707,15 @@ ipcMain.handle(
   "account:get-entitlements",
   async () => {
     return refreshAccountEntitlements();
+  }
+);
+
+ipcMain.handle(
+  "catalog:get-plans",
+  async (_event, currency) => {
+    return getPublicPricingCatalog(
+      currency
+    );
   }
 );
 
