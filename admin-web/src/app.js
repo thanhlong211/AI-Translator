@@ -10,7 +10,9 @@ const state = {
   usersSize: 25,
   usersTotal: 0,
   plans: [],
-  selectedUserId: null
+  planSchema: null,
+  selectedUserId: null,
+  selectedPlanCode: null
 };
 
 const escapeHtml = (value) => String(value ?? "")
@@ -95,11 +97,12 @@ async function loadView(view) {
   $$(".nav-item[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   $$(".view").forEach((section) => section.classList.add("hidden"));
   $(`#${view}View`).classList.remove("hidden");
-  const labels = { dashboard: "Tổng quan", users: "Người dùng", audit: "Audit log" };
+  const labels = { dashboard: "Tổng quan", users: "Người dùng", plans: "Plans & Features", audit: "Audit log" };
   $("#pageTitle").textContent = labels[view] || "Admin";
   try {
     if (view === "dashboard") await loadDashboard();
     if (view === "users") await loadUsers();
+    if (view === "plans") await loadPlans();
     if (view === "audit") await loadAudit();
   } catch (error) {
     toast(error.message, "error");
@@ -133,13 +136,152 @@ async function loadDashboard() {
     <article class="card roadmap-card">
       <span class="eyebrow">COMMERCIAL FOUNDATION</span>
       <h3>Admin core đã hoạt động</h3>
-      <div class="roadmap-grid"><span class="done">✓ Users & access</span><span>14.6 Plans & features</span><span>14.7 Pricing</span><span>14.8 AI costs</span><span>14.9 Security & operations</span></div>
+      <div class="roadmap-grid"><span class="done">✓ Users & access</span><span class="working">→ 14.6 Plans & features</span><span>14.7 Pricing</span><span>14.8 AI costs</span><span>14.9 Security & operations</span></div>
     </article>`;
   $("[data-open-audit]")?.addEventListener("click", () => void loadView("audit"));
 }
 
 function metric(label, value, hint) {
   return `<article class="metric-card"><span>${escapeHtml(label)}</span><strong>${fmtNumber(value)}</strong><small>${escapeHtml(hint)}</small></article>`;
+}
+
+const FEATURE_LABELS = {
+  quickTranslate: "Quick Translate",
+  studyMode: "Study Mode",
+  mangaPanel: "Manga Panel",
+  mangaSession: "Manga Session",
+  continuousManga: "Continuous Manga",
+  translationMemory: "Translation Memory",
+  novelReaderTxt: "TXT Reader",
+  novelReaderEpub: "EPUB Reader",
+  pdfTextReader: "PDF Text Reader",
+  pdfOcrReader: "PDF OCR Reader"
+};
+
+const LIMIT_LABELS = {
+  monthlyTranslations: "Translations / tháng",
+  mangaPagesPerDay: "Manga pages / ngày",
+  continuousMangaPagesPerDay: "Continuous Manga pages / ngày",
+  contextItems: "Context items",
+  devices: "Devices"
+};
+
+const humanKey = (key, labels) => labels[key] || key.replace(/([a-z])([A-Z])/g, "$1 $2");
+
+async function ensurePlanSchema() {
+  if (!state.planSchema) state.planSchema = await api("/api/v1/admin/plan-schema");
+  return state.planSchema;
+}
+
+async function loadPlans() {
+  state.plans = await api("/api/v1/admin/plans");
+  const rows = state.plans || [];
+  $("#plansTable").innerHTML = rows.length ? `
+    <table><thead><tr><th>Plan</th><th>Rank</th><th>Trạng thái</th><th>Ghi chú</th></tr></thead>
+    <tbody>${rows.map((plan) => `
+      <tr class="clickable" data-plan-code="${escapeHtml(plan.code)}">
+        <td><strong>${escapeHtml(plan.displayName)}</strong><small>${escapeHtml(plan.code)}</small></td>
+        <td>${fmtNumber(plan.rankOrder)}</td>
+        <td><span class="status-badge ${plan.active ? "ok" : "warn"}">${plan.active ? "ACTIVE" : "DISABLED"}</span></td>
+        <td><span class="muted">Bấm để chỉnh feature & limit</span></td>
+      </tr>`).join("")}</tbody></table>` : '<div class="empty large">Chưa có plan.</div>';
+  $$('[data-plan-code]').forEach((row) => row.addEventListener("click", () => void openPlan(row.dataset.planCode)));
+}
+
+async function openPlan(planCode) {
+  state.selectedUserId = null;
+  state.selectedPlanCode = planCode;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải plan...</div>';
+  try {
+    const [detail, schema] = await Promise.all([
+      api(`/api/v1/admin/plans/${encodeURIComponent(planCode)}`),
+      ensurePlanSchema()
+    ]);
+    renderPlanDrawer(detail, schema, false);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function openCreatePlan() {
+  state.selectedUserId = null;
+  state.selectedPlanCode = null;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerTitle").textContent = "Tạo plan";
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải entitlement schema...</div>';
+  try {
+    const schema = await ensurePlanSchema();
+    const nextRank = Math.max(0, ...(state.plans || []).map((p) => Number(p.rankOrder || 0))) + 10;
+    const features = Object.fromEntries((schema.featureKeys || []).map((key) => [key, false]));
+    const limits = Object.fromEntries((schema.limitKeys || []).map((key) => [key, 0]));
+    renderPlanDrawer({ code: "", displayName: "", description: "", rankOrder: nextRank, active: true, features, limits }, schema, true);
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function renderPlanDrawer(plan, schema, isCreate) {
+  $("#drawerTitle").textContent = isCreate ? "Tạo plan mới" : `${plan.displayName} · ${plan.code}`;
+  const featureKeys = schema.featureKeys || Object.keys(plan.features || {});
+  const limitKeys = schema.limitKeys || Object.keys(plan.limits || {});
+  $("#drawerBody").innerHTML = `
+    <section class="drawer-section plan-section first">
+      <div class="section-heading"><div><span class="eyebrow">PLAN DEFINITION</span><h3>Thông tin plan</h3></div></div>
+      <div class="form-grid">
+        <label><span>Code</span><input id="planCodeField" maxlength="30" value="${escapeHtml(plan.code)}" ${isCreate ? "" : "readonly"} placeholder="ULTIMATE" /></label>
+        <label><span>Tên hiển thị</span><input id="planDisplayName" maxlength="80" value="${escapeHtml(plan.displayName)}" placeholder="Ultimate" /></label>
+        <label><span>Rank</span><input id="planRank" type="number" min="0" max="100000" value="${Number(plan.rankOrder || 0)}" /></label>
+        <label class="toggle-field"><span>Trạng thái</span><span class="toggle-line"><input id="planActive" type="checkbox" ${plan.active ? "checked" : ""} ${plan.code === "FREE" && !isCreate ? "disabled" : ""} /> Active</span></label>
+      </div>
+      <label><span>Mô tả</span><textarea id="planDescription" rows="2" maxlength="500" placeholder="Mô tả nội bộ cho plan...">${escapeHtml(plan.description || "")}</textarea></label>
+    </section>
+    <section class="drawer-section plan-section">
+      <div class="section-heading"><div><span class="eyebrow">FEATURES</span><h3>Quyền tính năng</h3></div><small class="muted">Bật/tắt không cần rebuild Desktop</small></div>
+      <div class="feature-grid">${featureKeys.map((key) => `
+        <label class="feature-row"><span><strong>${escapeHtml(humanKey(key, FEATURE_LABELS))}</strong><small>${escapeHtml(key)}</small></span><input type="checkbox" data-feature-key="${escapeHtml(key)}" ${plan.features?.[key] ? "checked" : ""} /></label>`).join("")}</div>
+    </section>
+    <section class="drawer-section plan-section">
+      <div class="section-heading"><div><span class="eyebrow">LIMITS</span><h3>Quota & giới hạn</h3></div><small class="muted">-1 = không giới hạn</small></div>
+      <div class="limit-grid">${limitKeys.map((key) => `
+        <label><span>${escapeHtml(humanKey(key, LIMIT_LABELS))}<small>${escapeHtml(key)}</small></span><input type="number" min="-1" step="1" data-limit-key="${escapeHtml(key)}" value="${Number(plan.limits?.[key] ?? 0)}" /></label>`).join("")}</div>
+    </section>
+    <section class="drawer-section plan-section">
+      <label><span>Lý do thay đổi</span><textarea id="planReason" rows="2" maxlength="500" placeholder="Bắt buộc để ghi audit..."></textarea></label>
+      <div class="action-row"><button id="savePlanDefinition" class="primary">${isCreate ? "Tạo plan" : "Lưu thay đổi"}</button></div>
+      <small class="muted">Plan code không thể đổi sau khi tạo. Pricing/subscription không nằm trong Batch 14.6.</small>
+    </section>`;
+
+  $("#savePlanDefinition").addEventListener("click", async () => {
+    const code = $("#planCodeField").value.trim().toUpperCase();
+    const displayName = $("#planDisplayName").value.trim();
+    const description = $("#planDescription").value.trim();
+    const rankOrder = Number($("#planRank").value);
+    const active = $("#planActive").checked;
+    const reason = $("#planReason").value.trim();
+    if (!code || !displayName || !reason) {
+      toast("Code, tên hiển thị và lý do là bắt buộc.", "error");
+      return;
+    }
+    const features = Object.fromEntries($$("[data-feature-key]").map((input) => [input.dataset.featureKey, input.checked]));
+    const limits = Object.fromEntries($$("[data-limit-key]").map((input) => [input.dataset.limitKey, Number(input.value)]));
+    const body = { displayName, description, rankOrder, active, features, limits, reason };
+    if (isCreate) body.code = code;
+    try {
+      const saved = await api(isCreate ? "/api/v1/admin/plans" : `/api/v1/admin/plans/${encodeURIComponent(plan.code)}`, {
+        method: isCreate ? "POST" : "PUT",
+        body: JSON.stringify(body)
+      });
+      toast(isCreate ? `Đã tạo plan ${saved.code}.` : `Đã cập nhật ${saved.code}.`, "success");
+      state.plans = [];
+      closeDrawer();
+      await loadPlans();
+    } catch (error) {
+      toast(error.message, "error");
+    }
+  });
 }
 
 async function loadUsers() {
@@ -263,6 +405,7 @@ function closeDrawer() {
   $("#drawerBackdrop").classList.add("hidden");
   $("#userDrawer").classList.add("hidden");
   state.selectedUserId = null;
+  state.selectedPlanCode = null;
 }
 
 $("#loginForm").addEventListener("submit", async (event) => {
@@ -291,6 +434,7 @@ $$(".nav-item[data-view]").forEach((button) => button.addEventListener("click", 
 $("#refreshButton").addEventListener("click", () => void loadView(state.currentView));
 $("#logoutButton").addEventListener("click", () => { clearSession(); showLogin(); });
 $("#searchUsersButton").addEventListener("click", () => { state.usersPage = 0; void loadUsers(); });
+$("#createPlanButton").addEventListener("click", () => void openCreatePlan());
 $("#userSearch").addEventListener("keydown", (event) => { if (event.key === "Enter") { state.usersPage = 0; void loadUsers(); } });
 $("#statusFilter").addEventListener("change", () => { state.usersPage = 0; void loadUsers(); });
 $("#prevUsers").addEventListener("click", () => { if (state.usersPage > 0) { state.usersPage -= 1; void loadUsers(); } });

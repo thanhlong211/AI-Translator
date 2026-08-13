@@ -1,8 +1,10 @@
 package com.dangt.aitranslator.backend.admin;
 
+import com.dangt.aitranslator.backend.common.ConflictException;
 import com.dangt.aitranslator.backend.common.ForbiddenException;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowCallbackHandler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,6 +13,7 @@ import java.time.Instant;
 import java.time.YearMonth;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -72,6 +75,7 @@ public class AdminService {
                                (
                                    SELECT o.plan_code
                                    FROM user_plan_overrides o
+                                   INNER JOIN plan_catalog op ON op.code = o.plan_code AND op.active = TRUE
                                    WHERE o.user_id = u.id
                                      AND o.active = TRUE
                                      AND o.effective_from <= CURRENT_TIMESTAMP(6)
@@ -129,6 +133,164 @@ public class AdminService {
                         rs.getBoolean("active")
                 )
         );
+    }
+
+    @Transactional(readOnly = true)
+    public AdminPlanSchemaResponse planSchema() {
+        return new AdminPlanSchemaResponse(
+                knownFeatureKeys(),
+                knownLimitKeys()
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public AdminPlanDetailResponse planDetail(String requestedPlanCode) {
+        String planCode = requirePlanCode(requestedPlanCode);
+
+        List<PlanMetadata> rows = jdbcTemplate.query(
+                """
+                SELECT code, display_name, description, rank_order, active
+                FROM plan_catalog
+                WHERE code = ?
+                LIMIT 1
+                """,
+                (rs, rowNum) -> new PlanMetadata(
+                        rs.getString("code"),
+                        rs.getString("display_name"),
+                        rs.getString("description"),
+                        rs.getInt("rank_order"),
+                        rs.getBoolean("active")
+                ),
+                planCode
+        );
+
+        if (rows.isEmpty()) {
+            throw new IllegalArgumentException("Plan không tồn tại.");
+        }
+
+        PlanMetadata plan = rows.getFirst();
+        return new AdminPlanDetailResponse(
+                plan.code(),
+                plan.displayName(),
+                plan.description(),
+                plan.rankOrder(),
+                plan.active(),
+                loadPlanFeatures(plan.code()),
+                loadPlanLimits(plan.code())
+        );
+    }
+
+    @Transactional
+    public AdminPlanDetailResponse createPlan(
+            UserAccount actor,
+            AdminPlanCreateRequest request
+    ) {
+        String planCode = requirePlanCode(request.code());
+        String displayName = cleanRequiredText(request.displayName(), "Tên hiển thị");
+        String description = cleanOptionalText(request.description());
+        String reason = cleanRequiredText(request.reason(), "Lý do");
+        int rankOrder = request.rankOrder() == null
+                ? nextPlanRank()
+                : request.rankOrder();
+        boolean active = request.active() == null || request.active();
+
+        Integer exists = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM plan_catalog WHERE code = ?",
+                Integer.class,
+                planCode
+        );
+        if (exists != null && exists > 0) {
+            throw new ConflictException("Plan " + planCode + " đã tồn tại.");
+        }
+
+        List<String> featureKeys = knownFeatureKeys();
+        List<String> limitKeys = knownLimitKeys();
+        Map<String, Boolean> features = normalizedFeatures(request.features(), featureKeys);
+        Map<String, Long> limits = normalizedLimits(request.limits(), limitKeys);
+
+        jdbcTemplate.update(
+                """
+                INSERT INTO plan_catalog (
+                    code, display_name, description, rank_order, active, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP(6), CURRENT_TIMESTAMP(6))
+                """,
+                planCode,
+                displayName,
+                description,
+                rankOrder,
+                active
+        );
+
+        replacePlanFeatures(planCode, featureKeys, features);
+        replacePlanLimits(planCode, limitKeys, limits);
+
+        auditService.record(
+                actor.getId(),
+                "PLAN_CREATED",
+                null,
+                "plan=" + planCode
+                        + "; rank=" + rankOrder
+                        + "; active=" + active
+                        + "; reason=" + reason
+        );
+
+        return planDetail(planCode);
+    }
+
+    @Transactional
+    public AdminPlanDetailResponse updatePlan(
+            UserAccount actor,
+            String requestedPlanCode,
+            AdminPlanDefinitionUpdateRequest request
+    ) {
+        String planCode = requirePlanCode(requestedPlanCode);
+        AdminPlanDetailResponse before = planDetail(planCode);
+        String displayName = cleanRequiredText(request.displayName(), "Tên hiển thị");
+        String description = cleanOptionalText(request.description());
+        String reason = cleanRequiredText(request.reason(), "Lý do");
+        boolean active = request.active();
+
+        if ("FREE".equals(planCode) && !active) {
+            throw new IllegalArgumentException("Plan FREE là fallback hệ thống và không thể tắt.");
+        }
+
+        List<String> featureKeys = knownFeatureKeys();
+        List<String> limitKeys = knownLimitKeys();
+        Map<String, Boolean> features = normalizedFeatures(request.features(), featureKeys);
+        Map<String, Long> limits = normalizedLimits(request.limits(), limitKeys);
+
+        jdbcTemplate.update(
+                """
+                UPDATE plan_catalog
+                SET display_name = ?,
+                    description = ?,
+                    rank_order = ?,
+                    active = ?,
+                    updated_at = CURRENT_TIMESTAMP(6)
+                WHERE code = ?
+                """,
+                displayName,
+                description,
+                request.rankOrder(),
+                active,
+                planCode
+        );
+
+        replacePlanFeatures(planCode, featureKeys, features);
+        replacePlanLimits(planCode, limitKeys, limits);
+
+        auditService.record(
+                actor.getId(),
+                "PLAN_UPDATED",
+                null,
+                "plan=" + planCode
+                        + "; displayName=" + before.displayName() + "->" + displayName
+                        + "; rank=" + before.rankOrder() + "->" + request.rankOrder()
+                        + "; active=" + before.active() + "->" + active
+                        + "; reason=" + reason
+        );
+
+        return planDetail(planCode);
     }
 
     @Transactional(readOnly = true)
@@ -399,6 +561,191 @@ public class AdminService {
         );
     }
 
+    private List<String> knownFeatureKeys() {
+        return List.copyOf(jdbcTemplate.query(
+                """
+                SELECT DISTINCT feature_key
+                FROM plan_features
+                ORDER BY feature_key
+                """,
+                (rs, rowNum) -> rs.getString("feature_key")
+        ));
+    }
+
+    private List<String> knownLimitKeys() {
+        return List.copyOf(jdbcTemplate.query(
+                """
+                SELECT DISTINCT limit_key
+                FROM plan_limits
+                ORDER BY limit_key
+                """,
+                (rs, rowNum) -> rs.getString("limit_key")
+        ));
+    }
+
+    private Map<String, Boolean> loadPlanFeatures(String planCode) {
+        Map<String, Boolean> features = new LinkedHashMap<>();
+        jdbcTemplate.query(
+                """
+                SELECT feature_key, enabled
+                FROM plan_features
+                WHERE plan_code = ?
+                ORDER BY feature_key
+                """,
+                (RowCallbackHandler) rs -> {
+                    features.put(
+                            rs.getString("feature_key"),
+                            rs.getBoolean("enabled")
+                    );
+                },
+                planCode
+        );
+        return Map.copyOf(features);
+    }
+
+    private Map<String, Long> loadPlanLimits(String planCode) {
+        Map<String, Long> limits = new LinkedHashMap<>();
+        jdbcTemplate.query(
+                """
+                SELECT limit_key, limit_value
+                FROM plan_limits
+                WHERE plan_code = ?
+                ORDER BY limit_key
+                """,
+                (RowCallbackHandler) rs -> {
+                    limits.put(
+                            rs.getString("limit_key"),
+                            rs.getLong("limit_value")
+                    );
+                },
+                planCode
+        );
+        return Map.copyOf(limits);
+    }
+
+    private Map<String, Boolean> normalizedFeatures(
+            Map<String, Boolean> requested,
+            List<String> knownKeys
+    ) {
+        Map<String, Boolean> source = requested == null ? Map.of() : requested;
+        rejectUnknownKeys(source.keySet(), knownKeys, "feature");
+
+        Map<String, Boolean> result = new LinkedHashMap<>();
+        for (String key : knownKeys) {
+            result.put(key, Boolean.TRUE.equals(source.get(key)));
+        }
+        return result;
+    }
+
+    private Map<String, Long> normalizedLimits(
+            Map<String, Long> requested,
+            List<String> knownKeys
+    ) {
+        Map<String, Long> source = requested == null ? Map.of() : requested;
+        rejectUnknownKeys(source.keySet(), knownKeys, "limit");
+
+        Map<String, Long> result = new LinkedHashMap<>();
+        for (String key : knownKeys) {
+            Long value = source.getOrDefault(key, 0L);
+            if (value == null || value < -1L) {
+                throw new IllegalArgumentException(
+                        "Limit " + key + " phải >= -1 (-1 = không giới hạn)."
+                );
+            }
+            result.put(key, value);
+        }
+        return result;
+    }
+
+    private void rejectUnknownKeys(
+            java.util.Set<String> requestedKeys,
+            List<String> knownKeys,
+            String type
+    ) {
+        List<String> unknown = new ArrayList<>();
+        for (String key : requestedKeys) {
+            if (!knownKeys.contains(key)) {
+                unknown.add(key);
+            }
+        }
+        if (!unknown.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Có " + type + " key chưa được hệ thống định nghĩa: "
+                            + String.join(", ", unknown)
+            );
+        }
+    }
+
+    private void replacePlanFeatures(
+            String planCode,
+            List<String> knownKeys,
+            Map<String, Boolean> features
+    ) {
+        jdbcTemplate.update(
+                "DELETE FROM plan_features WHERE plan_code = ?",
+                planCode
+        );
+        for (String key : knownKeys) {
+            jdbcTemplate.update(
+                    "INSERT INTO plan_features (plan_code, feature_key, enabled) VALUES (?, ?, ?)",
+                    planCode,
+                    key,
+                    Boolean.TRUE.equals(features.get(key))
+            );
+        }
+    }
+
+    private void replacePlanLimits(
+            String planCode,
+            List<String> knownKeys,
+            Map<String, Long> limits
+    ) {
+        jdbcTemplate.update(
+                "DELETE FROM plan_limits WHERE plan_code = ?",
+                planCode
+        );
+        for (String key : knownKeys) {
+            jdbcTemplate.update(
+                    "INSERT INTO plan_limits (plan_code, limit_key, limit_value) VALUES (?, ?, ?)",
+                    planCode,
+                    key,
+                    limits.getOrDefault(key, 0L)
+            );
+        }
+    }
+
+    private int nextPlanRank() {
+        Integer max = jdbcTemplate.queryForObject(
+                "SELECT COALESCE(MAX(rank_order), 0) FROM plan_catalog",
+                Integer.class
+        );
+        return (max == null ? 0 : max) + 10;
+    }
+
+    private static String requirePlanCode(String value) {
+        String code = String.valueOf(value == null ? "" : value)
+                .trim()
+                .toUpperCase(Locale.ROOT);
+        if (!code.matches("[A-Z][A-Z0-9_]{0,29}")) {
+            throw new IllegalArgumentException(
+                    "Plan code chỉ được dùng A-Z, 0-9, dấu gạch dưới và phải bắt đầu bằng chữ."
+            );
+        }
+        return code;
+    }
+
+    private static String cleanRequiredText(String value, String fieldName) {
+        String clean = String.valueOf(value == null ? "" : value).trim();
+        if (clean.isEmpty()) {
+            throw new IllegalArgumentException(fieldName + " không được để trống.");
+        }
+        return clean;
+    }
+
+    private static String cleanOptionalText(String value) {
+        return String.valueOf(value == null ? "" : value).trim();
+    }
+
     private int revokeAllSessions(long userId) {
         return jdbcTemplate.update(
                 """
@@ -502,6 +849,7 @@ public class AdminService {
                            (
                                SELECT o.plan_code
                                FROM user_plan_overrides o
+                               INNER JOIN plan_catalog op ON op.code = o.plan_code AND op.active = TRUE
                                WHERE o.user_id = u.id
                                  AND o.active = TRUE
                                  AND o.effective_from <= CURRENT_TIMESTAMP(6)
@@ -525,6 +873,7 @@ public class AdminService {
                            WHEN EXISTS (
                                SELECT 1
                                FROM user_plan_overrides o
+                               INNER JOIN plan_catalog op ON op.code = o.plan_code AND op.active = TRUE
                                WHERE o.user_id = u.id
                                  AND o.active = TRUE
                                  AND o.effective_from <= CURRENT_TIMESTAMP(6)
@@ -545,17 +894,26 @@ public class AdminService {
                                'DEFAULT'
                            )
                        END AS plan_source,
-                       COALESCE(
-                           (
+                       CASE
+                           WHEN EXISTS (
+                               SELECT 1
+                               FROM user_plan_overrides o
+                               INNER JOIN plan_catalog op ON op.code = o.plan_code AND op.active = TRUE
+                               WHERE o.user_id = u.id
+                                 AND o.active = TRUE
+                                 AND o.effective_from <= CURRENT_TIMESTAMP(6)
+                                 AND (o.expires_at IS NULL OR o.expires_at > CURRENT_TIMESTAMP(6))
+                           ) THEN (
                                SELECT o.expires_at
                                FROM user_plan_overrides o
+                               INNER JOIN plan_catalog op ON op.code = o.plan_code AND op.active = TRUE
                                WHERE o.user_id = u.id
                                  AND o.active = TRUE
                                  AND o.effective_from <= CURRENT_TIMESTAMP(6)
                                  AND (o.expires_at IS NULL OR o.expires_at > CURRENT_TIMESTAMP(6))
                                LIMIT 1
-                           ),
-                           (
+                           )
+                           ELSE (
                                SELECT s.period_end
                                FROM subscriptions s
                                INNER JOIN plan_catalog p ON p.code = s.plan AND p.active = TRUE
@@ -566,7 +924,7 @@ public class AdminService {
                                ORDER BY p.rank_order DESC, s.id DESC
                                LIMIT 1
                            )
-                       ) AS plan_ends_at,
+                       END AS plan_ends_at,
                        (
                            SELECT COUNT(*)
                            FROM translation_usage_events t
@@ -591,6 +949,15 @@ public class AdminService {
 
     private static Instant toInstant(Timestamp timestamp) {
         return timestamp == null ? null : timestamp.toInstant();
+    }
+
+    private record PlanMetadata(
+            String code,
+            String displayName,
+            String description,
+            int rankOrder,
+            boolean active
+    ) {
     }
 
     private record TargetUser(

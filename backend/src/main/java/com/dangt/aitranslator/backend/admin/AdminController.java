@@ -42,6 +42,42 @@ public class AdminController {
         return adminService.listPlans();
     }
 
+    @GetMapping("/plan-schema")
+    public AdminPlanSchemaResponse planSchema(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return adminService.planSchema();
+    }
+
+    @GetMapping("/plans/{planCode}")
+    public AdminPlanDetailResponse plan(
+            @PathVariable String planCode,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return adminService.planDetail(planCode);
+    }
+
+    @PostMapping("/plans")
+    public AdminPlanDetailResponse createPlan(
+            @Valid @RequestBody AdminPlanCreateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return adminService.createPlan(actor, request);
+    }
+
+    @PutMapping("/plans/{planCode}")
+    public AdminPlanDetailResponse updatePlan(
+            @PathVariable String planCode,
+            @Valid @RequestBody AdminPlanDefinitionUpdateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return adminService.updatePlan(actor, planCode, request);
+    }
+
     @GetMapping("/users")
     public AdminUserPageResponse users(
             @RequestParam(defaultValue = "") String query,

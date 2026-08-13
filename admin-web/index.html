@@ -49,7 +49,7 @@
         <button class="nav-item" data-view="users"><span>◎</span> Người dùng</button>
         <button class="nav-item" data-view="audit"><span>≡</span> Audit log</button>
         <div class="nav-separator">COMMERCIAL</div>
-        <button class="nav-item disabled" disabled><span>◇</span> Plans & Features <em>14.6</em></button>
+        <button class="nav-item" data-view="plans"><span>◇</span> Plans & Features <em>14.6</em></button>
         <button class="nav-item disabled" disabled><span>₫</span> Pricing <em>14.7</em></button>
         <button class="nav-item disabled" disabled><span>∿</span> AI Costs <em>14.8</em></button>
       </nav>
@@ -85,6 +85,14 @@
             <button id="nextUsers" class="ghost compact">Sau →</button>
           </div>
         </div>
+      </section>
+
+      <section id="plansView" class="view hidden">
+        <div class="plans-toolbar card">
+          <div><span class="eyebrow">ENTITLEMENTS</span><h3>Plans & Features</h3><small>Feature/limit được lấy từ backend. Pricing được quản lý ở Batch 14.7.</small></div>
+          <button id="createPlanButton" class="primary compact">+ Tạo plan</button>
+        </div>
+        <div class="card table-card"><div id="plansTable"></div></div>
       </section>
 
       <section id="auditView" class="view hidden">

@@ -121,27 +121,35 @@ public class EntitlementService {
         String cleanFeatureName = String.valueOf(
                 featureName == null ? cleanKey : featureName
         ).trim();
-        String cleanRequiredPlan = String.valueOf(
-                requiredPlan == null ? "PRO" : requiredPlan
-        ).trim().toUpperCase(Locale.ROOT);
+        String minimumPlan = findMinimumPlanNameForFeature(cleanKey);
+        if (minimumPlan.isBlank()) {
+            minimumPlan = String.valueOf(
+                    requiredPlan == null ? "gói trả phí" : requiredPlan
+            ).trim();
+        }
 
         throw new ForbiddenException(
                 cleanFeatureName
-                        + " yêu cầu gói "
-                        + cleanRequiredPlan
-                        + " hoặc cao hơn."
+                        + " không có trong gói "
+                        + entitlement.planName()
+                        + ". Gói tối thiểu đang bật: "
+                        + minimumPlan
+                        + "."
         );
     }
 
     private EffectiveSubscription findEffectiveSubscription(long userId) {
         List<EffectiveSubscription> adminOverrides = jdbcTemplate.query(
                 """
-                SELECT plan_code, expires_at
-                FROM user_plan_overrides
-                WHERE user_id = ?
-                  AND active = TRUE
-                  AND effective_from <= CURRENT_TIMESTAMP(6)
-                  AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP(6))
+                SELECT o.plan_code, o.expires_at
+                FROM user_plan_overrides o
+                INNER JOIN plan_catalog p
+                    ON p.code = o.plan_code
+                   AND p.active = TRUE
+                WHERE o.user_id = ?
+                  AND o.active = TRUE
+                  AND o.effective_from <= CURRENT_TIMESTAMP(6)
+                  AND (o.expires_at IS NULL OR o.expires_at > CURRENT_TIMESTAMP(6))
                 LIMIT 1
                 """,
                 (rs, rowNum) -> new EffectiveSubscription(
@@ -218,6 +226,25 @@ public class EntitlementService {
         }
 
         throw new IllegalStateException("Plan FREE chưa được cấu hình trong database.");
+    }
+
+    private String findMinimumPlanNameForFeature(String featureKey) {
+        List<String> plans = jdbcTemplate.query(
+                """
+                SELECT p.display_name
+                FROM plan_catalog p
+                INNER JOIN plan_features f
+                    ON f.plan_code = p.code
+                   AND f.feature_key = ?
+                   AND f.enabled = TRUE
+                WHERE p.active = TRUE
+                ORDER BY p.rank_order ASC, p.code ASC
+                LIMIT 1
+                """,
+                (rs, rowNum) -> rs.getString("display_name"),
+                featureKey
+        );
+        return plans.isEmpty() ? "" : plans.getFirst();
     }
 
     private Map<String, Boolean> loadFeatures(String planCode) {
