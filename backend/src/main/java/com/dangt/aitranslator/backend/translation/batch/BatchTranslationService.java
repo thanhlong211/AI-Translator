@@ -10,6 +10,8 @@ import com.dangt.aitranslator.backend.profile.PromptBuilderService;
 import com.dangt.aitranslator.backend.profile.TranslationProfile;
 import com.dangt.aitranslator.backend.translation.ai.TranslationAiProvider;
 import com.dangt.aitranslator.backend.translation.ai.TranslationAiResult;
+import com.dangt.aitranslator.backend.usage.AiProviderUsage;
+import com.dangt.aitranslator.backend.usage.AiUsageLedgerService;
 import com.dangt.aitranslator.backend.usage.TranslationUsageService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -47,6 +49,7 @@ public class BatchTranslationService {
 
     private final TranslationAiProvider aiProvider;
     private final TranslationUsageService usageService;
+    private final AiUsageLedgerService aiUsageLedgerService;
     private final ProfileService profileService;
     private final PromptBuilderService promptBuilderService;
     private final TranslationMemoryService memoryService;
@@ -54,12 +57,14 @@ public class BatchTranslationService {
     public BatchTranslationService(
             TranslationAiProvider aiProvider,
             TranslationUsageService usageService,
+            AiUsageLedgerService aiUsageLedgerService,
             ProfileService profileService,
             PromptBuilderService promptBuilderService,
             TranslationMemoryService memoryService
     ) {
         this.aiProvider = aiProvider;
         this.usageService = usageService;
+        this.aiUsageLedgerService = aiUsageLedgerService;
         this.profileService = profileService;
         this.promptBuilderService = promptBuilderService;
         this.memoryService = memoryService;
@@ -170,34 +175,79 @@ public class BatchTranslationService {
             stageStartedAt =
                     System.nanoTime();
 
-            TranslationAiResult aiResult =
-                    aiProvider.translate(
-                            prompt
-                    );
+            final long aiStartedAt =
+                    stageStartedAt;
 
-            aiMs =
-                    elapsedMs(
-                            stageStartedAt
-                    );
+            TranslationAiResult aiResult = null;
+            Map<String, String> parsed;
 
-            provider =
-                    safe(aiResult.provider());
-            model =
-                    safe(aiResult.model());
+            try {
+                aiResult =
+                        aiProvider.translate(
+                                prompt
+                        );
 
-            stageStartedAt =
-                    System.nanoTime();
+                aiMs =
+                        elapsedMs(
+                                aiStartedAt
+                        );
 
-            Map<String, String> parsed =
-                    parseAiTranslations(
-                            aiResult.text(),
-                            aiBlocks
-                    );
+                provider =
+                        safe(aiResult.provider());
+                model =
+                        safe(aiResult.model());
 
-            parseMs =
-                    elapsedMs(
-                            stageStartedAt
-                    );
+                stageStartedAt =
+                        System.nanoTime();
+
+                parsed =
+                        parseAiTranslations(
+                                aiResult.text(),
+                                aiBlocks
+                        );
+
+                parseMs =
+                        elapsedMs(
+                                stageStartedAt
+                        );
+
+                aiUsageLedgerService.recordSuccess(
+                        userId,
+                        requestId,
+                        request.purpose().name(),
+                        aiResult.usage(),
+                        aiMs
+                );
+            } catch (RuntimeException ex) {
+                aiMs =
+                        elapsedMs(
+                                aiStartedAt
+                        );
+
+                AiProviderUsage failureUsage =
+                        aiResult == null
+                                ? new AiProviderUsage(
+                                        aiProvider.providerName(),
+                                        aiProvider.modelName(),
+                                        null,
+                                        null,
+                                        null,
+                                        null,
+                                        null
+                                )
+                                : aiResult.usage();
+
+                aiUsageLedgerService.recordFailure(
+                        userId,
+                        requestId,
+                        request.purpose().name(),
+                        failureUsage,
+                        aiMs,
+                        ex
+                );
+
+                throw ex;
+            }
 
             StringBuilder sourceUsage =
                     new StringBuilder();

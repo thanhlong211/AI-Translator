@@ -9,6 +9,8 @@ import com.dangt.aitranslator.backend.profile.PromptBuilderService;
 import com.dangt.aitranslator.backend.profile.TranslationProfile;
 import com.dangt.aitranslator.backend.translation.ai.TranslationAiProvider;
 import com.dangt.aitranslator.backend.translation.ai.TranslationAiResult;
+import com.dangt.aitranslator.backend.usage.AiProviderUsage;
+import com.dangt.aitranslator.backend.usage.AiUsageLedgerService;
 import com.dangt.aitranslator.backend.usage.TranslationUsageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +29,7 @@ public class TranslationService {
 
     private final TranslationAiProvider aiProvider;
     private final TranslationUsageService usageService;
+    private final AiUsageLedgerService aiUsageLedgerService;
     private final ProfileService profileService;
     private final PromptBuilderService promptBuilderService;
     private final TranslationMemoryService memoryService;
@@ -34,12 +37,14 @@ public class TranslationService {
     public TranslationService(
             TranslationAiProvider aiProvider,
             TranslationUsageService usageService,
+            AiUsageLedgerService aiUsageLedgerService,
             ProfileService profileService,
             PromptBuilderService promptBuilderService,
             TranslationMemoryService memoryService
     ) {
         this.aiProvider = aiProvider;
         this.usageService = usageService;
+        this.aiUsageLedgerService = aiUsageLedgerService;
         this.profileService = profileService;
         this.promptBuilderService =
                 promptBuilderService;
@@ -163,27 +168,73 @@ public class TranslationService {
         stageStartedAt =
                 System.nanoTime();
 
-        TranslationAiResult aiResult =
-                aiProvider.translate(
-                        prompt
+        final long aiStartedAt =
+                stageStartedAt;
+
+        TranslationAiResult aiResult = null;
+        String translatedText;
+        long aiMs;
+
+        try {
+            aiResult =
+                    aiProvider.translate(
+                            prompt
+                    );
+
+            aiMs =
+                    elapsedMs(
+                            aiStartedAt
+                    );
+
+            translatedText =
+                    aiResult.text() == null
+                            ? ""
+                            : aiResult
+                                    .text()
+                                    .trim();
+
+            if (translatedText.isBlank()) {
+                throw new IllegalStateException(
+                        "AI provider không trả về nội dung dịch."
                 );
+            }
 
-        long aiMs =
-                elapsedMs(
-                        stageStartedAt
-                );
-
-        String translatedText =
-                aiResult.text() == null
-                        ? ""
-                        : aiResult
-                                .text()
-                                .trim();
-
-        if (translatedText.isBlank()) {
-            throw new IllegalStateException(
-                    "AI provider không trả về nội dung dịch."
+            aiUsageLedgerService.recordSuccess(
+                    userId,
+                    requestId,
+                    request.purpose().name(),
+                    aiResult.usage(),
+                    aiMs
             );
+        } catch (RuntimeException ex) {
+            aiMs =
+                    elapsedMs(
+                            aiStartedAt
+                    );
+
+            AiProviderUsage failureUsage =
+                    aiResult == null
+                            ? new AiProviderUsage(
+                                    aiProvider.providerName(),
+                                    aiProvider.modelName(),
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null
+                            )
+                            : aiResult.usage();
+
+            aiUsageLedgerService.recordFailure(
+                    userId,
+                    requestId,
+                    request.purpose().name(),
+                    failureUsage,
+                    aiMs,
+                    ex
+            );
+
+            throw ex;
         }
 
         stageStartedAt =

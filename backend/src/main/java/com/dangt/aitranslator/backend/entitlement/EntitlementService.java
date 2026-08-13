@@ -65,6 +65,25 @@ public class EntitlementService {
     }
 
     @Transactional(readOnly = true)
+    public String resolvePlanCode(long userId) {
+        if (userId <= 0) {
+            throw new IllegalArgumentException("userId không hợp lệ.");
+        }
+
+        EffectiveSubscription subscription =
+                developmentPlanOverride.isBlank()
+                        ? findEffectiveSubscription(userId)
+                        : new EffectiveSubscription(
+                                developmentPlanOverride,
+                                "DEVELOPMENT_OVERRIDE",
+                                "ENVIRONMENT",
+                                null
+                        );
+
+        return findPlan(subscription.planCode()).code();
+    }
+
+    @Transactional(readOnly = true)
     public void requireTranslationQuota(UserAccount user) {
         EntitlementResponse entitlement = resolve(user);
         long limit = entitlement.limits().getOrDefault(

@@ -20,46 +20,54 @@ public class AdminAuthService {
     private final JwtService jwtService;
     private final AdminGuard adminGuard;
     private final AdminAuditService auditService;
+    private final AdminSecurityEventService securityEventService;
 
     public AdminAuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             AdminGuard adminGuard,
-            AdminAuditService auditService
+            AdminAuditService auditService,
+            AdminSecurityEventService securityEventService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.adminGuard = adminGuard;
         this.auditService = auditService;
+        this.securityEventService = securityEventService;
     }
 
     @Transactional
     public AdminLoginResponse login(AdminLoginRequest request) {
         String email = request.email().trim().toLowerCase(Locale.ROOT);
+        UserAccount user = userRepository.findByEmail(email).orElse(null);
 
-        UserAccount user = userRepository
-                .findByEmail(email)
-                .orElseThrow(() -> new UnauthorizedException(
-                        "Email hoặc mật khẩu Admin không đúng."
-                ));
+        if (user == null) {
+            securityEventService.recordLoginFailure(email, null, "UNKNOWN_ACCOUNT");
+            throw new UnauthorizedException("Email hoặc mật khẩu Admin không đúng.");
+        }
 
         if (!"ACTIVE".equals(user.getStatus())) {
+            securityEventService.recordLoginFailure(email, user, "ACCOUNT_INACTIVE");
             throw new ForbiddenException("Tài khoản Admin hiện không hoạt động.");
         }
 
         if (!adminGuard.isAdminRole(user.getRole())) {
+            securityEventService.recordLoginFailure(email, user, "NON_ADMIN_ROLE");
             throw new ForbiddenException("Tài khoản không có quyền Admin.");
         }
 
         if (user.getPasswordHash() == null ||
                 !passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            securityEventService.recordLoginFailure(email, user, "INVALID_PASSWORD");
             throw new UnauthorizedException("Email hoặc mật khẩu Admin không đúng.");
         }
 
         JwtService.IssuedToken access =
                 jwtService.issueAdminAccessToken(user);
+
+        securityEventService.recordLoginSuccess(user, email);
 
         auditService.record(
                 user.getId(),

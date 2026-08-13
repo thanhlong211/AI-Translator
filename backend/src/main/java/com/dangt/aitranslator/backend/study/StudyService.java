@@ -7,11 +7,15 @@ import com.dangt.aitranslator.backend.grammar.GrammarService;
 import com.dangt.aitranslator.backend.grammar.GrammarSyncSummary;
 import com.dangt.aitranslator.backend.profile.ProfileService;
 import com.dangt.aitranslator.backend.profile.TranslationProfile;
+import com.dangt.aitranslator.backend.usage.AiProviderUsage;
+import com.dangt.aitranslator.backend.usage.AiUsageLedgerService;
+import com.dangt.aitranslator.backend.usage.OpenAiUsageExtractor;
 import com.dangt.aitranslator.backend.vocabulary.VocabularyService;
 import com.dangt.aitranslator.backend.vocabulary.VocabularySyncSummary;
 import com.openai.client.OpenAIClient;
 import com.openai.models.ChatModel;
 import com.openai.models.responses.ResponseCreateParams;
+import com.openai.models.responses.StructuredResponse;
 import com.openai.models.responses.StructuredResponseCreateParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +35,8 @@ public class StudyService {
 
     private final OpenAIClient openAIClient;
     private final ChatModel studyModel;
+    private final String studyModelName;
+    private final AiUsageLedgerService aiUsageLedgerService;
     private final ProfileService profileService;
     private final StudyPromptBuilderService promptBuilderService;
     private final StudyAnalysisValidator validator;
@@ -45,6 +51,7 @@ public class StudyService {
             )
             String studyModelName,
 
+            AiUsageLedgerService aiUsageLedgerService,
             ProfileService profileService,
             StudyPromptBuilderService promptBuilderService,
             StudyAnalysisValidator validator,
@@ -52,10 +59,14 @@ public class StudyService {
             GrammarService grammarService
     ) {
         this.openAIClient = openAIClient;
+        this.studyModelName =
+                studyModelName;
         this.studyModel =
                 ChatModel.of(
                         studyModelName
                 );
+        this.aiUsageLedgerService =
+                aiUsageLedgerService;
         this.profileService =
                 profileService;
         this.promptBuilderService =
@@ -138,13 +149,21 @@ public class StudyService {
         stageStartedAt =
                 System.nanoTime();
 
+        final long openAiStartedAt =
+                stageStartedAt;
+
+        StructuredResponse<StudyStructuredOutput> aiResponse = null;
         StudyStructuredOutput structuredOutput;
+        long openAiMs;
 
         try {
-            structuredOutput =
+            aiResponse =
                     openAIClient
                             .responses()
-                            .create(params)
+                            .create(params);
+
+            structuredOutput =
+                    aiResponse
                             .output()
                             .stream()
                             .flatMap(item ->
@@ -168,9 +187,36 @@ public class StudyService {
                                             "OpenAI không trả về Structured Study Analysis."
                                     )
                             );
-        } catch (AiResponseFormatException ex) {
-            throw ex;
+
+            openAiMs =
+                    elapsedMs(
+                            openAiStartedAt
+                    );
         } catch (Exception ex) {
+            openAiMs =
+                    elapsedMs(
+                            openAiStartedAt
+                    );
+
+            AiProviderUsage failureUsage =
+                    aiResponse == null
+                            ? OpenAiUsageExtractor.empty(
+                                    studyModelName
+                            )
+                            : OpenAiUsageExtractor.from(
+                                    aiResponse.rawResponse(),
+                                    studyModelName
+                            );
+
+            aiUsageLedgerService.recordFailure(
+                    userId,
+                    requestId,
+                    "STUDY_ANALYZER",
+                    failureUsage,
+                    openAiMs,
+                    ex
+            );
+
             /*
              * Không log raw model output vì Study có thể chứa nội dung truyện.
              * requestId + exception class đủ để trace production.
@@ -182,36 +228,63 @@ public class StudyService {
                     safeExceptionMessage(ex)
             );
 
+            if (ex instanceof AiResponseFormatException formatException) {
+                throw formatException;
+            }
+
             throw new AiResponseFormatException(
                     "Không đọc được Structured Study Analysis. Hãy thử lại.",
                     ex
             );
         }
 
-        long openAiMs =
-                elapsedMs(
-                        stageStartedAt
-                );
-
         stageStartedAt =
                 System.nanoTime();
 
-        StudyAnalysisPayload parsed =
-                toPayload(
-                        structuredOutput
-                );
+        StudyAnalysisPayload normalized;
 
-        StudyAnalysisPayload normalized =
-                validator
-                        .validateAndNormalize(
-                                parsed,
-                                cleanText
-                        );
+        try {
+            StudyAnalysisPayload parsed =
+                    toPayload(
+                            structuredOutput
+                    );
+
+            normalized =
+                    validator
+                            .validateAndNormalize(
+                                    parsed,
+                                    cleanText
+                            );
+        } catch (RuntimeException ex) {
+            aiUsageLedgerService.recordFailure(
+                    userId,
+                    requestId,
+                    "STUDY_ANALYZER",
+                    OpenAiUsageExtractor.from(
+                            aiResponse.rawResponse(),
+                            studyModelName
+                    ),
+                    openAiMs,
+                    ex
+            );
+            throw ex;
+        }
 
         long parseMs =
                 elapsedMs(
                         stageStartedAt
                 );
+
+        aiUsageLedgerService.recordSuccess(
+                userId,
+                requestId,
+                "STUDY_ANALYZER",
+                OpenAiUsageExtractor.from(
+                        aiResponse.rawResponse(),
+                        studyModelName
+                ),
+                openAiMs
+        );
 
         stageStartedAt =
                 System.nanoTime();

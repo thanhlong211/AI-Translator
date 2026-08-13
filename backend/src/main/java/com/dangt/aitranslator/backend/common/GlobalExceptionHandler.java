@@ -1,5 +1,7 @@
 package com.dangt.aitranslator.backend.common;
 
+import com.dangt.aitranslator.backend.admin.AdminSecurityEventService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -16,6 +18,14 @@ public class GlobalExceptionHandler {
             LoggerFactory.getLogger(
                     GlobalExceptionHandler.class
             );
+
+    private final AdminSecurityEventService securityEventService;
+
+    public GlobalExceptionHandler(
+            AdminSecurityEventService securityEventService
+    ) {
+        this.securityEventService = securityEventService;
+    }
 
     @ExceptionHandler(
             HttpMessageNotReadableException.class
@@ -74,8 +84,14 @@ public class GlobalExceptionHandler {
             UnauthorizedException.class
     )
     ResponseEntity<ApiError> unauthorized(
-            UnauthorizedException ex
+            UnauthorizedException ex,
+            HttpServletRequest request
     ) {
+        recordAdminGuardDenial(
+                request,
+                "ADMIN_ACCESS_UNAUTHENTICATED",
+                "APPLICATION_GUARD"
+        );
         return error(
                 HttpStatus.UNAUTHORIZED,
                 "UNAUTHORIZED",
@@ -87,8 +103,14 @@ public class GlobalExceptionHandler {
             ForbiddenException.class
     )
     ResponseEntity<ApiError> forbidden(
-            ForbiddenException ex
+            ForbiddenException ex,
+            HttpServletRequest request
     ) {
+        recordAdminGuardDenial(
+                request,
+                "ADMIN_ACCESS_FORBIDDEN",
+                "APPLICATION_GUARD"
+        );
         return error(
                 HttpStatus.FORBIDDEN,
                 "FORBIDDEN",
@@ -144,6 +166,26 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "INTERNAL_ERROR",
                 "Backend xử lý thất bại."
+        );
+    }
+
+    private void recordAdminGuardDenial(
+            HttpServletRequest request,
+            String eventType,
+            String reasonCode
+    ) {
+        if (request == null) {
+            return;
+        }
+        String path = String.valueOf(request.getRequestURI());
+        if (!path.startsWith("/api/v1/admin/")
+                || "/api/v1/admin/auth/login".equals(path)) {
+            return;
+        }
+        securityEventService.recordAdminAccessDenied(
+                request,
+                eventType,
+                reasonCode
         );
     }
 

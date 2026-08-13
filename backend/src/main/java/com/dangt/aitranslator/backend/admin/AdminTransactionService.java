@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.admin;
 
+import com.dangt.aitranslator.backend.billing.RevenueNormalizationService;
 import com.dangt.aitranslator.backend.common.ForbiddenException;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,15 +22,18 @@ public class AdminTransactionService {
     private final JdbcTemplate jdbcTemplate;
     private final AdminGuard adminGuard;
     private final AdminAuditService auditService;
+    private final RevenueNormalizationService revenueNormalizationService;
 
     public AdminTransactionService(
             JdbcTemplate jdbcTemplate,
             AdminGuard adminGuard,
-            AdminAuditService auditService
+            AdminAuditService auditService,
+            RevenueNormalizationService revenueNormalizationService
     ) {
         this.jdbcTemplate = jdbcTemplate;
         this.adminGuard = adminGuard;
         this.auditService = auditService;
+        this.revenueNormalizationService = revenueNormalizationService;
     }
 
     @Transactional(readOnly = true)
@@ -222,6 +226,8 @@ public class AdminTransactionService {
                 transactionId
         );
 
+        revenueNormalizationService.normalizeTransaction(transactionId);
+
         auditService.record(
                 actor.getId(),
                 "PAYMENT_TRANSACTION_SETTLED",
@@ -346,6 +352,8 @@ public class AdminTransactionService {
                 """,
                 transactionId
         );
+
+        revenueNormalizationService.normalizeTransaction(transactionId);
 
         auditService.record(
                 actor.getId(),
@@ -523,6 +531,14 @@ public class AdminTransactionService {
                 rs.getString("currency"),
                 rs.getLong("amount_minor"),
                 rs.getLong("refunded_amount_minor"),
+                rs.getString("reporting_currency"),
+                nullableLong(rs.getObject("fx_rate_id")),
+                rs.getBigDecimal("fx_rate"),
+                rs.getBigDecimal("gross_amount_reporting"),
+                rs.getBigDecimal("refunded_amount_reporting"),
+                rs.getBigDecimal("net_amount_reporting"),
+                rs.getString("revenue_status"),
+                toInstant(rs.getTimestamp("revenue_normalized_at")),
                 rs.getString("provider"),
                 rs.getString("provider_reference"),
                 rs.getString("status"),
@@ -553,6 +569,14 @@ public class AdminTransactionService {
                        pt.currency,
                        pt.amount_minor,
                        pt.refunded_amount_minor,
+                       pt.reporting_currency,
+                       pt.fx_rate_id,
+                       pt.fx_rate,
+                       pt.gross_amount_reporting,
+                       pt.refunded_amount_reporting,
+                       pt.net_amount_reporting,
+                       pt.revenue_status,
+                       pt.revenue_normalized_at,
                        pt.provider,
                        pt.provider_reference,
                        pt.status,

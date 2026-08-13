@@ -11,9 +11,14 @@ import java.util.List;
 public class AdminAuditService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final AdminSecurityEventService securityEventService;
 
-    public AdminAuditService(JdbcTemplate jdbcTemplate) {
+    public AdminAuditService(
+            JdbcTemplate jdbcTemplate,
+            AdminSecurityEventService securityEventService
+    ) {
         this.jdbcTemplate = jdbcTemplate;
+        this.securityEventService = securityEventService;
     }
 
     public void record(
@@ -22,6 +27,7 @@ public class AdminAuditService {
             Long targetUserId,
             String details
     ) {
+        String cleanDetails = cleanDetails(details);
         jdbcTemplate.update(
                 """
                 INSERT INTO admin_audit_log (
@@ -35,7 +41,14 @@ public class AdminAuditService {
                 actorUserId,
                 action,
                 targetUserId,
-                cleanDetails(details)
+                cleanDetails
+        );
+
+        securityEventService.recordAuditAction(
+                actorUserId,
+                action,
+                targetUserId,
+                cleanDetails
         );
     }
 
