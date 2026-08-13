@@ -60,8 +60,11 @@ const {
 } = require("./mangaBubbleDetector.cjs");
 
 const {
-  parseEpubBuffer,
-} = require("./epubParser.cjs");
+  readDocumentPath,
+  openDocumentFiles,
+  getTranslationRouteForFormat,
+  listDocumentFormats,
+} = require("./documentReaderCore.cjs");
 
 const {
   startForegroundWindowTracker,
@@ -6616,428 +6619,72 @@ async function translateBatchBlocks(
   };
 }
 
-const NOVEL_TXT_MAX_BYTES =
-  8 * 1024 * 1024;
-
-const NOVEL_EPUB_MAX_BYTES =
-  80 * 1024 * 1024;
-
-function decodeNovelTextBuffer(buffer) {
-  if (!Buffer.isBuffer(buffer)) {
-    return {
-      text: "",
-      encoding: "UTF-8",
-    };
-  }
-
-  if (
-    buffer.length >= 3 &&
-    buffer[0] === 0xef &&
-    buffer[1] === 0xbb &&
-    buffer[2] === 0xbf
-  ) {
-    return {
-      text: buffer
-        .subarray(3)
-        .toString("utf8"),
-      encoding: "UTF-8 BOM",
-    };
-  }
-
-  if (
-    buffer.length >= 2 &&
-    buffer[0] === 0xff &&
-    buffer[1] === 0xfe
-  ) {
-    return {
-      text: buffer
-        .subarray(2)
-        .toString("utf16le"),
-      encoding: "UTF-16 LE",
-    };
-  }
-
-  if (
-    buffer.length >= 2 &&
-    buffer[0] === 0xfe &&
-    buffer[1] === 0xff
-  ) {
-    const swapped =
-      Buffer.from(
-        buffer.subarray(2)
-      );
-
-    for (
-      let index = 0;
-      index + 1 < swapped.length;
-      index += 2
-    ) {
-      const first =
-        swapped[index];
-      swapped[index] =
-        swapped[index + 1];
-      swapped[index + 1] =
-        first;
-    }
-
-    return {
-      text: swapped.toString(
-        "utf16le"
-      ),
-      encoding: "UTF-16 BE",
-    };
-  }
-
-  return {
-    text: buffer.toString("utf8"),
-    encoding: "UTF-8",
-  };
+function novelReaderOwnerWindow() {
+  return (
+    mainWindow &&
+    !mainWindow.isDestroyed()
+      ? mainWindow
+      : undefined
+  );
 }
 
-async function readNovelTxtPath(filePathValue) {
+async function readNovelDocumentPath(
+  filePathValue,
+  requestedFormat = null
+) {
   await ensureAuthenticated();
-  requireDesktopFeatureCapability(
-    "novelReaderTxt"
+
+  return readDocumentPath(
+    filePathValue,
+    {
+      requestedFormat,
+      requireCapability:
+        requireDesktopFeatureCapability,
+    }
   );
+}
 
-  const filePath =
-    path.resolve(
-      String(filePathValue || "")
-    );
+async function openNovelDocumentFiles(
+  requestedFormat
+) {
+  await ensureAuthenticated();
 
-  if (
-    !filePath ||
-    path.extname(filePath)
-      .toLowerCase() !== ".txt"
-  ) {
-    throw new Error(
-      "Novel Reader hiện chỉ hỗ trợ file .txt."
-    );
-  }
+  return openDocumentFiles({
+    dialog,
+    ownerWindow:
+      novelReaderOwnerWindow(),
+    requestedFormat,
+    requireCapability:
+      requireDesktopFeatureCapability,
+  });
+}
 
-  const stat =
-    await fs.stat(filePath);
-
-  if (!stat.isFile()) {
-    throw new Error(
-      "Đường dẫn đã chọn không phải file."
-    );
-  }
-
-  if (stat.size > NOVEL_TXT_MAX_BYTES) {
-    throw new Error(
-      "File TXT lớn hơn 8 MB. Hãy chia novel thành file nhỏ hơn để đọc ổn định."
-    );
-  }
-
-  const buffer =
-    await fs.readFile(filePath);
-
-  const decoded =
-    decodeNovelTextBuffer(buffer);
-
-  const text =
-    String(decoded.text || "")
-      .replace(/^\uFEFF/, "")
-      .replace(/\u0000/g, "")
-      .trim();
-
-  if (!text) {
-    throw new Error(
-      "File TXT không có nội dung đọc được."
-    );
-  }
-
-  const replacementCount =
-    (text.match(/\uFFFD/g) || [])
-      .length;
-
-  if (
-    decoded.encoding === "UTF-8" &&
-    replacementCount >= 3 &&
-    replacementCount / text.length > 0.003
-  ) {
-    throw new Error(
-      "Encoding TXT có vẻ không phải UTF-8 (có thể là Shift-JIS). Hãy lưu/chuyển file sang UTF-8 rồi mở lại."
-    );
-  }
-
-  return {
-    success: true,
-    file: {
-      path: filePath,
-      name:
-        path.basename(filePath),
-      sizeBytes: stat.size,
-      modifiedAt:
-        stat.mtime.toISOString(),
-      encoding:
-        decoded.encoding,
-      format: "TXT",
-      title:
-        path.basename(filePath, path.extname(filePath)),
-      author: "",
-      language: "",
-    },
-    text,
-  };
+// Legacy wrappers are intentionally kept during the Reader refactor so an
+// older renderer build can still talk to a newer Electron main process.
+async function readNovelTxtPath(filePathValue) {
+  return readNovelDocumentPath(
+    filePathValue,
+    "TXT"
+  );
 }
 
 async function openNovelTxtFile() {
-  await ensureAuthenticated();
-  requireDesktopFeatureCapability(
-    "novelReaderTxt"
+  return openNovelDocumentFiles(
+    "TXT"
   );
-
-  const ownerWindow =
-    mainWindow &&
-    !mainWindow.isDestroyed()
-      ? mainWindow
-      : undefined;
-
-  const dialogOptions = {
-    title:
-      "Thêm Novel TXT vào thư viện",
-    properties: [
-      "openFile",
-      "multiSelections",
-    ],
-    filters: [
-      {
-        name: "Text / Novel",
-        extensions: [
-          "txt",
-        ],
-      },
-    ],
-  };
-
-  const result =
-    ownerWindow
-      ? await dialog.showOpenDialog(
-          ownerWindow,
-          dialogOptions
-        )
-      : await dialog.showOpenDialog(
-          dialogOptions
-        );
-
-  if (
-    result.canceled ||
-    !result.filePaths?.length
-  ) {
-    return {
-      success: false,
-      canceled: true,
-    };
-  }
-
-  const items = [];
-  const errors = [];
-
-  for (
-    const selectedPath of
-      result.filePaths.slice(0, 30)
-  ) {
-    try {
-      items.push(
-        await readNovelTxtPath(
-          selectedPath
-        )
-      );
-    } catch (error) {
-      errors.push({
-        path: selectedPath,
-        error:
-          error instanceof Error
-            ? error.message
-            : String(error),
-      });
-    }
-  }
-
-  if (!items.length) {
-    throw new Error(
-      errors[0]?.error ||
-      "Không mở được file TXT nào."
-    );
-  }
-
-  return {
-    success: true,
-    file: items[0].file,
-    text: items[0].text,
-    files: items,
-    errors,
-  };
 }
 
 async function readNovelEpubPath(filePathValue) {
-  await ensureAuthenticated();
-  requireDesktopFeatureCapability(
-    "novelReaderEpub"
+  return readNovelDocumentPath(
+    filePathValue,
+    "EPUB"
   );
-
-  const filePath =
-    path.resolve(
-      String(filePathValue || "")
-    );
-
-  if (
-    !filePath ||
-    path.extname(filePath)
-      .toLowerCase() !== ".epub"
-  ) {
-    throw new Error(
-      "Novel Reader EPUB chỉ hỗ trợ file .epub."
-    );
-  }
-
-  const stat =
-    await fs.stat(filePath);
-
-  if (!stat.isFile()) {
-    throw new Error(
-      "Đường dẫn đã chọn không phải file."
-    );
-  }
-
-  if (stat.size > NOVEL_EPUB_MAX_BYTES) {
-    throw new Error(
-      "File EPUB lớn hơn 80 MB. Hãy dùng bản EPUB nhẹ hơn để Reader hoạt động ổn định."
-    );
-  }
-
-  const buffer =
-    await fs.readFile(filePath);
-
-  const parsed =
-    parseEpubBuffer(
-      buffer,
-      path.basename(filePath)
-    );
-
-  return {
-    success: true,
-    file: {
-      path: filePath,
-      name:
-        path.basename(filePath),
-      sizeBytes: stat.size,
-      modifiedAt:
-        stat.mtime.toISOString(),
-      encoding: "EPUB",
-      format: "EPUB",
-      title:
-        parsed.metadata?.title ||
-        path.basename(filePath, ".epub"),
-      author:
-        parsed.metadata?.author || "",
-      language:
-        parsed.metadata?.language || "",
-    },
-    blocks:
-      Array.isArray(parsed.blocks)
-        ? parsed.blocks
-        : [],
-    chapters:
-      Array.isArray(parsed.chapters)
-        ? parsed.chapters
-        : [],
-    metadata:
-      parsed.metadata || {},
-  };
 }
 
 async function openNovelEpubFile() {
-  await ensureAuthenticated();
-  requireDesktopFeatureCapability(
-    "novelReaderEpub"
+  return openNovelDocumentFiles(
+    "EPUB"
   );
-
-  const ownerWindow =
-    mainWindow &&
-    !mainWindow.isDestroyed()
-      ? mainWindow
-      : undefined;
-
-  const dialogOptions = {
-    title:
-      "Thêm EPUB vào thư viện",
-    properties: [
-      "openFile",
-      "multiSelections",
-    ],
-    filters: [
-      {
-        name: "EPUB / eBook",
-        extensions: [
-          "epub",
-        ],
-      },
-    ],
-  };
-
-  const result =
-    ownerWindow
-      ? await dialog.showOpenDialog(
-          ownerWindow,
-          dialogOptions
-        )
-      : await dialog.showOpenDialog(
-          dialogOptions
-        );
-
-  if (
-    result.canceled ||
-    !result.filePaths?.length
-  ) {
-    return {
-      success: false,
-      canceled: true,
-    };
-  }
-
-  const items = [];
-  const errors = [];
-
-  for (
-    const selectedPath of
-      result.filePaths.slice(0, 20)
-  ) {
-    try {
-      items.push(
-        await readNovelEpubPath(
-          selectedPath
-        )
-      );
-    } catch (error) {
-      errors.push({
-        path: selectedPath,
-        error:
-          error instanceof Error
-            ? error.message
-            : String(error),
-      });
-    }
-  }
-
-  if (!items.length) {
-    throw new Error(
-      errors[0]?.error ||
-      "Không mở được file EPUB nào."
-    );
-  }
-
-  return {
-    success: true,
-    file: items[0].file,
-    blocks: items[0].blocks,
-    chapters: items[0].chapters,
-    metadata: items[0].metadata,
-    files: items,
-    errors,
-  };
 }
 
 async function translateNovelBlocks(
@@ -7045,16 +6692,13 @@ async function translateNovelBlocks(
 ) {
   await ensureAuthenticated();
 
-  const readerFormat =
-    String(payload?.format || "TXT")
-      .toUpperCase() === "EPUB"
-      ? "EPUB"
-      : "TXT";
+  const route =
+    getTranslationRouteForFormat(
+      payload?.format || "TXT"
+    );
 
   requireDesktopFeatureCapability(
-    readerFormat === "EPUB"
-      ? "novelReaderEpub"
-      : "novelReaderTxt"
+    route.capability
   );
 
   const blocks =
@@ -7065,10 +6709,7 @@ async function translateNovelBlocks(
   return translateBatchBlocks(
     blocks,
     {
-      purpose:
-        readerFormat === "EPUB"
-          ? "NOVEL_EPUB"
-          : "NOVEL",
+      purpose: route.purpose,
       sourceLanguage:
         payload?.sourceLanguage,
       targetLanguage:
@@ -7077,8 +6718,7 @@ async function translateNovelBlocks(
         Array.isArray(
           payload?.context
         )
-          ? payload.context
-              .slice(-10)
+          ? payload.context.slice(-10)
           : [],
     }
   );
@@ -11368,6 +11008,36 @@ ipcMain.handle(
   async (_event, sessionId) => {
     return revokeDeviceSession(
       sessionId
+    );
+  }
+);
+
+
+ipcMain.handle(
+  "novel:list-formats",
+  async () => {
+    return {
+      success: true,
+      formats: listDocumentFormats(),
+    };
+  }
+);
+
+ipcMain.handle(
+  "novel:open-document",
+  async (_event, format) => {
+    return openNovelDocumentFiles(
+      format
+    );
+  }
+);
+
+ipcMain.handle(
+  "novel:read-document",
+  async (_event, filePath, format) => {
+    return readNovelDocumentPath(
+      filePath,
+      format
     );
   }
 );

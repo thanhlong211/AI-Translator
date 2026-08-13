@@ -21,6 +21,18 @@ import {
     translationLanguageLabels
 } from "../app/translationLanguages";
 
+import {
+    normalizeDocumentReaderBlocks,
+    normalizeDocumentReaderPayload
+} from "../app/documentReader";
+
+import type {
+    DocumentReaderBlock,
+    DocumentReaderFileInfo,
+    DocumentReaderFormat,
+    DocumentReaderOpenPayload
+} from "../app/documentReader";
+
 interface NovelReaderPageProps {
     backend: BackendStatus;
     auth: AuthStatus;
@@ -38,29 +50,10 @@ interface NovelReaderPageProps {
     onUpgrade: () => void;
 }
 
-type NovelDocumentFormat = "TXT" | "EPUB";
-
-interface NovelFileInfo {
-    path: string;
-    name: string;
-    sizeBytes: number;
-    modifiedAt: string;
-    encoding: string;
-    format?: NovelDocumentFormat;
-    title?: string;
-    author?: string;
-    language?: string;
-}
-
-interface NovelBlock {
-    id: string;
-    index: number;
-    text: string;
-    heading: boolean;
-    html?: string;
-    spineIndex?: number;
-    sourcePath?: string;
-}
+type NovelDocumentFormat = DocumentReaderFormat;
+type NovelFileInfo = DocumentReaderFileInfo;
+type NovelBlock = DocumentReaderBlock;
+type NovelOpenPayload = DocumentReaderOpenPayload;
 
 interface NovelTranslation {
     translatedText: string;
@@ -96,25 +89,6 @@ interface NovelLibraryEntry {
     targetLanguage: TargetTranslationLanguage;
     profileId: number | null;
     readerPreferences: NovelReaderPreferences;
-}
-
-interface NovelOpenPayload {
-    success: boolean;
-    canceled?: boolean;
-    file?: NovelFileInfo;
-    text?: string;
-    blocks?: NovelBlock[];
-    chapters?: Array<{
-        label: string;
-        index: number;
-        sourcePath?: string;
-    }>;
-    metadata?: {
-        title?: string;
-        author?: string;
-        language?: string;
-    };
-    error?: string;
 }
 
 type NovelReaderTheme = "light" | "sepia" | "dark";
@@ -395,170 +369,6 @@ let novelSessionCache: NovelSessionCache = {
     windowStart: 0,
     status: "Mở hoặc thêm TXT / EPUB để bắt đầu đọc."
 };
-
-function isChapterHeading(text: string) {
-    const clean = text.trim();
-
-    if (!clean || clean.length > 90) {
-        return false;
-    }
-
-    return /^(?:第\s*[0-9０-９一二三四五六七八九十百千]+\s*[章話節巻部]|chapter\s+[0-9ivxlcdm]+|chương\s+[0-9ivxlcdm]+|prologue|epilogue|序章|終章|幕間|間章)/iu
-        .test(clean);
-}
-
-function splitLongText(
-    text: string,
-    maxChars = 1100
-): string[] {
-    const clean = text.trim();
-
-    if (!clean) {
-        return [];
-    }
-
-    if (clean.length <= maxChars) {
-        return [clean];
-    }
-
-    const sentences =
-        clean.match(/[^。！？!?\n]+[。！？!?]?|\n+/gu) ||
-        [clean];
-
-    const chunks: string[] = [];
-    let current = "";
-
-    function pushCurrent() {
-        const value = current.trim();
-        if (value) {
-            chunks.push(value);
-        }
-        current = "";
-    }
-
-    for (const rawSentence of sentences) {
-        let sentence = rawSentence.trim();
-
-        if (!sentence) {
-            continue;
-        }
-
-        while (sentence.length > maxChars) {
-            if (current) {
-                pushCurrent();
-            }
-
-            let splitAt = sentence.lastIndexOf(
-                " ",
-                maxChars
-            );
-
-            if (splitAt < Math.floor(maxChars * 0.55)) {
-                splitAt = maxChars;
-            }
-
-            chunks.push(
-                sentence.slice(0, splitAt).trim()
-            );
-            sentence = sentence.slice(splitAt).trim();
-        }
-
-        if (!sentence) {
-            continue;
-        }
-
-        const separator = current ? " " : "";
-
-        if (
-            current.length +
-                separator.length +
-                sentence.length >
-            maxChars
-        ) {
-            pushCurrent();
-        }
-
-        current +=
-            (current ? " " : "") + sentence;
-    }
-
-    pushCurrent();
-
-    return chunks;
-}
-
-function parseNovelText(text: string): NovelBlock[] {
-    const normalized = String(text || "")
-        .replace(/\r\n?/g, "\n")
-        .replace(/^\uFEFF/, "")
-        .trim();
-
-    if (!normalized) {
-        return [];
-    }
-
-    const rawLines = normalized.split("\n");
-    const rawParagraphs: string[] = [];
-    let currentLines: string[] = [];
-    let currentLength = 0;
-
-    function flushCurrent() {
-        const value = currentLines
-            .join("\n")
-            .trim();
-
-        if (value) {
-            rawParagraphs.push(value);
-        }
-
-        currentLines = [];
-        currentLength = 0;
-    }
-
-    for (const rawLine of rawLines) {
-        const line = rawLine.trim();
-
-        if (!line) {
-            flushCurrent();
-            continue;
-        }
-
-        if (isChapterHeading(line)) {
-            flushCurrent();
-            rawParagraphs.push(line);
-            continue;
-        }
-
-        if (
-            currentLength > 0 &&
-            currentLength + line.length + 1 > 1050
-        ) {
-            flushCurrent();
-        }
-
-        currentLines.push(line);
-        currentLength += line.length + 1;
-    }
-
-    flushCurrent();
-
-    const flattened = rawParagraphs.flatMap(
-        (paragraph) =>
-            isChapterHeading(paragraph)
-                ? [paragraph]
-                : splitLongText(paragraph)
-    );
-
-    return flattened.map(
-        (paragraph, index) => ({
-            id: `novel-${index + 1}`,
-            index,
-            text: paragraph,
-            heading: isChapterHeading(paragraph)
-        })
-    );
-}
-
 
 function translationMatchesLanguagePair(
     translation: NovelTranslation | undefined,
@@ -1161,24 +971,17 @@ export function NovelReaderPage({
         payload: NovelOpenPayload,
         knownEntry?: NovelLibraryEntry | null
     ) {
-        if (!payload?.success || !payload.file) {
+        const normalizedPayload =
+            normalizeDocumentReaderPayload(payload);
+
+        if (!normalizedPayload?.success || !normalizedPayload.file) {
             throw new Error(
                 "Không mở được tài liệu Novel."
             );
         }
-
-        const parsed = Array.isArray(payload.blocks) && payload.blocks.length
-            ? payload.blocks.map((block, index) => ({
-                  ...block,
-                  index,
-                  id: block.id || `document-${index + 1}`,
-                  text: String(block.text || "").trim(),
-                  heading: Boolean(block.heading),
-                  html: String(block.html || "")
-              })).filter((block) => Boolean(block.text))
-            : parseNovelText(
-                  payload.text || ""
-              );
+        const parsed = normalizeDocumentReaderBlocks(
+            normalizedPayload.blocks
+        );
 
         if (!parsed.length) {
             throw new Error(
@@ -1186,7 +989,7 @@ export function NovelReaderPage({
             );
         }
 
-        const nextFile = payload.file;
+        const nextFile = normalizedPayload.file;
         const saved = loadProgress(nextFile);
         const restoredIndex = Math.max(
             0,
@@ -1240,7 +1043,9 @@ export function NovelReaderPage({
             setIsOpening(true);
             setStatus("Đang thêm novel vào thư viện...");
 
-            const result = await api.openNovelTxt?.();
+            const result = api.openNovelDocument
+                ? await api.openNovelDocument("TXT")
+                : await api.openNovelTxt?.();
 
             if (result?.canceled) {
                 setStatus("Đã hủy chọn file.");
@@ -1259,7 +1064,9 @@ export function NovelReaderPage({
                     continue;
                 }
 
-                const parsed = parseNovelText(item.text || "");
+                const parsed = normalizeDocumentReaderBlocks(
+                    item.blocks
+                );
                 if (!parsed.length) {
                     continue;
                 }
@@ -1311,7 +1118,9 @@ export function NovelReaderPage({
             setIsOpening(true);
             setStatus("Đang thêm EPUB vào thư viện...");
 
-            const result = await api.openNovelEpub?.();
+            const result = api.openNovelDocument
+                ? await api.openNovelDocument("EPUB")
+                : await api.openNovelEpub?.();
 
             if (result?.canceled) {
                 setStatus("Đã hủy chọn EPUB.");
@@ -1331,16 +1140,9 @@ export function NovelReaderPage({
                     continue;
                 }
 
-                const parsed = Array.isArray(item.blocks)
-                    ? item.blocks
-                          .map((block, index) => ({
-                              ...block,
-                              index,
-                              text: String(block.text || "").trim(),
-                              heading: Boolean(block.heading)
-                          }))
-                          .filter((block) => Boolean(block.text))
-                    : [];
+                const parsed = normalizeDocumentReaderBlocks(
+                    item.blocks
+                );
 
                 if (!parsed.length) {
                     continue;
@@ -1398,9 +1200,14 @@ export function NovelReaderPage({
             setIsOpening(true);
             setStatus(`Đang mở ${entry.name}...`);
 
-            const result = entry.format === "EPUB"
-                ? await api.readNovelEpub?.(entry.path)
-                : await api.readNovelTxt?.(entry.path);
+            const result = api.readNovelDocument
+                ? await api.readNovelDocument(
+                      entry.path,
+                      entry.format
+                  )
+                : entry.format === "EPUB"
+                    ? await api.readNovelEpub?.(entry.path)
+                    : await api.readNovelTxt?.(entry.path);
 
             loadNovelPayload(result, entry);
         } catch (error) {
@@ -1572,7 +1379,7 @@ export function NovelReaderPage({
 
             const result =
                 await api.translateNovelBlocks?.({
-                    format: file.format === "EPUB" ? "EPUB" : "TXT",
+                    format: file.format || "TXT",
                     sourceLanguage,
                     targetLanguage,
                     context: buildContext(start),
