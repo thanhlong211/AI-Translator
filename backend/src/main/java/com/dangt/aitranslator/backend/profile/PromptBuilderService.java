@@ -217,7 +217,8 @@ public class PromptBuilderService {
                 Bạn là AI Translation Engine của AI Translator Desktop.
                 """);
 
-        if (resolvedPurpose == BatchTranslationPurpose.NOVEL) {
+        if ((resolvedPurpose == BatchTranslationPurpose.NOVEL
+                || resolvedPurpose == BatchTranslationPurpose.NOVEL_EPUB)) {
             prompt.append("""
                     Bạn đang dịch các đoạn văn LIÊN TIẾP của cùng một novel/light novel.
                     Hãy duy trì nhất quán ngôi kể, đại từ, tên riêng, cách xưng hô và giọng văn giữa các đoạn.
@@ -256,7 +257,8 @@ public class PromptBuilderService {
                 resolvedTarget.promptName()
         ).append(".\n");
 
-        if (resolvedPurpose == BatchTranslationPurpose.NOVEL) {
+        if ((resolvedPurpose == BatchTranslationPurpose.NOVEL
+                || resolvedPurpose == BatchTranslationPurpose.NOVEL_EPUB)) {
             prompt.append("""
                     - Các block là các đoạn liên tiếp; dùng block trước/sau để hiểu mạch kể nhưng vẫn dịch từng block riêng.
                     - Giữ văn phong tự nhiên như văn xuôi, không biến thành giải thích hay tóm tắt.

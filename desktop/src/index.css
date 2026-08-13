@@ -5405,3 +5405,63 @@ button:disabled {
     margin: 7px 0 0;
     font-size: 16px;
 }
+
+/* Batch 14: EPUB integrated into Novel Reader. */
+.novel-reader-import-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.novel-library-cover.epub,
+.novel-file-icon.epub {
+    border-style: solid;
+    border-width: 1px;
+    border-color: var(--novel-border-strong);
+    background: var(--novel-surface-raised);
+    color: var(--novel-accent);
+}
+
+.novel-library-author,
+.novel-file-author {
+    color: var(--novel-muted);
+    font-size: 11px;
+}
+
+.novel-file-author {
+    display: block;
+    margin-top: 2px;
+}
+
+.novel-reader-page ruby {
+    ruby-position: over;
+}
+
+.novel-reader-page rt {
+    color: var(--novel-muted);
+    font-size: 0.58em;
+    line-height: 1;
+}
+
+.novel-reader-page .novel-source-pane p strong,
+.novel-reader-page .novel-source-pane p b {
+    font-weight: 700;
+}
+
+.novel-reader-page .novel-source-pane p em,
+.novel-reader-page .novel-source-pane p i {
+    font-style: italic;
+}
+
+@media (max-width: 760px) {
+    .novel-reader-import-actions {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .novel-reader-import-actions > button {
+        flex: 1 1 120px;
+    }
+}

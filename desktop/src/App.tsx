@@ -4194,7 +4194,7 @@ function App() {
                         onSelectProfile={selectProfile}
                         onUpgrade={() => {
                             setEntitlementMessage(
-                                "Novel Reader TXT yêu cầu gói PRO hoặc cao hơn."
+                                "Novel Reader TXT/EPUB yêu cầu gói PRO hoặc cao hơn."
                             );
                             setActivePage("settings");
 
