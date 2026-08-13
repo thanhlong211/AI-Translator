@@ -225,6 +225,13 @@ public class PromptBuilderService {
 
                     YÊU CẦU BẮT BUỘC:
                     """);
+        } else if (resolvedPurpose == BatchTranslationPurpose.PDF_TEXT) {
+            prompt.append("""
+                    Bạn đang dịch các đoạn văn LIÊN TIẾP được trích xuất từ cùng một tài liệu PDF có text.
+                    Hãy giữ nhất quán thuật ngữ, tên riêng, đại từ, cấu trúc và giọng văn giữa các đoạn.
+
+                    YÊU CẦU BẮT BUỘC:
+                    """);
         } else if (resolvedPurpose == BatchTranslationPurpose.MANGA) {
             prompt.append("""
                     Bạn đang dịch nhiều text block OCR từ cùng một trang manga.
@@ -263,6 +270,12 @@ public class PromptBuilderService {
                     - Các block là các đoạn liên tiếp; dùng block trước/sau để hiểu mạch kể nhưng vẫn dịch từng block riêng.
                     - Giữ văn phong tự nhiên như văn xuôi, không biến thành giải thích hay tóm tắt.
                     - Nếu một câu/ý nối qua ranh giới block, ưu tiên nghĩa tự nhiên nhưng KHÔNG gộp output của hai block.
+                    """);
+        } else if (resolvedPurpose == BatchTranslationPurpose.PDF_TEXT) {
+            prompt.append("""
+                    - Các block là các đoạn liên tiếp trong tài liệu; dùng block trước/sau để hiểu ngữ cảnh nhưng vẫn dịch từng block riêng.
+                    - Giữ nguyên ý nghĩa và cấp độ văn phong của tài liệu; không biến thành giải thích hay tóm tắt.
+                    - Nếu câu bị ngắt do layout PDF, ưu tiên nghĩa tự nhiên nhưng KHÔNG gộp output của hai block.
                     """);
         } else {
             prompt.append("""

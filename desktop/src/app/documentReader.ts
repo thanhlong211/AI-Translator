@@ -1,4 +1,4 @@
-export type DocumentReaderFormat = "TXT" | "EPUB";
+export type DocumentReaderFormat = "TXT" | "EPUB" | "PDF_TEXT";
 
 export interface DocumentReaderFileInfo {
     path: string;
@@ -20,12 +20,14 @@ export interface DocumentReaderBlock {
     html?: string;
     spineIndex?: number;
     sourcePath?: string;
+    pageNumber?: number;
 }
 
 export interface DocumentReaderChapter {
     label: string;
     index: number;
     sourcePath?: string;
+    pageNumber?: number;
 }
 
 export interface DocumentReaderOpenPayload {
@@ -41,6 +43,8 @@ export interface DocumentReaderOpenPayload {
         author?: string;
         language?: string;
         format?: DocumentReaderFormat;
+        pageCount?: number;
+        textCharacterCount?: number;
     };
     error?: string;
 }
@@ -55,16 +59,25 @@ export interface DocumentReaderFormatDescriptor {
 
 export const documentReaderFormats: ReadonlyArray<DocumentReaderFormat> = [
     "TXT",
-    "EPUB"
+    "EPUB",
+    "PDF_TEXT"
 ] as const;
 
 export function normalizeDocumentReaderFormat(
     value: unknown,
     fallback: DocumentReaderFormat = "TXT"
 ): DocumentReaderFormat {
-    return String(value || "").toUpperCase() === "EPUB"
-        ? "EPUB"
-        : fallback;
+    const normalized = String(value || "").toUpperCase();
+
+    if (normalized === "EPUB") {
+        return "EPUB";
+    }
+
+    if (normalized === "PDF_TEXT" || normalized === "PDF") {
+        return "PDF_TEXT";
+    }
+
+    return fallback;
 }
 
 export function normalizeDocumentReaderBlocks(
@@ -95,6 +108,9 @@ export function normalizeDocumentReaderBlocks(
                     : undefined,
                 sourcePath: block.sourcePath
                     ? String(block.sourcePath)
+                    : undefined,
+                pageNumber: Number.isFinite(block.pageNumber)
+                    ? Number(block.pageNumber)
                     : undefined
             } as DocumentReaderBlock;
         })
@@ -118,6 +134,9 @@ export function normalizeDocumentReaderPayload(
                       index: Math.max(0, Number(chapter?.index) || 0),
                       sourcePath: chapter?.sourcePath
                           ? String(chapter.sourcePath)
+                          : undefined,
+                      pageNumber: Number.isFinite(chapter?.pageNumber)
+                          ? Number(chapter.pageNumber)
                           : undefined
                   }))
                   .filter((chapter) => Boolean(chapter.label))

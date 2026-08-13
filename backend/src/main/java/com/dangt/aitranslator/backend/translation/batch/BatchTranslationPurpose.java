@@ -8,5 +8,6 @@ public enum BatchTranslationPurpose {
     GENERAL,
     MANGA,
     NOVEL,
-    NOVEL_EPUB
+    NOVEL_EPUB,
+    PDF_TEXT
 }

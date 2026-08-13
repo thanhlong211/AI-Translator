@@ -23,7 +23,8 @@ import {
 
 import {
     normalizeDocumentReaderBlocks,
-    normalizeDocumentReaderPayload
+    normalizeDocumentReaderPayload,
+    normalizeDocumentReaderFormat
 } from "../app/documentReader";
 
 import type {
@@ -293,8 +294,8 @@ function loadNovelLibrary(): NovelLibraryEntry[] {
                 bookmarks: Array.isArray(item.bookmarks)
                     ? item.bookmarks.filter(Number.isFinite)
                     : [],
-                format: (item.format === "EPUB" ? "EPUB" : "TXT") as NovelDocumentFormat,
-                title: item.title || item.name.replace(/\.(txt|epub)$/i, ""),
+                format: normalizeDocumentReaderFormat(item.format) as NovelDocumentFormat,
+                title: item.title || item.name.replace(/\.(txt|epub|pdf)$/i, ""),
                 author: item.author || "",
                 language: item.language || "",
                 sourceLanguage: item.sourceLanguage || "AUTO",
@@ -637,7 +638,11 @@ export function NovelReaderPage({
         entitlements.features.novelReaderEpub
     );
 
-    const novelAvailable = txtAvailable || epubAvailable;
+    const pdfAvailable = Boolean(
+        entitlements.features.pdfTextReader
+    );
+
+    const novelAvailable = txtAvailable || epubAvailable || pdfAvailable;
 
     const chapters = useMemo(
         () =>
@@ -892,11 +897,11 @@ export function NovelReaderPage({
                 sizeBytes: nextFile.sizeBytes,
                 modifiedAt: nextFile.modifiedAt,
                 encoding: nextFile.encoding,
-                format: nextFile.format === "EPUB" ? "EPUB" : "TXT",
+                format: normalizeDocumentReaderFormat(nextFile.format),
                 title:
                     nextFile.title ||
                     existing?.title ||
-                    nextFile.name.replace(/\.(txt|epub)$/i, ""),
+                    nextFile.name.replace(/\.(txt|epub|pdf)$/i, ""),
                 author: nextFile.author || existing?.author || "",
                 language: nextFile.language || existing?.language || "",
                 totalBlocks: parsed.length,
@@ -1186,10 +1191,83 @@ export function NovelReaderPage({
         }
     }
 
+    async function openPdf() {
+        if (!pdfAvailable) {
+            onUpgrade();
+            return;
+        }
+
+        try {
+            setIsOpening(true);
+            setStatus("Đang phân tích PDF có text...");
+
+            const result = await api.openNovelDocument?.("PDF_TEXT");
+
+            if (result?.canceled) {
+                setStatus("Đã hủy chọn PDF.");
+                return;
+            }
+
+            const items: NovelOpenPayload[] =
+                Array.isArray(result?.files) && result.files.length
+                    ? result.files
+                    : [result];
+
+            let firstPayload: NovelOpenPayload | null = null;
+            let addedCount = 0;
+
+            for (const item of items) {
+                if (!item?.success || !item.file) {
+                    continue;
+                }
+
+                const parsed = normalizeDocumentReaderBlocks(item.blocks);
+                if (!parsed.length) {
+                    continue;
+                }
+
+                upsertLibraryItem(item.file, parsed, {
+                    lastOpenedAt: Date.now()
+                });
+                addedCount++;
+                firstPayload ||= item;
+            }
+
+            if (!firstPayload) {
+                throw new Error(
+                    result?.error ||
+                    "Không mở được PDF có text nào."
+                );
+            }
+
+            loadNovelPayload(
+                firstPayload,
+                library.find(
+                    (entry) => entry.path === firstPayload?.file?.path
+                ) || null
+            );
+            setStatus(
+                addedCount > 1
+                    ? `Đã thêm ${addedCount} PDF vào thư viện và mở ${firstPayload.file?.title || firstPayload.file?.name}.`
+                    : `Đã thêm ${firstPayload.file?.title || firstPayload.file?.name} vào thư viện.`
+            );
+        } catch (error) {
+            setStatus(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+        } finally {
+            setIsOpening(false);
+        }
+    }
+
     async function openLibraryNovel(entry: NovelLibraryEntry) {
         const canOpen = entry.format === "EPUB"
             ? epubAvailable
-            : txtAvailable;
+            : entry.format === "PDF_TEXT"
+                ? pdfAvailable
+                : txtAvailable;
 
         if (!canOpen) {
             onUpgrade();
@@ -1207,7 +1285,9 @@ export function NovelReaderPage({
                   )
                 : entry.format === "EPUB"
                     ? await api.readNovelEpub?.(entry.path)
-                    : await api.readNovelTxt?.(entry.path);
+                    : entry.format === "PDF_TEXT"
+                        ? await api.readNovelDocument?.(entry.path, "PDF_TEXT")
+                        : await api.readNovelTxt?.(entry.path);
 
             loadNovelPayload(result, entry);
         } catch (error) {
@@ -1485,7 +1565,7 @@ export function NovelReaderPage({
                     </h2>
 
                     <p>
-                        FREE vẫn dùng Quick Translate. PRO mở Novel Reader TXT/EPUB,
+                        FREE vẫn dùng Quick Translate. PRO mở Novel Reader TXT/EPUB/PDF Text,
                         Study Mode và Manga Session; MANGA+ mở thêm Continuous Manga.
                     </p>
 
@@ -1529,7 +1609,7 @@ export function NovelReaderPage({
             <section className="novel-reader-hero">
                 <div>
                     <span className="eyebrow violet">
-                        NOVEL READER · TXT + EPUB · PRO
+                        DOCUMENT READER · TXT + EPUB + PDF · PRO
                     </span>
 
                     <h2>
@@ -1537,7 +1617,7 @@ export function NovelReaderPage({
                     </h2>
 
                     <p>
-                        TXT và EPUB được đọc cục bộ trên Desktop. Chỉ những đoạn
+                        TXT, EPUB và PDF có text được đọc cục bộ trên Desktop. Chỉ những đoạn
                         bạn yêu cầu dịch mới được gửi backend; toàn bộ sách không bị upload.
                     </p>
                 </div>
@@ -1552,12 +1632,20 @@ export function NovelReaderPage({
                         + TXT
                     </button>
                     <button
-                        className="scan-primary"
+                        className="secondary-action"
                         onClick={() => void openEpub()}
                         disabled={isOpening || isTranslating || !epubAvailable}
                         title={!epubAvailable ? "EPUB yêu cầu gói PRO" : "Thêm EPUB"}
                     >
-                        {isOpening ? "Đang thêm..." : "+ EPUB"}
+                        + EPUB
+                    </button>
+                    <button
+                        className="scan-primary"
+                        onClick={() => void openPdf()}
+                        disabled={isOpening || isTranslating || !pdfAvailable}
+                        title={!pdfAvailable ? "PDF Text Reader yêu cầu gói PRO" : "Thêm PDF có text"}
+                    >
+                        {isOpening ? "Đang mở..." : "+ PDF"}
                     </button>
                 </div>
             </section>
@@ -1568,7 +1656,7 @@ export function NovelReaderPage({
                         <span className="eyebrow">NOVEL LIBRARY</span>
                         <h3>Thư viện của bạn</h3>
                         <p>
-                            {library.length} tài liệu · TXT/EPUB lưu cục bộ · không xóa file gốc khi gỡ khỏi Library.
+                            {library.length} tài liệu · TXT/EPUB/PDF lưu cục bộ · không xóa file gốc khi gỡ khỏi Library.
                         </p>
                     </div>
 
@@ -1605,7 +1693,7 @@ export function NovelReaderPage({
                                     }
                                     key={entry.path}
                                 >
-                                    <div className={`novel-library-cover ${entry.format.toLowerCase()}`}>{entry.format}</div>
+                                    <div className={`novel-library-cover ${entry.format.toLowerCase()}`}>{entry.format === "PDF_TEXT" ? "PDF" : entry.format}</div>
                                     <div className="novel-library-item-main">
                                         <strong title={entry.title || entry.name}>
                                             {entry.title || entry.name}
@@ -1619,7 +1707,7 @@ export function NovelReaderPage({
                                             {percent}% · {entry.currentChapter}
                                         </span>
                                         <small>
-                                            {entry.format} · {entry.chapterCount} chapter · {entry.bookmarks.length} bookmark · {translationLanguageLabels[entry.targetLanguage]}
+                                            {entry.format === "PDF_TEXT" ? "PDF" : entry.format} · {entry.chapterCount} chapter · {entry.bookmarks.length} bookmark · {translationLanguageLabels[entry.targetLanguage]}
                                         </small>
                                         <div className="novel-library-progress">
                                             <span style={{ width: `${percent}%` }} />
@@ -1653,7 +1741,7 @@ export function NovelReaderPage({
                     <div className="novel-library-empty">
                         {library.length
                             ? "Không tìm thấy novel phù hợp."
-                            : "Chưa có novel. Bấm + Thêm TXT và có thể chọn nhiều file cùng lúc."}
+                            : "Chưa có tài liệu. Thêm TXT, EPUB hoặc PDF có text để bắt đầu."}
                     </div>
                 )}
             </section>
@@ -1979,7 +2067,7 @@ export function NovelReaderPage({
             {file && (
                 <section className="novel-file-card">
                     <div className="novel-file-main">
-                        <div className={`novel-file-icon ${(file.format || "TXT").toLowerCase()}`}>{file.format || "TXT"}</div>
+                        <div className={`novel-file-icon ${(file.format || "TXT").toLowerCase()}`}>{file.format === "PDF_TEXT" ? "PDF" : file.format || "TXT"}</div>
                         <div>
                             <strong>{file.title || file.name}</strong>
                             {file.author && (

@@ -839,6 +839,10 @@ export function SettingsPage({
                             [
                                 "Novel EPUB",
                                 "novelReaderEpub"
+                            ],
+                            [
+                                "PDF Text Reader",
+                                "pdfTextReader"
                             ]
                         ].map(
                             ([label, key]) => (

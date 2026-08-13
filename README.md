@@ -1,37 +1,41 @@
-# Batch 14.1 — Generic Document Reader Core
+# Batch 14.2 · PDF Text Reader
 
-Refactor-only foundation batch after EPUB support. No new end-user file format is introduced in this batch.
+Branch: `feature/batch-14-2-pdf-text-reader`
 
-## What changed
+## What changes
 
-- Added `desktop/electron/documentReaderCore.cjs`.
-- Added a single format registry for TXT and EPUB.
-- TXT parsing moved from React into Electron and now returns the same normalized block model as EPUB.
-- Added generic IPC: `novel:list-formats`, `novel:open-document`, `novel:read-document`.
-- Kept legacy TXT/EPUB IPC wrappers for compatibility.
-- Added `desktop/src/app/documentReader.ts` as the shared renderer document model.
-- `NovelReaderPage` now consumes normalized document blocks instead of containing a TXT parser.
-- Translation capability and backend purpose are resolved from the format registry.
-- Existing Library/progress/bookmarks/cache keys are unchanged.
+- Adds `PDF_TEXT` to Generic Document Reader Core.
+- Adds local Electron PDF text extraction (`pdfTextParser.cjs`).
+- Reader Library can import/reopen TXT, EPUB and text-based PDF.
+- PDF uses existing progress, bookmarks, search, themes, font settings, profiles, language switching and Translation Memory.
+- Adds backend `BatchTranslationPurpose.PDF_TEXT` and feature gate `pdfTextReader`.
+- Adds Flyway `V14__add_pdf_text_reader_entitlement.sql`.
+- FREE: PDF Text OFF. PRO/MANGA_PLUS: PDF Text ON.
+- Settings → Plan & License shows PDF Text Reader capability.
 
-## No production data changes
+## Safety / limitations
 
-- No DB migration.
-- No Flyway change.
-- No entitlement matrix change.
-- No license change.
-- No Translation Memory schema change.
+PDF stays local; only blocks selected for translation go to backend. Encrypted PDF is rejected. Image-only/scan PDF reports that PDF OCR Reader is needed (planned Batch 14.3).
 
-## Validation
+The parser supports common PDF text streams including Flate/ASCII85/ASCIIHex, ToUnicode CMaps, WinAnsi and common CJK UCS2 encodings. Some highly compressed object-stream-only PDFs may still be unsupported in this lightweight baseline.
 
-- `node --check documentReaderCore.cjs` PASS
-- `node --check main.cjs` PASS
-- `node --check preload.cjs` PASS
-- TypeScript strict check for `NovelReaderPage.tsx` + `documentReader.ts` PASS
-- TXT parser synthetic test PASS: 5 blocks / 2 chapters
-- EPUB3 sample PASS: title/author / 6 blocks / 2 chapters
-- generic picker/read adapter PASS
-- capability routing PASS (`TXT -> novelReaderTxt`, `EPUB -> novelReaderEpub`)
-- translation routing PASS (`TXT -> NOVEL`, `EPUB -> NOVEL_EPUB`)
+## Test
 
-See `docs/DOCUMENT_READER_CORE.md` for the adapter contract used by future PDF/DOCX support.
+Use `samples/pdf-text-reader-test.pdf` (3 pages / 3 chapters) or `samples/pdf-text-reader-japanese-test.pdf`.
+
+1. Login with PRO/MANGA_PLUS.
+2. Reader → `+ PDF`.
+3. Open a sample PDF.
+4. Verify chapter navigation, search, bookmark and progress.
+5. Translate several blocks to VI, then switch target to EN and translate again.
+6. Reopen the PDF from Library with Continue Reading.
+7. FREE account must not be allowed to open/translate PDF.
+
+## Validation completed
+
+- `node --check`: main/preload/documentReaderCore/pdfTextParser PASS.
+- TypeScript strict semantic check: NovelReaderPage + SettingsPage + documentReader PASS.
+- Java compile with dependency stubs: purpose/controller/prompt PASS.
+- Parser tests: Latin PDF PASS, Japanese UniJIS-UCS2 PDF PASS, direct ToUnicode CMap PASS.
+- Image-only PDF detection PASS.
+- No V1-V13 migration was edited.

@@ -94,6 +94,15 @@ public class BatchTranslationController {
             );
         }
 
+        if (request.purpose() == BatchTranslationPurpose.PDF_TEXT) {
+            entitlementService.requireFeature(
+                    user,
+                    "pdfTextReader",
+                    "PDF Text Reader",
+                    "PRO"
+            );
+        }
+
         entitlementService
                 .requireTranslationQuota(user);
 
