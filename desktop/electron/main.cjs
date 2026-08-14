@@ -11,10 +11,9 @@ const {
     dialog,
     shell
 } = require("electron");
-const { spawn } = require("child_process");
-const readline = require("readline");
 const path = require("path");
 const os = require("os");
+const { spawn } = require("child_process");
 const screenshot = require("screenshot-desktop");
 const sharp = require("sharp");
 const {
@@ -31,6 +30,7 @@ const {
 const {
   showFullScreenTranslationOverlay,
   hideFullScreenTranslationOverlay,
+  restoreFullScreenTranslationOverlay,
   closeFullScreenTranslationOverlay,
   setFullScreenOverlayPinned,
   toggleFullScreenOverlayPinned,
@@ -82,6 +82,20 @@ const {
   createOverlay,
   closeOverlay
 } = require("./overlay.cjs");
+
+const {
+  OcrWorkerManager,
+} = require("./ocrWorkerManager.cjs");
+
+const {
+  normalizeAction: normalizeMangaNavigationAction,
+  normalizeProfiles: normalizeMangaNavigationProfiles,
+  findMatchingProfile: findMatchingMangaNavigationProfile,
+  createDraftForTarget: createMangaNavigationDraft,
+  upsertProfile: upsertMangaNavigationProfileList,
+  deleteProfile: deleteMangaNavigationProfileFromList,
+  publicNavigationState: buildMangaNavigationPublicState,
+} = require("./mangaNavigationProfiles.cjs");
 // ======================================================
 // JAVA BACKEND
 // ======================================================
@@ -1332,6 +1346,190 @@ function getMangaPanelSessionContext() {
     }));
 }
 
+function resolveMangaNavigationTargetWindow() {
+  return (
+    mangaPanelSession?.targetWindow ||
+    activeOverlayTargetWindow ||
+    pendingTargetWindow ||
+    null
+  );
+}
+
+function resolveActiveMangaNavigationProfile() {
+  if (!mangaPanelSession) {
+    return null;
+  }
+
+  const preferredId =
+    String(
+      mangaPanelSession.navigationProfileId ||
+      ""
+    ).trim();
+
+  if (preferredId) {
+    const preferred =
+      mangaNavigationProfiles.find(
+        (profile) =>
+          profile.id === preferredId
+      );
+
+    if (preferred) {
+      return preferred;
+    }
+  }
+
+  const matched =
+    findMatchingMangaNavigationProfile(
+      mangaNavigationProfiles,
+      resolveMangaNavigationTargetWindow()
+    );
+
+  if (matched) {
+    mangaPanelSession.navigationProfileId =
+      matched.id;
+  }
+
+  return matched || null;
+}
+
+function getMangaNavigationPublicState() {
+  return buildMangaNavigationPublicState({
+    profiles:
+      mangaNavigationProfiles,
+    targetWindow:
+      resolveMangaNavigationTargetWindow(),
+    preferredProfileId:
+      mangaPanelSession?.navigationProfileId ||
+      null,
+  });
+}
+
+function getMangaNavigationConfigPayload() {
+  const targetWindow =
+    resolveMangaNavigationTargetWindow();
+  const existing =
+    resolveActiveMangaNavigationProfile();
+  const draft =
+    createMangaNavigationDraft(
+      targetWindow,
+      existing
+    );
+
+  return {
+    success: true,
+    hasSession:
+      Boolean(mangaPanelSession),
+    target: targetWindow
+      ? {
+          processName:
+            String(targetWindow.processName || ""),
+          title:
+            String(targetWindow.title || ""),
+        }
+      : null,
+    profile: draft,
+    navigation:
+      getMangaNavigationPublicState(),
+  };
+}
+
+async function saveMangaNavigationProfile(
+  input
+) {
+  if (!mangaPanelSession) {
+    throw new Error(
+      "Chưa có Manga Session để lưu điều khiển trang."
+    );
+  }
+
+  const targetWindow =
+    resolveMangaNavigationTargetWindow();
+  const previousProfiles =
+    mangaNavigationProfiles;
+  const previousProfileId =
+    mangaPanelSession.navigationProfileId ||
+    null;
+
+  const result =
+    upsertMangaNavigationProfileList(
+      mangaNavigationProfiles,
+      input,
+      targetWindow
+    );
+
+  try {
+    mangaNavigationProfiles =
+      result.profiles;
+
+    mangaPanelSession.navigationProfileId =
+      result.profile.id;
+
+    await saveDesktopPreferences();
+  } catch (error) {
+    mangaNavigationProfiles =
+      previousProfiles;
+    mangaPanelSession.navigationProfileId =
+      previousProfileId;
+    throw error;
+  }
+
+  updateFullScreenOverlaySession(
+    getMangaPanelSessionState()
+  );
+
+  return {
+    success: true,
+    profile: result.profile,
+    navigation:
+      getMangaNavigationPublicState(),
+  };
+}
+
+async function removeMangaNavigationProfile(
+  profileId
+) {
+  const previousProfiles =
+    mangaNavigationProfiles;
+  const previousProfileId =
+    mangaPanelSession?.navigationProfileId ||
+    null;
+
+  try {
+    mangaNavigationProfiles =
+      deleteMangaNavigationProfileFromList(
+        mangaNavigationProfiles,
+        profileId
+      );
+
+    if (
+      mangaPanelSession &&
+      mangaPanelSession.navigationProfileId ===
+        String(profileId || "")
+    ) {
+      mangaPanelSession.navigationProfileId =
+        null;
+    }
+
+    await saveDesktopPreferences();
+  } catch (error) {
+    mangaNavigationProfiles =
+      previousProfiles;
+    if (mangaPanelSession) {
+      mangaPanelSession.navigationProfileId =
+        previousProfileId;
+    }
+    throw error;
+  }
+
+  if (mangaPanelSession) {
+    updateFullScreenOverlaySession(
+      getMangaPanelSessionState()
+    );
+  }
+
+  return getMangaNavigationConfigPayload();
+}
+
 function getMangaPanelSessionState() {
   if (!mangaPanelSession) {
     return {
@@ -1346,6 +1544,8 @@ function getMangaPanelSessionState() {
         ),
       capabilities:
         getDesktopFeatureCapabilities(),
+      navigation:
+        getMangaNavigationPublicState(),
       continuous:
         getMangaContinuousPublicState(),
     };
@@ -1387,6 +1587,8 @@ function getMangaPanelSessionState() {
       ),
     capabilities:
       getDesktopFeatureCapabilities(),
+    navigation:
+      getMangaNavigationPublicState(),
     continuous:
       getMangaContinuousPublicState(),
   };
@@ -1443,6 +1645,11 @@ function beginMangaPanelSession({
       targetWindow
         ? { ...targetWindow }
         : null,
+    navigationProfileId:
+      findMatchingMangaNavigationProfile(
+        mangaNavigationProfiles,
+        targetWindow
+      )?.id || null,
     startedAt:
       Date.now(),
     lastUsedAt:
@@ -4806,7 +5013,6 @@ async function revokeDeviceSession(
 }
 
 
-const OCR_OUTPUT_MARKER = "__OCR_JSON__";
 const fsSync = require("fs");
 const fs = require("fs/promises");
 const crypto = require("crypto");
@@ -4819,17 +5025,18 @@ let translationCachePath = null;
 
 const MAX_CACHE_ITEMS = 500;
 
-let ocrWorker = null;
-let ocrWorkerReady = false;
+let ocrWorkerManager = null;
 
-let ocrReadyPromise = null;
-let resolveOcrReady = null;
-let rejectOcrReady = null;
+function getOcrWorkerManager() {
+  if (!ocrWorkerManager) {
+    ocrWorkerManager = new OcrWorkerManager({
+      getOcrDirectory,
+      logger: console,
+    });
+  }
 
-let nextOcrRequestId = 1;
-
-
-const pendingOcrRequests = new Map();
+  return ocrWorkerManager;
+}
 
 // ======================================================
 // GLOBAL VARIABLES
@@ -4913,6 +5120,9 @@ let studyPreferences = {
 let overlayPreferences = {
   ...DEFAULT_OVERLAY_PREFERENCES,
 };
+
+let mangaNavigationProfiles = [];
+let mangaNavigationSettingsWindow = null;
 
 let onboardingCompleted =
   false;
@@ -5165,6 +5375,11 @@ async function loadDesktopPreferences() {
         data?.overlay
       );
 
+    mangaNavigationProfiles =
+      normalizeMangaNavigationProfiles(
+        data?.mangaNavigationProfiles
+      );
+
     onboardingCompleted =
       Boolean(
         data?.onboardingCompleted
@@ -5191,6 +5406,8 @@ async function loadDesktopPreferences() {
     overlayPreferences = {
       ...DEFAULT_OVERLAY_PREFERENCES,
     };
+
+    mangaNavigationProfiles = [];
 
     onboardingCompleted =
       false;
@@ -5221,7 +5438,7 @@ async function saveDesktopPreferences() {
     preferencesPath,
     JSON.stringify(
       {
-        version: 3,
+        version: 4,
 
         shortcuts: {
           ...shortcutSettings,
@@ -5234,6 +5451,11 @@ async function saveDesktopPreferences() {
         overlay: {
           ...overlayPreferences,
         },
+
+        mangaNavigationProfiles:
+          normalizeMangaNavigationProfiles(
+            mangaNavigationProfiles
+          ),
 
         onboardingCompleted,
       },
@@ -5293,7 +5515,7 @@ function getShortcutSettings() {
 
 function getAppPreferences() {
   return {
-    version: 3,
+    version: 4,
 
     legacyMigrationNeeded:
       legacyPreferenceMigration,
@@ -5308,6 +5530,11 @@ function getAppPreferences() {
     overlay: {
       ...overlayPreferences,
     },
+
+    mangaNavigationProfiles:
+      normalizeMangaNavigationProfiles(
+        mangaNavigationProfiles
+      ),
 
     onboardingCompleted,
   };
@@ -5453,6 +5680,8 @@ async function resetAppPreferences() {
     ...DEFAULT_OVERLAY_PREFERENCES,
   };
 
+  mangaNavigationProfiles = [];
+
   onboardingCompleted =
     keepOnboarding;
 
@@ -5534,6 +5763,11 @@ async function runShortcutScan(
 function triggerMangaSessionNextPage(
   source = "shortcut"
 ) {
+  /*
+   * Batch 15.0.5.1: restore the original shortcut behavior.
+   * Ctrl+Shift+Y only OCR/translates the page that is currently visible.
+   * Website navigation belongs exclusively to the overlay Next (⏭) action.
+   */
   void runMangaSessionNextPage(
     source
   ).catch((error) => {
@@ -5868,6 +6102,872 @@ async function updateShortcutSettings(
   return getShortcutSettings();
 }
 
+
+const MANGA_NAVIGATION_KEY_CODES = Object.freeze({
+  ARROWLEFT: 0x25,
+  ARROWRIGHT: 0x27,
+  PAGEUP: 0x21,
+  PAGEDOWN: 0x22,
+  SPACE: 0x20,
+  ENTER: 0x0D,
+});
+
+function normalizeMangaNavigationTarget(
+  targetWindow
+) {
+  const hwnd =
+    String(
+      targetWindow?.hwnd || ""
+    ).trim();
+
+  const processId =
+    Number(
+      targetWindow?.processId || 0
+    );
+
+  if (
+    !/^\d+$/.test(hwnd) ||
+    !Number.isInteger(processId) ||
+    processId <= 0
+  ) {
+    return null;
+  }
+
+  return {
+    hwnd,
+    processId,
+  };
+}
+
+function runMangaNavigationPowerShell({
+  targetWindow,
+  body,
+  timeoutMs = 2600,
+} = {}) {
+  if (process.platform !== "win32") {
+    return Promise.resolve({
+      success: false,
+      reason: "unsupported-platform",
+    });
+  }
+
+  const target =
+    normalizeMangaNavigationTarget(
+      targetWindow
+    );
+
+  if (!target) {
+    return Promise.resolve({
+      success: false,
+      reason: "missing-target-window",
+    });
+  }
+
+  const script = `
+$ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
+Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class AiTranslatorMangaNav {
+    [StructLayout(LayoutKind.Sequential)]
+    public struct RECT { public int Left; public int Top; public int Right; public int Bottom; }
+    [StructLayout(LayoutKind.Sequential)]
+    public struct POINT { public int X; public int Y; }
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")]
+    public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+    [DllImport("kernel32.dll")]
+    public static extern uint GetCurrentThreadId();
+    [DllImport("user32.dll")]
+    public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
+    [DllImport("user32.dll")]
+    public static extern bool BringWindowToTop(IntPtr hWnd);
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")]
+    public static extern bool IsIconic(IntPtr hWnd);
+    [DllImport("user32.dll")]
+    public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
+    [DllImport("user32.dll")]
+    public static extern bool GetCursorPos(out POINT point);
+    [DllImport("user32.dll")]
+    public static extern bool SetCursorPos(int X, int Y);
+    [DllImport("user32.dll")]
+    public static extern short GetAsyncKeyState(int vKey);
+    [DllImport("user32.dll")]
+    public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
+    [DllImport("user32.dll")]
+    public static extern void mouse_event(uint dwFlags, uint dx, uint dy, int dwData, UIntPtr dwExtraInfo);
+}
+"@
+$hwnd = [IntPtr]::new([Int64]${target.hwnd})
+# SW_RESTORE (9) must only be used for a minimized window. Calling it for a
+# maximized/full-screen browser changes the user's window state and makes the
+# manga reader look like it was "shrunk" before the navigation action runs.
+if ([AiTranslatorMangaNav]::IsIconic($hwnd)) {
+    [void][AiTranslatorMangaNav]::ShowWindowAsync($hwnd, 9)
+    Start-Sleep -Milliseconds 80
+}
+[void][AiTranslatorMangaNav]::SetForegroundWindow($hwnd)
+Start-Sleep -Milliseconds 110
+
+# Windows may reject SetForegroundWindow when another process owns the
+# foreground lock. Verify the exact HWND before injecting a key/click/scroll.
+# If the first attempt is rejected, temporarily attach the helper thread to
+# the foreground + target input queues and retry. This avoids silently sending
+# ArrowRight to AI Translator/another window and later reporting difference=0.
+$foreground = [AiTranslatorMangaNav]::GetForegroundWindow()
+if ($foreground -ne $hwnd) {
+    $currentThread = [AiTranslatorMangaNav]::GetCurrentThreadId()
+    $foregroundPid = [uint32]0
+    $targetPid = [uint32]0
+    $foregroundThread = if ($foreground -ne [IntPtr]::Zero) {
+        [AiTranslatorMangaNav]::GetWindowThreadProcessId($foreground, [ref]$foregroundPid)
+    } else { 0 }
+    $targetThread = [AiTranslatorMangaNav]::GetWindowThreadProcessId($hwnd, [ref]$targetPid)
+    $attachedForeground = $false
+    $attachedTarget = $false
+
+    try {
+        if ($foregroundThread -ne 0 -and $foregroundThread -ne $currentThread) {
+            $attachedForeground = [AiTranslatorMangaNav]::AttachThreadInput($currentThread, $foregroundThread, $true)
+        }
+        if ($targetThread -ne 0 -and $targetThread -ne $currentThread) {
+            $attachedTarget = [AiTranslatorMangaNav]::AttachThreadInput($currentThread, $targetThread, $true)
+        }
+        [void][AiTranslatorMangaNav]::BringWindowToTop($hwnd)
+        [void][AiTranslatorMangaNav]::SetForegroundWindow($hwnd)
+        Start-Sleep -Milliseconds 140
+    } finally {
+        if ($attachedTarget) {
+            [void][AiTranslatorMangaNav]::AttachThreadInput($currentThread, $targetThread, $false)
+        }
+        if ($attachedForeground) {
+            [void][AiTranslatorMangaNav]::AttachThreadInput($currentThread, $foregroundThread, $false)
+        }
+    }
+}
+
+$foreground = [AiTranslatorMangaNav]::GetForegroundWindow()
+if ($foreground -ne $hwnd) {
+    throw ("TARGET_BROWSER_NOT_FOCUSED|expected={0}|actual={1}" -f $hwnd.ToInt64(), $foreground.ToInt64())
+}
+
+${body}
+`;
+
+  return new Promise((resolve) => {
+    const child =
+      spawn(
+        "powershell.exe",
+        [
+          "-NoProfile",
+          "-NonInteractive",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          script,
+        ],
+        {
+          windowsHide: true,
+          stdio: [
+            "ignore",
+            "pipe",
+            "pipe",
+          ],
+        }
+      );
+
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+
+    const finish = (payload) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      resolve(payload);
+    };
+
+    const timeout =
+      setTimeout(() => {
+        try {
+          child.kill();
+        } catch {
+        }
+
+        finish({
+          success: false,
+          reason: "navigation-helper-timeout",
+        });
+      }, timeoutMs);
+
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk.toString("utf8");
+    });
+
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString("utf8");
+    });
+
+    child.on("error", (error) => {
+      clearTimeout(timeout);
+      finish({
+        success: false,
+        reason: "navigation-helper-error",
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+      });
+    });
+
+    child.on("close", (code) => {
+      clearTimeout(timeout);
+      finish({
+        success:
+          Number(code) === 0,
+        stdout:
+          stdout.trim(),
+        error:
+          stderr.trim(),
+      });
+    });
+  });
+}
+
+async function executeMangaNavigationAction(
+  targetWindow,
+  inputAction
+) {
+  const action =
+    normalizeMangaNavigationAction(
+      inputAction
+    );
+
+  if (action.type === "MANUAL") {
+    return {
+      success: true,
+      manual: true,
+      action,
+    };
+  }
+
+  if (action.type === "KEY") {
+    const virtualKey =
+      MANGA_NAVIGATION_KEY_CODES[
+        action.key
+      ];
+
+    if (!virtualKey) {
+      return {
+        success: false,
+        reason: "unsupported-key",
+      };
+    }
+
+    const result =
+      await runMangaNavigationPowerShell({
+        targetWindow,
+        body: `
+[AiTranslatorMangaNav]::keybd_event([byte]${virtualKey}, 0, 0, [UIntPtr]::Zero)
+Start-Sleep -Milliseconds 35
+[AiTranslatorMangaNav]::keybd_event([byte]${virtualKey}, 0, 2, [UIntPtr]::Zero)
+Write-Output "OK"
+`,
+      });
+
+    return {
+      ...result,
+      action,
+    };
+  }
+
+  if (action.type === "CLICK") {
+    if (!action.clickConfigured) {
+      return {
+        success: false,
+        reason: "click-position-not-configured",
+      };
+    }
+
+    const clickX =
+      Number(action.clickX).toFixed(6);
+    const clickY =
+      Number(action.clickY).toFixed(6);
+
+    const result =
+      await runMangaNavigationPowerShell({
+        targetWindow,
+        body: `
+$rect = New-Object AiTranslatorMangaNav+RECT
+if (-not [AiTranslatorMangaNav]::GetWindowRect($hwnd, [ref]$rect)) { throw "GetWindowRect failed" }
+$width = [Math]::Max(1, $rect.Right - $rect.Left)
+$height = [Math]::Max(1, $rect.Bottom - $rect.Top)
+$x = $rect.Left + [int][Math]::Round($width * ${clickX})
+$y = $rect.Top + [int][Math]::Round($height * ${clickY})
+[void][AiTranslatorMangaNav]::SetCursorPos($x, $y)
+Start-Sleep -Milliseconds 55
+[AiTranslatorMangaNav]::mouse_event(0x0002, 0, 0, 0, [UIntPtr]::Zero)
+Start-Sleep -Milliseconds 35
+[AiTranslatorMangaNav]::mouse_event(0x0004, 0, 0, 0, [UIntPtr]::Zero)
+Write-Output "OK"
+`,
+      });
+
+    return {
+      ...result,
+      action,
+    };
+  }
+
+  const wheelDelta =
+    (action.scrollDirection === "UP" ? 1 : -1) *
+    Math.max(1, Number(action.scrollSteps || 1)) *
+    120;
+
+  const result =
+    await runMangaNavigationPowerShell({
+      targetWindow,
+      body: `
+$rect = New-Object AiTranslatorMangaNav+RECT
+if (-not [AiTranslatorMangaNav]::GetWindowRect($hwnd, [ref]$rect)) { throw "GetWindowRect failed" }
+$x = $rect.Left + [int][Math]::Round(($rect.Right - $rect.Left) * 0.5)
+$y = $rect.Top + [int][Math]::Round(($rect.Bottom - $rect.Top) * 0.5)
+[void][AiTranslatorMangaNav]::SetCursorPos($x, $y)
+Start-Sleep -Milliseconds 45
+[AiTranslatorMangaNav]::mouse_event(0x0800, 0, 0, ${wheelDelta}, [UIntPtr]::Zero)
+Write-Output "OK"
+`,
+    });
+
+  return {
+    ...result,
+    action,
+  };
+}
+
+async function captureMangaNavigationClickPoint() {
+  if (!mangaPanelSession) {
+    throw new Error(
+      "Chưa có Manga Session để chọn vị trí nút Next."
+    );
+  }
+
+  const sourceWindow =
+    resolveMangaNavigationTargetWindow();
+
+  if (!sourceWindow) {
+    throw new Error(
+      "Không tìm thấy cửa sổ truyện."
+    );
+  }
+
+  const settingsWindow =
+    mangaNavigationSettingsWindow;
+
+  stopOverlayLifecycle();
+  hideSelectionTranslation();
+  hideFullScreenTranslationOverlay();
+  closeOverlay();
+
+  if (
+    settingsWindow &&
+    !settingsWindow.isDestroyed()
+  ) {
+    settingsWindow.hide();
+  }
+
+  await delay(170);
+
+  const result =
+    await runMangaNavigationPowerShell({
+      targetWindow:
+        sourceWindow,
+      timeoutMs: 12500,
+      body: `
+$rect = New-Object AiTranslatorMangaNav+RECT
+if (-not [AiTranslatorMangaNav]::GetWindowRect($hwnd, [ref]$rect)) { throw "GetWindowRect failed" }
+while (([AiTranslatorMangaNav]::GetAsyncKeyState(0x01) -band 0x8000) -ne 0) { Start-Sleep -Milliseconds 20 }
+Start-Sleep -Milliseconds 120
+$started = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+while ($true) {
+    if (([AiTranslatorMangaNav]::GetAsyncKeyState(0x1B) -band 0x8000) -ne 0) {
+        Write-Output "CANCEL"
+        break
+    }
+    if (([AiTranslatorMangaNav]::GetAsyncKeyState(0x01) -band 0x8000) -ne 0) {
+        $point = New-Object AiTranslatorMangaNav+POINT
+        [void][AiTranslatorMangaNav]::GetCursorPos([ref]$point)
+        $width = [Math]::Max(1, $rect.Right - $rect.Left)
+        $height = [Math]::Max(1, $rect.Bottom - $rect.Top)
+        $rx = ($point.X - $rect.Left) / [double]$width
+        $ry = ($point.Y - $rect.Top) / [double]$height
+        if ($rx -lt 0 -or $rx -gt 1 -or $ry -lt 0 -or $ry -gt 1) {
+            Write-Output "OUTSIDE"
+        } else {
+            Write-Output ("POINT|{0:F6}|{1:F6}" -f $rx, $ry)
+        }
+        break
+    }
+    if (([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() - $started) -gt 10000) {
+        Write-Output "TIMEOUT"
+        break
+    }
+    Start-Sleep -Milliseconds 25
+}
+`,
+    });
+
+  if (
+    settingsWindow &&
+    !settingsWindow.isDestroyed()
+  ) {
+    settingsWindow.show();
+    settingsWindow.focus();
+  }
+
+  const output =
+    String(result?.stdout || "").trim();
+  const match =
+    output.match(
+      /POINT\|([0-9.]+)\|([0-9.]+)/
+    );
+
+  if (!result?.success || !match) {
+    const restored =
+      restoreFullScreenTranslationOverlay();
+
+    if (
+      restored?.success &&
+      !isFullScreenOverlayPinned()
+    ) {
+      startOverlayLifecycle(
+        sourceWindow
+      );
+    }
+
+    if (output.includes("CANCEL")) {
+      return {
+        success: false,
+        cancelled: true,
+      };
+    }
+
+    throw new Error(
+      output.includes("OUTSIDE")
+        ? "Hãy click bên trong cửa sổ website đang đọc truyện."
+        : "Không ghi nhận được vị trí nút Next. Hãy thử lại."
+    );
+  }
+
+  return {
+    success: true,
+    clickX:
+      Math.min(
+        0.98,
+        Math.max(
+          0.02,
+          Number(match[1])
+        )
+      ),
+    clickY:
+      Math.min(
+        0.98,
+        Math.max(
+          0.02,
+          Number(match[2])
+        )
+      ),
+    note:
+      "Vị trí đã ghi nhận. Nếu click vừa rồi làm website sang trang, sau khi lưu hãy dùng Ctrl+Shift+Y để dịch trang hiện tại.",
+  };
+}
+
+function openMangaNavigationSettingsWindow() {
+  if (
+    mangaNavigationSettingsWindow &&
+    !mangaNavigationSettingsWindow.isDestroyed()
+  ) {
+    mangaNavigationSettingsWindow.show();
+    mangaNavigationSettingsWindow.focus();
+    return {
+      success: true,
+      visible: true,
+    };
+  }
+
+  mangaNavigationSettingsWindow =
+    new BrowserWindow({
+      width: 560,
+      height: 720,
+      minWidth: 500,
+      minHeight: 620,
+      show: false,
+      title:
+        "AI Translator · Điều khiển trang manga",
+      backgroundColor:
+        "#0b1020",
+      autoHideMenuBar: true,
+      resizable: true,
+      webPreferences: {
+        preload:
+          path.join(
+            __dirname,
+            "preload.cjs"
+          ),
+        contextIsolation: true,
+        nodeIntegration: false,
+      },
+    });
+
+  mangaNavigationSettingsWindow.setAlwaysOnTop(
+    true,
+    "screen-saver"
+  );
+
+  mangaNavigationSettingsWindow.loadFile(
+    path.join(
+      __dirname,
+      "mangaNavigationSettings.html"
+    )
+  );
+
+  mangaNavigationSettingsWindow.once(
+    "ready-to-show",
+    () => {
+      if (
+        mangaNavigationSettingsWindow &&
+        !mangaNavigationSettingsWindow.isDestroyed()
+      ) {
+        mangaNavigationSettingsWindow.show();
+        mangaNavigationSettingsWindow.focus();
+      }
+    }
+  );
+
+  mangaNavigationSettingsWindow.on(
+    "closed",
+    () => {
+      mangaNavigationSettingsWindow = null;
+    }
+  );
+
+  return {
+    success: true,
+    visible: true,
+  };
+}
+
+function closeMangaNavigationSettingsWindow() {
+  if (
+    mangaNavigationSettingsWindow &&
+    !mangaNavigationSettingsWindow.isDestroyed()
+  ) {
+    mangaNavigationSettingsWindow.close();
+  }
+
+  mangaNavigationSettingsWindow = null;
+
+  return {
+    success: true,
+    visible: false,
+  };
+}
+
+async function captureMangaPageFingerprint(
+  selection
+) {
+  const image =
+    await screenshot({
+      format: "png",
+    });
+
+  return buildMangaSelectionFingerprint(
+    image,
+    selection
+  );
+}
+
+async function waitForMangaPageVisualChange({
+  selection,
+  baseline,
+  timeoutMs = 2400,
+} = {}) {
+  if (!selection || !baseline) {
+    await delay(550);
+    return {
+      changed: false,
+      reason: "no-baseline",
+    };
+  }
+
+  const startedAt =
+    Date.now();
+
+  let candidate = null;
+  let stableHits = 0;
+  let lastDifference = 0;
+
+  while (
+    Date.now() - startedAt <
+    timeoutMs
+  ) {
+    await delay(170);
+
+    let current;
+
+    try {
+      current =
+        await captureMangaPageFingerprint(
+          selection
+        );
+    } catch {
+      continue;
+    }
+
+    const difference =
+      mangaFingerprintDifference(
+        baseline,
+        current
+      );
+
+    lastDifference =
+      difference;
+
+    if (difference < 0.075) {
+      candidate = null;
+      stableHits = 0;
+      continue;
+    }
+
+    if (!candidate) {
+      candidate = current;
+      stableHits = 0;
+      continue;
+    }
+
+    const stableDifference =
+      mangaFingerprintDifference(
+        candidate,
+        current
+      );
+
+    if (stableDifference <= 0.045) {
+      stableHits += 1;
+    } else {
+      candidate = current;
+      stableHits = 0;
+    }
+
+    if (stableHits >= 1) {
+      return {
+        changed: true,
+        difference:
+          Number(
+            difference.toFixed(4)
+          ),
+      };
+    }
+  }
+
+  return {
+    changed: false,
+    difference:
+      Number(
+        lastDifference.toFixed(4)
+      ),
+    reason: "visual-change-not-detected",
+  };
+}
+
+async function advanceMangaSourceAndTranslate() {
+  if (
+    selectorIsOpen ||
+    isProcessingSelection ||
+    isFullScreenProcessing ||
+    isMangaSessionProcessing
+  ) {
+    throw new Error(
+      "AI Translator đang xử lý một lần quét khác."
+    );
+  }
+
+  const session =
+    mangaPanelSession;
+
+  if (!session) {
+    throw new Error(
+      `Chưa có Manga Session. Hãy dùng ${shortcutDisplay(shortcutSettings.panel)} để chọn vùng trang đầu tiên.`
+    );
+  }
+
+  const profile =
+    resolveActiveMangaNavigationProfile();
+
+  if (!profile) {
+    return {
+      success: false,
+      needsConfiguration: true,
+      error:
+        "Website này chưa có cách chuyển trang. Hãy bấm ⚙ để cấu hình một lần.",
+      session:
+        getMangaPanelSessionState(),
+    };
+  }
+
+  const action =
+    normalizeMangaNavigationAction(
+      profile.action
+    );
+
+  /*
+   * MANUAL nghĩa là website không cho AI Translator tự điều khiển.
+   * Nút Next lúc này chỉ dịch trang hiện tại, đúng với Ctrl+Shift+Y.
+   */
+  if (action.type === "MANUAL") {
+    return runMangaSessionNextPage(
+      "overlay-manual-navigation"
+    );
+  }
+
+  const sourceWindow =
+    session.targetWindow ||
+    activeOverlayTargetWindow ||
+    pendingTargetWindow ||
+    null;
+
+  if (!sourceWindow) {
+    throw new Error(
+      "Không tìm thấy cửa sổ truyện để chuyển trang."
+    );
+  }
+
+  const selection = {
+    ...session.selection,
+  };
+
+  const restorePreviousOverlay = () => {
+    const restored =
+      restoreFullScreenTranslationOverlay();
+
+    if (
+      restored?.success &&
+      !isFullScreenOverlayPinned()
+    ) {
+      startOverlayLifecycle(
+        sourceWindow
+      );
+    }
+  };
+
+  stopOverlayLifecycle();
+  hideSelectionTranslation();
+  hideFullScreenTranslationOverlay();
+  closeOverlay();
+
+  await delay(120);
+
+  let baseline = null;
+
+  try {
+    baseline =
+      await captureMangaPageFingerprint(
+        selection
+      );
+  } catch (error) {
+    console.warn(
+      "MANGA PAGE TURN BASELINE ERROR:",
+      error
+    );
+  }
+
+  const navigationResult =
+    await executeMangaNavigationAction(
+      sourceWindow,
+      action
+    );
+
+  if (!navigationResult?.success) {
+    restorePreviousOverlay();
+
+    const focusRejected =
+      String(
+        navigationResult?.error || ""
+      ).includes(
+        "TARGET_BROWSER_NOT_FOCUSED"
+      );
+
+    return {
+      success: false,
+      needsConfiguration:
+        !focusRejected,
+      error: focusRejected
+        ? "Windows chưa chuyển focus sang cửa sổ truyện. Hãy click vào Brave/MangaDex một lần rồi bấm Next hoặc Ctrl+Shift+Y lại."
+        : "Không thể thực hiện cách chuyển trang đã lưu. Hãy mở ⚙ nếu bạn muốn cập nhật cấu hình cho website này.",
+      navigation:
+        getMangaNavigationPublicState(),
+      session:
+        getMangaPanelSessionState(),
+    };
+  }
+
+  const pageChange =
+    await waitForMangaPageVisualChange({
+      selection,
+      baseline,
+      timeoutMs:
+        action.changeTimeoutMs,
+    });
+
+  console.log(
+    "MANGA SITE NAVIGATION:",
+    {
+      profile:
+        profile.name,
+      action:
+        action.type,
+      pageChange,
+      target: {
+        processName:
+          sourceWindow.processName,
+        hwnd:
+          sourceWindow.hwnd,
+        processId:
+          sourceWindow.processId,
+      },
+    }
+  );
+
+  if (
+    baseline &&
+    !pageChange.changed
+  ) {
+    restorePreviousOverlay();
+
+    return {
+      success: false,
+      needsConfiguration: true,
+      error:
+        `Cấu hình “${profile.name}” chưa làm trang truyện thay đổi. Overlay được giữ nguyên; hãy thử lại hoặc bấm ⚙ nếu bạn muốn đổi phím, click hay cuộn.`,
+      navigation:
+        getMangaNavigationPublicState(),
+      session:
+        getMangaPanelSessionState(),
+    };
+  }
+
+  return runMangaSessionNextPage(
+    "overlay-site-navigation"
+  );
+}
+
 async function waitForExternalForegroundSnapshot(
   timeoutMs =
     1000
@@ -5928,7 +7028,7 @@ function normalizeTrackedTitle(
     .trim();
 }
 
-function sameTrackedWindow(
+function sameTrackedNativeWindow(
   target,
   current
 ) {
@@ -5939,16 +7039,23 @@ function sameTrackedWindow(
     return false;
   }
 
-  if (
-    String(target.hwnd) !==
-    String(current.hwnd)
-  ) {
-    return false;
-  }
+  return (
+    String(target.hwnd) ===
+      String(current.hwnd) &&
+    Number(target.processId) ===
+      Number(current.processId)
+  );
+}
 
+function sameTrackedWindow(
+  target,
+  current
+) {
   if (
-    Number(target.processId) !==
-    Number(current.processId)
+    !sameTrackedNativeWindow(
+      target,
+      current
+    )
   ) {
     return false;
   }
@@ -6046,6 +7153,23 @@ function startOverlayLifecycle(
   let hasSeenTarget =
     false;
 
+  /*
+   * Manga "trang tiếp theo" có thể làm title của tab đổi ngay sau khi
+   * shortcut được bấm (ví dụ Chapter 10 -> Chapter 11). Nếu khóa title
+   * từ snapshot trước OCR, lifecycle sẽ không bao giờ được arm và overlay
+   * sẽ còn trên màn hình khi user đổi tab.
+   *
+   * Vì vậy lần đầu source HWND + PID quay lại foreground sẽ được dùng làm
+   * baseline title mới. Sau khi đã arm, title đổi trong cùng HWND được xem
+   * là browser tab/page-context change và overlay sẽ tự ẩn.
+   */
+  let lifecycleTarget =
+    activeOverlayTargetWindow
+      ? {
+          ...activeOverlayTargetWindow,
+        }
+      : null;
+
   overlayLifecycleTimer =
     setInterval(
       () => {
@@ -6070,26 +7194,34 @@ function startOverlayLifecycle(
           return;
         }
 
-        if (
-          sameTrackedWindow(
-            activeOverlayTargetWindow,
-            current
-          )
-        ) {
-          hasSeenTarget = true;
-          return;
-        }
-
-        /*
-         * Selection overlay / focus transition có thể tạm thời
-         * là foreground. Chỉ bắt đầu auto-hide sau khi đã thấy
-         * target thật quay lại ít nhất một lần.
-         */
         if (!hasSeenTarget) {
+          if (
+            sameTrackedNativeWindow(
+              lifecycleTarget,
+              current
+            )
+          ) {
+            lifecycleTarget = {
+              ...current,
+            };
+
+            activeOverlayTargetWindow = {
+              ...current,
+            };
+
+            hasSeenTarget = true;
+            return;
+          }
+
+          /*
+           * Selection/loading/overlay focus transition có thể tạm thời
+           * làm app khác thành foreground. Cho source window thời gian
+           * quay lại trước khi bỏ lifecycle.
+           */
           if (
             Date.now() -
             startedAt >
-            3000
+            3500
           ) {
             stopOverlayLifecycle();
           }
@@ -6097,11 +7229,57 @@ function startOverlayLifecycle(
           return;
         }
 
+        if (
+          sameTrackedNativeWindow(
+            lifecycleTarget,
+            current
+          )
+        ) {
+          const baselineTitle =
+            normalizeTrackedTitle(
+              lifecycleTarget?.title
+            );
+
+          const currentTitle =
+            normalizeTrackedTitle(
+              current?.title
+            );
+
+          /*
+           * Một số browser trả title rỗng ở sample đầu tiên sau khi loading
+           * overlay đóng. Lấy title thật đầu tiên làm baseline thay vì để
+           * lifecycle mất khả năng phát hiện tab switch.
+           */
+          if (
+            !baselineTitle &&
+            currentTitle
+          ) {
+            lifecycleTarget = {
+              ...current,
+            };
+
+            activeOverlayTargetWindow = {
+              ...current,
+            };
+
+            return;
+          }
+
+          if (
+            sameTrackedWindow(
+              lifecycleTarget,
+              current
+            )
+          ) {
+            return;
+          }
+        }
+
         hideTranslationExperience(
           "foreground-window-or-browser-tab-changed"
         );
       },
-      300
+      250
     );
 }
 
@@ -10415,125 +11593,8 @@ async function runFullScreenTranslation(
   }
 }
 
-function rejectAllOcrRequests(error) {
-  for (const pending of pendingOcrRequests.values()) {
-    clearTimeout(pending.timeout);
-
-    pending.reject(error);
-  }
-
-  pendingOcrRequests.clear();
-}
-
-function handleOcrWorkerMessage(line) {
-  if (!line.startsWith(OCR_OUTPUT_MARKER)) {
-    /*
-     * Đây là log thường từ PaddleOCR.
-     */
-    console.log("OCR WORKER LOG:", line);
-
-    return;
-  }
-
-  const jsonText = line.slice(OCR_OUTPUT_MARKER.length);
-
-  let message;
-
-  try {
-    message = JSON.parse(jsonText);
-  } catch (error) {
-    console.error("OCR WORKER JSON ERROR:", error, jsonText);
-
-    return;
-  }
-
-  if (message.type === "ready") {
-    ocrWorkerReady = true;
-
-    console.log("OCR WORKER READY");
-
-    if (resolveOcrReady) {
-      resolveOcrReady();
-    }
-
-    resolveOcrReady = null;
-    rejectOcrReady = null;
-
-    return;
-  }
-
-  if (message.type !== "result") {
-    return;
-  }
-
-  const requestId = String(message.id);
-
-  const pending = pendingOcrRequests.get(requestId);
-
-  if (!pending) {
-    console.warn("OCR REQUEST NOT FOUND:", requestId);
-
-    return;
-  }
-
-  clearTimeout(pending.timeout);
-
-  pendingOcrRequests.delete(requestId);
-
-  if (!message.success) {
-    pending.reject(new Error(message.error || "OCR worker thất bại."));
-
-    return;
-  }
-
-  pending.resolve(message.result);
-}
-
 async function requestOcr(imagePath) {
-  /*
-   * Chờ PaddleOCR tải model hoàn tất.
-   */
-  await startOcrWorker();
-
-  if (!ocrWorker || ocrWorker.killed || !ocrWorkerReady) {
-    throw new Error("OCR worker không hoạt động.");
-  }
-
-  const requestId = String(nextOcrRequestId++);
-
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => {
-      pendingOcrRequests.delete(requestId);
-
-      reject(new Error("OCR xử lý quá thời gian."));
-    }, 60000);
-
-    pendingOcrRequests.set(requestId, {
-      resolve,
-      reject,
-      timeout,
-    });
-
-    const request = {
-      id: requestId,
-      action: "ocr",
-      imagePath,
-    };
-
-    const payload = JSON.stringify(request) + "\n";
-
-    ocrWorker.stdin.write(payload, "utf8", (error) => {
-      if (!error) {
-        return;
-      }
-
-      clearTimeout(timeout);
-
-      pendingOcrRequests.delete(requestId);
-
-      reject(error);
-    });
-  });
+  return getOcrWorkerManager().request(imagePath);
 }
 
 function normalizeTranslationText(text) {
@@ -10712,13 +11773,65 @@ ipcMain.handle(
 
 ipcMain.handle(
   "translation:panel-next",
-  async () => {
+  async (_event, options) => {
+    if (
+      options?.advanceSource
+    ) {
+      return advanceMangaSourceAndTranslate();
+    }
+
     return runMangaSessionNextPage(
       "renderer"
     );
   }
 );
 
+
+ipcMain.handle(
+  "translation:manga-navigation-open",
+  async () => {
+    return openMangaNavigationSettingsWindow();
+  }
+);
+
+ipcMain.handle(
+  "translation:manga-navigation-close",
+  async () => {
+    return closeMangaNavigationSettingsWindow();
+  }
+);
+
+ipcMain.handle(
+  "translation:manga-navigation-config",
+  async () => {
+    return getMangaNavigationConfigPayload();
+  }
+);
+
+ipcMain.handle(
+  "translation:manga-navigation-save",
+  async (_event, profile) => {
+    return saveMangaNavigationProfile(
+      profile
+    );
+  }
+);
+
+ipcMain.handle(
+  "translation:manga-navigation-delete",
+  async (_event, profileId) => {
+    return removeMangaNavigationProfile(
+      profileId
+    );
+  }
+);
+
+ipcMain.handle(
+  "translation:manga-navigation-capture-click",
+  async () => {
+    return captureMangaNavigationClickPoint();
+  }
+);
 
 ipcMain.handle(
   "translation:manga-continuous-toggle",
@@ -10872,12 +11985,13 @@ ipcMain.handle(
       toggleFullScreenOverlayEditing();
 
     /*
-     * Khi kéo bubble, foreground window sẽ là overlay của chính app.
-     * Tạm dừng auto-hide để overlay không tự biến mất giữa thao tác.
+     * Giữ lifecycle chạy cả trong Edit Mode. Foreground tracker đã bỏ qua
+     * các window thuộc chính Electron process, vì vậy drag/resize/edit text
+     * không làm overlay tự ẩn. Nếu user thực sự chuyển sang tab/app khác,
+     * overlay vẫn phải biến mất như chế độ bình thường.
      */
-    if (editing) {
-      stopOverlayLifecycle();
-    } else if (
+    if (
+      !editing &&
       !isFullScreenOverlayPinned()
     ) {
       startOverlayLifecycle(
@@ -12322,180 +13436,24 @@ ipcMain.handle("capture-screen", async () => {
 // Settings có thể re-register accelerator lúc runtime.
 
 function startOcrWorker() {
-  /*
-   * Worker đã sẵn sàng.
-   */
-  if (ocrWorker && !ocrWorker.killed && ocrWorkerReady) {
-    return Promise.resolve();
-  }
-
-  /*
-   * Worker đang khởi động.
-   * Trả lại Promise cũ để các request cùng chờ.
-   */
-  if (ocrWorker && !ocrWorker.killed && ocrWorkerReadyPromise) {
-    return ocrWorkerReadyPromise;
-  }
-
-  const ocrDirectory = getOcrDirectory();
-
-  const pythonPath = path.join(ocrDirectory, ".venv", "Scripts", "python.exe");
-
-  const workerPath = path.join(ocrDirectory, "worker.py");
-  ocrWorkerReady = false;
-
-  ocrWorkerReadyPromise = new Promise((resolve, reject) => {
-    resolveOcrWorkerReady = resolve;
-
-    rejectOcrWorkerReady = reject;
-  });
-
-  ocrWorker = spawn(pythonPath, ["-X", "utf8", workerPath], {
-    windowsHide: true,
-
-    stdio: ["pipe", "pipe", "pipe"],
-
-    env: {
-      ...process.env,
-
-      PYTHONUTF8: "1",
-
-      PYTHONIOENCODING: "utf-8",
-
-      PYTHONUNBUFFERED: "1",
-    },
-  });
-
-  console.log("OCR WORKER STARTING...");
-
-  const lineReader = readline.createInterface({
-    input: ocrWorker.stdout,
-    crlfDelay: Infinity,
-  });
-
-  lineReader.on("line", (line) => {
-    /*
-     * Log thường của PaddleOCR.
-     */
-    if (!line.startsWith(OCR_OUTPUT_MARKER)) {
-      if (line.trim()) {
-        console.log("OCR WORKER LOG:", line);
-      }
-
-      return;
-    }
-
-    const jsonText = line.slice(OCR_OUTPUT_MARKER.length);
-
-    let message;
-
-    try {
-      message = JSON.parse(jsonText);
-    } catch (error) {
-      console.error("OCR WORKER JSON ERROR:", error, jsonText);
-
-      return;
-    }
-
-    /*
-     * Worker tải model hoàn tất.
-     */
-    if (message.type === "ready") {
-      ocrWorkerReady = true;
-
-      console.log("OCR WORKER READY");
-
-      if (resolveOcrWorkerReady) {
-        resolveOcrWorkerReady();
-      }
-
-      resolveOcrWorkerReady = null;
-      rejectOcrWorkerReady = null;
-
-      return;
-    }
-
-    /*
-     * Nhận kết quả OCR.
-     */
-    if (message.type === "result") {
-      const requestId = String(message.id);
-
-      const pending = pendingOcrRequests.get(requestId);
-
-      if (!pending) {
-        console.warn("OCR REQUEST NOT FOUND:", requestId);
-
-        return;
-      }
-
-      clearTimeout(pending.timeout);
-
-      pendingOcrRequests.delete(requestId);
-
-      if (!message.success) {
-        pending.reject(new Error(message.error || "OCR worker thất bại."));
-
-        return;
-      }
-
-      pending.resolve(message.result);
-    }
-  });
-
-  ocrWorker.stderr.on("data", (data) => {
-    const output = data.toString("utf8");
-
-    if (output.trim()) {
-      console.log("OCR WORKER STDERR:", output);
-    }
-  });
-
-  ocrWorker.on("error", (error) => {
-    console.error("OCR WORKER ERROR:", error);
-
-    ocrWorkerReady = false;
-
-    if (rejectOcrWorkerReady) {
-      rejectOcrWorkerReady(error);
-    }
-
-    for (const pending of pendingOcrRequests.values()) {
-      clearTimeout(pending.timeout);
-
-      pending.reject(error);
-    }
-
-    pendingOcrRequests.clear();
-  });
-
-  ocrWorker.on("close", (code) => {
-    console.log("OCR WORKER CLOSED:", code);
-
-    const error = new Error(`OCR worker đã dừng, mã ${code}.`);
-
-    if (!ocrWorkerReady && rejectOcrWorkerReady) {
-      rejectOcrWorkerReady(error);
-    }
-
-    for (const pending of pendingOcrRequests.values()) {
-      clearTimeout(pending.timeout);
-
-      pending.reject(error);
-    }
-
-    pendingOcrRequests.clear();
-
-    ocrWorker = null;
-    ocrWorkerReady = false;
-    ocrWorkerReadyPromise = null;
-
-    resolveOcrWorkerReady = null;
-    rejectOcrWorkerReady = null;
-  });
-
-  return ocrWorkerReadyPromise;
+  return getOcrWorkerManager().start();
 }
+
+ipcMain.handle(
+  "ocr-worker:get-health",
+  async () => {
+    return getOcrWorkerManager().getHealth();
+  }
+);
+
+ipcMain.handle(
+  "ocr-worker:restart",
+  async () => {
+    const manager = getOcrWorkerManager();
+    await manager.restart("settings");
+    return manager.getHealth();
+  }
+);
 
 // ======================================================
 // ELECTRON LIFECYCLE
@@ -12553,19 +13511,9 @@ app.on("will-quit", () => {
   stopOverlayLifecycle();
   stopForegroundWindowTracker();
 
-  if (ocrWorker && !ocrWorker.killed) {
-    try {
-      ocrWorker.stdin.write(
-        JSON.stringify({
-          action: "shutdown",
-        }) + "\n",
-      );
-    } catch {
-      // Worker đã đóng.
-    }
-
-    ocrWorker.kill();
-    ocrWorker = null;
+  if (ocrWorkerManager) {
+    ocrWorkerManager.dispose();
+    ocrWorkerManager = null;
   }
 
   if (tray) {

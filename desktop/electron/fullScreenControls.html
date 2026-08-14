@@ -92,7 +92,6 @@
     }
 
     #debug[hidden],
-    #next[hidden],
     #auto[hidden],
     #pause[hidden],
     #context[hidden] {
@@ -128,12 +127,6 @@
       border-color: #4338ca;
     }
 
-    #next:hover {
-      color: #ffffff;
-      background: #0f766e;
-      border-color: #0f766e;
-    }
-
     #reset:hover {
       color: #111827;
       background: #f3f4f6;
@@ -152,14 +145,6 @@
     <div id="info">
       Khung dịch
     </div>
-
-    <button
-      id="next"
-      title="Dịch trang manga tiếp theo bằng vùng quét đã lưu"
-      hidden
-    >
-      ▶
-    </button>
 
     <button
       id="auto"
@@ -226,12 +211,6 @@
       document.getElementById(
         "info"
       );
-
-    const next =
-      document.getElementById(
-        "next"
-      );
-
 
     const auto =
       document.getElementById(
@@ -340,9 +319,6 @@
           continuous?.paused
         );
 
-      next.hidden =
-        !sessionActive;
-
       auto.hidden =
         !sessionActive;
 
@@ -401,11 +377,6 @@
         sessionActive
           ? `Context Manga · ${Number(session?.contextItems || 0)}/10 · Chapter ${Number(session?.chapterNumber || 1)}`
           : "Xem Manga Session Context";
-
-      next.title =
-        sessionActive
-          ? `Dịch trang ${Number(session?.nextPageNumber || 1)} · ${session?.nextShortcut || "Ctrl+Shift+Y"}`
-          : "Dịch trang manga tiếp theo";
 
       pin.classList.toggle(
         "active",
@@ -481,22 +452,6 @@
       ?.onFullScreenOverlayState?.(
         render
       );
-
-    next.addEventListener(
-      "click",
-      async () => {
-        next.disabled = true;
-
-        try {
-          await window
-            .electronAPI
-            .translatePanelNextPage();
-        } finally {
-          next.disabled = false;
-        }
-      }
-    );
-
 
     auto.addEventListener(
       "click",
