@@ -14,7 +14,11 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
+import java.util.Locale;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 @Service
 public class SocialOAuthClient {
@@ -31,19 +35,22 @@ public class SocialOAuthClient {
     private final String googleClientSecret;
     private final String facebookClientId;
     private final String facebookClientSecret;
+    private final String facebookGraphApiVersion;
 
     public SocialOAuthClient(
             @Value("${app.auth.social.public-base-url:http://localhost:8080}") String publicBaseUrl,
             @Value("${app.auth.social.google.client-id:}") String googleClientId,
             @Value("${app.auth.social.google.client-secret:}") String googleClientSecret,
             @Value("${app.auth.social.facebook.client-id:}") String facebookClientId,
-            @Value("${app.auth.social.facebook.client-secret:}") String facebookClientSecret
+            @Value("${app.auth.social.facebook.client-secret:}") String facebookClientSecret,
+            @Value("${app.auth.social.facebook.graph-api-version:}") String facebookGraphApiVersion
     ) {
         this.publicBaseUrl = trimTrailingSlash(publicBaseUrl);
         this.googleClientId = clean(googleClientId);
         this.googleClientSecret = clean(googleClientSecret);
         this.facebookClientId = clean(facebookClientId);
         this.facebookClientSecret = clean(facebookClientSecret);
+        this.facebookGraphApiVersion = normalizeFacebookGraphApiVersion(facebookGraphApiVersion);
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .followRedirects(HttpClient.Redirect.NORMAL)
@@ -101,7 +108,7 @@ public class SocialOAuthClient {
                     "state", state,
                     "prompt", "select_account"
             );
-            case FACEBOOK -> "https://www.facebook.com/dialog/oauth?" + query(
+            case FACEBOOK -> facebookAuthorizationBaseUrl() + "/dialog/oauth?" + query(
                     "client_id", facebookClientId,
                     "redirect_uri", callbackUrl(provider),
                     "response_type", "code",
@@ -185,7 +192,7 @@ public class SocialOAuthClient {
         );
 
         JsonNode token = postFormJson(
-                "https://graph.facebook.com/oauth/access_token",
+                facebookGraphBaseUrl() + "/oauth/access_token",
                 body
         );
 
@@ -194,8 +201,9 @@ public class SocialOAuthClient {
             throw new ForbiddenException("Facebook không trả về access token hợp lệ.");
         }
 
-        String userInfoUrl = "https://graph.facebook.com/me?" + query(
-                "fields", "id,name,email,picture.type(large)"
+        String userInfoUrl = facebookGraphBaseUrl() + "/me?" + query(
+                "fields", "id,name,email,picture.type(large)",
+                "appsecret_proof", facebookAppSecretProof(accessToken)
         );
 
         JsonNode userInfo = getBearerJson(userInfoUrl, accessToken);
@@ -223,6 +231,54 @@ public class SocialOAuthClient {
                 text(userInfo, "name"),
                 picture
         );
+    }
+
+
+    private String facebookGraphBaseUrl() {
+        if (facebookGraphApiVersion.isBlank()) {
+            return "https://graph.facebook.com";
+        }
+        return "https://graph.facebook.com/" + facebookGraphApiVersion;
+    }
+
+    private String facebookAuthorizationBaseUrl() {
+        if (facebookGraphApiVersion.isBlank()) {
+            return "https://www.facebook.com";
+        }
+        return "https://www.facebook.com/" + facebookGraphApiVersion;
+    }
+
+    /**
+     * Meta supports appsecret_proof for Graph calls made from a trusted server.
+     * The proof is an HMAC-SHA256 of the short-lived user access token using
+     * the app secret. It is sent only to Meta and is never persisted.
+     */
+    private String facebookAppSecretProof(String accessToken) {
+        try {
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(
+                    facebookClientSecret.getBytes(StandardCharsets.UTF_8),
+                    "HmacSHA256"
+            ));
+            return HexFormat.of().formatHex(
+                    mac.doFinal(accessToken.getBytes(StandardCharsets.UTF_8))
+            );
+        } catch (Exception ex) {
+            throw new IllegalStateException("Không thể bảo vệ Facebook Graph request.", ex);
+        }
+    }
+
+    private static String normalizeFacebookGraphApiVersion(String value) {
+        String version = clean(value).toLowerCase(Locale.ROOT);
+        if (version.isBlank()) {
+            return "";
+        }
+        if (!version.matches("v\\d+\\.\\d+")) {
+            throw new IllegalArgumentException(
+                    "FACEBOOK_GRAPH_API_VERSION phải có dạng vNN.N, ví dụ v23.0."
+            );
+        }
+        return version;
     }
 
     private JsonNode postFormJson(String url, String formBody) throws Exception {

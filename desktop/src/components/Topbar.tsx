@@ -4,6 +4,7 @@ import type {
     PageId
 } from "../app/types";
 
+import { useI18n } from "../i18n";
 import { Icon } from "./Icon";
 
 interface TopbarProps {
@@ -13,49 +14,49 @@ interface TopbarProps {
     onOpenSettings: () => void;
 }
 
-const pageTitles: Record<
+const pageTitleKeys: Record<
     PageId,
     { title: string; subtitle: string }
 > = {
     translate: {
-        title: "Dịch màn hình",
-        subtitle: "OCR local, AI translation qua Java backend"
+        title: "topbar.translate.title",
+        subtitle: "topbar.translate.subtitle"
     },
     novel: {
-        title: "Novel Reader TXT",
-        subtitle: "Đọc song ngữ + Context + Translation Memory"
+        title: "topbar.novel.title",
+        subtitle: "topbar.novel.subtitle"
     },
     study: {
-        title: "Chế độ học",
-        subtitle: "Dịch và phân tích tiếng Nhật theo ngữ cảnh"
+        title: "topbar.study.title",
+        subtitle: "topbar.study.subtitle"
     },
     vocabulary: {
-        title: "Từ vựng của tôi",
-        subtitle: "Kho từ cá nhân được xây từ nội dung bạn đọc"
+        title: "topbar.vocabulary.title",
+        subtitle: "topbar.vocabulary.subtitle"
     },
     grammar: {
-        title: "Cấu trúc / Ngữ pháp",
-        subtitle: "Kho pattern cá nhân, số lần gặp và tiến độ học"
+        title: "topbar.grammar.title",
+        subtitle: "topbar.grammar.subtitle"
     },
     review: {
-        title: "Ôn tập SRS",
-        subtitle: "Vocabulary + Grammar đến hạn trong một hàng đợi"
+        title: "topbar.review.title",
+        subtitle: "topbar.review.subtitle"
     },
     profiles: {
-        title: "Translation Profiles",
-        subtitle: "Phong cách, prompt, nhân vật và thuật ngữ"
+        title: "topbar.profiles.title",
+        subtitle: "topbar.profiles.subtitle"
     },
     memory: {
-        title: "Bộ nhớ dịch",
-        subtitle: "Xem và quản lý các bản sửa Translation Memory"
+        title: "topbar.memory.title",
+        subtitle: "topbar.memory.subtitle"
     },
     history: {
-        title: "Lịch sử",
-        subtitle: "Các phiên dịch và học gần đây"
+        title: "topbar.history.title",
+        subtitle: "topbar.history.subtitle"
     },
     settings: {
-        title: "Cài đặt",
-        subtitle: "Tài khoản, thiết bị và kết nối backend"
+        title: "topbar.settings.title",
+        subtitle: "topbar.settings.subtitle"
     }
 };
 
@@ -65,13 +66,14 @@ export function Topbar({
     auth,
     onOpenSettings
 }: TopbarProps) {
-    const current = pageTitles[activePage];
+    const { t } = useI18n();
+    const current = pageTitleKeys[activePage];
 
     return (
         <header className="topbar">
             <div>
-                <h1>{current.title}</h1>
-                <p>{current.subtitle}</p>
+                <h1>{t(current.title)}</h1>
+                <p>{t(current.subtitle)}</p>
             </div>
 
             <div className="topbar-actions">
@@ -85,31 +87,46 @@ export function Topbar({
                     <span className="status-dot" />
                     <Icon name="server" size={16} />
                     {backend.connected
-                        ? "Backend online"
-                        : "Backend offline"}
+                        ? t("topbar.backendOnline")
+                        : t("topbar.backendOffline")}
                 </div>
 
                 <button
+                    type="button"
                     className="account-button"
                     onClick={onOpenSettings}
+                    aria-label={
+                        auth.authenticated
+                            ? auth.user?.email || t("topbar.signedIn")
+                            : t("topbar.openAccount")
+                    }
+                    title={
+                        auth.authenticated
+                            ? auth.user?.email || t("topbar.signedIn")
+                            : t("topbar.openAccount")
+                    }
                 >
                     <span className="account-avatar">
-                        <Icon name="user" size={17} />
+                        {auth.authenticated && auth.user?.email
+                            ? auth.user.email.slice(0, 1).toUpperCase()
+                            : <Icon name="user" size={17} />}
                     </span>
 
                     <span className="account-copy">
                         <strong>
                             {auth.authenticated
                                 ? auth.user?.email
-                                : "Chưa đăng nhập"}
+                                : t("topbar.notSignedIn")}
                         </strong>
 
                         <small>
                             {auth.authenticated
-                                ? auth.user?.role
-                                : "Mở tài khoản"}
+                                ? t("topbar.signedIn")
+                                : t("topbar.openAccount")}
                         </small>
                     </span>
+
+                    <span className="account-chevron" aria-hidden="true">›</span>
                 </button>
             </div>
         </header>

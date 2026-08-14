@@ -644,7 +644,7 @@ export function ReviewPage({
             <section className="page-intro-row review-intro">
                 <div>
                     <span className="eyebrow violet">
-                        REVIEW / SRS
+                        REVIEW
                     </span>
 
                     <h2>
@@ -652,8 +652,7 @@ export function ReviewPage({
                     </h2>
 
                     <p>
-                        SRS dùng cho card đến hạn.
-                        Khi muốn học thêm, dùng Ôn tự do hoặc Ôn lại phiên vừa rồi.
+                        Ôn các thẻ đến hạn hoặc luyện thêm theo nhu cầu.
                     </p>
                 </div>
 
@@ -700,17 +699,14 @@ export function ReviewPage({
 
                         <span>
                             {practiceSource === "SESSION"
-                                ? "Đang làm lại các card của phiên SRS vừa rồi."
-                                : "Đang luyện các item trong thư viện, ưu tiên item yếu."}
+                                ? "Đang làm lại các thẻ của phiên ôn vừa rồi."
+                                : "Đang luyện các mục trong thư viện, ưu tiên mục cần ôn thêm."}
                         </span>
                     </div>
 
                     <div>
                         <span>
-                            Không đổi dueAt
-                        </span>
-                        <span>
-                            Không tăng mastery
+                            Không ảnh hưởng lịch ôn
                         </span>
                         <span>
                             Sai → gặp lại cuối phiên
@@ -725,7 +721,7 @@ export function ReviewPage({
                     <strong>
                         {stats.dueNow}
                     </strong>
-                    <small>cần ôn theo SRS</small>
+                    <small>cần ôn</small>
                 </div>
 
                 <div className="review-stat-card">
@@ -744,7 +740,7 @@ export function ReviewPage({
                         {stats.wrongLast24h}
                     </strong>
                     <small>
-                        chỉ tính SRS thật
+                        trong phiên ôn đến hạn
                     </small>
                 </div>
 
@@ -777,8 +773,8 @@ export function ReviewPage({
 
                     <p>
                         {mode === "PRACTICE"
-                            ? "Bạn có thể làm lại bộ này hoặc quay về lịch SRS."
-                            : "Card đã học sẽ quay lại khi đến dueAt. Nếu muốn ôn ngay, dùng chế độ ôn lại."}
+                            ? "Bạn có thể làm lại bộ này hoặc quay về lịch ôn."
+                            : "Thẻ đã học sẽ quay lại khi đến hạn. Nếu muốn luyện thêm, dùng Ôn tự do."}
                     </p>
 
                     <div className="review-complete-actions">
@@ -999,11 +995,11 @@ export function ReviewPage({
                                     {mode === "PRACTICE" ? (
                                         <>
                                             <span>
-                                                Practice-only
+                                                Luyện thêm
                                             </span>
 
                                             <span>
-                                                Không thay lịch SRS / mastery
+                                                Không ảnh hưởng lịch ôn
                                             </span>
 
                                             {!feedback.correct && (
@@ -1064,28 +1060,12 @@ export function ReviewPage({
 
                         <span>
                             {mode === "PRACTICE"
-                                ? "Ôn lại không làm thay đổi lịch SRS"
-                                : "Mức thuộc được tính từ lịch sử đúng/sai"}
+                                ? "Không ảnh hưởng lịch ôn"
+                                : "Kết quả sẽ cập nhật tiến độ và lịch ôn."}
                         </span>
                     </div>
                 </section>
             )}
-
-            <section className="review-method-card">
-                <strong>
-                    Hai kiểu ôn khác nhau
-                </strong>
-
-                <span>
-                    <b>Đến hạn:</b>
-                    {" "}đây là SRS thật, đúng/sai sẽ cập nhật mastery và dueAt.
-                </span>
-
-                <span>
-                    <b>Ôn tự do / Làm lại:</b>
-                    {" "}chỉ luyện trí nhớ, không tác động lịch. Sai sẽ được đưa về cuối phiên để gặp lại.
-                </span>
-            </section>
         </div>
     );
 }

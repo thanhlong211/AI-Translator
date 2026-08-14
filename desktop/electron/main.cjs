@@ -113,6 +113,15 @@ const BACKEND_LOGIN_URL =
 const BACKEND_REGISTER_URL =
   `${BACKEND_AUTH_BASE_URL}/register`;
 
+const BACKEND_PASSWORD_FORGOT_URL =
+  `${BACKEND_AUTH_BASE_URL}/password/forgot`;
+
+const BACKEND_PASSWORD_RESET_URL =
+  `${BACKEND_AUTH_BASE_URL}/password/reset`;
+
+const BACKEND_PASSWORD_CHANGE_URL =
+  `${BACKEND_AUTH_BASE_URL}/password/change`;
+
 const BACKEND_SOCIAL_AUTH_URL =
   `${BACKEND_AUTH_BASE_URL}/social`;
 
@@ -2840,6 +2849,122 @@ async function registerDesktop(
   return getDesktopAuthStatus();
 }
 
+
+async function requestPasswordResetDesktop(
+  email
+) {
+  return callPublicAuthApi(
+    BACKEND_PASSWORD_FORGOT_URL,
+    {
+      email:
+        String(email || "")
+          .trim(),
+    }
+  );
+}
+
+async function resetPasswordDesktop(
+  token,
+  newPassword
+) {
+  return callPublicAuthApi(
+    BACKEND_PASSWORD_RESET_URL,
+    {
+      token:
+        String(token || "")
+          .trim(),
+      newPassword:
+        String(newPassword || ""),
+    }
+  );
+}
+
+async function changePasswordDesktop(
+  currentPassword,
+  newPassword
+) {
+  await ensureAuthenticated();
+
+  const email =
+    String(
+      currentUser?.email || ""
+    ).trim();
+
+  const response =
+    await authorizedBackendFetch(
+      BACKEND_PASSWORD_CHANGE_URL,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type":
+            "application/json; charset=utf-8",
+          Accept:
+            "application/json",
+        },
+        body: JSON.stringify({
+          currentPassword:
+            String(
+              currentPassword || ""
+            ),
+          newPassword:
+            String(
+              newPassword || ""
+            ),
+        }),
+      }
+    );
+
+  const payload =
+    await parseBackendJson(
+      response
+    );
+
+  if (!response.ok) {
+    const error = new Error(
+      payload?.error ||
+      `Backend lỗi HTTP ${response.status}.`
+    );
+    error.statusCode =
+      response.status;
+    throw error;
+  }
+
+  /*
+   * Backend đã revoke toàn bộ refresh sessions.
+   * Desktop đăng nhập lại ngay bằng mật khẩu mới để
+   * giữ đúng một session mới trên thiết bị hiện tại.
+   */
+  clearAccessSession();
+  await clearStoredRefreshToken();
+  sendAuthChanged();
+
+  if (email) {
+    try {
+      await loginDesktop(
+        email,
+        newPassword
+      );
+    } catch (error) {
+      console.error(
+        "PASSWORD REAUTH ERROR:",
+        error
+      );
+      return {
+        ...payload,
+        reauthenticated: false,
+      };
+    }
+  }
+
+  return {
+    ...payload,
+    reauthenticated:
+      Boolean(
+        accessToken &&
+        currentUser
+      ),
+  };
+}
 
 async function getSocialProvidersDesktop() {
   let response;
@@ -6732,7 +6857,8 @@ async function translateText(
   profile,
   context,
   sourceLanguage,
-  targetLanguage
+  targetLanguage,
+  purpose = "QUICK_TRANSLATE"
 ) {
   const text =
     String(originalText || "")
@@ -6782,6 +6908,14 @@ async function translateText(
                 normalizeTranslationTargetLanguage(
                   targetLanguage
                 ),
+
+              purpose:
+                String(
+                  purpose ||
+                  "QUICK_TRANSLATE"
+                )
+                  .trim()
+                  .toUpperCase(),
 
               context:
                 Array.isArray(context)
@@ -7820,7 +7954,9 @@ async function translateWithCache(
       profile,
       context,
       sourceLanguage,
-      targetLanguage
+      targetLanguage,
+      options?.purpose ||
+        "QUICK_TRANSLATE"
     )
     .then(
       async (result) => {
@@ -11199,6 +11335,7 @@ ipcMain.on("selection-complete", async (_event, selection) => {
           {
             sourceLanguage: "JA",
             targetLanguage: "VI",
+            purpose: "STUDY_FAST",
           }
         );
       } catch (fastError) {
@@ -11647,6 +11784,35 @@ ipcMain.handle(
     return registerDesktop(
       credentials?.email,
       credentials?.password
+    );
+  }
+);
+
+ipcMain.handle(
+  "auth:forgot-password",
+  async (_event, payload) => {
+    return requestPasswordResetDesktop(
+      payload?.email
+    );
+  }
+);
+
+ipcMain.handle(
+  "auth:reset-password",
+  async (_event, payload) => {
+    return resetPasswordDesktop(
+      payload?.token,
+      payload?.newPassword
+    );
+  }
+);
+
+ipcMain.handle(
+  "auth:change-password",
+  async (_event, payload) => {
+    return changePasswordDesktop(
+      payload?.currentPassword,
+      payload?.newPassword
     );
   }
 );

@@ -4,6 +4,7 @@ import com.dangt.aitranslator.backend.auth.AuthResponse;
 import com.dangt.aitranslator.backend.auth.AuthService;
 import com.dangt.aitranslator.backend.common.ConflictException;
 import com.dangt.aitranslator.backend.common.ForbiddenException;
+import com.dangt.aitranslator.backend.common.EmailNormalizer;
 import com.dangt.aitranslator.backend.common.UnauthorizedException;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import com.dangt.aitranslator.backend.user.UserRepository;
@@ -24,7 +25,6 @@ import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -375,7 +375,7 @@ public class SocialAuthService {
             return existingIdentityUserId;
         }
 
-        String email = normalizeEmail(profile.email());
+        String email = EmailNormalizer.normalize(profile.email());
         if (email.isBlank()) {
             throw new ConflictException(
                     provider.displayName() + " không cung cấp email. Hãy dùng email/password hoặc liên kết provider từ tài khoản đã đăng nhập."
@@ -451,7 +451,7 @@ public class SocialAuthService {
         );
 
         Instant now = Instant.now();
-        String email = normalizeEmail(profile.email());
+        String email = EmailNormalizer.normalize(profile.email());
 
         if (!existing.isEmpty()) {
             String oldSubject = String.valueOf(existing.get(0).get("provider_subject"));
@@ -515,7 +515,7 @@ public class SocialAuthService {
                 SET email_at_link = ?, display_name = ?, avatar_url = ?, last_login_at = ?
                 WHERE user_id = ? AND provider = ? AND provider_subject = ?
                 """,
-                blankToNull(normalizeEmail(profile.email())),
+                blankToNull(EmailNormalizer.normalize(profile.email())),
                 blankToNull(profile.displayName()),
                 blankToNull(profile.avatarUrl()),
                 Timestamp.from(Instant.now()),
@@ -720,10 +720,6 @@ public class SocialAuthService {
                 String.valueOf(left).getBytes(StandardCharsets.US_ASCII),
                 String.valueOf(right).getBytes(StandardCharsets.US_ASCII)
         );
-    }
-
-    private static String normalizeEmail(String email) {
-        return clean(email).toLowerCase(Locale.ROOT);
     }
 
     private static String normalizeDeviceId(String value) {

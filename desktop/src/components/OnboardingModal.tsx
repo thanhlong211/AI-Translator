@@ -1,6 +1,7 @@
 import type {
     ShortcutSettings
 } from "../app/types";
+import { useI18n } from "../i18n";
 
 interface OnboardingModalProps {
     open: boolean;
@@ -15,6 +16,8 @@ export function OnboardingModal({
     shortcuts,
     onComplete
 }: OnboardingModalProps) {
+    const { t } = useI18n();
+
     if (!open) {
         return null;
     }
@@ -25,19 +28,18 @@ export function OnboardingModal({
                 className="onboarding-modal"
                 role="dialog"
                 aria-modal="true"
-                aria-label="Hướng dẫn bắt đầu"
+                aria-label={t("onboarding.aria")}
             >
                 <div className="onboarding-badge">
                     AI TRANSLATOR
                 </div>
 
                 <h2>
-                    Bắt đầu trong 5 bước
+                    {t("onboarding.title")}
                 </h2>
 
                 <p className="onboarding-lead">
-                    Đăng nhập, chọn Translation Profile,
-                    sau đó dùng phím tắt ở bất kỳ trang đọc truyện nào.
+                    {t("onboarding.lead")}
                 </p>
 
                 <div className="onboarding-steps">
@@ -46,12 +48,11 @@ export function OnboardingModal({
 
                         <div>
                             <strong>
-                                Đăng nhập và chọn Profile
+                                {t("onboarding.step1.title")}
                             </strong>
 
                             <p>
-                                Profile quyết định phong cách dịch,
-                                glossary và quy tắc nhân vật.
+                                {t("onboarding.step1.body")}
                             </p>
                         </div>
                     </article>
@@ -61,18 +62,17 @@ export function OnboardingModal({
 
                         <div>
                             <strong>
-                                Quét khung truyện
+                                {t("onboarding.step2.title")}
                             </strong>
 
                             <p>
-                                Nhấn
+                                {t("onboarding.step2.before")}
                                 {" "}
                                 <kbd>
                                     {shortcuts.panelDisplay}
                                 </kbd>
                                 {" "}
-                                rồi kéo chọn một khung manga hoặc vùng
-                                chứa nhiều bubble để dịch cùng lúc.
+                                {t("onboarding.step2.after")}
                             </p>
                         </div>
                     </article>
@@ -82,18 +82,17 @@ export function OnboardingModal({
 
                         <div>
                             <strong>
-                                Sang trang manga tiếp theo
+                                {t("onboarding.step3.title")}
                             </strong>
 
                             <p>
-                                Sau khi chuyển trang, nhấn
+                                {t("onboarding.step3.before")}
                                 {" "}
                                 <kbd>
                                     {shortcuts.panelNextDisplay}
                                 </kbd>
                                 {" "}
-                                để quét lại đúng vùng cũ và giữ context
-                                hội thoại của Manga Session.
+                                {t("onboarding.step3.after")}
                             </p>
                         </div>
                     </article>
@@ -103,17 +102,17 @@ export function OnboardingModal({
 
                         <div>
                             <strong>
-                                Dịch nhanh
+                                {t("onboarding.step4.title")}
                             </strong>
 
                             <p>
-                                Nhấn
+                                {t("onboarding.step4.before")}
                                 {" "}
                                 <kbd>
                                     {shortcuts.translateDisplay}
                                 </kbd>
                                 {" "}
-                                rồi kéo một vùng chữ cần dịch.
+                                {t("onboarding.step4.after")}
                             </p>
                         </div>
                     </article>
@@ -123,26 +122,24 @@ export function OnboardingModal({
 
                         <div>
                             <strong>
-                                Study
+                                {t("onboarding.step5.title")}
                             </strong>
 
                             <p>
-                                Nhấn
+                                {t("onboarding.step5.before")}
                                 {" "}
                                 <kbd>
                                     {shortcuts.studyDisplay}
                                 </kbd>
                                 {" "}
-                                để vừa dịch nhanh vừa phân tích
-                                từ vựng/ngữ pháp ở background.
+                                {t("onboarding.step5.after")}
                             </p>
                         </div>
                     </article>
                 </div>
 
                 <div className="onboarding-note">
-                    Overlay mặc định tự ẩn khi đổi cửa sổ/tab.
-                    Có thể Pin hoặc đổi hành vi trong Settings.
+                    {t("onboarding.note")}
                 </div>
 
                 <button
@@ -150,8 +147,8 @@ export function OnboardingModal({
                     onClick={onComplete}
                 >
                     {replay
-                        ? "Đóng hướng dẫn"
-                        : "Bắt đầu sử dụng"}
+                        ? t("onboarding.close")
+                        : t("onboarding.start")}
                 </button>
             </section>
         </div>

@@ -150,8 +150,7 @@ export function GrammarPage({
                     </h2>
 
                     <p>
-                        Lưu pattern thay vì lưu cả câu truyện.
-                        Mỗi cấu trúc có số lần gặp và tiến độ riêng.
+                        Lưu các mẫu ngữ pháp bạn gặp để theo dõi và ôn lại.
                     </p>
                 </div>
 
@@ -290,8 +289,8 @@ export function GrammarPage({
                     </h3>
 
                     <p>
-                        Bật Auto-save Ngữ pháp trong Study
-                        hoặc bấm “+ Lưu” trên grammar card.
+                        Bật “Tự động lưu ngữ pháp” trong Study
+                        hoặc bấm “+ Lưu” trên thẻ ngữ pháp.
                     </p>
                 </section>
             ) : (

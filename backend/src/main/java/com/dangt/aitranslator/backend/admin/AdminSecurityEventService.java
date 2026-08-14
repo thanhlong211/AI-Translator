@@ -359,7 +359,9 @@ public class AdminSecurityEventService {
     }
 
     private static String severityForAction(String action) {
-        if (action.contains("ROLE_CHANGED") || action.contains("SUPER_ADMIN")) {
+        if (action.contains("ROLE_CHANGED")
+                || action.contains("SUPER_ADMIN")
+                || action.contains("SAFETY_MODE")) {
             return "CRITICAL";
         }
         if (action.contains("REFUND")

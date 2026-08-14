@@ -152,9 +152,7 @@ export function TranslatePage({
                     </h2>
 
                     <p>
-                        Với manga, nên dùng Quét khung truyện để chỉ OCR
-                        vùng nội dung cần đọc, tránh menu trình duyệt, tab và
-                        chữ ngoài truyện.
+                        Quét một khung truyện hoặc vùng nội dung bạn muốn dịch.
                     </p>
                 </div>
 
@@ -163,7 +161,7 @@ export function TranslatePage({
                         className="scan-primary"
                         onClick={onPanelScan}
                         disabled={!canScan}
-                        title="Kéo chọn một khung truyện hoặc vùng manga; OCR tất cả bubble trong vùng đó và dịch một lần"
+                        title="Kéo chọn một khung truyện hoặc vùng manga để dịch cùng lúc"
                     >
                         <Icon name="scan" size={19} />
 
@@ -180,7 +178,7 @@ export function TranslatePage({
                         className="secondary-action"
                         onClick={onScan}
                         disabled={!canScan}
-                        title="Dịch nhanh một vùng chữ thành một bubble"
+                        title="Dịch nhanh một vùng chữ"
                     >
                         <Icon name="scan" size={18} />
                         Chọn 1 vùng
@@ -193,7 +191,7 @@ export function TranslatePage({
                         className="secondary-action full-screen-action"
                         onClick={onFullScreenScan}
                         disabled={!canScan}
-                        title="Thử nghiệm: OCR toàn bộ màn hình, có thể bắt cả UI trình duyệt/game"
+                        title="Quét toàn bộ màn hình"
                     >
                         <Icon name="scan" size={18} />
                         Toàn màn hình
@@ -209,7 +207,7 @@ export function TranslatePage({
 
             {!backend.connected && (
                 <div className="notice danger">
-                    Java backend hiện không kết nối được.
+                    Dịch vụ tạm thời không khả dụng.
                 </div>
             )}
 
@@ -221,7 +219,7 @@ export function TranslatePage({
                         </span>
 
                         <h3>
-                            Prompt Engine
+                            Hồ sơ dịch
                         </h3>
                     </div>
 
@@ -251,7 +249,7 @@ export function TranslatePage({
                         >
                             {isProfileSaving
                                 ? "Đang lưu..."
-                                : "Lưu Profile"}
+                                : "Lưu Hồ sơ"}
                         </button>
                     </div>
                 </div>
@@ -481,8 +479,7 @@ export function TranslatePage({
                             />
 
                             <small>
-                                Nhấn “Lưu Profile” trước khi quét
-                                để Java Prompt Engine dùng thay đổi mới.
+                                Hãy lưu Hồ sơ trước khi quét để dùng các thay đổi mới.
                             </small>
                         </label>
                     </>
@@ -512,7 +509,7 @@ export function TranslatePage({
                                 event.target.value
                             );
                         }}
-                        placeholder="Nội dung OCR sẽ xuất hiện tại đây"
+                        placeholder="Nội dung nhận diện sẽ xuất hiện tại đây"
                     />
                 </article>
 

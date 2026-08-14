@@ -174,9 +174,7 @@ export function VocabularyPage({
                     </h2>
 
                     <p>
-                        Kho từ riêng của tài khoản.
-                        Từ được chống trùng, đếm số lần gặp
-                        và theo dõi tiến độ NEW / LEARNING / KNOWN.
+                        Lưu từ vựng, theo dõi số lần gặp và tiến độ học.
                     </p>
                 </div>
 

@@ -3,6 +3,7 @@ package com.dangt.aitranslator.backend.admin;
 import com.dangt.aitranslator.backend.auth.JwtService;
 import com.dangt.aitranslator.backend.auth.UserSummary;
 import com.dangt.aitranslator.backend.common.ForbiddenException;
+import com.dangt.aitranslator.backend.common.EmailNormalizer;
 import com.dangt.aitranslator.backend.common.UnauthorizedException;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import com.dangt.aitranslator.backend.user.UserRepository;
@@ -10,7 +11,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Locale;
 
 @Service
 public class AdminAuthService {
@@ -40,7 +40,7 @@ public class AdminAuthService {
 
     @Transactional
     public AdminLoginResponse login(AdminLoginRequest request) {
-        String email = request.email().trim().toLowerCase(Locale.ROOT);
+        String email = EmailNormalizer.normalize(request.email());
         UserAccount user = userRepository.findByEmail(email).orElse(null);
 
         if (user == null) {

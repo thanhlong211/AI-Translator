@@ -1,4 +1,5 @@
 import type { PageId } from "../app/types";
+import { useI18n } from "../i18n";
 import { Icon } from "./Icon";
 
 interface SidebarProps {
@@ -8,28 +9,32 @@ interface SidebarProps {
 
 const mainItems: Array<{
     id: PageId;
-    label: string;
-    description: string;
+    labelKey: string;
+    descriptionKey: string;
 }> = [
-    { id: "translate", label: "Dịch", description: "OCR & AI" },
-    { id: "novel", label: "Novel Reader", description: "TXT · EPUB · dịch sách" },
-    { id: "study", label: "Học tập", description: "Phân tích câu" },
-    { id: "vocabulary", label: "Từ vựng", description: "Kho cá nhân" },
-    { id: "grammar", label: "Ngữ pháp", description: "Cấu trúc đã lưu" },
-    { id: "review", label: "Ôn tập", description: "SRS hôm nay" },
-    { id: "profiles", label: "Profiles", description: "Prompt & Style" },
-    { id: "memory", label: "Bộ nhớ dịch", description: "Bản sửa cá nhân" },
-    { id: "history", label: "Lịch sử", description: "Phiên gần đây" }
+    { id: "translate", labelKey: "sidebar.translate", descriptionKey: "sidebar.translateDescription" },
+    { id: "novel", labelKey: "sidebar.novel", descriptionKey: "sidebar.novelDescription" },
+    { id: "study", labelKey: "sidebar.study", descriptionKey: "sidebar.studyDescription" },
+    { id: "vocabulary", labelKey: "sidebar.vocabulary", descriptionKey: "sidebar.vocabularyDescription" },
+    { id: "grammar", labelKey: "sidebar.grammar", descriptionKey: "sidebar.grammarDescription" },
+    { id: "review", labelKey: "sidebar.review", descriptionKey: "sidebar.reviewDescription" },
+    { id: "profiles", labelKey: "sidebar.profiles", descriptionKey: "sidebar.profilesDescription" },
+    { id: "memory", labelKey: "sidebar.memory", descriptionKey: "sidebar.memoryDescription" },
+    { id: "history", labelKey: "sidebar.history", descriptionKey: "sidebar.historyDescription" }
 ];
 
 export function Sidebar({
     activePage,
     onChange
 }: SidebarProps) {
+    const { t } = useI18n();
+
     return (
         <aside className="sidebar">
             <div className="brand">
-                <div className="brand-mark">A</div>
+                <div className="brand-mark" aria-hidden="true">
+                    <span>A</span>
+                </div>
 
                 <div className="brand-copy">
                     <strong>AI Translator</strong>
@@ -39,12 +44,15 @@ export function Sidebar({
 
             <nav className="side-nav">
                 <div className="nav-section-label">
-                    Workspace
+                    {t("sidebar.workspace")}
                 </div>
 
                 {mainItems.map((item) => (
                     <button
                         key={item.id}
+                        type="button"
+                        title={t(item.labelKey)}
+                        aria-current={activePage === item.id ? "page" : undefined}
                         className={
                             activePage === item.id
                                 ? "nav-item active"
@@ -57,8 +65,8 @@ export function Sidebar({
                         </span>
 
                         <span className="nav-copy">
-                            <strong>{item.label}</strong>
-                            <small>{item.description}</small>
+                            <strong>{t(item.labelKey)}</strong>
+                            <small>{t(item.descriptionKey)}</small>
                         </span>
                     </button>
                 ))}
@@ -66,6 +74,9 @@ export function Sidebar({
 
             <div className="sidebar-footer">
                 <button
+                    type="button"
+                    title={t("sidebar.settings")}
+                    aria-current={activePage === "settings" ? "page" : undefined}
                     className={
                         activePage === "settings"
                             ? "nav-item active"
@@ -78,8 +89,8 @@ export function Sidebar({
                     </span>
 
                     <span className="nav-copy">
-                        <strong>Cài đặt</strong>
-                        <small>Account & App</small>
+                        <strong>{t("sidebar.settings")}</strong>
+                        <small>{t("sidebar.settingsDescription")}</small>
                     </span>
                 </button>
             </div>

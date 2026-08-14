@@ -4,7 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>desktop</title>
+    <script>
+      (() => {
+        try {
+          const stored = localStorage.getItem("aiTranslator.ui.theme.v1");
+          const preference = ["system", "light", "dark"].includes(stored)
+            ? stored
+            : "system";
+          const resolved = preference === "system"
+            ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+            : preference;
+          document.documentElement.dataset.theme = resolved;
+          document.documentElement.dataset.themePreference = preference;
+          document.documentElement.style.colorScheme = resolved;
+        } catch {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
+    <title>AI Translator</title>
   </head>
   <body>
     <div id="root"></div>

@@ -26,15 +26,18 @@ public class AdminService {
     private final JdbcTemplate jdbcTemplate;
     private final AdminGuard adminGuard;
     private final AdminAuditService auditService;
+    private final AdminSafetyService safetyService;
 
     public AdminService(
             JdbcTemplate jdbcTemplate,
             AdminGuard adminGuard,
-            AdminAuditService auditService
+            AdminAuditService auditService,
+            AdminSafetyService safetyService
     ) {
         this.jdbcTemplate = jdbcTemplate;
         this.adminGuard = adminGuard;
         this.auditService = auditService;
+        this.safetyService = safetyService;
     }
 
     @Transactional(readOnly = true)
@@ -418,8 +421,8 @@ public class AdminService {
             throw new IllegalArgumentException("Status chỉ hỗ trợ ACTIVE hoặc SUSPENDED.");
         }
 
-        if (actor.getId().equals(userId) && !"ACTIVE".equals(status)) {
-            throw new IllegalArgumentException("Không thể tự khóa tài khoản Admin đang dùng.");
+        if (!"ACTIVE".equals(status)) {
+            safetyService.requireCanSuspendUser(actor, userId, target.role());
         }
 
         jdbcTemplate.update(
@@ -452,6 +455,7 @@ public class AdminService {
     ) {
         TargetUser target = requireTarget(userId);
         requireCanManage(actor, target);
+        safetyService.requireCanRevokeSessions(actor, userId);
 
         int changed = revokeAllSessions(userId);
 

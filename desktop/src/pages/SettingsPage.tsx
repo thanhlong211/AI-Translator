@@ -19,7 +19,9 @@ import type {
     SocialAuthProviderStatus,
     StudyLevel
 } from "../app/types";
-
+import { useI18n } from "../i18n";
+import { useTheme } from "../theme";
+import { Icon } from "../components/Icon";
 
 
 type NovelReaderFontPreset =
@@ -71,11 +73,12 @@ function billingPeriodLabel(value: PublicCatalogPrice["billingPeriod"]) {
 
 function formatCatalogMoney(
     amountMinor: number,
-    currency: string
+    currency: string,
+    locale: string
 ) {
     try {
         const formatter = new Intl.NumberFormat(
-            "vi-VN",
+            locale,
             {
                 style: "currency",
                 currency
@@ -90,7 +93,7 @@ function formatCatalogMoney(
             amountMinor / Math.pow(10, exponent)
         );
     } catch {
-        return `${amountMinor.toLocaleString("vi-VN")} ${currency}`;
+        return `${amountMinor.toLocaleString(locale)} ${currency}`;
     }
 }
 
@@ -165,6 +168,71 @@ function novelReaderFontStack(
         default:
             return '"Segoe UI", "Yu Gothic UI", "Yu Gothic", Meiryo, "Noto Sans JP", sans-serif';
     }
+}
+
+function SocialProviderLogo({
+    provider
+}: {
+    provider: SocialAuthProviderCode;
+}) {
+    if (provider === "GOOGLE") {
+        return (
+            <svg
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+                focusable="false"
+            >
+                <path
+                    fill="#4285F4"
+                    d="M21.6 12.23c0-.71-.06-1.24-.19-1.79H12v3.42h5.52a4.72 4.72 0 0 1-2.05 3.09l-.03.11 2.97 2.3.21.02c1.93-1.78 3.04-4.4 3.04-7.15Z"
+                />
+                <path
+                    fill="#34A853"
+                    d="M12 22c2.7 0 4.96-.89 6.61-2.42l-3.15-2.43c-.84.57-1.97.97-3.46.97-2.6 0-4.81-1.76-5.6-4.2l-.1.01-3.09 2.39-.03.09A9.99 9.99 0 0 0 12 22Z"
+                />
+                <path
+                    fill="#FBBC05"
+                    d="M6.4 13.92A6.05 6.05 0 0 1 6.08 12c0-.67.12-1.31.31-1.92l-.01-.13-3.12-2.42-.1.05A10.02 10.02 0 0 0 2 12c0 1.59.38 3.09 1.17 4.42l3.23-2.5Z"
+                />
+                <path
+                    fill="#EA4335"
+                    d="M12 5.88c1.88 0 3.15.81 3.88 1.49l2.8-2.73C16.96 3.05 14.7 2 12 2a9.99 9.99 0 0 0-8.83 5.58l3.22 2.5c.8-2.44 3.01-4.2 5.61-4.2Z"
+                />
+            </svg>
+        );
+    }
+
+    return (
+        <svg
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+        >
+            <circle cx="12" cy="12" r="10" fill="#1877F2" />
+            <path
+                fill="#fff"
+                d="M13.3 20v-7h2.35l.35-2.73h-2.7V8.53c0-.79.22-1.33 1.36-1.33h1.45V4.76c-.25-.03-1.11-.1-2.11-.1-2.09 0-3.52 1.27-3.52 3.62v1.99H8.42V13h2.36v7h2.52Z"
+            />
+        </svg>
+    );
+}
+
+interface PasswordResetRequestResult {
+    accepted?: boolean;
+    message?: string;
+}
+
+interface PasswordActionResult {
+    success?: boolean;
+    sessionsRevoked?: boolean;
+    reauthenticated?: boolean;
+    message?: string;
+}
+
+interface PasswordDesktopApi {
+    forgotPassword?: (payload: { email: string }) => Promise<PasswordResetRequestResult>;
+    resetPassword?: (payload: { token: string; newPassword: string }) => Promise<PasswordActionResult>;
+    changePassword?: (payload: { currentPassword: string; newPassword: string }) => Promise<PasswordActionResult>;
 }
 
 interface SettingsPageProps {
@@ -252,6 +320,32 @@ interface SettingsPageProps {
         (licenseKey: string) => Promise<void>;
 }
 
+type SettingsCategory =
+    | "general"
+    | "account"
+    | "plan"
+    | "reading"
+    | "advanced";
+
+const SETTINGS_CATEGORY_EVENT =
+    "ai-translator:open-settings-category";
+
+const SETTINGS_CATEGORIES: SettingsCategory[] = [
+    "general",
+    "account",
+    "plan",
+    "reading",
+    "advanced"
+];
+
+function isSettingsCategory(
+    value: unknown
+): value is SettingsCategory {
+    return SETTINGS_CATEGORIES.includes(
+        value as SettingsCategory
+    );
+}
+
 export function SettingsPage({
     backend,
     auth,
@@ -292,6 +386,37 @@ export function SettingsPage({
     onRefreshEntitlements,
     onActivateLicense
 }: SettingsPageProps) {
+    const {
+        locale,
+        intlLocale,
+        availableLocales,
+        setLocale,
+        t
+    } = useI18n();
+
+    const {
+        theme,
+        resolvedTheme,
+        setTheme
+    } = useTheme();
+
+    const [
+        activeSettingsCategory,
+        setActiveSettingsCategory
+    ] = useState<SettingsCategory>(() => {
+        if (typeof window !== "undefined") {
+            const hash = window.location.hash;
+            if (
+                hash === "#plan-license" ||
+                hash === "#pricing-catalog"
+            ) {
+                return "plan";
+            }
+        }
+
+        return "general";
+    });
+
     const [
         translateShortcut,
         setTranslateShortcut
@@ -387,6 +512,19 @@ export function SettingsPage({
         setIsResetting
     ] = useState(false);
 
+    const [passwordRecoveryOpen, setPasswordRecoveryOpen] = useState(false);
+    const [recoveryEmail, setRecoveryEmail] = useState(email);
+    const [recoveryToken, setRecoveryToken] = useState("");
+    const [recoveryNewPassword, setRecoveryNewPassword] = useState("");
+    const [recoveryConfirmPassword, setRecoveryConfirmPassword] = useState("");
+    const [recoveryMessage, setRecoveryMessage] = useState("");
+    const [recoveryLoading, setRecoveryLoading] = useState(false);
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [nextPassword, setNextPassword] = useState("");
+    const [confirmNextPassword, setConfirmNextPassword] = useState("");
+    const [passwordSecurityMessage, setPasswordSecurityMessage] = useState("");
+    const [passwordSecurityLoading, setPasswordSecurityLoading] = useState(false);
+
     const [
         licenseKey,
         setLicenseKey
@@ -412,6 +550,30 @@ export function SettingsPage({
         setPricingCatalogMessage
     ] = useState("");
 
+
+    useEffect(() => {
+        const handleOpenSettingsCategory = (event: Event) => {
+            const next = (
+                event as CustomEvent<SettingsCategory>
+            ).detail;
+
+            if (isSettingsCategory(next)) {
+                setActiveSettingsCategory(next);
+            }
+        };
+
+        window.addEventListener(
+            SETTINGS_CATEGORY_EVENT,
+            handleOpenSettingsCategory
+        );
+
+        return () => {
+            window.removeEventListener(
+                SETTINGS_CATEGORY_EVENT,
+                handleOpenSettingsCategory
+            );
+        };
+    }, []);
 
     const initialNovelFontSettings =
         loadNovelReaderFontSettings();
@@ -491,7 +653,7 @@ export function SettingsPage({
             setPricingCatalogMessage(
                 error instanceof Error
                     ? error.message
-                    : "Không tải được bảng giá từ backend."
+                    : "Không thể tải bảng giá lúc này."
             );
         } finally {
             setIsPricingCatalogLoading(false);
@@ -624,6 +786,107 @@ export function SettingsPage({
         );
     }
 
+    function passwordApi() {
+        return window.electronAPI as typeof window.electronAPI & PasswordDesktopApi;
+    }
+
+    async function requestPasswordReset(event: FormEvent) {
+        event.preventDefault();
+        const cleanEmail = recoveryEmail.trim();
+        if (!cleanEmail) {
+            setRecoveryMessage("Nhập email của tài khoản.");
+            return;
+        }
+        const request = passwordApi().forgotPassword;
+        if (!request) {
+            setRecoveryMessage("Desktop chưa hỗ trợ quên mật khẩu.");
+            return;
+        }
+        try {
+            setRecoveryLoading(true);
+            setRecoveryMessage("");
+            const result = await request({ email: cleanEmail });
+            setRecoveryMessage(
+                result.message ||
+                "Nếu email tồn tại, hướng dẫn đặt lại mật khẩu đã được gửi."
+            );
+        } catch (error) {
+            setRecoveryMessage(error instanceof Error ? error.message : String(error));
+        } finally {
+            setRecoveryLoading(false);
+        }
+    }
+
+    async function submitPasswordReset(event: FormEvent) {
+        event.preventDefault();
+        if (!recoveryToken.trim()) {
+            setRecoveryMessage("Nhập mã đặt lại mật khẩu.");
+            return;
+        }
+        if (recoveryNewPassword.length < 8 || recoveryNewPassword.length > 100) {
+            setRecoveryMessage("Mật khẩu mới phải dài từ 8 đến 100 ký tự.");
+            return;
+        }
+        if (recoveryNewPassword !== recoveryConfirmPassword) {
+            setRecoveryMessage("Xác nhận mật khẩu chưa khớp.");
+            return;
+        }
+        const reset = passwordApi().resetPassword;
+        if (!reset) {
+            setRecoveryMessage("Desktop chưa hỗ trợ đặt lại mật khẩu.");
+            return;
+        }
+        try {
+            setRecoveryLoading(true);
+            const result = await reset({
+                token: recoveryToken.trim(),
+                newPassword: recoveryNewPassword
+            });
+            setRecoveryToken("");
+            setRecoveryNewPassword("");
+            setRecoveryConfirmPassword("");
+            setRecoveryMessage(result.message || "Đã đặt lại mật khẩu. Bạn có thể đăng nhập.");
+        } catch (error) {
+            setRecoveryMessage(error instanceof Error ? error.message : String(error));
+        } finally {
+            setRecoveryLoading(false);
+        }
+    }
+
+    async function submitPasswordChange(event: FormEvent) {
+        event.preventDefault();
+        if (nextPassword.length < 8 || nextPassword.length > 100) {
+            setPasswordSecurityMessage("Mật khẩu mới phải dài từ 8 đến 100 ký tự.");
+            return;
+        }
+        if (nextPassword !== confirmNextPassword) {
+            setPasswordSecurityMessage("Xác nhận mật khẩu chưa khớp.");
+            return;
+        }
+        const change = passwordApi().changePassword;
+        if (!change) {
+            setPasswordSecurityMessage("Desktop chưa hỗ trợ đổi mật khẩu.");
+            return;
+        }
+        try {
+            setPasswordSecurityLoading(true);
+            setPasswordSecurityMessage("");
+            const result = await change({ currentPassword, newPassword: nextPassword });
+            setCurrentPassword("");
+            setNextPassword("");
+            setConfirmNextPassword("");
+            setPasswordSecurityMessage(
+                result.reauthenticated === false
+                    ? `${result.message || "Đã đổi mật khẩu."} Hãy đăng nhập lại.`
+                    : result.message || "Đã đổi mật khẩu và làm mới phiên đăng nhập."
+            );
+        } catch (error) {
+            setPasswordSecurityMessage(error instanceof Error ? error.message : String(error));
+        } finally {
+            setPasswordSecurityLoading(false);
+        }
+    }
+
     async function saveShortcuts() {
         try {
             setIsSavingShortcuts(
@@ -694,135 +957,346 @@ export function SettingsPage({
         }
     }
 
+    const settingsNavigation: Array<{
+        id: SettingsCategory;
+        icon: "settings" | "user" | "card" | "novel" | "sliders";
+        title: string;
+        description: string;
+        eyebrow: string;
+        summary: string;
+    }> = [
+        {
+            id: "general",
+            icon: "settings" as const,
+            title: t("settings.nav.general"),
+            description: t("settings.nav.generalDescription"),
+            eyebrow: t("settings.group.generalEyebrow"),
+            summary: t("settings.group.generalSummary")
+        },
+        {
+            id: "account",
+            icon: "user" as const,
+            title: t("settings.nav.account"),
+            description: t("settings.nav.accountDescription"),
+            eyebrow: t("settings.group.accountEyebrow"),
+            summary: t("settings.group.accountSummary")
+        },
+        {
+            id: "plan",
+            icon: "card" as const,
+            title: t("settings.nav.plan"),
+            description: t("settings.nav.planDescription"),
+            eyebrow: t("settings.group.planEyebrow"),
+            summary: t("settings.group.planSummary")
+        },
+        {
+            id: "reading",
+            icon: "novel" as const,
+            title: t("settings.nav.reading"),
+            description: t("settings.nav.readingDescription"),
+            eyebrow: t("settings.group.readingEyebrow"),
+            summary: t("settings.group.readingSummary")
+        },
+        {
+            id: "advanced",
+            icon: "sliders" as const,
+            title: t("settings.nav.advanced"),
+            description: t("settings.nav.advancedDescription"),
+            eyebrow: t("settings.group.advancedEyebrow"),
+            summary: t("settings.group.advancedSummary")
+        }
+    ];
+
+    const activeSettingsNavigation =
+        settingsNavigation.find(
+            (item) =>
+                item.id === activeSettingsCategory
+        ) ?? settingsNavigation[0];
+
     return (
-        <div className="page-stack settings-page">
-            <section className="settings-section">
+        <div
+            className="page-stack settings-page"
+            data-settings-category={activeSettingsCategory}
+        >
+            <div className="settings-category-shell">
+                <nav
+                    className="settings-category-nav"
+                    aria-label={t("settings.nav.aria")}
+                >
+                    {settingsNavigation.map((item) => (
+                        <button
+                            key={item.id}
+                            type="button"
+                            className={
+                                item.id === activeSettingsCategory
+                                    ? "settings-category-tab active"
+                                    : "settings-category-tab"
+                            }
+                            aria-pressed={
+                                item.id === activeSettingsCategory
+                            }
+                            onClick={() => {
+                                setActiveSettingsCategory(item.id);
+                            }}
+                        >
+                            <span className="settings-category-icon" aria-hidden="true">
+                                <Icon name={item.icon} size={17} />
+                            </span>
+
+                            <span className="settings-category-copy">
+                                <strong>{item.title}</strong>
+                                <small>{item.description}</small>
+                            </span>
+                        </button>
+                    ))}
+                </nav>
+
+                <div className="settings-category-overview">
+                    <div>
+                        <span className="eyebrow">
+                            {activeSettingsNavigation.eyebrow}
+                        </span>
+                        <h2>{activeSettingsNavigation.title}</h2>
+                        <p>{activeSettingsNavigation.summary}</p>
+                    </div>
+
+                    <span className="settings-category-count">
+                        {t("settings.group.sectionLabel")}
+                    </span>
+                </div>
+            </div>
+            <section data-settings-group="general" className="settings-section theme-settings-section">
                 <div className="settings-section-header">
                     <div>
                         <span className="eyebrow">
-                            ACCOUNT
+                            {t("theme.eyebrow")}
                         </span>
 
                         <h2>
-                            Tài khoản AI Translator
+                            {t("theme.title")}
                         </h2>
 
                         <p>
-                            Access token chỉ giữ trong RAM.
-                            Refresh token được mã hóa bằng
-                            Electron safeStorage.
+                            {t("theme.description")}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="theme-choice-grid" role="radiogroup" aria-label={t("theme.title")}>
+                    {([
+                        ["system", "theme.system", "theme.systemDescription"],
+                        ["light", "theme.light", "theme.lightDescription"],
+                        ["dark", "theme.dark", "theme.darkDescription"]
+                    ] as const).map(([value, labelKey, descriptionKey]) => (
+                        <button
+                            key={value}
+                            type="button"
+                            role="radio"
+                            aria-checked={theme === value}
+                            className={
+                                theme === value
+                                    ? "theme-choice active"
+                                    : "theme-choice"
+                            }
+                            onClick={() => setTheme(value)}
+                        >
+                            <span className={`theme-preview ${value}`}>
+                                <i />
+                                <i />
+                                <i />
+                            </span>
+
+                            <span className="theme-choice-copy">
+                                <strong>{t(labelKey)}</strong>
+                                <small>{t(descriptionKey)}</small>
+                            </span>
+
+                            {theme === value && (
+                                <span className="theme-active-chip">
+                                    {t("theme.current")}
+                                    {value === "system"
+                                        ? ` · ${resolvedTheme === "dark" ? t("theme.dark") : t("theme.light")}`
+                                        : ""}
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </section>
+
+            <section data-settings-group="general" className="settings-section language-settings-section">
+                <div className="settings-section-header">
+                    <div>
+                        <span className="eyebrow">
+                            {t("language.eyebrow")}
+                        </span>
+
+                        <h2>
+                            {t("language.title")}
+                        </h2>
+
+                        <p>
+                            {t("language.description")}
+                        </p>
+                    </div>
+                </div>
+
+                <div className="language-settings-grid">
+                    <label className="control-field">
+                        <span>{t("language.field")}</span>
+
+                        <select
+                            value={locale}
+                            onChange={(event) => {
+                                const next = event.target.value;
+                                if (next === "vi" || next === "en") {
+                                    setLocale(next);
+                                }
+                            }}
+                        >
+                            {availableLocales.map((option) => (
+                                <option
+                                    key={option.code}
+                                    value={option.code}
+                                >
+                                    {option.nativeLabel}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                </div>
+            </section>
+
+            <section
+                data-settings-group="account"
+                className="settings-section account-settings-section"
+            >
+                <div className="settings-section-header account-settings-header">
+                    <div>
+                        <span className="eyebrow">
+                            {t("settings.auth.accountEyebrow")}
+                        </span>
+
+                        <h2>
+                            {t("settings.auth.accountTitle")}
+                        </h2>
+
+                        <p>
+                            {t("settings.auth.accountDescription")}
                         </p>
                     </div>
 
                     {auth.authenticated && (
                         <button
+                            type="button"
                             className="danger-outline"
                             onClick={onLogout}
                             disabled={isAuthLoading}
                         >
-                            Đăng xuất
+                            {t("settings.auth.logout")}
                         </button>
                     )}
                 </div>
 
                 {!auth.authenticated ? (
-                    <div className="auth-surface">
-                        <div className="auth-tabs">
-                            <button
-                                className={
-                                    authMode === "login"
-                                        ? "segment active"
-                                        : "segment"
-                                }
-                                onClick={() => {
-                                    onAuthModeChange(
-                                        "login"
-                                    );
-                                }}
-                            >
-                                Đăng nhập
-                            </button>
+                    <div className="auth-experience">
+                        <aside className="auth-welcome-panel">
+                            <div className="auth-welcome-brand" aria-hidden="true">
+                                <span>A</span>
+                            </div>
 
-                            <button
-                                className={
-                                    authMode === "register"
-                                        ? "segment active"
-                                        : "segment"
-                                }
-                                onClick={() => {
-                                    onAuthModeChange(
-                                        "register"
-                                    );
-                                }}
-                            >
-                                Đăng ký
-                            </button>
-                        </div>
+                            <div className="auth-welcome-copy">
+                                <span className="eyebrow auth-welcome-eyebrow">
+                                    {t("settings.auth.welcomeEyebrow")}
+                                </span>
 
-                        <form
-                            className="auth-form"
-                            onSubmit={onSubmitAuth}
-                        >
-                            <label className="control-field">
-                                <span>Email</span>
+                                <h3>{t("settings.auth.welcomeTitle")}</h3>
+                                <p>{t("settings.auth.welcomeDescription")}</p>
+                            </div>
 
-                                <input
-                                    type="email"
-                                    value={email}
-                                    onChange={(event) => {
-                                        onEmailChange(
-                                            event.target.value
-                                        );
-                                    }}
-                                    autoComplete="email"
-                                />
-                            </label>
+                            <div className="auth-benefit-list">
+                                {[
+                                    t("settings.auth.benefitProfiles"),
+                                    t("settings.auth.benefitLearning"),
+                                    t("settings.auth.benefitSignIn")
+                                ].map((benefit) => (
+                                    <div className="auth-benefit" key={benefit}>
+                                        <span className="auth-benefit-icon" aria-hidden="true">
+                                            <Icon name="check" size={14} />
+                                        </span>
+                                        <span>{benefit}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </aside>
 
-                            <label className="control-field">
-                                <span>Mật khẩu</span>
+                        <div className="auth-card">
+                            <div className="auth-card-toolbar">
+                                <div className="auth-tabs" role="tablist" aria-label={t("settings.auth.accountTitle")}>
+                                    <button
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={authMode === "login"}
+                                        className={
+                                            authMode === "login"
+                                                ? "segment active"
+                                                : "segment"
+                                        }
+                                        onClick={() => {
+                                            onAuthModeChange("login");
+                                        }}
+                                    >
+                                        {t("settings.auth.signInTab")}
+                                    </button>
 
-                                <input
-                                    type="password"
-                                    value={password}
-                                    onChange={(event) => {
-                                        onPasswordChange(
-                                            event.target.value
-                                        );
-                                    }}
-                                    autoComplete={
-                                        authMode === "login"
-                                            ? "current-password"
-                                            : "new-password"
+                                    <button
+                                        type="button"
+                                        role="tab"
+                                        aria-selected={authMode === "register"}
+                                        className={
+                                            authMode === "register"
+                                                ? "segment active"
+                                                : "segment"
+                                        }
+                                        onClick={() => {
+                                            onAuthModeChange("register");
+                                        }}
+                                    >
+                                        {t("settings.auth.registerTab")}
+                                    </button>
+                                </div>
+
+                                <span
+                                    className={
+                                        backend.connected
+                                            ? "auth-service-status online"
+                                            : "auth-service-status"
                                     }
-                                />
-                            </label>
+                                >
+                                    <span className="status-dot" />
+                                    {backend.connected
+                                        ? t("settings.auth.serviceReady")
+                                        : t("settings.auth.serviceOffline")}
+                                </span>
+                            </div>
 
-                            <button
-                                className="primary-action"
-                                type="submit"
-                                disabled={
-                                    isAuthLoading ||
-                                    !backend.connected
-                                }
-                            >
-                                {isAuthLoading
-                                    ? "Đang xử lý..."
-                                    : authMode === "login"
-                                        ? "Đăng nhập"
-                                        : "Tạo tài khoản"}
-                            </button>
-                        </form>
+                            <div className="auth-card-heading">
+                                <h3>
+                                    {authMode === "login"
+                                        ? t("settings.auth.signInTitle")
+                                        : t("settings.auth.registerTitle")}
+                                </h3>
+                                <p>
+                                    {authMode === "login"
+                                        ? t("settings.auth.signInDescription")
+                                        : t("settings.auth.registerDescription")}
+                                </p>
+                            </div>
 
-                        <div className="social-auth-divider">
-                            <span>hoặc đăng nhập bằng</span>
-                        </div>
-
-                        <div className="social-auth-grid">
-                            {socialProviders.map(
-                                (provider) => {
+                            <div className="social-auth-grid">
+                                {socialProviders.map((provider) => {
                                     const loading =
-                                        socialAuthLoadingProvider ===
-                                        provider.provider;
+                                        socialAuthLoadingProvider === provider.provider;
 
                                     return (
                                         <div
@@ -839,88 +1313,235 @@ export function SettingsPage({
                                                     socialAuthLoadingProvider !== null
                                                 }
                                                 onClick={() => {
-                                                    onSocialLogin(
-                                                        provider.provider
-                                                    );
+                                                    onSocialLogin(provider.provider);
                                                 }}
                                             >
                                                 <span className="social-auth-logo">
-                                                    {provider.provider === "GOOGLE"
-                                                        ? "G"
-                                                        : "f"}
+                                                    {loading ? (
+                                                        <span className="auth-inline-spinner" />
+                                                    ) : (
+                                                        <SocialProviderLogo provider={provider.provider} />
+                                                    )}
                                                 </span>
 
-                                                <span>
+                                                <span className="social-auth-button-copy">
                                                     {loading
-                                                        ? `Đang chờ ${provider.displayName}...`
-                                                        : `Tiếp tục với ${provider.displayName}`}
+                                                        ? `${t("settings.auth.waitingFor")} ${provider.displayName}...`
+                                                        : `${t("settings.auth.continueWith")} ${provider.displayName}`}
                                                 </span>
                                             </button>
 
                                             {!provider.available && (
                                                 <small>
-                                                    {provider.reason ||
-                                                        "Chưa cấu hình trên backend."}
+                                                    {t("settings.auth.providerUnavailable")}
                                                 </small>
                                             )}
                                         </div>
                                     );
-                                }
-                            )}
+                                })}
 
-                            {!socialProviders.length && (
-                                <div className="social-auth-unavailable">
-                                    Social Login chưa được cấu hình hoặc backend chưa sẵn sàng.
+                                {!socialProviders.length && (
+                                    <div className="social-auth-unavailable">
+                                        {t("settings.auth.providersUnavailable")}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="social-auth-divider">
+                                <span>{t("settings.auth.orEmail")}</span>
+                            </div>
+
+                            <form
+                                className="auth-form auth-form-stacked"
+                                onSubmit={onSubmitAuth}
+                            >
+                                <label className="control-field">
+                                    <span>{t("settings.auth.email")}</span>
+
+                                    <input
+                                        type="email"
+                                        value={email}
+                                        onChange={(event) => {
+                                            onEmailChange(event.target.value);
+                                        }}
+                                        placeholder={t("settings.auth.emailPlaceholder")}
+                                        autoComplete="email"
+                                    />
+                                </label>
+
+                                <label className="control-field">
+                                    <span>{t("settings.auth.password")}</span>
+
+                                    <input
+                                        type="password"
+                                        value={password}
+                                        onChange={(event) => {
+                                            onPasswordChange(event.target.value);
+                                        }}
+                                        placeholder={
+                                            authMode === "login"
+                                                ? t("settings.auth.passwordPlaceholder")
+                                                : t("settings.auth.newPasswordPlaceholder")
+                                        }
+                                        autoComplete={
+                                            authMode === "login"
+                                                ? "current-password"
+                                                : "new-password"
+                                        }
+                                    />
+                                </label>
+
+                                <button
+                                    className="primary-action auth-submit-button"
+                                    type="submit"
+                                    disabled={
+                                        isAuthLoading ||
+                                        !backend.connected
+                                    }
+                                >
+                                    {isAuthLoading
+                                        ? t("settings.auth.processing")
+                                        : authMode === "login"
+                                            ? t("settings.auth.signIn")
+                                            : t("settings.auth.createAccount")}
+                                </button>
+                            </form>
+
+                            {authMode === "login" && (
+                                <div className="password-recovery-entry">
+                                    <button
+                                        type="button"
+                                        className="text-action"
+                                        onClick={() => {
+                                            setPasswordRecoveryOpen((value) => !value);
+                                            setRecoveryEmail(email);
+                                            setRecoveryMessage("");
+                                        }}
+                                    >
+                                        {t("settings.auth.forgotPassword")}
+                                    </button>
                                 </div>
                             )}
+
+                            {authMode === "login" && passwordRecoveryOpen && (
+                                <div className="password-recovery-panel">
+                                    <form
+                                        className="auth-form compact-password-form"
+                                        onSubmit={requestPasswordReset}
+                                    >
+                                        <label className="control-field">
+                                            <span>Email</span>
+                                            <input
+                                                type="email"
+                                                value={recoveryEmail}
+                                                onChange={(event) => setRecoveryEmail(event.target.value)}
+                                                autoComplete="email"
+                                            />
+                                        </label>
+                                        <button
+                                            type="submit"
+                                            className="secondary-action"
+                                            disabled={recoveryLoading || !backend.connected}
+                                        >
+                                            {recoveryLoading ? "Đang xử lý..." : "Gửi yêu cầu đặt lại"}
+                                        </button>
+                                    </form>
+
+                                    <form
+                                        className="auth-form compact-password-form reset-password-form"
+                                        onSubmit={submitPasswordReset}
+                                    >
+                                        <label className="control-field">
+                                            <span>Mã đặt lại mật khẩu</span>
+                                            <input
+                                                type="text"
+                                                value={recoveryToken}
+                                                onChange={(event) => setRecoveryToken(event.target.value)}
+                                                autoComplete="one-time-code"
+                                            />
+                                        </label>
+                                        <div className="password-two-column">
+                                            <label className="control-field">
+                                                <span>Mật khẩu mới</span>
+                                                <input
+                                                    type="password"
+                                                    value={recoveryNewPassword}
+                                                    onChange={(event) => setRecoveryNewPassword(event.target.value)}
+                                                    autoComplete="new-password"
+                                                />
+                                            </label>
+                                            <label className="control-field">
+                                                <span>Xác nhận mật khẩu</span>
+                                                <input
+                                                    type="password"
+                                                    value={recoveryConfirmPassword}
+                                                    onChange={(event) => setRecoveryConfirmPassword(event.target.value)}
+                                                    autoComplete="new-password"
+                                                />
+                                            </label>
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="primary-action"
+                                            disabled={recoveryLoading || !backend.connected}
+                                        >
+                                            Đặt mật khẩu mới
+                                        </button>
+                                    </form>
+                                    {recoveryMessage && (
+                                        <div className="notice info compact-notice">
+                                            {recoveryMessage}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="auth-card-footer">
+                                <span className="auth-secure-note">
+                                    <Icon name="lock" size={13} />
+                                    {t("settings.auth.secureNote")}
+                                </span>
+
+                                {auth.sessionStored && (
+                                    <button
+                                        type="button"
+                                        className="text-action auth-restore-action"
+                                        onClick={onRestoreSession}
+                                    >
+                                        {t("settings.auth.restoreSession")}
+                                    </button>
+                                )}
+                            </div>
                         </div>
-
-                        <p className="social-auth-note">
-                            Google/Facebook mở bằng trình duyệt hệ thống.
-                            Desktop không lưu mật khẩu hoặc access token của nhà cung cấp.
-                        </p>
-
-                        {auth.sessionStored && (
-                            <button
-                                className="text-action"
-                                onClick={onRestoreSession}
-                            >
-                                Khôi phục phiên đã lưu
-                            </button>
-                        )}
                     </div>
                 ) : (
                     <>
-                        <div className="account-summary">
+                        <div className="account-summary account-summary-premium">
                             <div className="large-avatar">
                                 {auth.user?.email
                                     ?.slice(0, 1)
                                     .toUpperCase()}
                             </div>
 
-                            <div>
-                                <strong>
-                                    {auth.user?.email}
-                                </strong>
-
-                                <span>
-                                    Role:
-                                    {" "}
-                                    {auth.user?.role}
+                            <div className="account-summary-copy">
+                                <span className="account-kicker">
+                                    {t("settings.auth.accountActive")}
                                 </span>
+                                <strong>{auth.user?.email}</strong>
                             </div>
 
                             <div className="verified-badge">
-                                ✓ Đã xác thực
+                                <Icon name="check" size={13} />
+                                {t("settings.auth.verified")}
                             </div>
                         </div>
 
                         <div className="identity-management">
                             <div className="identity-management-header">
                                 <div>
-                                    <strong>Tài khoản liên kết</strong>
+                                    <strong>{t("settings.auth.linkedAccounts")}</strong>
                                     <span>
-                                        Dùng cùng một AI Translator account khi đăng nhập bằng provider khác.
+                                        {t("settings.auth.linkedAccountsDescription")}
                                     </span>
                                 </div>
 
@@ -929,93 +1550,133 @@ export function SettingsPage({
                                     type="button"
                                     onClick={onRefreshAccountIdentities}
                                 >
-                                    Làm mới
+                                    {t("settings.auth.refresh")}
                                 </button>
                             </div>
 
                             <div className="identity-provider-grid">
-                                {socialProviders.map(
-                                    (provider) => {
-                                        const identity =
-                                            accountIdentities.find(
-                                                (item) =>
-                                                    item.provider ===
-                                                    provider.provider
-                                            );
-                                        const loading =
-                                            socialAuthLoadingProvider ===
-                                            provider.provider;
-
-                                        return (
-                                            <article
-                                                className={`identity-provider-card ${identity ? "linked" : ""}`}
-                                                key={provider.provider}
-                                            >
-                                                <div className="identity-provider-mark">
-                                                    {provider.provider === "GOOGLE"
-                                                        ? "G"
-                                                        : "f"}
-                                                </div>
-
-                                                <div className="identity-provider-main">
-                                                    <strong>
-                                                        {provider.displayName}
-                                                    </strong>
-
-                                                    {identity ? (
-                                                        <>
-                                                            <span>
-                                                                {identity.email ||
-                                                                    identity.displayName ||
-                                                                    "Đã liên kết"}
-                                                            </span>
-                                                            <small>
-                                                                ✓ Connected
-                                                            </small>
-                                                        </>
-                                                    ) : (
-                                                        <span>
-                                                            Chưa liên kết
-                                                        </span>
-                                                    )}
-                                                </div>
-
-                                                {!identity && (
-                                                    <button
-                                                        className="secondary-action compact"
-                                                        type="button"
-                                                        disabled={
-                                                            !provider.available ||
-                                                            socialAuthLoadingProvider !== null
-                                                        }
-                                                        onClick={() => {
-                                                            onLinkAccountIdentity(
-                                                                provider.provider
-                                                            );
-                                                        }}
-                                                    >
-                                                        {loading
-                                                            ? "Đang chờ..."
-                                                            : "Liên kết"}
-                                                    </button>
-                                                )}
-                                            </article>
+                                {socialProviders.map((provider) => {
+                                    const identity =
+                                        accountIdentities.find(
+                                            (item) =>
+                                                item.provider === provider.provider
                                         );
-                                    }
-                                )}
+                                    const loading =
+                                        socialAuthLoadingProvider === provider.provider;
+
+                                    return (
+                                        <article
+                                            className={`identity-provider-card ${identity ? "linked" : ""}`}
+                                            key={provider.provider}
+                                        >
+                                            <div className="identity-provider-mark">
+                                                <SocialProviderLogo provider={provider.provider} />
+                                            </div>
+
+                                            <div className="identity-provider-main">
+                                                <strong>{provider.displayName}</strong>
+
+                                                {identity ? (
+                                                    <>
+                                                        <span>
+                                                            {identity.email ||
+                                                                identity.displayName ||
+                                                                t("settings.auth.linked")}
+                                                        </span>
+                                                        <small>
+                                                            {t("settings.auth.linked")}
+                                                        </small>
+                                                    </>
+                                                ) : (
+                                                    <span>
+                                                        {t("settings.auth.notLinked")}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {!identity && (
+                                                <button
+                                                    className="secondary-action compact"
+                                                    type="button"
+                                                    disabled={
+                                                        !provider.available ||
+                                                        socialAuthLoadingProvider !== null
+                                                    }
+                                                    onClick={() => {
+                                                        onLinkAccountIdentity(provider.provider);
+                                                    }}
+                                                >
+                                                    {loading
+                                                        ? t("settings.auth.waiting")
+                                                        : t("settings.auth.link")}
+                                                </button>
+                                            )}
+                                        </article>
+                                    );
+                                })}
                             </div>
                         </div>
                     </>
                 )}
 
                 {authMessage && (
-                    <div className="notice info">
+                    <div className="notice info account-auth-message">
                         {authMessage}
                     </div>
                 )}
             </section>
 
-            <section
+            {auth.authenticated && (
+                <section data-settings-group="account" className="settings-section password-security-section">
+                    <div className="settings-section-header">
+                        <div>
+                            <span className="eyebrow">SECURITY</span>
+                            <h2>Mật khẩu</h2>
+                        </div>
+                    </div>
+                    <form className="password-security-form" onSubmit={submitPasswordChange}>
+                        <label className="control-field">
+                            <span>Mật khẩu hiện tại</span>
+                            <input
+                                type="password"
+                                value={currentPassword}
+                                onChange={(event) => setCurrentPassword(event.target.value)}
+                                autoComplete="current-password"
+                            />
+                        </label>
+                        <label className="control-field">
+                            <span>Mật khẩu mới</span>
+                            <input
+                                type="password"
+                                value={nextPassword}
+                                onChange={(event) => setNextPassword(event.target.value)}
+                                autoComplete="new-password"
+                            />
+                        </label>
+                        <label className="control-field">
+                            <span>Xác nhận mật khẩu mới</span>
+                            <input
+                                type="password"
+                                value={confirmNextPassword}
+                                onChange={(event) => setConfirmNextPassword(event.target.value)}
+                                autoComplete="new-password"
+                            />
+                        </label>
+                        <button
+                            type="submit"
+                            className="primary-action"
+                            disabled={passwordSecurityLoading || !backend.connected}
+                        >
+                            {passwordSecurityLoading ? "Đang đổi..." : "Đổi mật khẩu"}
+                        </button>
+                    </form>
+                    {passwordSecurityMessage && (
+                        <div className="notice info compact-notice">{passwordSecurityMessage}</div>
+                    )}
+                </section>
+            )}
+
+            <section data-settings-group="plan"
                 className="settings-section"
                 id="pricing-catalog"
             >
@@ -1030,8 +1691,7 @@ export function SettingsPage({
                         </h2>
 
                         <p>
-                            Plan, feature và giá dưới đây được tải trực tiếp từ backend.
-                            Thay đổi trong Admin không cần build lại Desktop.
+                            Các gói hiện có và mức giá tương ứng.
                         </p>
                     </div>
 
@@ -1054,7 +1714,7 @@ export function SettingsPage({
 
                 {!backend.connected && (
                     <div className="notice info">
-                        Kết nối backend để tải bảng giá hiện tại.
+                        Không thể tải bảng giá lúc này.
                     </div>
                 )}
 
@@ -1084,12 +1744,7 @@ export function SettingsPage({
                                     </strong>
 
                                     <span>
-                                        {plan.code}
-                                        {" · "}
-                                        {enabledFeatures} quyền bật
-                                        {plan.description
-                                            ? ` · ${plan.description}`
-                                            : ""}
+                                        {plan.description || `${enabledFeatures} tính năng`}
                                     </span>
                                 </div>
 
@@ -1104,7 +1759,8 @@ export function SettingsPage({
                                                     {": "}
                                                     {formatCatalogMoney(
                                                         price.amountMinor,
-                                                        price.currency
+                                                        price.currency,
+                                                        intlLocale
                                                     )}
                                                 </strong>
 
@@ -1114,7 +1770,8 @@ export function SettingsPage({
                                                         {" · Niêm yết "}
                                                         {formatCatalogMoney(
                                                             price.compareAtAmountMinor,
-                                                            price.currency
+                                                            price.currency,
+                                                            intlLocale
                                                         )}
                                                     </span>
                                                 )}
@@ -1139,25 +1796,17 @@ export function SettingsPage({
                         <div className="device-row">
                             <div>
                                 <strong>
-                                    Chưa có plan đang mở bán
+                                    Chưa có gói đang mở bán.
                                 </strong>
-                                <span>
-                                    Kiểm tra Plans & Features và Pricing trong Admin.
-                                </span>
                             </div>
                         </div>
                     )}
                 </div>
 
-                <div className="notice info">
-                    Bảng giá chỉ dùng để hiển thị sản phẩm. Quyền sử dụng thực tế
-                    vẫn do endpoint entitlement của tài khoản quyết định.
-                </div>
-
             </section>
 
             {auth.authenticated && (
-                <section
+                <section data-settings-group="plan"
                     className="settings-section"
                     id="plan-license"
                 >
@@ -1172,8 +1821,7 @@ export function SettingsPage({
                             </h2>
 
                             <p>
-                                Quyền tính năng được lấy từ backend.
-                                Desktop không tự quyết định gói trả phí.
+                                Tính năng có trong gói hiện tại của bạn.
                             </p>
                         </div>
 
@@ -1188,14 +1836,14 @@ export function SettingsPage({
                         >
                             {isEntitlementLoading
                                 ? "Đang tải..."
-                                : "Làm mới quyền"}
+                                : "Làm mới"}
                         </button>
                     </div>
 
                     <div className="account-summary">
                         <div className="large-avatar">
                             {entitlements
-                                .planCode
+                                .planName
                                 .slice(0, 1)}
                         </div>
 
@@ -1204,17 +1852,6 @@ export function SettingsPage({
                                 {entitlements.planName}
                             </strong>
 
-                            <span>
-                                {entitlements.planCode}
-                                {" · "}
-                                {entitlements
-                                    .subscriptionStatus}
-                                {entitlements
-                                    .developmentOverride
-                                    ? " · DEV OVERRIDE"
-                                    : ""}
-                            </span>
-
                             {entitlements.periodEnd && (
                                 <span>
                                     Hết hạn:
@@ -1222,14 +1859,14 @@ export function SettingsPage({
                                     {new Date(
                                         entitlements.periodEnd
                                     ).toLocaleDateString(
-                                        "vi-VN"
+                                        intlLocale
                                     )}
                                 </span>
                             )}
                         </div>
 
                         <div className="verified-badge">
-                            ✓ {Object.values(entitlements.features).filter(Boolean).length} quyền đang bật
+                            ✓ {Object.values(entitlements.features).filter(Boolean).length} tính năng
                         </div>
                     </div>
 
@@ -1248,7 +1885,7 @@ export function SettingsPage({
                                 "mangaPanel"
                             ],
                             [
-                                "Manga Session",
+                                "Phiên Manga",
                                 "mangaSession"
                             ],
                             [
@@ -1286,11 +1923,6 @@ export function SettingsPage({
                                             {label}
                                         </strong>
 
-                                        <span>
-                                            Feature:
-                                            {" "}
-                                            {key}
-                                        </span>
                                     </div>
 
                                     <div
@@ -1314,7 +1946,7 @@ export function SettingsPage({
                     </div>
 
                     <div className="notice info">
-                        Quota tháng:
+                        Mức sử dụng:
                         {" "}
                         {entitlements
                             .usage
@@ -1342,7 +1974,7 @@ export function SettingsPage({
                     >
                         <label className="control-field">
                             <span>
-                                License key
+                                Mã giấy phép
                             </span>
 
                             <input
@@ -1369,7 +2001,7 @@ export function SettingsPage({
                         >
                             {isActivatingLicense
                                 ? "Đang kích hoạt..."
-                                : "Kích hoạt license"}
+                                : "Kích hoạt giấy phép"}
                         </button>
                     </form>
 
@@ -1382,7 +2014,7 @@ export function SettingsPage({
             )}
 
             {auth.authenticated && (
-                <section className="settings-section">
+                <section data-settings-group="plan" className="settings-section">
                     <div className="settings-section-header">
                         <div>
                             <span className="eyebrow">
@@ -1394,7 +2026,7 @@ export function SettingsPage({
                             </h2>
 
                             <p>
-                                Thu hồi refresh session của từng máy.
+                                Quản lý các thiết bị đang đăng nhập vào tài khoản.
                             </p>
                         </div>
 
@@ -1427,7 +2059,9 @@ export function SettingsPage({
                                         </strong>
 
                                         <span>
-                                            {device.deviceId}
+                                            {device.lastUsedAt
+                                                ? `Hoạt động gần đây: ${new Date(device.lastUsedAt).toLocaleString(intlLocale)}`
+                                                : "Thiết bị đã đăng nhập"}
                                         </span>
                                     </div>
 
@@ -1455,11 +2089,11 @@ export function SettingsPage({
                 </section>
             )}
 
-            <section className="settings-section">
+            <section data-settings-group="reading" className="settings-section">
                 <div className="settings-section-header">
                     <div>
                         <span className="eyebrow violet">
-                            STUDY & OVERLAY
+                            READING & STUDY
                         </span>
 
                         <h2>
@@ -1467,8 +2101,7 @@ export function SettingsPage({
                         </h2>
 
                         <p>
-                            Các lựa chọn này được lưu ở Desktop
-                            và áp dụng cho Global Shortcut.
+                            Thiết lập mặc định khi dịch và học.
                         </p>
                     </div>
 
@@ -1490,7 +2123,7 @@ export function SettingsPage({
                 <div className="settings-preference-grid">
                     <label className="control-field">
                         <span>
-                            Study level mặc định
+                            Trình độ giải thích mặc định
                         </span>
 
                         <select
@@ -1544,8 +2177,7 @@ export function SettingsPage({
                             </strong>
 
                             <small>
-                                Chỉ lưu Vocabulary metadata,
-                                không lưu screenshot/câu manga.
+                                Tự động lưu từ mới.
                             </small>
                         </span>
                     </label>
@@ -1569,8 +2201,7 @@ export function SettingsPage({
                             </strong>
 
                             <small>
-                                Pattern/meaning/explanation được
-                                đưa vào Learning Library.
+                                Tự động lưu mẫu ngữ pháp.
                             </small>
                         </span>
                     </label>
@@ -1579,12 +2210,11 @@ export function SettingsPage({
                 <div className="settings-subsection">
                     <div>
                         <strong>
-                            Translation Overlay
+                            Bản dịch trên màn hình
                         </strong>
 
                         <span>
-                            Điều chỉnh bubble dịch mà không ảnh hưởng
-                            OCR hay vùng chọn.
+                            Điều chỉnh cách hiển thị bản dịch trên màn hình.
                         </span>
                     </div>
 
@@ -1610,8 +2240,8 @@ export function SettingsPage({
                                 </strong>
 
                                 <small>
-                                    Tắt nếu muốn overlay ở lại
-                                    cho tới khi Close/scan mới.
+                                    Tắt nếu muốn bản dịch ở lại
+                                    cho tới khi bạn đóng hoặc quét lại.
                                 </small>
                             </span>
                         </label>
@@ -1649,7 +2279,7 @@ export function SettingsPage({
 
                         <label className="control-field">
                             <span>
-                                Cỡ chữ overlay
+                                Cỡ chữ bản dịch
                             </span>
 
                             <select
@@ -1690,7 +2320,7 @@ export function SettingsPage({
                 )}
             </section>
 
-            <section className="settings-section novel-font-settings-section">
+            <section data-settings-group="reading" className="settings-section novel-font-settings-section">
                 <div className="settings-section-header">
                     <div>
                         <span className="eyebrow violet">
@@ -1783,8 +2413,7 @@ export function SettingsPage({
                         />
 
                         <small>
-                            Dùng tên font đã cài trên Windows. App vẫn
-                            nối thêm fallback để giảm lỗi glyph.
+                            Nhập tên font đã cài trên máy.
                         </small>
                     </label>
                 </div>
@@ -1815,7 +2444,7 @@ export function SettingsPage({
                 )}
             </section>
 
-            <section className="settings-section">
+            <section data-settings-group="reading" className="settings-section">
                 <div className="settings-section-header">
                     <div>
                         <span className="eyebrow">
@@ -1827,8 +2456,7 @@ export function SettingsPage({
                         </h2>
 
                         <p>
-                            Dịch nhanh, Quét khung truyện và Study là
-                            ba phím độc lập, kể cả khi app đang minimized.
+                            Các phím tắt vẫn hoạt động khi AI Translator đang chạy nền.
                         </p>
                     </div>
 
@@ -1914,7 +2542,7 @@ export function SettingsPage({
                         />
 
                         <small>
-                            Dùng lại vùng quét của Manga Session · mặc định Ctrl+Shift+Y
+                            Mặc định: Ctrl+Shift+Y
                         </small>
                     </label>
 
@@ -1948,43 +2576,9 @@ export function SettingsPage({
                         {shortcutMessage}
                     </div>
                 )}
-
-                <div className="shortcut-behavior-note">
-                    <strong>
-                        Dịch nhanh
-                    </strong>
-
-                    <span>
-                        → OCR → /translate → overlay
-                    </span>
-
-                    <strong>
-                        Quét khung truyện
-                    </strong>
-
-                    <span>
-                        → chọn một khung/page → OCR nhiều bubble → batch translate → multi-overlay
-                    </span>
-
-                    <strong>
-                        Trang tiếp theo
-                    </strong>
-
-                    <span>
-                        → dùng lại vùng Manga Session → OCR → bubble detect → batch translate với context trang trước
-                    </span>
-
-                    <strong>
-                        Study
-                    </strong>
-
-                    <span>
-                        → OCR → Fast Translate + Study background
-                    </span>
-                </div>
             </section>
 
-            <section className="settings-section">
+            <section data-settings-group="advanced" className="settings-section">
                 <div className="settings-section-header">
                     <div>
                         <span className="eyebrow">
@@ -1996,9 +2590,8 @@ export function SettingsPage({
                         </h2>
 
                         <p>
-                            Khôi phục chỉ tác động cấu hình Desktop.
-                            Không xóa account, Profile, Vocabulary,
-                            Grammar hoặc Review history.
+                            Chỉ đặt lại cài đặt ứng dụng. Tài khoản, hồ sơ dịch,
+                            từ vựng, ngữ pháp và lịch sử ôn tập sẽ được giữ nguyên.
                         </p>
                     </div>
                 </div>
@@ -2034,53 +2627,38 @@ export function SettingsPage({
                     </span>
 
                     <span>
-                        Study:
+                        Học:
                         {" "}
                         Ctrl+Shift+E
                     </span>
 
                     <span>
-                        Level:
+                        Trình độ:
                         {" "}
                         AUTO
                     </span>
 
                     <span>
-                        Overlay:
+                        Hiển thị:
                         {" "}
-                        Auto-hide · 96%
+                        Tự ẩn · 96%
                     </span>
                 </div>
             </section>
 
-            <section className="settings-section">
+            <section data-settings-group="advanced" className="settings-section">
                 <div className="settings-section-header">
                     <div>
-                        <span className="eyebrow">
-                            BACKEND
-                        </span>
-
-                        <h2>
-                            Java Spring Boot
-                        </h2>
-
-                        <p>
-                            {backend.baseUrl}
-                        </p>
+                        <span className="eyebrow">SERVICE</span>
+                        <h2>Trạng thái dịch vụ</h2>
                     </div>
 
                     <button
                         className="secondary-action"
-                        onClick={
-                            onRefreshBackend
-                        }
-                        disabled={
-                            isCheckingBackend
-                        }
+                        onClick={onRefreshBackend}
+                        disabled={isCheckingBackend}
                     >
-                        {isCheckingBackend
-                            ? "Đang kiểm tra..."
-                            : "Kiểm tra"}
+                        {isCheckingBackend ? "Đang kiểm tra..." : "Thử lại"}
                     </button>
                 </div>
 
@@ -2092,32 +2670,20 @@ export function SettingsPage({
                                 : "status-dot"
                         }
                     />
-
                     <div>
                         <strong>
                             {backend.connected
-                                ? "Backend ready"
-                                : "Backend offline"}
+                                ? "Dịch vụ sẵn sàng"
+                                : "Dịch vụ tạm thời không khả dụng"}
                         </strong>
-
-                        <span>
-                            {backend.status}
-                        </span>
                     </div>
                 </div>
 
-                {backend.error && (
-                    <div className="notice danger">
-                        {backend.error}
+                {!backend.connected && (
+                    <div className="notice info">
+                        Kiểm tra kết nối mạng rồi thử lại.
                     </div>
                 )}
-
-                <div className="swagger-link">
-                    Swagger UI:
-                    {" "}
-                    {backend.baseUrl}
-                    /swagger-ui.html
-                </div>
             </section>
         </div>
     );
