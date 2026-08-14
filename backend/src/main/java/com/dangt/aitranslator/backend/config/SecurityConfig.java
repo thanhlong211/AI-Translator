@@ -1,12 +1,14 @@
 package com.dangt.aitranslator.backend.config;
 
 import org.springframework.context.annotation.Bean;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
@@ -21,7 +23,8 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             RestAuthenticationEntryPoint authenticationEntryPoint,
-            RestAccessDeniedHandler accessDeniedHandler
+            RestAccessDeniedHandler accessDeniedHandler,
+            ApiRateLimitFilter apiRateLimitFilter
     ) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
@@ -56,8 +59,22 @@ public class SecurityConfig {
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(authenticationEntryPoint)
                         .accessDeniedHandler(accessDeniedHandler)
+                )
+                .addFilterAfter(
+                        apiRateLimitFilter,
+                        BearerTokenAuthenticationFilter.class
                 );
 
         return http.build();
     }
+    @Bean
+    FilterRegistrationBean<ApiRateLimitFilter> apiRateLimitFilterRegistration(
+            ApiRateLimitFilter filter
+    ) {
+        FilterRegistrationBean<ApiRateLimitFilter> registration =
+                new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
 }

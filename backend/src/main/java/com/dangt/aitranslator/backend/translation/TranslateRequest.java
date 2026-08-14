@@ -59,10 +59,10 @@ public record TranslateRequest(
         TranslationPurpose purpose,
 
         @Valid
-        @Size(max = 10)
+        @Size(max = 50)
         @Schema(
                 description =
-                        "Tối đa 10 câu trước. Backend chỉ dùng số lượng do profile contextLines quy định."
+                        "Context được entitlement giới hạn; backend vẫn chỉ dùng số lượng do profile contextLines quy định."
         )
         List<TranslationContextItem> context
 

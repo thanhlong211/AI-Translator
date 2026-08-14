@@ -124,6 +124,10 @@ public class StudyController {
                 "Study Mode",
                 "PRO"
         );
+        entitlementService.requireContextItems(
+                user,
+                request.context().size()
+        );
         entitlementService.requireTranslationQuota(user);
 
         return studyService.analyze(

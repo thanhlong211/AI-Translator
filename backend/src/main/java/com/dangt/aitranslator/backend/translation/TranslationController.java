@@ -127,6 +127,11 @@ public class TranslationController {
             );
         }
 
+        entitlementService.requireContextItems(
+                user,
+                request.context().size()
+        );
+
         entitlementService
                 .requireTranslationQuota(user);
 

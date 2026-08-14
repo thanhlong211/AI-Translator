@@ -375,7 +375,7 @@
 
       context.title =
         sessionActive
-          ? `Context Manga · ${Number(session?.contextItems || 0)}/10 · Chapter ${Number(session?.chapterNumber || 1)}`
+          ? `Context Manga · ${Number(session?.contextItems || 0)}/${Number(session?.maxContextItems ?? 0)} · Chapter ${Number(session?.chapterNumber || 1)}`
           : "Xem Manga Session Context";
 
       pin.classList.toggle(
