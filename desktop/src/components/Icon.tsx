@@ -6,7 +6,11 @@ interface IconProps {
         | "scan"
         | "user"
         | "server"
-        | "copy";
+        | "copy"
+        | "card"
+        | "sliders"
+        | "check"
+        | "lock";
     size?: number;
 }
 
@@ -145,6 +149,42 @@ export function Icon({ name, size = 20 }: IconProps) {
                 <svg {...common}>
                     <rect x="8" y="8" width="11" height="11" rx="2" />
                     <path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+                </svg>
+            );
+        case "card":
+            return (
+                <svg {...common}>
+                    <rect x="3" y="5" width="18" height="14" rx="3" />
+                    <path d="M3 9h18" />
+                    <path d="M7 15h4" />
+                </svg>
+            );
+        case "sliders":
+            return (
+                <svg {...common}>
+                    <path d="M4 6h7" />
+                    <path d="M15 6h5" />
+                    <circle cx="13" cy="6" r="2" />
+                    <path d="M4 12h3" />
+                    <path d="M11 12h9" />
+                    <circle cx="9" cy="12" r="2" />
+                    <path d="M4 18h9" />
+                    <path d="M17 18h3" />
+                    <circle cx="15" cy="18" r="2" />
+                </svg>
+            );
+        case "check":
+            return (
+                <svg {...common}>
+                    <path d="m5 12 4 4L19 6" />
+                </svg>
+            );
+        case "lock":
+            return (
+                <svg {...common}>
+                    <rect x="5" y="10" width="14" height="10" rx="2.5" />
+                    <path d="M8 10V7a4 4 0 0 1 8 0v3" />
+                    <path d="M12 14v2" />
                 </svg>
             );
         default:

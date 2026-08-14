@@ -93,8 +93,7 @@ export function HistoryPage({
                     </h2>
 
                     <p>
-                        Tổng hợp từ Review/SRS metadata.
-                        Không lưu screenshot hay toàn bộ câu manga.
+                        Theo dõi tiến độ ôn tập gần đây.
                     </p>
                 </div>
 
@@ -181,7 +180,7 @@ export function HistoryPage({
                     </strong>
 
                     <small>
-                        có ít nhất 1 review
+                        có ít nhất 1 lượt ôn
                     </small>
                 </article>
 
@@ -209,7 +208,7 @@ export function HistoryPage({
                     </strong>
 
                     <small>
-                        mastery = MASTERED
+                        đã thuộc hoàn toàn
                     </small>
                 </article>
             </section>
@@ -334,13 +333,13 @@ export function HistoryPage({
                             className="text-action"
                             onClick={onOpenReview}
                         >
-                            Mở Review
+                            Mở ôn tập
                         </button>
                     </div>
 
                     {!dashboard.weakItems.length ? (
                         <div className="learning-empty-inline">
-                            Chưa có item nào bị đánh dấu yếu.
+                            Chưa có mục nào cần ưu tiên ôn thêm.
                         </div>
                     ) : (
                         <div className="weak-item-list">
@@ -409,7 +408,7 @@ export function HistoryPage({
                             </span>
 
                             <h3>
-                                Review gần đây
+                                Lượt ôn gần đây
                             </h3>
                         </div>
                     </div>
@@ -480,17 +479,6 @@ export function HistoryPage({
                         </div>
                     )}
                 </div>
-            </section>
-
-            <section className="learning-privacy-note">
-                <strong>
-                    Dữ liệu dashboard
-                </strong>
-
-                <span>
-                    Chỉ dùng đúng/sai, thời gian review, item ID và counter SRS.
-                    Không ghi screenshot, OCR sentence hay nội dung manga vào History.
-                </span>
             </section>
         </div>
     );

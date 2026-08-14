@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.common;
 
+import com.dangt.aitranslator.backend.admin.AdminErrorEventService;
 import com.dangt.aitranslator.backend.admin.AdminSecurityEventService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -20,11 +21,14 @@ public class GlobalExceptionHandler {
             );
 
     private final AdminSecurityEventService securityEventService;
+    private final AdminErrorEventService errorEventService;
 
     public GlobalExceptionHandler(
-            AdminSecurityEventService securityEventService
+            AdminSecurityEventService securityEventService,
+            AdminErrorEventService errorEventService
     ) {
         this.securityEventService = securityEventService;
+        this.errorEventService = errorEventService;
     }
 
     @ExceptionHandler(
@@ -122,12 +126,21 @@ public class GlobalExceptionHandler {
             AiResponseFormatException.class
     )
     ResponseEntity<ApiError> aiResponseFormat(
-            AiResponseFormatException ex
+            AiResponseFormatException ex,
+            HttpServletRequest request
     ) {
         log.warn(
                 "AI response format error requestId={} message={}",
                 RequestCorrelation.currentId(),
                 ex.getMessage()
+        );
+
+        errorEventService.recordHttpFailure(
+                request,
+                "AI_RESPONSE_FORMAT",
+                ex,
+                HttpStatus.BAD_GATEWAY.value(),
+                true
         );
 
         return error(
@@ -154,12 +167,21 @@ public class GlobalExceptionHandler {
             Exception.class
     )
     ResponseEntity<ApiError> unexpected(
-            Exception ex
+            Exception ex,
+            HttpServletRequest request
     ) {
         log.error(
                 "Backend error requestId={}",
                 RequestCorrelation.currentId(),
                 ex
+        );
+
+        errorEventService.recordHttpFailure(
+                request,
+                "INTERNAL_ERROR",
+                ex,
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                false
         );
 
         return error(

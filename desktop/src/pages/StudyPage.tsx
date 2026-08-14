@@ -95,24 +95,6 @@ function wordKey(
     ].join("::");
 }
 
-function formatMs(
-    value?: number
-) {
-    if (
-        value == null ||
-        value <= 0
-    ) {
-        return "";
-    }
-
-    if (value < 1000) {
-        return `${Math.round(value)}ms`;
-    }
-
-    return `${(
-        value / 1000
-    ).toFixed(1)}s`;
-}
 
 export function StudyPage({
     backend,
@@ -184,10 +166,6 @@ export function StudyPage({
     const grammarSync =
         study.result
             ?.grammarSync;
-
-    const performance =
-        study.result
-            ?.performance;
 
     const displayOriginal =
         analysis?.original ||
@@ -313,9 +291,7 @@ export function StudyPage({
                     </h2>
 
                     <p>
-                        Fast Translate chạy song song với Study Analyzer.
-                        Bạn có thể đọc bản dịch và quét câu tiếp theo
-                        mà không phải chờ toàn bộ grammar/vocabulary.
+                        Dịch ngay và tự động phân tích từ vựng, ngữ pháp sau đó.
                     </p>
                 </div>
 
@@ -426,8 +402,7 @@ export function StudyPage({
                         </strong>
 
                         <small>
-                            Chỉ vocabulary item,
-                            không lưu cả câu.
+                            Chỉ lưu từ vựng, không lưu cả câu.
                         </small>
                     </span>
                 </label>
@@ -451,27 +426,26 @@ export function StudyPage({
                         </strong>
 
                         <small>
-                            Chỉ lưu pattern + giải thích,
-                            không lưu cả câu truyện.
+                            Chỉ lưu mẫu ngữ pháp và giải thích.
                         </small>
                     </span>
                 </label>
 
                 <div className="study-toolbar-info">
                     <span>
-                        Context:
+                        Ngữ cảnh:
                         {" "}
                         {activeProfile?.contextLines ?? 0}
                     </span>
 
                     <span>
-                        Glossary:
+                        Thuật ngữ:
                         {" "}
                         {activeProfile?.glossary.length ?? 0}
                     </span>
 
                     <span>
-                        Characters:
+                        Nhân vật:
                         {" "}
                         {activeProfile?.characters.length ?? 0}
                     </span>
@@ -480,7 +454,7 @@ export function StudyPage({
 
             {profileDirty && (
                 <div className="notice warning">
-                    Profile đang có thay đổi chưa lưu.
+                    Hồ sơ đang có thay đổi chưa lưu.
                     Hãy lưu trước khi quét.
                 </div>
             )}
@@ -493,13 +467,13 @@ export function StudyPage({
 
             {!backend.connected && (
                 <div className="notice danger">
-                    Java backend hiện không kết nối được.
+                    Dịch vụ tạm thời không khả dụng.
                 </div>
             )}
 
             {sync?.autoSaved && (
                 <div className="notice success-notice">
-                    Vocabulary Auto-save:
+                    Từ vựng đã lưu:
                     {" "}
                     <strong>
                         {sync.inserted}
@@ -519,7 +493,7 @@ export function StudyPage({
 
             {grammarSync?.autoSaved && (
                 <div className="notice success-notice">
-                    Grammar Auto-save:
+                    Ngữ pháp đã lưu:
                     {" "}
                     <strong>
                         {grammarSync.inserted}
@@ -557,9 +531,9 @@ export function StudyPage({
                     <div className="study-empty-preview">
                         <div>
                             <span>1</span>
-                            <strong>OCR</strong>
+                            <strong>1</strong>
                             <small>
-                                nhận diện câu
+                                Nhận diện câu
                             </small>
                         </div>
 
@@ -569,9 +543,9 @@ export function StudyPage({
 
                         <div>
                             <span>2</span>
-                            <strong>Fast Translate</strong>
+                            <strong>2</strong>
                             <small>
-                                hiện overlay trước
+                                Hiện bản dịch
                             </small>
                         </div>
 
@@ -581,9 +555,9 @@ export function StudyPage({
 
                         <div>
                             <span>3</span>
-                            <strong>Study AI</strong>
+                            <strong>3</strong>
                             <small>
-                                hoàn thiện background
+                                Phân tích học tập
                             </small>
                         </div>
                     </div>
@@ -628,30 +602,6 @@ export function StudyPage({
                                         studyLevel
                                     }
                                 </span>
-
-                                {fast?.visibleMs ? (
-                                    <span className="performance-chip fast">
-                                        Dịch:
-                                        {" "}
-                                        {
-                                            formatMs(
-                                                fast.visibleMs
-                                            )
-                                        }
-                                    </span>
-                                ) : null}
-
-                                {performance?.totalMs ? (
-                                    <span className="performance-chip">
-                                        Study:
-                                        {" "}
-                                        {
-                                            formatMs(
-                                                performance.totalMs
-                                            )
-                                        }
-                                    </span>
-                                ) : null}
 
                                 <button
                                     className="text-action"
@@ -727,8 +677,7 @@ export function StudyPage({
                                 </strong>
 
                                 <p>
-                                    AI đang phân tích Hiragana,
-                                    cấu trúc, ngữ pháp và từ vựng ở background.
+                                    AI đang phân tích cách đọc, cấu trúc, ngữ pháp và từ vựng.
                                     Bạn có thể quét câu tiếp theo ngay.
                                 </p>
                             </div>

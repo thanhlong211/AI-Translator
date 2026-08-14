@@ -33,6 +33,9 @@ public class AdminController {
     private final AdminMarginDashboardService marginDashboardService;
     private final AdminSecurityEventService securityEventService;
     private final AdminAuditService auditService;
+    private final AdminOperationalHealthService operationalHealthService;
+    private final AdminErrorEventService errorEventService;
+    private final AdminSafetyService safetyService;
 
     public AdminController(
             AdminGuard adminGuard,
@@ -50,7 +53,10 @@ public class AdminController {
             RevenueNormalizationService revenueNormalizationService,
             AdminMarginDashboardService marginDashboardService,
             AdminSecurityEventService securityEventService,
-            AdminAuditService auditService
+            AdminAuditService auditService,
+            AdminOperationalHealthService operationalHealthService,
+            AdminErrorEventService errorEventService,
+            AdminSafetyService safetyService
     ) {
         this.adminGuard = adminGuard;
         this.adminService = adminService;
@@ -68,6 +74,9 @@ public class AdminController {
         this.marginDashboardService = marginDashboardService;
         this.securityEventService = securityEventService;
         this.auditService = auditService;
+        this.operationalHealthService = operationalHealthService;
+        this.errorEventService = errorEventService;
+        this.safetyService = safetyService;
     }
 
     @GetMapping("/dashboard")
@@ -611,6 +620,98 @@ public class AdminController {
                 outcome,
                 category,
                 eventType,
+                query,
+                limit
+        );
+    }
+
+    @GetMapping("/operational-health")
+    public AdminOperationalHealthResponse operationalHealth(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return operationalHealthService.snapshot();
+    }
+
+    @GetMapping("/safety")
+    public AdminSafetyResponse safety(
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return safetyService.snapshot();
+    }
+
+    @PostMapping("/safety/mode")
+    public AdminSafetyResponse updateSafetyMode(
+            @Valid @RequestBody AdminSafetyModeUpdateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return safetyService.changeMode(actor, request);
+    }
+
+    @GetMapping("/error-events")
+    public AdminErrorDashboardResponse errorEvents(
+            @RequestParam(defaultValue = "7") int days,
+            @RequestParam(defaultValue = "") String status,
+            @RequestParam(defaultValue = "") String severity,
+            @RequestParam(defaultValue = "") String module,
+            @RequestParam(defaultValue = "") String errorCode,
+            @RequestParam(defaultValue = "") String query,
+            @RequestParam(defaultValue = "300") int limit,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return errorEventService.dashboard(days, status, severity, module, errorCode, query, limit);
+    }
+
+    @GetMapping("/error-events/{eventId}")
+    public AdminErrorEventResponse errorEvent(
+            @PathVariable long eventId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return errorEventService.get(eventId);
+    }
+
+    @PostMapping("/error-events/{eventId}/acknowledge")
+    public AdminErrorEventResponse acknowledgeErrorEvent(
+            @PathVariable long eventId,
+            @Valid @RequestBody AdminReasonRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return errorEventService.acknowledge(eventId, actor, request.reason());
+    }
+
+    @PostMapping("/error-events/{eventId}/resolve")
+    public AdminErrorEventResponse resolveErrorEvent(
+            @PathVariable long eventId,
+            @Valid @RequestBody AdminReasonRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return errorEventService.resolve(eventId, actor, request.reason());
+    }
+
+    @GetMapping("/audit-dashboard")
+    public AdminAuditDashboardResponse auditDashboard(
+            @RequestParam(defaultValue = "7") int days,
+            @RequestParam(defaultValue = "") String category,
+            @RequestParam(defaultValue = "") String action,
+            @RequestParam(defaultValue = "") String actor,
+            @RequestParam(defaultValue = "") String target,
+            @RequestParam(defaultValue = "") String query,
+            @RequestParam(defaultValue = "300") int limit,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return auditService.dashboard(
+                days,
+                category,
+                action,
+                actor,
+                target,
                 query,
                 limit
         );

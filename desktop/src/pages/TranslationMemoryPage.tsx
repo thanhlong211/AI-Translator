@@ -176,8 +176,7 @@ export function TranslationMemoryPage({
                     </h2>
 
                     <p>
-                        Các bản sửa bạn chủ động lưu. Exact-match sẽ ưu tiên
-                        dùng bộ nhớ này trước khi gọi AI.
+                        Các bản sửa bạn lưu sẽ được ưu tiên để bản dịch sau nhất quán hơn.
                     </p>
                 </div>
 
@@ -194,7 +193,7 @@ export function TranslationMemoryPage({
 
                     <div>
                         <strong>{stats.totalHits}</strong>
-                        <span>AI calls tránh được</span>
+                        <span>Lần đã tái sử dụng</span>
                     </div>
                 </div>
             </section>
@@ -312,7 +311,7 @@ export function TranslationMemoryPage({
                     <h3>Chưa có Translation Memory</h3>
                     <p>
                         Dịch một câu, sửa kết quả rồi bấm “Lưu bản sửa”.
-                        Memory sẽ xuất hiện ở đây.
+                        Bản sửa sẽ xuất hiện ở đây.
                     </p>
                 </section>
             ) : (
@@ -341,7 +340,7 @@ export function TranslationMemoryPage({
 
                                         <small>
                                             {profileNameById.get(item.profileId) ||
-                                                `Profile #${item.profileId}`}
+                                                `Hồ sơ #${item.profileId}`}
                                         </small>
                                     </div>
 

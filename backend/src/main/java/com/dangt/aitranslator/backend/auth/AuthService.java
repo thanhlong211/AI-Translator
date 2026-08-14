@@ -2,6 +2,7 @@ package com.dangt.aitranslator.backend.auth;
 
 import com.dangt.aitranslator.backend.common.ConflictException;
 import com.dangt.aitranslator.backend.common.ForbiddenException;
+import com.dangt.aitranslator.backend.common.EmailNormalizer;
 import com.dangt.aitranslator.backend.common.UnauthorizedException;
 import com.dangt.aitranslator.backend.session.RefreshTokenService;
 import com.dangt.aitranslator.backend.user.UserAccount;
@@ -11,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Locale;
 
 @Service
 public class AuthService {
@@ -35,7 +35,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        String email = normalizeEmail(request.email());
+        String email = EmailNormalizer.normalize(request.email());
 
         if (userRepository.existsByEmail(email)) {
             throw new ConflictException("Email này đã được đăng ký.");
@@ -61,7 +61,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        String email = normalizeEmail(request.email());
+        String email = EmailNormalizer.normalize(request.email());
 
         UserAccount user = userRepository
                 .findByEmail(email)
@@ -153,9 +153,4 @@ public class AuthService {
         }
     }
 
-    private String normalizeEmail(String email) {
-        return email
-                .trim()
-                .toLowerCase(Locale.ROOT);
-    }
 }

@@ -1347,7 +1347,7 @@ export function NovelReaderPage({
 
         if (!api.ocrNovelPdfPages) {
             throw new Error(
-                "Electron preload chưa có PDF OCR API. Hãy restart Desktop sau khi áp patch."
+                "PDF OCR chưa sẵn sàng. Hãy khởi động lại ứng dụng và thử lại."
             );
         }
 
@@ -1447,7 +1447,7 @@ export function NovelReaderPage({
             setStatus(
                 addedCount > 1
                     ? `Đã thêm ${addedCount} PDF scan vào Library · đã OCR các trang đầu của ${firstPayload.file.title || firstPayload.file.name}.`
-                    : `Đã mở PDF scan · OCR cache sẽ được tái sử dụng ở lần đọc sau.`
+                    : `Đã mở PDF scan.`
             );
         } catch (error) {
             setStatus(
@@ -1535,7 +1535,7 @@ export function NovelReaderPage({
             ) {
                 const pdfFile = result?.file || result?.document;
                 if (!pdfFile) {
-                    throw new Error("Không đọc được metadata PDF OCR.");
+                    throw new Error("Không đọc được thông tin PDF.");
                 }
                 result = await runPdfOcrPages(pdfFile, 1, 3);
             }
@@ -1642,7 +1642,7 @@ export function NovelReaderPage({
         }
 
         if (!backend.connected) {
-            setStatus("Java backend hiện không kết nối được.");
+            setStatus("Dịch vụ tạm thời không khả dụng.");
             return;
         }
 
@@ -1736,7 +1736,7 @@ export function NovelReaderPage({
             ) {
                 throw new Error(
                     result?.error ||
-                    "Backend không trả về bản dịch novel."
+                    "Không thể nhận bản dịch lúc này. Vui lòng thử lại."
                 );
             }
 
@@ -1785,9 +1785,8 @@ export function NovelReaderPage({
                 Math.max(0, start - 3)
             );
 
-            const summary = result.summary || {};
             setStatus(
-                `Đã dịch ${selected.length} đoạn · Memory ${summary.memoryHits || 0} · AI ${summary.aiBlocks || 0}.`
+                `Đã dịch ${selected.length} đoạn.`
             );
 
             window.setTimeout(() => {
@@ -1824,8 +1823,7 @@ export function NovelReaderPage({
                     </h2>
 
                     <p>
-                        FREE vẫn dùng Quick Translate. PRO mở Novel Reader TXT/EPUB/PDF Text/PDF OCR,
-                        Study Mode và Manga Session; MANGA+ mở thêm Continuous Manga.
+                        Nâng cấp để đọc và dịch TXT, EPUB và PDF ngay trong AI Translator.
                     </p>
 
                     <button
@@ -1885,7 +1883,7 @@ export function NovelReaderPage({
             <section className="novel-reader-hero">
                 <div>
                     <span className="eyebrow violet">
-                        DOCUMENT READER · TXT + EPUB + PDF TEXT + PDF OCR · PRO
+                        DOCUMENT READER · TXT · EPUB · PDF
                     </span>
 
                     <h2>
@@ -1893,8 +1891,7 @@ export function NovelReaderPage({
                     </h2>
 
                     <p>
-                        TXT, EPUB, PDF có text và PDF scan đều được xử lý cục bộ trên Desktop.
-                        PDF scan dùng PaddleOCR local; chỉ text bạn yêu cầu dịch mới được gửi backend.
+                        Đọc TXT, EPUB và PDF trong cùng một thư viện.
                     </p>
                 </div>
 
@@ -1940,7 +1937,7 @@ export function NovelReaderPage({
                         <span className="eyebrow">NOVEL LIBRARY</span>
                         <h3>Thư viện của bạn</h3>
                         <p>
-                            {library.length} tài liệu · TXT/EPUB/PDF Text/PDF OCR lưu cục bộ · không xóa file gốc khi gỡ khỏi Library.
+                            {library.length} tài liệu · Xóa khỏi thư viện không xóa file gốc trên máy.
                         </p>
                     </div>
 

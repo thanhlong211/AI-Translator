@@ -393,6 +393,27 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  forgotPassword: (payload) => {
+    return ipcRenderer.invoke(
+      "auth:forgot-password",
+      payload
+    );
+  },
+
+  resetPassword: (payload) => {
+    return ipcRenderer.invoke(
+      "auth:reset-password",
+      payload
+    );
+  },
+
+  changePassword: (payload) => {
+    return ipcRenderer.invoke(
+      "auth:change-password",
+      payload
+    );
+  },
+
   getSocialAuthProviders: () => {
     return ipcRenderer.invoke(
       "auth:get-social-providers"

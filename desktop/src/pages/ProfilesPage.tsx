@@ -188,7 +188,7 @@ export function ProfilesPage({
             <section className="page-intro-row">
                 <div>
                     <span className="eyebrow">
-                        PROMPT ENGINE
+                        TRANSLATION PROFILE
                     </span>
 
                     <h2>
@@ -196,8 +196,7 @@ export function ProfilesPage({
                     </h2>
 
                     <p>
-                        Profile được lưu trong MySQL và Java
-                        sẽ dùng toàn bộ rules bên dưới để build prompt.
+                        Quản lý phong cách dịch, nhân vật và thuật ngữ cho từng nội dung.
                     </p>
                 </div>
 

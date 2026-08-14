@@ -56,6 +56,7 @@ import { ProfilesPage } from "./pages/ProfilesPage";
 import { TranslationMemoryPage } from "./pages/TranslationMemoryPage";
 import { HistoryPage } from "./pages/HistoryPage";
 import { SettingsPage } from "./pages/SettingsPage";
+import { useI18n } from "./i18n";
 import {
     normalizeSourceLanguage,
     normalizeTargetLanguage
@@ -185,6 +186,8 @@ function profileToPayload(
 }
 
 function App() {
+    const { t } = useI18n();
+
     const api =
         window.electronAPI as any;
 
@@ -632,9 +635,7 @@ function App() {
             translationMemory: true,
             continuousManga: false,
             novelReaderTxt: false,
-            novelReaderEpub: false,
-            pdfTextReader: false,
-            pdfOcrReader: false
+            novelReaderEpub: false
         },
         limits: {
             monthlyTranslations: 300,
@@ -1152,15 +1153,24 @@ function App() {
                     );
 
                     window.setTimeout(() => {
-                        document
-                            .getElementById(
-                                "plan-license"
+                        window.dispatchEvent(
+                            new CustomEvent(
+                                "ai-translator:open-settings-category",
+                                { detail: "plan" }
                             )
-                            ?.scrollIntoView({
-                                behavior: "smooth",
-                                block: "start"
-                            });
-                    }, 0);
+                        );
+
+                        window.setTimeout(() => {
+                            document
+                                .getElementById(
+                                    "plan-license"
+                                )
+                                ?.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "start"
+                                });
+                        }, 40);
+                    }, 60);
                 }
             );
 
@@ -1433,9 +1443,7 @@ function App() {
                     translationMemory: true,
                     continuousManga: false,
                     novelReaderTxt: false,
-                    novelReaderEpub: false,
-                    pdfTextReader: false,
-                    pdfOcrReader: false
+                    novelReaderEpub: false
                 },
                 limits: {
                     monthlyTranslations: 300,
@@ -1613,7 +1621,7 @@ function App() {
     ) {
         if (!backend.connected) {
             setAuthMessage(
-                "Java backend chưa kết nối."
+                "Không thể kết nối dịch vụ. Vui lòng thử lại."
             );
             return;
         }
@@ -1721,7 +1729,7 @@ function App() {
 
         if (!backend.connected) {
             setAuthMessage(
-                "Java backend chưa kết nối."
+                "Không thể kết nối dịch vụ. Vui lòng thử lại."
             );
             return;
         }
@@ -1803,9 +1811,7 @@ function App() {
                     translationMemory: true,
                     continuousManga: false,
                     novelReaderTxt: false,
-                    novelReaderEpub: false,
-                    pdfTextReader: false,
-                    pdfOcrReader: false
+                    novelReaderEpub: false
                 },
                 limits: {
                     monthlyTranslations: 300,
@@ -3640,7 +3646,7 @@ function App() {
                 (current) => ({
                     ...current,
                     status:
-                        "Java backend chưa kết nối."
+                        "Không thể kết nối dịch vụ. Vui lòng thử lại."
                 })
             );
             return;
@@ -3723,7 +3729,7 @@ function App() {
                 (current) => ({
                     ...current,
                     status:
-                        "Java backend chưa kết nối."
+                        "Không thể kết nối dịch vụ. Vui lòng thử lại."
                 })
             );
             return;
@@ -3761,15 +3767,24 @@ function App() {
                 "settings"
             );
             window.setTimeout(() => {
-                document
-                    .getElementById(
-                        "plan-license"
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "ai-translator:open-settings-category",
+                        { detail: "plan" }
                     )
-                    ?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start"
-                    });
-            }, 0);
+                );
+
+                window.setTimeout(() => {
+                    document
+                        .getElementById(
+                            "plan-license"
+                        )
+                        ?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
+                        });
+                }, 40);
+            }, 60);
             return;
         }
 
@@ -3845,7 +3860,7 @@ function App() {
                 (current) => ({
                     ...current,
                     status:
-                        "Java backend chưa kết nối."
+                        "Không thể kết nối dịch vụ. Vui lòng thử lại."
                 })
             );
             return;
@@ -4035,7 +4050,7 @@ function App() {
                 (current) => ({
                     ...current,
                     status:
-                        "Java backend chưa kết nối."
+                        "Không thể kết nối dịch vụ. Vui lòng thử lại."
                 })
             );
             return;
@@ -4073,15 +4088,24 @@ function App() {
                 "settings"
             );
             window.setTimeout(() => {
-                document
-                    .getElementById(
-                        "plan-license"
+                window.dispatchEvent(
+                    new CustomEvent(
+                        "ai-translator:open-settings-category",
+                        { detail: "plan" }
                     )
-                    ?.scrollIntoView({
-                        behavior: "smooth",
-                        block: "start"
-                    });
-            }, 0);
+                );
+
+                window.setTimeout(() => {
+                    document
+                        .getElementById(
+                            "plan-license"
+                        )
+                        ?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start"
+                        });
+                }, 40);
+            }, 60);
             return;
         }
 
@@ -4365,15 +4389,24 @@ function App() {
                             setActivePage("settings");
 
                             window.setTimeout(() => {
-                                document
-                                    .getElementById(
-                                        "plan-license"
+                                window.dispatchEvent(
+                                    new CustomEvent(
+                                        "ai-translator:open-settings-category",
+                                        { detail: "plan" }
                                     )
-                                    ?.scrollIntoView({
-                                        behavior: "smooth",
-                                        block: "start"
-                                    });
-                            }, 0);
+                                );
+
+                                window.setTimeout(() => {
+                                    document
+                                        .getElementById(
+                                            "plan-license"
+                                        )
+                                        ?.scrollIntoView({
+                                            behavior: "smooth",
+                                            block: "start"
+                                        });
+                                }, 40);
+                            }, 60);
                         }}
                     />
                 );
@@ -4844,25 +4877,42 @@ function App() {
                 </main>
 
                 <footer className="workspace-footer">
-                    <span>
-                        Dịch:
-                        {" "}
-                        {shortcutSettings.translateDisplay}
-                        {" "}·{" "}
-                        Study:
-                        {" "}
-                        {shortcutSettings.studyDisplay}
-                    </span>
+                    <div className="workspace-footer-group">
+                        <span className="shortcut-status">
+                            <kbd>{shortcutSettings.translateDisplay}</kbd>
+                            {t("status.quickTranslate")}
+                        </span>
 
-                    <span>
-                        {profileDraft
-                            ? `Profile: ${profileDraft.name}`
-                            : "No Profile"}
-                        {" "}·{" "}
-                        {backend.connected
-                            ? "AI Backend Ready"
-                            : "Backend Offline"}
-                    </span>
+                        <span className="shortcut-status">
+                            <kbd>{shortcutSettings.studyDisplay}</kbd>
+                            {t("status.study")}
+                        </span>
+                    </div>
+
+                    <div className="workspace-footer-group workspace-footer-right">
+                        <span className="profile-status">
+                            {t("status.profile")}:
+                            {" "}
+                            <strong>
+                                {profileDraft
+                                    ? profileDraft.name
+                                    : t("status.noProfile")}
+                            </strong>
+                        </span>
+
+                        <span
+                            className={
+                                backend.connected
+                                    ? "service-status online"
+                                    : "service-status"
+                            }
+                        >
+                            <span className="status-dot" />
+                            {backend.connected
+                                ? t("status.ready")
+                                : t("status.offline")}
+                        </span>
+                    </div>
                 </footer>
             </div>
         </div>
