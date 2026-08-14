@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Translator · Điều khiển trang manga</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      background: #080d18;
+      color: #eef4ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(82, 96, 255, .18), transparent 34%),
+        radial-gradient(circle at 100% 25%, rgba(15, 118, 110, .13), transparent 30%),
+        #080d18;
+    }
+
+    body { padding: 22px; }
+
+    button, input, select { font: inherit; }
+
+    .shell {
+      width: min(100%, 620px);
+      margin: 0 auto;
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 9px;
+      color: #a9b6d1;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, #6674ff, #7a56d9 58%, #0f9b8e);
+      color: white;
+      box-shadow: 0 8px 24px rgba(83, 94, 255, .28);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.18;
+      letter-spacing: -.02em;
+    }
+
+    .subtitle {
+      margin: 7px 0 0;
+      color: #8f9eb8;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .icon-close {
+      width: 34px;
+      height: 34px;
+      border: 1px solid #263149;
+      border-radius: 11px;
+      background: #111827cc;
+      color: #aeb9ce;
+      cursor: pointer;
+    }
+
+    .icon-close:hover { background: #1a2334; color: white; }
+
+    .site-card,
+    .card {
+      border: 1px solid #212c42;
+      border-radius: 17px;
+      background: rgba(14, 21, 35, .88);
+      box-shadow: 0 16px 42px rgba(0, 0, 0, .2);
+    }
+
+    .site-card {
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+
+    .site-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 13px;
+      border: 1px solid #2a3853;
+      background: #111b2e;
+      color: #8ea1ff;
+      font-size: 18px;
+    }
+
+    .site-card strong {
+      display: block;
+      font-size: 14px;
+    }
+
+    .site-card span {
+      display: block;
+      margin-top: 4px;
+      color: #7f8da7;
+      font-size: 11px;
+      line-height: 1.4;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .card { padding: 17px; margin-bottom: 14px; }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 13px;
+    }
+
+    .section-title strong { font-size: 14px; }
+    .section-title small { color: #65748f; font-size: 11px; }
+
+    .field { display: grid; gap: 7px; margin-top: 12px; }
+    .field:first-child { margin-top: 0; }
+
+    label {
+      color: #aab6ca;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    input,
+    select {
+      width: 100%;
+      min-height: 40px;
+      padding: 0 11px;
+      border: 1px solid #29364e;
+      border-radius: 11px;
+      outline: none;
+      background: #0a1220;
+      color: #eef4ff;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: #6574ff;
+      box-shadow: 0 0 0 3px rgba(101, 116, 255, .16);
+    }
+
+    .help {
+      color: #65748f;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .action-choice {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 9px;
+      align-items: center;
+      min-height: 58px;
+      padding: 10px;
+      border: 1px solid #29364e;
+      border-radius: 12px;
+      background: #0b1424;
+      color: #dbe5f5;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .action-choice:hover { border-color: #3b4b6c; background: #101b2e; }
+    .action-choice.active {
+      border-color: #6574ff;
+      background: rgba(75, 87, 210, .18);
+      box-shadow: inset 0 0 0 1px rgba(101, 116, 255, .18);
+    }
+
+    .action-choice .glyph {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background: #172139;
+      font-size: 14px;
+    }
+
+    .action-choice b { display: block; font-size: 12px; }
+    .action-choice small { display: block; margin-top: 3px; color: #70809b; font-size: 10px; }
+
+    .action-panel {
+      margin-top: 13px;
+      padding-top: 13px;
+      border-top: 1px solid #1e293d;
+    }
+
+    .action-panel[hidden] { display: none; }
+
+    .inline-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .capture-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .position {
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      padding: 0 11px;
+      border: 1px dashed #34425d;
+      border-radius: 11px;
+      background: #09111f;
+      color: #95a4be;
+      font-size: 12px;
+    }
+
+    .secondary,
+    .primary,
+    .danger {
+      min-height: 40px;
+      padding: 0 14px;
+      border-radius: 11px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    .secondary {
+      border: 1px solid #33415d;
+      background: #111b2d;
+      color: #dce6f6;
+    }
+
+    .secondary:hover { background: #17233a; }
+
+    .primary {
+      border: 1px solid #6876ff;
+      background: linear-gradient(135deg, #5f70ff, #7560dc);
+      color: white;
+      box-shadow: 0 10px 24px rgba(91, 104, 255, .22);
+    }
+
+    .primary:hover { filter: brightness(1.06); }
+
+    .danger {
+      border: 1px solid #67343d;
+      background: #231319;
+      color: #ff9fa9;
+    }
+
+    button:disabled { opacity: .48; cursor: not-allowed; filter: none; }
+
+    .notice {
+      display: none;
+      margin-bottom: 14px;
+      padding: 11px 12px;
+      border-radius: 11px;
+      border: 1px solid #2a3b5a;
+      background: #0d1a2e;
+      color: #aebed8;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .notice.visible { display: block; }
+    .notice.success { border-color: #1f5a4e; background: #0b241e; color: #8ee5c9; }
+    .notice.error { border-color: #63323d; background: #241116; color: #ffabb4; }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding-top: 2px;
+    }
+
+    .footer-right { display: flex; gap: 9px; }
+
+    @media (max-width: 540px) {
+      body { padding: 14px; }
+      .action-grid, .inline-grid { grid-template-columns: 1fr; }
+      .footer { align-items: stretch; flex-direction: column-reverse; }
+      .footer-right { display: grid; grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="header">
+      <div>
+        <div class="brand"><span class="brand-mark">A</span> AI Translator</div>
+        <h1>Điều khiển trang manga</h1>
+        <p class="subtitle">Lưu cách sang trang riêng cho từng website. AI Translator sẽ dùng đúng thao tác ở những lần đọc sau.</p>
+      </div>
+      <button class="icon-close" id="closeTop" title="Đóng">×</button>
+    </header>
+
+    <div id="notice" class="notice"></div>
+
+    <section class="site-card">
+      <div class="site-icon">◎</div>
+      <div>
+        <strong id="siteName">Website hiện tại</strong>
+        <span id="siteTitle">Đang nhận diện cửa sổ truyện…</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <strong>Nhận diện website</strong>
+        <small>Lưu trên máy này</small>
+      </div>
+
+      <div class="field">
+        <label for="profileName">Tên cấu hình</label>
+        <input id="profileName" maxlength="80" placeholder="MangaDex" />
+      </div>
+
+      <div class="field">
+        <label for="titleContains">Tiêu đề cửa sổ có chứa</label>
+        <input id="titleContains" maxlength="100" placeholder="MangaDex" />
+        <div class="help">Nên dùng một từ ổn định của website, không dùng tên chapter hoặc số trang.</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="section-title">
+        <strong>Khi bấm ⏭</strong>
+        <small>Chọn đúng kiểu của website</small>
+      </div>
+
+      <div class="action-grid">
+        <button class="action-choice" data-action="MANUAL">
+          <span class="glyph">↻</span>
+          <span><b>Tôi tự chuyển</b><small>Chỉ dịch trang hiện tại</small></span>
+        </button>
+        <button class="action-choice" data-action="KEY">
+          <span class="glyph">⌨</span>
+          <span><b>Phím bàn phím</b><small>← → Space Page Down…</small></span>
+        </button>
+        <button class="action-choice" data-action="CLICK">
+          <span class="glyph">●</span>
+          <span><b>Click nút Next</b><small>Chọn vị trí trên website</small></span>
+        </button>
+        <button class="action-choice" data-action="SCROLL">
+          <span class="glyph">↕</span>
+          <span><b>Cuộn trang</b><small>Cho webtoon / reader dọc</small></span>
+        </button>
+      </div>
+
+      <div id="manualPanel" class="action-panel">
+        <div class="help">AI Translator không tự tác động vào website. Bạn tự sang trang, sau đó bấm ⏭ hoặc Ctrl+Shift+Y để dịch trang đang hiển thị.</div>
+      </div>
+
+      <div id="keyPanel" class="action-panel" hidden>
+        <div class="field">
+          <label for="keyName">Phím chuyển trang</label>
+          <select id="keyName">
+            <option value="ARROWRIGHT">Mũi tên phải →</option>
+            <option value="ARROWLEFT">Mũi tên trái ←</option>
+            <option value="PAGEDOWN">Page Down</option>
+            <option value="PAGEUP">Page Up</option>
+            <option value="SPACE">Space</option>
+            <option value="ENTER">Enter</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="clickPanel" class="action-panel" hidden>
+        <div class="capture-row">
+          <div class="field">
+            <label>Vị trí đã lưu</label>
+            <div id="position" class="position">Chưa chọn vị trí</div>
+          </div>
+          <button id="capture" class="secondary">Chọn vị trí</button>
+        </div>
+        <div class="help" style="margin-top:9px">Khi chọn vị trí, cửa sổ này sẽ ẩn. Click đúng nút Next trên website. Click đó có thể làm reader sang trang một lần.</div>
+      </div>
+
+      <div id="scrollPanel" class="action-panel" hidden>
+        <div class="inline-grid">
+          <div class="field">
+            <label for="scrollDirection">Hướng cuộn</label>
+            <select id="scrollDirection">
+              <option value="DOWN">Cuộn xuống</option>
+              <option value="UP">Cuộn lên</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="scrollSteps">Độ dài</label>
+            <select id="scrollSteps">
+              <option value="2">Ngắn</option>
+              <option value="5">Vừa</option>
+              <option value="8">Dài</option>
+              <option value="12">Rất dài</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="field" style="margin-top:15px">
+        <label for="changeTimeout">Thời gian chờ trang mới</label>
+        <select id="changeTimeout">
+          <option value="1800">1.8 giây · website nhanh</option>
+          <option value="2800">2.8 giây · mặc định</option>
+          <option value="4000">4 giây · ảnh tải chậm</option>
+          <option value="6000">6 giây · mạng chậm</option>
+        </select>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <button id="delete" class="danger" disabled>Xóa cấu hình</button>
+      <div class="footer-right">
+        <button id="close" class="secondary">Đóng</button>
+        <button id="save" class="primary">Lưu cho website này</button>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let payload = null;
+    let profile = null;
+    let actionType = "MANUAL";
+
+    function setNotice(message, type = "") {
+      const node = $("notice");
+      node.textContent = message || "";
+      node.className = `notice${message ? " visible" : ""}${type ? ` ${type}` : ""}`;
+    }
+
+    function renderAction() {
+      document.querySelectorAll("[data-action]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.action === actionType);
+      });
+      $("manualPanel").hidden = actionType !== "MANUAL";
+      $("keyPanel").hidden = actionType !== "KEY";
+      $("clickPanel").hidden = actionType !== "CLICK";
+      $("scrollPanel").hidden = actionType !== "SCROLL";
+    }
+
+    function renderPosition() {
+      const x = Number(profile?.action?.clickX);
+      const y = Number(profile?.action?.clickY);
+      const configured = Boolean(profile?.action?.clickConfigured);
+      $("position").textContent =
+        configured && Number.isFinite(x) && Number.isFinite(y)
+          ? `${Math.round(x * 100)}% ngang · ${Math.round(y * 100)}% dọc`
+          : "Chưa chọn vị trí";
+    }
+
+    function applyPayload(nextPayload) {
+      payload = nextPayload;
+      profile = JSON.parse(JSON.stringify(nextPayload?.profile || {}));
+      profile.action = profile.action || {};
+      actionType = String(profile.action.type || "MANUAL").toUpperCase();
+
+      $("siteName").textContent = nextPayload?.navigation?.siteHint || profile.name || "Website hiện tại";
+      $("siteTitle").textContent = nextPayload?.target?.title || "Không đọc được tiêu đề cửa sổ";
+      $("profileName").value = profile.name || "";
+      $("titleContains").value = profile.titleContains || "";
+      $("keyName").value = profile.action.key || "ARROWRIGHT";
+      $("scrollDirection").value = profile.action.scrollDirection || "DOWN";
+      $("scrollSteps").value = String(profile.action.scrollSteps || 5);
+      $("changeTimeout").value = String(profile.action.changeTimeoutMs || 2800);
+      $("delete").disabled = !Boolean(nextPayload?.navigation?.configured);
+      $("save").disabled = !Boolean(nextPayload?.hasSession);
+
+      renderAction();
+      renderPosition();
+
+      if (!nextPayload?.hasSession) {
+        setNotice("Hãy bắt đầu Manga Session bằng Ctrl+Shift+W trước khi cấu hình điều khiển trang.", "error");
+      }
+    }
+
+    async function load() {
+      try {
+        const data = await window.electronAPI.getMangaNavigationConfig();
+        applyPayload(data);
+      } catch (error) {
+        setNotice(error?.message || "Không tải được cấu hình.", "error");
+      }
+    }
+
+    document.querySelectorAll("[data-action]").forEach((button) => {
+      button.addEventListener("click", () => {
+        actionType = button.dataset.action;
+        renderAction();
+      });
+    });
+
+    $("capture").addEventListener("click", async () => {
+      $("capture").disabled = true;
+      setNotice("Cửa sổ sẽ ẩn. Click đúng nút Next trên website; nhấn Esc để hủy.");
+      try {
+        const result = await window.electronAPI.captureMangaNavigationClickPoint();
+        if (result?.success) {
+          profile.action.clickX = result.clickX;
+          profile.action.clickY = result.clickY;
+          profile.action.clickConfigured = true;
+          actionType = "CLICK";
+          renderAction();
+          renderPosition();
+          setNotice(result.note || "Đã ghi nhận vị trí.", "success");
+        } else if (result?.cancelled) {
+          setNotice("Đã hủy chọn vị trí.");
+        }
+      } catch (error) {
+        setNotice(error?.message || "Không chọn được vị trí.", "error");
+      } finally {
+        $("capture").disabled = false;
+      }
+    });
+
+    $("save").addEventListener("click", async () => {
+      if (!profile) return;
+      $("save").disabled = true;
+      setNotice("Đang lưu…");
+      const nextProfile = {
+        ...profile,
+        name: $("profileName").value.trim(),
+        processName: payload?.target?.processName || profile.processName || "",
+        titleContains: $("titleContains").value.trim(),
+        action: {
+          ...(profile.action || {}),
+          type: actionType,
+          key: $("keyName").value,
+          scrollDirection: $("scrollDirection").value,
+          scrollSteps: Number($("scrollSteps").value),
+          changeTimeoutMs: Number($("changeTimeout").value),
+        },
+      };
+
+      if (!nextProfile.name || !nextProfile.titleContains) {
+        setNotice("Tên cấu hình và chuỗi nhận diện website không được để trống.", "error");
+        $("save").disabled = false;
+        return;
+      }
+
+      if (actionType === "CLICK" && !nextProfile.action.clickConfigured) {
+        setNotice("Hãy bấm “Chọn vị trí” và click nút Next trên website trước khi lưu.", "error");
+        $("save").disabled = false;
+        return;
+      }
+
+      try {
+        const result = await window.electronAPI.saveMangaNavigationProfile(nextProfile);
+        profile = result.profile;
+        payload.navigation = result.navigation;
+        $("delete").disabled = false;
+        setNotice(`Đã lưu “${result.navigation?.profileName || nextProfile.name}”. Nút ⏭ sẽ dùng cấu hình này.`, "success");
+      } catch (error) {
+        setNotice(error?.message || "Không lưu được cấu hình.", "error");
+      } finally {
+        $("save").disabled = false;
+      }
+    });
+
+    $("delete").addEventListener("click", async () => {
+      if (!profile?.id) return;
+      $("delete").disabled = true;
+      try {
+        const result = await window.electronAPI.deleteMangaNavigationProfile(profile.id);
+        applyPayload(result);
+        setNotice("Đã xóa cấu hình. Nút ⏭ sẽ yêu cầu thiết lập lại cho website này.", "success");
+      } catch (error) {
+        setNotice(error?.message || "Không xóa được cấu hình.", "error");
+        $("delete").disabled = false;
+      }
+    });
+
+    async function closeWindow() {
+      await window.electronAPI.closeMangaNavigationSettings();
+    }
+
+    $("close").addEventListener("click", closeWindow);
+    $("closeTop").addEventListener("click", closeWindow);
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeWindow();
+    });
+
+    load();
+  </script>
+</body>
+</html>

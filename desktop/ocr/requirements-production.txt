@@ -1,0 +1,3 @@
+# Versions currently validated with the AI Translator OCR worker protocol v2.
+paddleocr==3.7.0
+paddlepaddle==3.2.2

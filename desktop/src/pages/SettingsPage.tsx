@@ -235,6 +235,42 @@ interface PasswordDesktopApi {
     changePassword?: (payload: { currentPassword: string; newPassword: string }) => Promise<PasswordActionResult>;
 }
 
+type OcrWorkerState =
+    | "stopped"
+    | "starting"
+    | "ready"
+    | "busy"
+    | "degraded";
+
+interface OcrWorkerHealth {
+    status: OcrWorkerState;
+    ready: boolean;
+    busy: boolean;
+    queued: number;
+    pid?: number | null;
+    restartCount: number;
+    lastReadyAt?: string | null;
+    lastSuccessAt?: string | null;
+    lastError?: string | null;
+    runtime: {
+        pythonConfigured: boolean;
+        workerConfigured: boolean;
+        pythonVersion?: string | null;
+        paddleOcrVersion?: string | null;
+        paddlePaddleVersion?: string | null;
+        startupMs?: number | null;
+    };
+}
+
+interface OcrDesktopApi {
+    getOcrWorkerHealth?: () => Promise<OcrWorkerHealth>;
+    restartOcrWorker?: () => Promise<OcrWorkerHealth>;
+}
+
+function ocrDesktopApi(): OcrDesktopApi {
+    return window.electronAPI as unknown as OcrDesktopApi;
+}
+
 interface SettingsPageProps {
     backend: BackendStatus;
     auth: AuthStatus;
@@ -551,6 +587,21 @@ export function SettingsPage({
     ] = useState("");
 
 
+    const [
+        ocrHealth,
+        setOcrHealth
+    ] = useState<OcrWorkerHealth | null>(null);
+
+    const [
+        isCheckingOcr,
+        setIsCheckingOcr
+    ] = useState(false);
+
+    const [
+        isRestartingOcr,
+        setIsRestartingOcr
+    ] = useState(false);
+
     useEffect(() => {
         const handleOpenSettingsCategory = (event: Event) => {
             const next = (
@@ -628,6 +679,75 @@ export function SettingsPage({
         }
     }
 
+    async function refreshOcrHealth(quiet = false) {
+        const api = ocrDesktopApi().getOcrWorkerHealth;
+
+        if (!api) {
+            setOcrHealth(null);
+            return;
+        }
+
+        try {
+            if (!quiet) {
+                setIsCheckingOcr(true);
+            }
+
+            const health = await api();
+            setOcrHealth(health);
+        } catch {
+            setOcrHealth({
+                status: "degraded",
+                ready: false,
+                busy: false,
+                queued: 0,
+                restartCount: 0,
+                runtime: {
+                    pythonConfigured: false,
+                    workerConfigured: false
+                }
+            });
+        } finally {
+            if (!quiet) {
+                setIsCheckingOcr(false);
+            }
+        }
+    }
+
+    async function restartOcrEngine() {
+        const api = ocrDesktopApi().restartOcrWorker;
+
+        if (!api || isRestartingOcr) {
+            return;
+        }
+
+        try {
+            setIsRestartingOcr(true);
+            const health = await api();
+            setOcrHealth(health);
+        } catch {
+            await refreshOcrHealth(true);
+        } finally {
+            setIsRestartingOcr(false);
+        }
+    }
+
+    function ocrStatusLabel() {
+        switch (ocrHealth?.status) {
+            case "ready":
+                return t("settings.ocr.ready");
+            case "busy":
+                return t("settings.ocr.busy");
+            case "starting":
+                return t("settings.ocr.starting");
+            case "degraded":
+                return t("settings.ocr.degraded");
+            case "stopped":
+                return t("settings.ocr.stopped");
+            default:
+                return t("settings.ocr.unavailable");
+        }
+    }
+
     async function loadPricingCatalog() {
         const api = window.electronAPI
             .getPricingCatalog;
@@ -665,6 +785,22 @@ export function SettingsPage({
             void loadPricingCatalog();
         }
     }, [backend.connected]);
+
+    useEffect(() => {
+        if (activeSettingsCategory !== "advanced") {
+            return;
+        }
+
+        void refreshOcrHealth();
+
+        const interval = window.setInterval(() => {
+            void refreshOcrHealth(true);
+        }, 5000);
+
+        return () => {
+            window.clearInterval(interval);
+        };
+    }, [activeSettingsCategory]);
 
     useEffect(() => {
         setTranslateShortcut(
@@ -2526,7 +2662,7 @@ export function SettingsPage({
 
                     <label className="control-field">
                         <span>
-                            Trang manga tiếp theo
+                            Dịch trang manga hiện tại
                         </span>
 
                         <input
@@ -2542,7 +2678,7 @@ export function SettingsPage({
                         />
 
                         <small>
-                            Mặc định: Ctrl+Shift+Y
+                            Sau khi tự chuyển trang, nhấn phím này để quét lại vùng cũ. Mặc định: Ctrl+Shift+Y
                         </small>
                     </label>
 
@@ -2682,6 +2818,81 @@ export function SettingsPage({
                 {!backend.connected && (
                     <div className="notice info">
                         Kiểm tra kết nối mạng rồi thử lại.
+                    </div>
+                )}
+
+                <div className="ocr-service-card">
+                    <div className="ocr-service-main">
+                        <span
+                            className={
+                                ocrHealth?.ready
+                                    ? "status-dot online"
+                                    : ocrHealth?.status === "starting"
+                                        ? "status-dot warming"
+                                        : "status-dot"
+                            }
+                        />
+
+                        <div>
+                            <div className="ocr-service-title-row">
+                                <strong>{t("settings.ocr.title")}</strong>
+                                <span className="ocr-service-state">
+                                    {ocrStatusLabel()}
+                                </span>
+                            </div>
+
+                            <p>
+                                {t("settings.ocr.description")}
+                            </p>
+
+                            <small>
+                                {ocrHealth?.runtime.paddleOcrVersion
+                                    ? `PaddleOCR ${ocrHealth.runtime.paddleOcrVersion}${
+                                        ocrHealth.runtime.pythonVersion
+                                            ? ` · Python ${ocrHealth.runtime.pythonVersion}`
+                                            : ""
+                                    }`
+                                    : t("settings.ocr.runtimeFallback")}
+
+                                {ocrHealth?.queued
+                                    ? ` · ${ocrHealth.queued} ${t("settings.ocr.queuedSuffix")}`
+                                    : ""}
+                            </small>
+                        </div>
+                    </div>
+
+                    <div className="ocr-service-actions">
+                        <button
+                            className="secondary-action compact"
+                            type="button"
+                            onClick={() => {
+                                void refreshOcrHealth();
+                            }}
+                            disabled={isCheckingOcr || isRestartingOcr}
+                        >
+                            {isCheckingOcr
+                                ? t("settings.ocr.checking")
+                                : t("settings.ocr.refresh")}
+                        </button>
+
+                        <button
+                            className="secondary-action compact"
+                            type="button"
+                            onClick={() => {
+                                void restartOcrEngine();
+                            }}
+                            disabled={isRestartingOcr}
+                        >
+                            {isRestartingOcr
+                                ? t("settings.ocr.restarting")
+                                : t("settings.ocr.restart")}
+                        </button>
+                    </div>
+                </div>
+
+                {ocrHealth?.status === "degraded" && (
+                    <div className="notice info">
+                        {t("settings.ocr.problemHint")}
                     </div>
                 )}
             </section>

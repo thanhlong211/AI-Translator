@@ -1091,7 +1091,7 @@ function controlsBounds(
   const workArea =
     display.workArea;
 
-  const width = 430;
+  const width = 470;
   const height = 34;
   const gap = 8;
 
@@ -1610,11 +1610,14 @@ function applyOverlayInteractionMode() {
   }
 
   /*
-   * Bình thường overlay không được chiếm keyboard focus để tránh làm
-   * browser/game/mainWindow mất focus. Riêng lúc đang sửa text trong
-   * bubble, BrowserWindow PHẢI focusable thì textarea mới nhận bàn phím
-   * trên Windows. Sau Save/Cancel chúng ta trả ngay về non-focusable.
+   * Bình thường overlay không được chiếm focus để click xuyên xuống
+   * browser/game. Khi bật Edit, Windows cần BrowserWindow focusable=true
+   * thì hit-testing/drag/resize ổn định sau khi overlay đã hide/show lại
+   * ở Ctrl+Shift+Y. Chỉ gọi focus() khi textarea thực sự đang sửa chữ.
    */
+  const interactive =
+    overlayEditing;
+
   const needsKeyboardFocus =
     overlayEditing &&
     overlayTextInputActive;
@@ -1624,11 +1627,11 @@ function applyOverlayInteractionMode() {
     "function"
   ) {
     overlayWindow.setFocusable(
-      needsKeyboardFocus
+      interactive
     );
   }
 
-  if (overlayEditing) {
+  if (interactive) {
     overlayWindow.setIgnoreMouseEvents(
       false
     );
@@ -1641,7 +1644,7 @@ function applyOverlayInteractionMode() {
     );
   }
 
-  if (needsKeyboardFocus) {
+  if (interactive) {
     overlayWindow.show();
 
     if (
@@ -1651,11 +1654,13 @@ function applyOverlayInteractionMode() {
       overlayWindow.moveTop();
     }
 
-    /*
-     * setFocusable(true) không tự đảm bảo native keyboard focus.
-     * focus() là bước bắt buộc để keydown/input đi vào textarea.
-     */
-    overlayWindow.focus();
+    if (needsKeyboardFocus) {
+      /*
+       * setFocusable(true) không tự đảm bảo native keyboard focus.
+       * focus() là bước bắt buộc để keydown/input đi vào textarea.
+       */
+      overlayWindow.focus();
+    }
   } else {
     overlayWindow.showInactive();
   }
@@ -1963,6 +1968,7 @@ function showFullScreenTranslationOverlay(
 
   overlayEditing = false;
   overlayDebug = false;
+  overlayTextInputActive = false;
 
   let win =
     overlayWindow;
@@ -2095,6 +2101,57 @@ function hideFullScreenTranslationOverlay() {
 
   hideMangaSessionInspector(true);
   notifyOverlayState();
+}
+
+function restoreFullScreenTranslationOverlay() {
+  if (!lastPayload) {
+    return {
+      success: false,
+      visible: false
+    };
+  }
+
+  if (
+    overlayWindow &&
+    !overlayWindow.isDestroyed()
+  ) {
+    applyOverlayInteractionMode();
+
+    if (
+      typeof overlayWindow.moveTop ===
+      "function"
+    ) {
+      overlayWindow.moveTop();
+    }
+  }
+
+  if (
+    controlsWindow &&
+    !controlsWindow.isDestroyed()
+  ) {
+    controlsWindow.showInactive();
+
+    if (
+      typeof controlsWindow.moveTop ===
+      "function"
+    ) {
+      controlsWindow.moveTop();
+    }
+  }
+
+  if (
+    sessionInspectorRequestedVisible &&
+    lastPayload?.session?.active
+  ) {
+    void showMangaSessionInspector();
+  }
+
+  notifyOverlayState();
+
+  return {
+    success: true,
+    visible: true
+  };
 }
 
 function closeFullScreenTranslationOverlay() {
@@ -2235,6 +2292,7 @@ function getFullScreenOverlayState() {
 module.exports = {
   showFullScreenTranslationOverlay,
   hideFullScreenTranslationOverlay,
+  restoreFullScreenTranslationOverlay,
   closeFullScreenTranslationOverlay,
   setFullScreenOverlayPinned,
   toggleFullScreenOverlayPinned,

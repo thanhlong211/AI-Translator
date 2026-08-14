@@ -13,7 +13,6 @@ const {
 } = require("electron");
 const path = require("path");
 const os = require("os");
-const { spawn } = require("child_process");
 const screenshot = require("screenshot-desktop");
 const sharp = require("sharp");
 const {
@@ -87,15 +86,6 @@ const {
   OcrWorkerManager,
 } = require("./ocrWorkerManager.cjs");
 
-const {
-  normalizeAction: normalizeMangaNavigationAction,
-  normalizeProfiles: normalizeMangaNavigationProfiles,
-  findMatchingProfile: findMatchingMangaNavigationProfile,
-  createDraftForTarget: createMangaNavigationDraft,
-  upsertProfile: upsertMangaNavigationProfileList,
-  deleteProfile: deleteMangaNavigationProfileFromList,
-  publicNavigationState: buildMangaNavigationPublicState,
-} = require("./mangaNavigationProfiles.cjs");
 // ======================================================
 // JAVA BACKEND
 // ======================================================
@@ -1346,190 +1336,6 @@ function getMangaPanelSessionContext() {
     }));
 }
 
-function resolveMangaNavigationTargetWindow() {
-  return (
-    mangaPanelSession?.targetWindow ||
-    activeOverlayTargetWindow ||
-    pendingTargetWindow ||
-    null
-  );
-}
-
-function resolveActiveMangaNavigationProfile() {
-  if (!mangaPanelSession) {
-    return null;
-  }
-
-  const preferredId =
-    String(
-      mangaPanelSession.navigationProfileId ||
-      ""
-    ).trim();
-
-  if (preferredId) {
-    const preferred =
-      mangaNavigationProfiles.find(
-        (profile) =>
-          profile.id === preferredId
-      );
-
-    if (preferred) {
-      return preferred;
-    }
-  }
-
-  const matched =
-    findMatchingMangaNavigationProfile(
-      mangaNavigationProfiles,
-      resolveMangaNavigationTargetWindow()
-    );
-
-  if (matched) {
-    mangaPanelSession.navigationProfileId =
-      matched.id;
-  }
-
-  return matched || null;
-}
-
-function getMangaNavigationPublicState() {
-  return buildMangaNavigationPublicState({
-    profiles:
-      mangaNavigationProfiles,
-    targetWindow:
-      resolveMangaNavigationTargetWindow(),
-    preferredProfileId:
-      mangaPanelSession?.navigationProfileId ||
-      null,
-  });
-}
-
-function getMangaNavigationConfigPayload() {
-  const targetWindow =
-    resolveMangaNavigationTargetWindow();
-  const existing =
-    resolveActiveMangaNavigationProfile();
-  const draft =
-    createMangaNavigationDraft(
-      targetWindow,
-      existing
-    );
-
-  return {
-    success: true,
-    hasSession:
-      Boolean(mangaPanelSession),
-    target: targetWindow
-      ? {
-          processName:
-            String(targetWindow.processName || ""),
-          title:
-            String(targetWindow.title || ""),
-        }
-      : null,
-    profile: draft,
-    navigation:
-      getMangaNavigationPublicState(),
-  };
-}
-
-async function saveMangaNavigationProfile(
-  input
-) {
-  if (!mangaPanelSession) {
-    throw new Error(
-      "Chưa có Manga Session để lưu điều khiển trang."
-    );
-  }
-
-  const targetWindow =
-    resolveMangaNavigationTargetWindow();
-  const previousProfiles =
-    mangaNavigationProfiles;
-  const previousProfileId =
-    mangaPanelSession.navigationProfileId ||
-    null;
-
-  const result =
-    upsertMangaNavigationProfileList(
-      mangaNavigationProfiles,
-      input,
-      targetWindow
-    );
-
-  try {
-    mangaNavigationProfiles =
-      result.profiles;
-
-    mangaPanelSession.navigationProfileId =
-      result.profile.id;
-
-    await saveDesktopPreferences();
-  } catch (error) {
-    mangaNavigationProfiles =
-      previousProfiles;
-    mangaPanelSession.navigationProfileId =
-      previousProfileId;
-    throw error;
-  }
-
-  updateFullScreenOverlaySession(
-    getMangaPanelSessionState()
-  );
-
-  return {
-    success: true,
-    profile: result.profile,
-    navigation:
-      getMangaNavigationPublicState(),
-  };
-}
-
-async function removeMangaNavigationProfile(
-  profileId
-) {
-  const previousProfiles =
-    mangaNavigationProfiles;
-  const previousProfileId =
-    mangaPanelSession?.navigationProfileId ||
-    null;
-
-  try {
-    mangaNavigationProfiles =
-      deleteMangaNavigationProfileFromList(
-        mangaNavigationProfiles,
-        profileId
-      );
-
-    if (
-      mangaPanelSession &&
-      mangaPanelSession.navigationProfileId ===
-        String(profileId || "")
-    ) {
-      mangaPanelSession.navigationProfileId =
-        null;
-    }
-
-    await saveDesktopPreferences();
-  } catch (error) {
-    mangaNavigationProfiles =
-      previousProfiles;
-    if (mangaPanelSession) {
-      mangaPanelSession.navigationProfileId =
-        previousProfileId;
-    }
-    throw error;
-  }
-
-  if (mangaPanelSession) {
-    updateFullScreenOverlaySession(
-      getMangaPanelSessionState()
-    );
-  }
-
-  return getMangaNavigationConfigPayload();
-}
-
 function getMangaPanelSessionState() {
   if (!mangaPanelSession) {
     return {
@@ -1544,8 +1350,6 @@ function getMangaPanelSessionState() {
         ),
       capabilities:
         getDesktopFeatureCapabilities(),
-      navigation:
-        getMangaNavigationPublicState(),
       continuous:
         getMangaContinuousPublicState(),
     };
@@ -1587,8 +1391,6 @@ function getMangaPanelSessionState() {
       ),
     capabilities:
       getDesktopFeatureCapabilities(),
-    navigation:
-      getMangaNavigationPublicState(),
     continuous:
       getMangaContinuousPublicState(),
   };
@@ -1645,11 +1447,6 @@ function beginMangaPanelSession({
       targetWindow
         ? { ...targetWindow }
         : null,
-    navigationProfileId:
-      findMatchingMangaNavigationProfile(
-        mangaNavigationProfiles,
-        targetWindow
-      )?.id || null,
     startedAt:
       Date.now(),
     lastUsedAt:
@@ -5121,9 +4918,6 @@ let overlayPreferences = {
   ...DEFAULT_OVERLAY_PREFERENCES,
 };
 
-let mangaNavigationProfiles = [];
-let mangaNavigationSettingsWindow = null;
-
 let onboardingCompleted =
   false;
 
@@ -5375,10 +5169,6 @@ async function loadDesktopPreferences() {
         data?.overlay
       );
 
-    mangaNavigationProfiles =
-      normalizeMangaNavigationProfiles(
-        data?.mangaNavigationProfiles
-      );
 
     onboardingCompleted =
       Boolean(
@@ -5407,7 +5197,6 @@ async function loadDesktopPreferences() {
       ...DEFAULT_OVERLAY_PREFERENCES,
     };
 
-    mangaNavigationProfiles = [];
 
     onboardingCompleted =
       false;
@@ -5452,10 +5241,6 @@ async function saveDesktopPreferences() {
           ...overlayPreferences,
         },
 
-        mangaNavigationProfiles:
-          normalizeMangaNavigationProfiles(
-            mangaNavigationProfiles
-          ),
 
         onboardingCompleted,
       },
@@ -5531,10 +5316,6 @@ function getAppPreferences() {
       ...overlayPreferences,
     },
 
-    mangaNavigationProfiles:
-      normalizeMangaNavigationProfiles(
-        mangaNavigationProfiles
-      ),
 
     onboardingCompleted,
   };
@@ -5680,7 +5461,6 @@ async function resetAppPreferences() {
     ...DEFAULT_OVERLAY_PREFERENCES,
   };
 
-  mangaNavigationProfiles = [];
 
   onboardingCompleted =
     keepOnboarding;
@@ -5764,9 +5544,9 @@ function triggerMangaSessionNextPage(
   source = "shortcut"
 ) {
   /*
-   * Batch 15.0.5.1: restore the original shortcut behavior.
-   * Ctrl+Shift+Y only OCR/translates the page that is currently visible.
-   * Website navigation belongs exclusively to the overlay Next (⏭) action.
+   * Batch 15.0.6: manual page navigation only.
+   * Ctrl+Shift+Y OCR/translates the page currently visible.
+   * The user changes manga pages directly in the browser/reader.
    */
   void runMangaSessionNextPage(
     source
@@ -6103,871 +5883,6 @@ async function updateShortcutSettings(
 }
 
 
-const MANGA_NAVIGATION_KEY_CODES = Object.freeze({
-  ARROWLEFT: 0x25,
-  ARROWRIGHT: 0x27,
-  PAGEUP: 0x21,
-  PAGEDOWN: 0x22,
-  SPACE: 0x20,
-  ENTER: 0x0D,
-});
-
-function normalizeMangaNavigationTarget(
-  targetWindow
-) {
-  const hwnd =
-    String(
-      targetWindow?.hwnd || ""
-    ).trim();
-
-  const processId =
-    Number(
-      targetWindow?.processId || 0
-    );
-
-  if (
-    !/^\d+$/.test(hwnd) ||
-    !Number.isInteger(processId) ||
-    processId <= 0
-  ) {
-    return null;
-  }
-
-  return {
-    hwnd,
-    processId,
-  };
-}
-
-function runMangaNavigationPowerShell({
-  targetWindow,
-  body,
-  timeoutMs = 2600,
-} = {}) {
-  if (process.platform !== "win32") {
-    return Promise.resolve({
-      success: false,
-      reason: "unsupported-platform",
-    });
-  }
-
-  const target =
-    normalizeMangaNavigationTarget(
-      targetWindow
-    );
-
-  if (!target) {
-    return Promise.resolve({
-      success: false,
-      reason: "missing-target-window",
-    });
-  }
-
-  const script = `
-$ErrorActionPreference = "Stop"
-[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false)
-Add-Type @"
-using System;
-using System.Runtime.InteropServices;
-public static class AiTranslatorMangaNav {
-    [StructLayout(LayoutKind.Sequential)]
-    public struct RECT { public int Left; public int Top; public int Right; public int Bottom; }
-    [StructLayout(LayoutKind.Sequential)]
-    public struct POINT { public int X; public int Y; }
-    [DllImport("user32.dll")]
-    public static extern bool SetForegroundWindow(IntPtr hWnd);
-    [DllImport("user32.dll")]
-    public static extern IntPtr GetForegroundWindow();
-    [DllImport("user32.dll")]
-    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
-    [DllImport("kernel32.dll")]
-    public static extern uint GetCurrentThreadId();
-    [DllImport("user32.dll")]
-    public static extern bool AttachThreadInput(uint idAttach, uint idAttachTo, bool fAttach);
-    [DllImport("user32.dll")]
-    public static extern bool BringWindowToTop(IntPtr hWnd);
-    [DllImport("user32.dll")]
-    public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
-    [DllImport("user32.dll")]
-    public static extern bool IsIconic(IntPtr hWnd);
-    [DllImport("user32.dll")]
-    public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
-    [DllImport("user32.dll")]
-    public static extern bool GetCursorPos(out POINT point);
-    [DllImport("user32.dll")]
-    public static extern bool SetCursorPos(int X, int Y);
-    [DllImport("user32.dll")]
-    public static extern short GetAsyncKeyState(int vKey);
-    [DllImport("user32.dll")]
-    public static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, UIntPtr dwExtraInfo);
-    [DllImport("user32.dll")]
-    public static extern void mouse_event(uint dwFlags, uint dx, uint dy, int dwData, UIntPtr dwExtraInfo);
-}
-"@
-$hwnd = [IntPtr]::new([Int64]${target.hwnd})
-# SW_RESTORE (9) must only be used for a minimized window. Calling it for a
-# maximized/full-screen browser changes the user's window state and makes the
-# manga reader look like it was "shrunk" before the navigation action runs.
-if ([AiTranslatorMangaNav]::IsIconic($hwnd)) {
-    [void][AiTranslatorMangaNav]::ShowWindowAsync($hwnd, 9)
-    Start-Sleep -Milliseconds 80
-}
-[void][AiTranslatorMangaNav]::SetForegroundWindow($hwnd)
-Start-Sleep -Milliseconds 110
-
-# Windows may reject SetForegroundWindow when another process owns the
-# foreground lock. Verify the exact HWND before injecting a key/click/scroll.
-# If the first attempt is rejected, temporarily attach the helper thread to
-# the foreground + target input queues and retry. This avoids silently sending
-# ArrowRight to AI Translator/another window and later reporting difference=0.
-$foreground = [AiTranslatorMangaNav]::GetForegroundWindow()
-if ($foreground -ne $hwnd) {
-    $currentThread = [AiTranslatorMangaNav]::GetCurrentThreadId()
-    $foregroundPid = [uint32]0
-    $targetPid = [uint32]0
-    $foregroundThread = if ($foreground -ne [IntPtr]::Zero) {
-        [AiTranslatorMangaNav]::GetWindowThreadProcessId($foreground, [ref]$foregroundPid)
-    } else { 0 }
-    $targetThread = [AiTranslatorMangaNav]::GetWindowThreadProcessId($hwnd, [ref]$targetPid)
-    $attachedForeground = $false
-    $attachedTarget = $false
-
-    try {
-        if ($foregroundThread -ne 0 -and $foregroundThread -ne $currentThread) {
-            $attachedForeground = [AiTranslatorMangaNav]::AttachThreadInput($currentThread, $foregroundThread, $true)
-        }
-        if ($targetThread -ne 0 -and $targetThread -ne $currentThread) {
-            $attachedTarget = [AiTranslatorMangaNav]::AttachThreadInput($currentThread, $targetThread, $true)
-        }
-        [void][AiTranslatorMangaNav]::BringWindowToTop($hwnd)
-        [void][AiTranslatorMangaNav]::SetForegroundWindow($hwnd)
-        Start-Sleep -Milliseconds 140
-    } finally {
-        if ($attachedTarget) {
-            [void][AiTranslatorMangaNav]::AttachThreadInput($currentThread, $targetThread, $false)
-        }
-        if ($attachedForeground) {
-            [void][AiTranslatorMangaNav]::AttachThreadInput($currentThread, $foregroundThread, $false)
-        }
-    }
-}
-
-$foreground = [AiTranslatorMangaNav]::GetForegroundWindow()
-if ($foreground -ne $hwnd) {
-    throw ("TARGET_BROWSER_NOT_FOCUSED|expected={0}|actual={1}" -f $hwnd.ToInt64(), $foreground.ToInt64())
-}
-
-${body}
-`;
-
-  return new Promise((resolve) => {
-    const child =
-      spawn(
-        "powershell.exe",
-        [
-          "-NoProfile",
-          "-NonInteractive",
-          "-ExecutionPolicy",
-          "Bypass",
-          "-Command",
-          script,
-        ],
-        {
-          windowsHide: true,
-          stdio: [
-            "ignore",
-            "pipe",
-            "pipe",
-          ],
-        }
-      );
-
-    let stdout = "";
-    let stderr = "";
-    let settled = false;
-
-    const finish = (payload) => {
-      if (settled) {
-        return;
-      }
-
-      settled = true;
-      resolve(payload);
-    };
-
-    const timeout =
-      setTimeout(() => {
-        try {
-          child.kill();
-        } catch {
-        }
-
-        finish({
-          success: false,
-          reason: "navigation-helper-timeout",
-        });
-      }, timeoutMs);
-
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk.toString("utf8");
-    });
-
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk.toString("utf8");
-    });
-
-    child.on("error", (error) => {
-      clearTimeout(timeout);
-      finish({
-        success: false,
-        reason: "navigation-helper-error",
-        error:
-          error instanceof Error
-            ? error.message
-            : String(error),
-      });
-    });
-
-    child.on("close", (code) => {
-      clearTimeout(timeout);
-      finish({
-        success:
-          Number(code) === 0,
-        stdout:
-          stdout.trim(),
-        error:
-          stderr.trim(),
-      });
-    });
-  });
-}
-
-async function executeMangaNavigationAction(
-  targetWindow,
-  inputAction
-) {
-  const action =
-    normalizeMangaNavigationAction(
-      inputAction
-    );
-
-  if (action.type === "MANUAL") {
-    return {
-      success: true,
-      manual: true,
-      action,
-    };
-  }
-
-  if (action.type === "KEY") {
-    const virtualKey =
-      MANGA_NAVIGATION_KEY_CODES[
-        action.key
-      ];
-
-    if (!virtualKey) {
-      return {
-        success: false,
-        reason: "unsupported-key",
-      };
-    }
-
-    const result =
-      await runMangaNavigationPowerShell({
-        targetWindow,
-        body: `
-[AiTranslatorMangaNav]::keybd_event([byte]${virtualKey}, 0, 0, [UIntPtr]::Zero)
-Start-Sleep -Milliseconds 35
-[AiTranslatorMangaNav]::keybd_event([byte]${virtualKey}, 0, 2, [UIntPtr]::Zero)
-Write-Output "OK"
-`,
-      });
-
-    return {
-      ...result,
-      action,
-    };
-  }
-
-  if (action.type === "CLICK") {
-    if (!action.clickConfigured) {
-      return {
-        success: false,
-        reason: "click-position-not-configured",
-      };
-    }
-
-    const clickX =
-      Number(action.clickX).toFixed(6);
-    const clickY =
-      Number(action.clickY).toFixed(6);
-
-    const result =
-      await runMangaNavigationPowerShell({
-        targetWindow,
-        body: `
-$rect = New-Object AiTranslatorMangaNav+RECT
-if (-not [AiTranslatorMangaNav]::GetWindowRect($hwnd, [ref]$rect)) { throw "GetWindowRect failed" }
-$width = [Math]::Max(1, $rect.Right - $rect.Left)
-$height = [Math]::Max(1, $rect.Bottom - $rect.Top)
-$x = $rect.Left + [int][Math]::Round($width * ${clickX})
-$y = $rect.Top + [int][Math]::Round($height * ${clickY})
-[void][AiTranslatorMangaNav]::SetCursorPos($x, $y)
-Start-Sleep -Milliseconds 55
-[AiTranslatorMangaNav]::mouse_event(0x0002, 0, 0, 0, [UIntPtr]::Zero)
-Start-Sleep -Milliseconds 35
-[AiTranslatorMangaNav]::mouse_event(0x0004, 0, 0, 0, [UIntPtr]::Zero)
-Write-Output "OK"
-`,
-      });
-
-    return {
-      ...result,
-      action,
-    };
-  }
-
-  const wheelDelta =
-    (action.scrollDirection === "UP" ? 1 : -1) *
-    Math.max(1, Number(action.scrollSteps || 1)) *
-    120;
-
-  const result =
-    await runMangaNavigationPowerShell({
-      targetWindow,
-      body: `
-$rect = New-Object AiTranslatorMangaNav+RECT
-if (-not [AiTranslatorMangaNav]::GetWindowRect($hwnd, [ref]$rect)) { throw "GetWindowRect failed" }
-$x = $rect.Left + [int][Math]::Round(($rect.Right - $rect.Left) * 0.5)
-$y = $rect.Top + [int][Math]::Round(($rect.Bottom - $rect.Top) * 0.5)
-[void][AiTranslatorMangaNav]::SetCursorPos($x, $y)
-Start-Sleep -Milliseconds 45
-[AiTranslatorMangaNav]::mouse_event(0x0800, 0, 0, ${wheelDelta}, [UIntPtr]::Zero)
-Write-Output "OK"
-`,
-    });
-
-  return {
-    ...result,
-    action,
-  };
-}
-
-async function captureMangaNavigationClickPoint() {
-  if (!mangaPanelSession) {
-    throw new Error(
-      "Chưa có Manga Session để chọn vị trí nút Next."
-    );
-  }
-
-  const sourceWindow =
-    resolveMangaNavigationTargetWindow();
-
-  if (!sourceWindow) {
-    throw new Error(
-      "Không tìm thấy cửa sổ truyện."
-    );
-  }
-
-  const settingsWindow =
-    mangaNavigationSettingsWindow;
-
-  stopOverlayLifecycle();
-  hideSelectionTranslation();
-  hideFullScreenTranslationOverlay();
-  closeOverlay();
-
-  if (
-    settingsWindow &&
-    !settingsWindow.isDestroyed()
-  ) {
-    settingsWindow.hide();
-  }
-
-  await delay(170);
-
-  const result =
-    await runMangaNavigationPowerShell({
-      targetWindow:
-        sourceWindow,
-      timeoutMs: 12500,
-      body: `
-$rect = New-Object AiTranslatorMangaNav+RECT
-if (-not [AiTranslatorMangaNav]::GetWindowRect($hwnd, [ref]$rect)) { throw "GetWindowRect failed" }
-while (([AiTranslatorMangaNav]::GetAsyncKeyState(0x01) -band 0x8000) -ne 0) { Start-Sleep -Milliseconds 20 }
-Start-Sleep -Milliseconds 120
-$started = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
-while ($true) {
-    if (([AiTranslatorMangaNav]::GetAsyncKeyState(0x1B) -band 0x8000) -ne 0) {
-        Write-Output "CANCEL"
-        break
-    }
-    if (([AiTranslatorMangaNav]::GetAsyncKeyState(0x01) -band 0x8000) -ne 0) {
-        $point = New-Object AiTranslatorMangaNav+POINT
-        [void][AiTranslatorMangaNav]::GetCursorPos([ref]$point)
-        $width = [Math]::Max(1, $rect.Right - $rect.Left)
-        $height = [Math]::Max(1, $rect.Bottom - $rect.Top)
-        $rx = ($point.X - $rect.Left) / [double]$width
-        $ry = ($point.Y - $rect.Top) / [double]$height
-        if ($rx -lt 0 -or $rx -gt 1 -or $ry -lt 0 -or $ry -gt 1) {
-            Write-Output "OUTSIDE"
-        } else {
-            Write-Output ("POINT|{0:F6}|{1:F6}" -f $rx, $ry)
-        }
-        break
-    }
-    if (([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds() - $started) -gt 10000) {
-        Write-Output "TIMEOUT"
-        break
-    }
-    Start-Sleep -Milliseconds 25
-}
-`,
-    });
-
-  if (
-    settingsWindow &&
-    !settingsWindow.isDestroyed()
-  ) {
-    settingsWindow.show();
-    settingsWindow.focus();
-  }
-
-  const output =
-    String(result?.stdout || "").trim();
-  const match =
-    output.match(
-      /POINT\|([0-9.]+)\|([0-9.]+)/
-    );
-
-  if (!result?.success || !match) {
-    const restored =
-      restoreFullScreenTranslationOverlay();
-
-    if (
-      restored?.success &&
-      !isFullScreenOverlayPinned()
-    ) {
-      startOverlayLifecycle(
-        sourceWindow
-      );
-    }
-
-    if (output.includes("CANCEL")) {
-      return {
-        success: false,
-        cancelled: true,
-      };
-    }
-
-    throw new Error(
-      output.includes("OUTSIDE")
-        ? "Hãy click bên trong cửa sổ website đang đọc truyện."
-        : "Không ghi nhận được vị trí nút Next. Hãy thử lại."
-    );
-  }
-
-  return {
-    success: true,
-    clickX:
-      Math.min(
-        0.98,
-        Math.max(
-          0.02,
-          Number(match[1])
-        )
-      ),
-    clickY:
-      Math.min(
-        0.98,
-        Math.max(
-          0.02,
-          Number(match[2])
-        )
-      ),
-    note:
-      "Vị trí đã ghi nhận. Nếu click vừa rồi làm website sang trang, sau khi lưu hãy dùng Ctrl+Shift+Y để dịch trang hiện tại.",
-  };
-}
-
-function openMangaNavigationSettingsWindow() {
-  if (
-    mangaNavigationSettingsWindow &&
-    !mangaNavigationSettingsWindow.isDestroyed()
-  ) {
-    mangaNavigationSettingsWindow.show();
-    mangaNavigationSettingsWindow.focus();
-    return {
-      success: true,
-      visible: true,
-    };
-  }
-
-  mangaNavigationSettingsWindow =
-    new BrowserWindow({
-      width: 560,
-      height: 720,
-      minWidth: 500,
-      minHeight: 620,
-      show: false,
-      title:
-        "AI Translator · Điều khiển trang manga",
-      backgroundColor:
-        "#0b1020",
-      autoHideMenuBar: true,
-      resizable: true,
-      webPreferences: {
-        preload:
-          path.join(
-            __dirname,
-            "preload.cjs"
-          ),
-        contextIsolation: true,
-        nodeIntegration: false,
-      },
-    });
-
-  mangaNavigationSettingsWindow.setAlwaysOnTop(
-    true,
-    "screen-saver"
-  );
-
-  mangaNavigationSettingsWindow.loadFile(
-    path.join(
-      __dirname,
-      "mangaNavigationSettings.html"
-    )
-  );
-
-  mangaNavigationSettingsWindow.once(
-    "ready-to-show",
-    () => {
-      if (
-        mangaNavigationSettingsWindow &&
-        !mangaNavigationSettingsWindow.isDestroyed()
-      ) {
-        mangaNavigationSettingsWindow.show();
-        mangaNavigationSettingsWindow.focus();
-      }
-    }
-  );
-
-  mangaNavigationSettingsWindow.on(
-    "closed",
-    () => {
-      mangaNavigationSettingsWindow = null;
-    }
-  );
-
-  return {
-    success: true,
-    visible: true,
-  };
-}
-
-function closeMangaNavigationSettingsWindow() {
-  if (
-    mangaNavigationSettingsWindow &&
-    !mangaNavigationSettingsWindow.isDestroyed()
-  ) {
-    mangaNavigationSettingsWindow.close();
-  }
-
-  mangaNavigationSettingsWindow = null;
-
-  return {
-    success: true,
-    visible: false,
-  };
-}
-
-async function captureMangaPageFingerprint(
-  selection
-) {
-  const image =
-    await screenshot({
-      format: "png",
-    });
-
-  return buildMangaSelectionFingerprint(
-    image,
-    selection
-  );
-}
-
-async function waitForMangaPageVisualChange({
-  selection,
-  baseline,
-  timeoutMs = 2400,
-} = {}) {
-  if (!selection || !baseline) {
-    await delay(550);
-    return {
-      changed: false,
-      reason: "no-baseline",
-    };
-  }
-
-  const startedAt =
-    Date.now();
-
-  let candidate = null;
-  let stableHits = 0;
-  let lastDifference = 0;
-
-  while (
-    Date.now() - startedAt <
-    timeoutMs
-  ) {
-    await delay(170);
-
-    let current;
-
-    try {
-      current =
-        await captureMangaPageFingerprint(
-          selection
-        );
-    } catch {
-      continue;
-    }
-
-    const difference =
-      mangaFingerprintDifference(
-        baseline,
-        current
-      );
-
-    lastDifference =
-      difference;
-
-    if (difference < 0.075) {
-      candidate = null;
-      stableHits = 0;
-      continue;
-    }
-
-    if (!candidate) {
-      candidate = current;
-      stableHits = 0;
-      continue;
-    }
-
-    const stableDifference =
-      mangaFingerprintDifference(
-        candidate,
-        current
-      );
-
-    if (stableDifference <= 0.045) {
-      stableHits += 1;
-    } else {
-      candidate = current;
-      stableHits = 0;
-    }
-
-    if (stableHits >= 1) {
-      return {
-        changed: true,
-        difference:
-          Number(
-            difference.toFixed(4)
-          ),
-      };
-    }
-  }
-
-  return {
-    changed: false,
-    difference:
-      Number(
-        lastDifference.toFixed(4)
-      ),
-    reason: "visual-change-not-detected",
-  };
-}
-
-async function advanceMangaSourceAndTranslate() {
-  if (
-    selectorIsOpen ||
-    isProcessingSelection ||
-    isFullScreenProcessing ||
-    isMangaSessionProcessing
-  ) {
-    throw new Error(
-      "AI Translator đang xử lý một lần quét khác."
-    );
-  }
-
-  const session =
-    mangaPanelSession;
-
-  if (!session) {
-    throw new Error(
-      `Chưa có Manga Session. Hãy dùng ${shortcutDisplay(shortcutSettings.panel)} để chọn vùng trang đầu tiên.`
-    );
-  }
-
-  const profile =
-    resolveActiveMangaNavigationProfile();
-
-  if (!profile) {
-    return {
-      success: false,
-      needsConfiguration: true,
-      error:
-        "Website này chưa có cách chuyển trang. Hãy bấm ⚙ để cấu hình một lần.",
-      session:
-        getMangaPanelSessionState(),
-    };
-  }
-
-  const action =
-    normalizeMangaNavigationAction(
-      profile.action
-    );
-
-  /*
-   * MANUAL nghĩa là website không cho AI Translator tự điều khiển.
-   * Nút Next lúc này chỉ dịch trang hiện tại, đúng với Ctrl+Shift+Y.
-   */
-  if (action.type === "MANUAL") {
-    return runMangaSessionNextPage(
-      "overlay-manual-navigation"
-    );
-  }
-
-  const sourceWindow =
-    session.targetWindow ||
-    activeOverlayTargetWindow ||
-    pendingTargetWindow ||
-    null;
-
-  if (!sourceWindow) {
-    throw new Error(
-      "Không tìm thấy cửa sổ truyện để chuyển trang."
-    );
-  }
-
-  const selection = {
-    ...session.selection,
-  };
-
-  const restorePreviousOverlay = () => {
-    const restored =
-      restoreFullScreenTranslationOverlay();
-
-    if (
-      restored?.success &&
-      !isFullScreenOverlayPinned()
-    ) {
-      startOverlayLifecycle(
-        sourceWindow
-      );
-    }
-  };
-
-  stopOverlayLifecycle();
-  hideSelectionTranslation();
-  hideFullScreenTranslationOverlay();
-  closeOverlay();
-
-  await delay(120);
-
-  let baseline = null;
-
-  try {
-    baseline =
-      await captureMangaPageFingerprint(
-        selection
-      );
-  } catch (error) {
-    console.warn(
-      "MANGA PAGE TURN BASELINE ERROR:",
-      error
-    );
-  }
-
-  const navigationResult =
-    await executeMangaNavigationAction(
-      sourceWindow,
-      action
-    );
-
-  if (!navigationResult?.success) {
-    restorePreviousOverlay();
-
-    const focusRejected =
-      String(
-        navigationResult?.error || ""
-      ).includes(
-        "TARGET_BROWSER_NOT_FOCUSED"
-      );
-
-    return {
-      success: false,
-      needsConfiguration:
-        !focusRejected,
-      error: focusRejected
-        ? "Windows chưa chuyển focus sang cửa sổ truyện. Hãy click vào Brave/MangaDex một lần rồi bấm Next hoặc Ctrl+Shift+Y lại."
-        : "Không thể thực hiện cách chuyển trang đã lưu. Hãy mở ⚙ nếu bạn muốn cập nhật cấu hình cho website này.",
-      navigation:
-        getMangaNavigationPublicState(),
-      session:
-        getMangaPanelSessionState(),
-    };
-  }
-
-  const pageChange =
-    await waitForMangaPageVisualChange({
-      selection,
-      baseline,
-      timeoutMs:
-        action.changeTimeoutMs,
-    });
-
-  console.log(
-    "MANGA SITE NAVIGATION:",
-    {
-      profile:
-        profile.name,
-      action:
-        action.type,
-      pageChange,
-      target: {
-        processName:
-          sourceWindow.processName,
-        hwnd:
-          sourceWindow.hwnd,
-        processId:
-          sourceWindow.processId,
-      },
-    }
-  );
-
-  if (
-    baseline &&
-    !pageChange.changed
-  ) {
-    restorePreviousOverlay();
-
-    return {
-      success: false,
-      needsConfiguration: true,
-      error:
-        `Cấu hình “${profile.name}” chưa làm trang truyện thay đổi. Overlay được giữ nguyên; hãy thử lại hoặc bấm ⚙ nếu bạn muốn đổi phím, click hay cuộn.`,
-      navigation:
-        getMangaNavigationPublicState(),
-      session:
-        getMangaPanelSessionState(),
-    };
-  }
-
-  return runMangaSessionNextPage(
-    "overlay-site-navigation"
-  );
-}
-
 async function waitForExternalForegroundSnapshot(
   timeoutMs =
     1000
@@ -7154,14 +6069,11 @@ function startOverlayLifecycle(
     false;
 
   /*
-   * Manga "trang tiếp theo" có thể làm title của tab đổi ngay sau khi
-   * shortcut được bấm (ví dụ Chapter 10 -> Chapter 11). Nếu khóa title
-   * từ snapshot trước OCR, lifecycle sẽ không bao giờ được arm và overlay
-   * sẽ còn trên màn hình khi user đổi tab.
-   *
-   * Vì vậy lần đầu source HWND + PID quay lại foreground sẽ được dùng làm
-   * baseline title mới. Sau khi đã arm, title đổi trong cùng HWND được xem
-   * là browser tab/page-context change và overlay sẽ tự ẩn.
+   * Với manual page navigation, user có thể đổi chapter/page trước khi
+   * nhấn Ctrl+Shift+Y. Title của browser vì vậy có thể khác snapshot cũ.
+   * Lần đầu source HWND + PID quay lại foreground được dùng làm baseline
+   * title mới. Sau khi đã arm, title đổi trong cùng HWND được xem là
+   * browser tab/page-context change và overlay sẽ tự ẩn.
    */
   let lifecycleTarget =
     activeOverlayTargetWindow
@@ -7590,7 +6502,7 @@ function createTray() {
 
       {
         label:
-          `Trang manga tiếp theo (${shortcutDisplay(shortcutSettings.panelNext)})`,
+          `Dịch trang manga hiện tại (${shortcutDisplay(shortcutSettings.panelNext)})`,
 
         accelerator:
           shortcutSettings.panelNext,
@@ -11253,7 +10165,7 @@ async function runFullScreenTranslation(
   ) {
     throw new Error(
       isMangaSessionProcessing
-        ? "Manga Session đang xử lý trang tiếp theo."
+        ? "Manga Session đang xử lý trang hiện tại."
         : "Full Screen Translation đang xử lý."
     );
   }
@@ -11773,65 +10685,13 @@ ipcMain.handle(
 
 ipcMain.handle(
   "translation:panel-next",
-  async (_event, options) => {
-    if (
-      options?.advanceSource
-    ) {
-      return advanceMangaSourceAndTranslate();
-    }
-
+  async () => {
     return runMangaSessionNextPage(
       "renderer"
     );
   }
 );
 
-
-ipcMain.handle(
-  "translation:manga-navigation-open",
-  async () => {
-    return openMangaNavigationSettingsWindow();
-  }
-);
-
-ipcMain.handle(
-  "translation:manga-navigation-close",
-  async () => {
-    return closeMangaNavigationSettingsWindow();
-  }
-);
-
-ipcMain.handle(
-  "translation:manga-navigation-config",
-  async () => {
-    return getMangaNavigationConfigPayload();
-  }
-);
-
-ipcMain.handle(
-  "translation:manga-navigation-save",
-  async (_event, profile) => {
-    return saveMangaNavigationProfile(
-      profile
-    );
-  }
-);
-
-ipcMain.handle(
-  "translation:manga-navigation-delete",
-  async (_event, profileId) => {
-    return removeMangaNavigationProfile(
-      profileId
-    );
-  }
-);
-
-ipcMain.handle(
-  "translation:manga-navigation-capture-click",
-  async () => {
-    return captureMangaNavigationClickPoint();
-  }
-);
 
 ipcMain.handle(
   "translation:manga-continuous-toggle",
