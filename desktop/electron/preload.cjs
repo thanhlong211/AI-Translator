@@ -40,6 +40,19 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
 
+  getOcrWorkerHealth: () => {
+    return ipcRenderer.invoke(
+      "ocr-worker:get-health"
+    );
+  },
+
+  restartOcrWorker: () => {
+    return ipcRenderer.invoke(
+      "ocr-worker:restart"
+    );
+  },
+
+
   openNovelTxt: () => {
     return ipcRenderer.invoke(
       "novel:open-txt"
@@ -87,7 +100,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
       "translation:panel-next"
     );
   },
-
 
   setMangaContinuousMode: (enabled) => {
     return ipcRenderer.invoke(
