@@ -409,6 +409,9 @@ export function ProfilesPage({
                                         <option value={10}>
                                             10 câu
                                         </option>
+                                        <option value={20}>
+                                            20 câu
+                                        </option>
                                     </select>
                                 </label>
 

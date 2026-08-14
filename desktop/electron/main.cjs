@@ -347,6 +347,8 @@ const DEFAULT_ACCOUNT_ENTITLEMENTS = Object.freeze({
   }),
   usage: Object.freeze({
     monthlyTranslationsUsed: 0,
+    mangaPagesToday: 0,
+    continuousMangaPagesToday: 0,
   }),
   developmentOverride: false,
 });
@@ -529,6 +531,25 @@ function resetAccountEntitlements({
   }
 
   return getAccountEntitlementsSnapshot();
+}
+
+function getDesktopContextItemLimit() {
+  const configured = Number(
+    accountEntitlements?.limits?.contextItems
+  );
+
+  if (!Number.isFinite(configured)) {
+    return 5;
+  }
+
+  if (configured < 0) {
+    return 50;
+  }
+
+  return Math.max(
+    0,
+    Math.min(50, Math.floor(configured))
+  );
 }
 
 function getDesktopFeatureCapabilities() {
@@ -1330,7 +1351,7 @@ function getMangaPanelSessionContext() {
       ? mangaPanelSession.context
       : []
   )
-    .slice(-10)
+    .slice(-getDesktopContextItemLimit())
     .map((item) => ({
       ...item,
     }));
@@ -1344,6 +1365,8 @@ function getMangaPanelSessionState() {
       pageNumber: 0,
       nextPageNumber: 1,
       contextItems: 0,
+      maxContextItems:
+        getDesktopContextItemLimit(),
       nextShortcut:
         shortcutDisplay(
           shortcutSettings.panelNext
@@ -1372,6 +1395,8 @@ function getMangaPanelSessionState() {
       mangaPanelSession.pageNumber + 1,
     contextItems:
       getMangaPanelSessionContext().length,
+    maxContextItems:
+      getDesktopContextItemLimit(),
     sourceLanguage:
       mangaPanelSession.sourceLanguage,
     targetLanguage:
@@ -1506,7 +1531,8 @@ function getMangaPanelSessionDetails() {
   if (!state.active) {
     return {
       ...state,
-      maxContextItems: 10,
+      maxContextItems:
+        getDesktopContextItemLimit(),
       context: [],
       profileName: "",
     };
@@ -1520,7 +1546,8 @@ function getMangaPanelSessionDetails() {
 
   return {
     ...state,
-    maxContextItems: 10,
+    maxContextItems:
+      getDesktopContextItemLimit(),
     profileName,
     context:
       getMangaPanelSessionContext()
@@ -1698,7 +1725,10 @@ function rememberMangaPanelSessionContext(
       translatedText,
   });
 
-  while (items.length > 10) {
+  const contextLimit =
+    getDesktopContextItemLimit();
+
+  while (items.length > contextLimit) {
     items.shift();
   }
 
@@ -1789,7 +1819,7 @@ function getCurrentTranslationContext(
         .get(key) ||
       []
     )
-  ];
+  ].slice(-getDesktopContextItemLimit());
 }
 
 function rememberTranslationContext(
@@ -6904,7 +6934,9 @@ async function analyzeJapaneseForStudy(
 
               context:
                 Array.isArray(context)
-                  ? context
+                  ? context.slice(
+                      -getDesktopContextItemLimit()
+                    )
                   : [],
             }),
         }
@@ -7009,7 +7041,9 @@ async function translateText(
 
               context:
                 Array.isArray(context)
-                  ? context
+                  ? context.slice(
+                      -getDesktopContextItemLimit()
+                    )
                   : [],
             }),
         }
@@ -7125,6 +7159,21 @@ async function translateBatchBlocks(
     ? requestedPurpose
     : "GENERAL";
 
+  const requestedMangaMode = String(
+    options?.mangaMode ||
+    "PANEL"
+  )
+    .trim()
+    .toUpperCase();
+
+  const mangaMode = new Set([
+    "PANEL",
+    "SESSION",
+    "CONTINUOUS",
+  ]).has(requestedMangaMode)
+    ? requestedMangaMode
+    : "PANEL";
+
   const normalizedBlocks =
     (Array.isArray(blocks)
       ? blocks
@@ -7157,7 +7206,9 @@ async function translateBatchBlocks(
       options?.context
     )
       ? options.context
-          .slice(-10)
+          .slice(
+            -getDesktopContextItemLimit()
+          )
           .map((item) => ({
             ...item,
           }))
@@ -7194,6 +7245,7 @@ async function translateBatchBlocks(
                 null,
 
               purpose,
+              mangaMode,
 
               sourceLanguage,
               targetLanguage,
@@ -7624,7 +7676,7 @@ async function translateNovelBlocks(
         Array.isArray(
           payload?.context
         )
-          ? payload.context.slice(-10)
+          ? payload.context.slice(-getDesktopContextItemLimit())
           : [],
     }
   );
@@ -7791,7 +7843,7 @@ async function applyOverlayCorrectionLocally(
 
     if (sessionChanged) {
       mangaPanelSession.context =
-        nextSessionItems.slice(-10);
+        nextSessionItems.slice(-getDesktopContextItemLimit());
       mangaPanelSession.lastUsedAt =
         Date.now();
       notifyMangaSessionInspectorRefresh();
@@ -9567,6 +9619,7 @@ async function processMangaPanelTranslation({
     currentTranslationTargetLanguage,
   targetWindow = null,
   startNewSession = false,
+  mangaMode = "PANEL",
 } = {}) {
   await requireFreshDesktopFeatureCapability(
     startNewSession
@@ -9642,7 +9695,7 @@ async function processMangaPanelTranslation({
         message:
           `Đang dịch ${layout.blocks.length} khung chữ…`,
         detail:
-          `${source} → ${target} · Session context ${getMangaPanelSessionContext().length}/10`,
+          `${source} → ${target} · Session context ${getMangaPanelSessionContext().length}/${getDesktopContextItemLimit()}`,
       }
     );
   }
@@ -9660,6 +9713,7 @@ async function processMangaPanelTranslation({
       {
         purpose:
           "MANGA",
+        mangaMode,
         sourceLanguage:
           source,
         targetLanguage:
@@ -10076,6 +10130,10 @@ async function runMangaSessionNextPage(
         targetWindow:
           pendingTargetWindow,
         startNewSession: false,
+        mangaMode:
+          source === "continuous-auto"
+            ? "CONTINUOUS"
+            : "SESSION",
       });
 
     closeTranslationLoading(

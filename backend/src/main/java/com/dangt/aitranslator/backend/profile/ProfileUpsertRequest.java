@@ -18,7 +18,7 @@ public record ProfileUpsertRequest(
         TranslationStyle style,
 
         @Min(0)
-        @Max(10)
+        @Max(50)
         @Schema(example = "5")
         int contextLines,
 

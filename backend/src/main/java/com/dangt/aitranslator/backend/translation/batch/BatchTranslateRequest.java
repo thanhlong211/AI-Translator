@@ -21,6 +21,12 @@ public record BatchTranslateRequest(
         @Schema(example = "MANGA")
         BatchTranslationPurpose purpose,
 
+        @Schema(
+                description = "Chỉ dùng khi purpose=MANGA: PANEL / SESSION / CONTINUOUS.",
+                example = "SESSION"
+        )
+        MangaTranslationMode mangaMode,
+
         @Schema(example = "AUTO")
         TranslationLanguage sourceLanguage,
 
@@ -28,7 +34,7 @@ public record BatchTranslateRequest(
         TranslationLanguage targetLanguage,
 
         @Valid
-        @Size(max = 10)
+        @Size(max = 50)
         List<TranslationContextItem> context,
 
         @Valid
@@ -41,6 +47,11 @@ public record BatchTranslateRequest(
                 purpose == null
                         ? BatchTranslationPurpose.GENERAL
                         : purpose;
+
+        mangaMode =
+                mangaMode == null
+                        ? MangaTranslationMode.PANEL
+                        : mangaMode;
 
         sourceLanguage =
                 sourceLanguage == null

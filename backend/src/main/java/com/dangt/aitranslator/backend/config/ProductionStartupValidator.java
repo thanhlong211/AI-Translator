@@ -55,6 +55,7 @@ public class ProductionStartupValidator implements ApplicationRunner {
         validateDatabaseTls(problems);
         validateSocialLogin(problems);
         validatePasswordResetDelivery(problems);
+        validateRateLimiting(problems);
 
         if (!problems.isEmpty()) {
             throw new IllegalStateException(
@@ -294,6 +295,12 @@ public class ProductionStartupValidator implements ApplicationRunner {
         String resetUrl = property("app.password-reset.reset-url-base").toLowerCase(Locale.ROOT);
         if (!resetUrl.isBlank() && !resetUrl.startsWith("https://")) {
             problems.add("PASSWORD_RESET_URL_BASE must use HTTPS when configured in production.");
+        }
+    }
+
+    private void validateRateLimiting(List<String> problems) {
+        if (!booleanProperty("app.rate-limit.enabled", false)) {
+            problems.add("RATE_LIMIT_ENABLED must remain true in production.");
         }
     }
 

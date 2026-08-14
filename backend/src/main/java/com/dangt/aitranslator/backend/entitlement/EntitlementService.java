@@ -21,14 +21,17 @@ import java.util.Map;
 public class EntitlementService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final DailyQuotaService dailyQuotaService;
     private final String developmentPlanOverride;
 
     public EntitlementService(
             JdbcTemplate jdbcTemplate,
+            DailyQuotaService dailyQuotaService,
             @Value("${app.entitlements.dev-plan-override:}")
             String developmentPlanOverride
     ) {
         this.jdbcTemplate = jdbcTemplate;
+        this.dailyQuotaService = dailyQuotaService;
         this.developmentPlanOverride = normalizePlan(developmentPlanOverride);
     }
 
@@ -107,6 +110,116 @@ public class EntitlementService {
                             + "."
             );
         }
+    }
+
+    @Transactional(readOnly = true)
+    public void requireContextItems(UserAccount user, int requestedItems) {
+        if (requestedItems < 0) {
+            throw new IllegalArgumentException("Số context item không hợp lệ.");
+        }
+
+        EntitlementResponse entitlement = resolve(user);
+        long limit = entitlement.limits().getOrDefault("contextItems", 0L);
+        if (limit < 0 || requestedItems <= limit) {
+            return;
+        }
+
+        throw new ForbiddenException(
+                "Gói "
+                        + entitlement.planName()
+                        + " cho phép tối đa "
+                        + limit
+                        + " context item mỗi request."
+        );
+    }
+
+    @Transactional
+    public List<DailyQuotaReservation> reserveMangaPage(
+            UserAccount user,
+            boolean continuous
+    ) {
+        EntitlementResponse entitlement = resolve(user);
+        List<DailyQuotaReservation> reservations = new java.util.ArrayList<>();
+
+        reserveDailyQuota(
+                user,
+                entitlement,
+                "mangaPagesPerDay",
+                "MANGA_PAGE",
+                1L,
+                reservations
+        );
+
+        if (continuous) {
+            try {
+                reserveDailyQuota(
+                        user,
+                        entitlement,
+                        "continuousMangaPagesPerDay",
+                        "MANGA_CONTINUOUS_PAGE",
+                        1L,
+                        reservations
+                );
+            } catch (RuntimeException ex) {
+                releaseDailyReservations(reservations);
+                throw ex;
+            }
+        }
+
+        return List.copyOf(reservations);
+    }
+
+    @Transactional
+    public void releaseDailyReservations(List<DailyQuotaReservation> reservations) {
+        if (reservations == null || reservations.isEmpty()) {
+            return;
+        }
+        for (DailyQuotaReservation reservation : reservations) {
+            if (reservation != null && reservation.reserved()) {
+                dailyQuotaService.release(
+                        reservation.userId(),
+                        reservation.quotaKey(),
+                        reservation.units()
+                );
+            }
+        }
+    }
+
+    private void reserveDailyQuota(
+            UserAccount user,
+            EntitlementResponse entitlement,
+            String limitKey,
+            String quotaKey,
+            long units,
+            List<DailyQuotaReservation> reservations
+    ) {
+        long limit = entitlement.limits().getOrDefault(limitKey, 0L);
+        if (limit < 0) {
+            reservations.add(DailyQuotaReservation.unlimited(
+                    user.getId(), quotaKey, units
+            ));
+            return;
+        }
+
+        boolean reserved = dailyQuotaService.reserve(
+                user.getId(),
+                quotaKey,
+                limit,
+                units
+        );
+        if (!reserved) {
+            throw new ForbiddenException(
+                    "Đã dùng hết quota "
+                            + limitKey
+                            + " của gói "
+                            + entitlement.planName()
+                            + " trong ngày hôm nay."
+            );
+        }
+
+        reservations.add(new DailyQuotaReservation(
+                user.getId(), quotaKey, units, true
+        ));
     }
 
     @Transactional(readOnly = true)
@@ -329,8 +442,9 @@ public class EntitlementService {
         );
 
         return Map.of(
-                "monthlyTranslationsUsed",
-                used == null ? 0L : used
+                "monthlyTranslationsUsed", used == null ? 0L : used,
+                "mangaPagesToday", dailyQuotaService.usedToday(userId, "MANGA_PAGE"),
+                "continuousMangaPagesToday", dailyQuotaService.usedToday(userId, "MANGA_CONTINUOUS_PAGE")
         );
     }
 

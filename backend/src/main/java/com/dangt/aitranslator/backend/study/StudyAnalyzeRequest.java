@@ -51,7 +51,7 @@ public record StudyAnalyzeRequest(
         boolean autoSaveGrammar,
 
         @Valid
-        @Size(max = 10)
+        @Size(max = 50)
         @Schema(
                 description =
                         "Các câu trước để hiểu ngữ cảnh. Backend vẫn giới hạn theo contextLines của Profile."

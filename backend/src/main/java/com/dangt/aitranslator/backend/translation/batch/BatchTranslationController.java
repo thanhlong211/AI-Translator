@@ -1,6 +1,7 @@
 package com.dangt.aitranslator.backend.translation.batch;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
+import com.dangt.aitranslator.backend.entitlement.DailyQuotaReservation;
 import com.dangt.aitranslator.backend.entitlement.EntitlementService;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/translate")
@@ -74,6 +77,25 @@ public class BatchTranslationController {
                     "Manga Translation",
                     "PRO"
             );
+
+            if (request.mangaMode() == MangaTranslationMode.SESSION
+                    || request.mangaMode() == MangaTranslationMode.CONTINUOUS) {
+                entitlementService.requireFeature(
+                        user,
+                        "mangaSession",
+                        "Manga Session",
+                        "PRO"
+                );
+            }
+
+            if (request.mangaMode() == MangaTranslationMode.CONTINUOUS) {
+                entitlementService.requireFeature(
+                        user,
+                        "continuousManga",
+                        "Continuous Manga",
+                        "MANGA_PLUS"
+                );
+            }
         }
 
         if (request.purpose() == BatchTranslationPurpose.NOVEL) {
@@ -112,6 +134,11 @@ public class BatchTranslationController {
             );
         }
 
+        entitlementService.requireContextItems(
+                user,
+                request.context().size()
+        );
+
         entitlementService
                 .requireTranslationQuota(user);
 
@@ -120,10 +147,23 @@ public class BatchTranslationController {
                 "translationMemory"
         );
 
-        return batchTranslationService.translate(
-                user.getId(),
-                request,
-                allowTranslationMemory
-        );
+        List<DailyQuotaReservation> reservations = List.of();
+        if (request.purpose() == BatchTranslationPurpose.MANGA) {
+            reservations = entitlementService.reserveMangaPage(
+                    user,
+                    request.mangaMode() == MangaTranslationMode.CONTINUOUS
+            );
+        }
+
+        try {
+            return batchTranslationService.translate(
+                    user.getId(),
+                    request,
+                    allowTranslationMemory
+            );
+        } catch (RuntimeException ex) {
+            entitlementService.releaseDailyReservations(reservations);
+            throw ex;
+        }
     }
 }
