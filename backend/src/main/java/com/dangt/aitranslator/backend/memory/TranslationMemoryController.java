@@ -1,6 +1,7 @@
 package com.dangt.aitranslator.backend.memory;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
+import com.dangt.aitranslator.backend.entitlement.EntitlementService;
 import com.dangt.aitranslator.backend.translation.TranslationLanguage;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,13 +25,16 @@ public class TranslationMemoryController {
 
     private final TranslationMemoryService memoryService;
     private final CurrentUserService currentUserService;
+    private final EntitlementService entitlementService;
 
     public TranslationMemoryController(
             TranslationMemoryService memoryService,
-            CurrentUserService currentUserService
+            CurrentUserService currentUserService,
+            EntitlementService entitlementService
     ) {
         this.memoryService = memoryService;
         this.currentUserService = currentUserService;
+        this.entitlementService = entitlementService;
     }
 
     @Operation(summary = "Danh sách Translation Memory của user")
@@ -60,6 +64,7 @@ public class TranslationMemoryController {
         UserAccount user =
                 currentUserService
                         .requireActiveUser(jwt);
+        requireTranslationMemory(user);
 
         return memoryService.search(
                 user.getId(),
@@ -81,6 +86,7 @@ public class TranslationMemoryController {
         UserAccount user =
                 currentUserService
                         .requireActiveUser(jwt);
+        requireTranslationMemory(user);
 
         return memoryService.stats(
                 user.getId()
@@ -103,6 +109,7 @@ public class TranslationMemoryController {
         UserAccount user =
                 currentUserService
                         .requireActiveUser(jwt);
+        requireTranslationMemory(user);
 
         return memoryService.update(
                 user.getId(),
@@ -124,10 +131,21 @@ public class TranslationMemoryController {
         UserAccount user =
                 currentUserService
                         .requireActiveUser(jwt);
+        requireTranslationMemory(user);
 
         memoryService.delete(
                 user.getId(),
                 memoryId
         );
     }
+
+    private void requireTranslationMemory(UserAccount user) {
+        entitlementService.requireFeature(
+                user,
+                "translationMemory",
+                "Translation Memory",
+                "PRO"
+        );
+    }
+
 }

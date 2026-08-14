@@ -115,9 +115,15 @@ public class BatchTranslationController {
         entitlementService
                 .requireTranslationQuota(user);
 
+        boolean allowTranslationMemory = entitlementService.hasFeature(
+                user,
+                "translationMemory"
+        );
+
         return batchTranslationService.translate(
                 user.getId(),
-                request
+                request,
+                allowTranslationMemory
         );
     }
 }

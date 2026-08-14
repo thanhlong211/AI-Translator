@@ -110,6 +110,26 @@ public class EntitlementService {
     }
 
     @Transactional(readOnly = true)
+    public void requireDeviceSlot(UserAccount user, long activeOtherDevices) {
+        EntitlementResponse entitlement = resolve(user);
+        long limit = entitlement.limits().getOrDefault("devices", 0L);
+
+        if (limit < 0) {
+            return;
+        }
+
+        if (activeOtherDevices >= limit) {
+            throw new ForbiddenException(
+                    "Đã đạt giới hạn "
+                            + limit
+                            + " thiết bị của gói "
+                            + entitlement.planName()
+                            + ". Hãy thu hồi một thiết bị cũ trước khi đăng nhập thiết bị mới."
+            );
+        }
+    }
+
+    @Transactional(readOnly = true)
     public boolean hasFeature(UserAccount user, String featureKey) {
         String cleanKey = String.valueOf(featureKey == null ? "" : featureKey).trim();
         if (cleanKey.isEmpty()) {

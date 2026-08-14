@@ -124,6 +124,7 @@ public class StudyController {
                 "Study Mode",
                 "PRO"
         );
+        entitlementService.requireTranslationQuota(user);
 
         return studyService.analyze(
                 user.getId(),

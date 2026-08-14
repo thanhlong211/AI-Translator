@@ -1,19 +1,32 @@
 # AI Translator Admin Web
 
-Zero-dependency Admin SPA for Batch 14.6.
+Zero-dependency Admin SPA covering the commercial/operations foundation through Batch 14.9.5, with production hardening added in Batch 15.0.7.
+
+## Development
 
 ```bash
 cd admin-web
 npm run dev
 ```
 
-Open `http://127.0.0.1:4174`.
+Open `http://127.0.0.1:4174`. Development `config.js` allows the backend URL field so local environments can switch between backend instances.
 
-The backend development CORS default allows both `http://localhost:4174` and the Desktop Vite origin. If you open the Admin console as `127.0.0.1`, either use `http://localhost:4174` in the browser or include `http://127.0.0.1:4174` in `APP_CORS_ALLOWED_ORIGINS`.
+## Production
 
-Before login, promote one existing local-password account to `SUPER_ADMIN` using the supplied SQL template under `backend/mysql/promote-super-admin.sql`.
+Do **not** deploy `dev-server.mjs` as the public web server. Serve these static files behind HTTPS using a hardened static host/reverse proxy.
 
+Copy `config.production.example.js` to `config.js` on the production host and set the real API origin:
 
-## Batch 14.6
+```js
+window.AI_TRANSLATOR_ADMIN_CONFIG = {
+  backendUrl: "https://api.example.com",
+  allowBackendOverride: false,
+  requireHttps: true,
+};
+```
 
-Plans & Features now supports dynamic plan creation and editing. Feature and limit keys are read from the backend schema; plan codes are immutable after creation. Pricing remains out of scope until Batch 14.7.
+Production mode hides/locks the Backend URL field so Admin credentials cannot be submitted to an arbitrary host. Keep secrets out of `config.js`; it is public browser JavaScript.
+
+Recommended response headers for the Admin host include a strict Content-Security-Policy, HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, and `frame-ancestors 'none'`.
+
+Before login, provision/promote the initial `SUPER_ADMIN` using the backend's controlled administration procedure.

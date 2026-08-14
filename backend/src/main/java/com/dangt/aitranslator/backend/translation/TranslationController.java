@@ -109,12 +109,36 @@ public class TranslationController {
                 currentUserService
                         .requireActiveUser(jwt);
 
+        if (request.purpose() == TranslationPurpose.QUICK_TRANSLATE) {
+            entitlementService.requireFeature(
+                    user,
+                    "quickTranslate",
+                    "Quick Translate",
+                    "FREE"
+            );
+        }
+
+        if (request.purpose() == TranslationPurpose.STUDY_FAST) {
+            entitlementService.requireFeature(
+                    user,
+                    "studyMode",
+                    "Study Mode",
+                    "PRO"
+            );
+        }
+
         entitlementService
                 .requireTranslationQuota(user);
 
+        boolean allowTranslationMemory = entitlementService.hasFeature(
+                user,
+                "translationMemory"
+        );
+
         return translationService.translate(
                 user.getId(),
-                request
+                request,
+                allowTranslationMemory
         );
     }
 }

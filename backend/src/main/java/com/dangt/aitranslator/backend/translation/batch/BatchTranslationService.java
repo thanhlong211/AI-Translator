@@ -72,7 +72,8 @@ public class BatchTranslationService {
 
     public BatchTranslateResponse translate(
             Long userId,
-            BatchTranslateRequest request
+            BatchTranslateRequest request,
+            boolean allowTranslationMemory
     ) {
         final String requestId =
                 shortRequestId();
@@ -110,13 +111,15 @@ public class BatchTranslationService {
 
         for (BatchTranslationBlockRequest block : blocks) {
             Optional<TranslationMemoryMatch> memoryMatch =
-                    memoryService.findExact(
-                            userId,
-                            profile.getId(),
-                            block.text(),
-                            request.sourceLanguage(),
-                            request.targetLanguage()
-                    );
+                    allowTranslationMemory
+                            ? memoryService.findExact(
+                                    userId,
+                                    profile.getId(),
+                                    block.text(),
+                                    request.sourceLanguage(),
+                                    request.targetLanguage()
+                            )
+                            : Optional.empty();
 
             if (memoryMatch.isPresent()) {
                 TranslationMemoryMatch match =

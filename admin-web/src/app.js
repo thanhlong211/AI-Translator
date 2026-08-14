@@ -1,8 +1,18 @@
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => [...document.querySelectorAll(selector)];
 
+const runtimeConfig = window.AI_TRANSLATOR_ADMIN_CONFIG || {};
+const defaultBackendUrl = String(
+  runtimeConfig.backendUrl || "http://localhost:8080"
+).trim().replace(/\/$/, "");
+const allowBackendOverride = runtimeConfig.allowBackendOverride !== false;
+const requireHttpsBackend = runtimeConfig.requireHttps === true;
+const storedBackendUrl = allowBackendOverride
+  ? sessionStorage.getItem("ait.admin.backend")
+  : "";
+
 const state = {
-  backendUrl: sessionStorage.getItem("ait.admin.backend") || "http://localhost:8080",
+  backendUrl: storedBackendUrl || defaultBackendUrl,
   token: sessionStorage.getItem("ait.admin.token") || "",
   admin: JSON.parse(sessionStorage.getItem("ait.admin.user") || "null"),
   currentView: "dashboard",
@@ -42,6 +52,24 @@ const state = {
   securityEventType: "",
   securityQuery: "",
   selectedSecurityEventId: null,
+  auditDashboard: null,
+  operationalHealth: null,
+  errorDashboard: null,
+  adminSafety: null,
+  errorDays: Number(sessionStorage.getItem("ait.admin.errorDays") || "7"),
+  errorStatus: "",
+  errorSeverity: "",
+  errorModule: "",
+  errorCode: "",
+  errorQuery: "",
+  selectedErrorEventId: null,
+  auditDays: Number(sessionStorage.getItem("ait.admin.auditDays") || "7"),
+  auditCategory: "",
+  auditAction: "",
+  auditActor: "",
+  auditTarget: "",
+  auditQuery: "",
+  selectedAuditId: null,
   selectedFxRateId: null,
   selectedUserId: null,
   selectedPlanCode: null,
@@ -95,12 +123,37 @@ function toast(message, kind = "info") {
   toast.timer = setTimeout(() => { el.className = "toast"; }, 3300);
 }
 
+function validateBackendUrl(value) {
+  const clean = String(value || "").trim().replace(/\/$/, "");
+  let parsed;
+  try {
+    parsed = new URL(clean);
+  } catch {
+    throw new Error("Backend URL không hợp lệ.");
+  }
+
+  if (!/^https?:$/.test(parsed.protocol)) {
+    throw new Error("Backend URL chỉ hỗ trợ HTTP/HTTPS.");
+  }
+  if (requireHttpsBackend && parsed.protocol !== "https:") {
+    throw new Error("Production Admin chỉ được kết nối backend HTTPS.");
+  }
+  if (!allowBackendOverride && clean !== defaultBackendUrl) {
+    throw new Error("Backend URL production đã bị khóa bởi deployment config.");
+  }
+  return clean;
+}
+
 function setSession(login) {
   state.token = login.accessToken;
   state.admin = login.user;
   sessionStorage.setItem("ait.admin.token", state.token);
   sessionStorage.setItem("ait.admin.user", JSON.stringify(state.admin));
-  sessionStorage.setItem("ait.admin.backend", state.backendUrl);
+  if (allowBackendOverride) {
+    sessionStorage.setItem("ait.admin.backend", state.backendUrl);
+  } else {
+    sessionStorage.removeItem("ait.admin.backend");
+  }
 }
 
 function clearSession() {
@@ -133,6 +186,8 @@ function showLogin(message = "") {
   $("#appView").classList.add("hidden");
   $("#loginView").classList.remove("hidden");
   $("#backendUrl").value = state.backendUrl;
+  $("#backendUrlField").classList.toggle("hidden", !allowBackendOverride);
+  $("#backendUrl").readOnly = !allowBackendOverride;
   $("#loginError").textContent = message;
   $("#loginError").classList.toggle("hidden", !message);
 }
@@ -150,7 +205,7 @@ async function loadView(view) {
   $$(".nav-item[data-view]").forEach((button) => button.classList.toggle("active", button.dataset.view === view));
   $$(".view").forEach((section) => section.classList.add("hidden"));
   $(`#${view}View`).classList.remove("hidden");
-  const labels = { dashboard: "Tổng quan", users: "Người dùng", plans: "Plans & Features", pricing: "Pricing", licenses: "Licenses", transactions: "Transactions", aiCosts: "AI Costs", margin: "Revenue & Margin", security: "Security Events", audit: "Audit log" };
+  const labels = { dashboard: "Tổng quan", users: "Người dùng", plans: "Plans & Features", pricing: "Pricing", licenses: "Licenses", transactions: "Transactions", aiCosts: "AI Costs", margin: "Revenue & Margin", security: "Security Events", audit: "Audit log", health: "Operational Health", errors: "Errors & Failed Jobs", safety: "Safety Controls" };
   $("#pageTitle").textContent = labels[view] || "Admin";
   try {
     if (view === "dashboard") await loadDashboard();
@@ -163,6 +218,9 @@ async function loadView(view) {
     if (view === "margin") await loadMargin();
     if (view === "security") await loadSecurity();
     if (view === "audit") await loadAudit();
+    if (view === "health") await loadOperationalHealth();
+    if (view === "errors") await loadErrors();
+    if (view === "safety") await loadSafety();
   } catch (error) {
     toast(error.message, "error");
   }
@@ -195,13 +253,16 @@ async function loadDashboard() {
     <article class="card roadmap-card">
       <span class="eyebrow">COMMERCIAL FOUNDATION</span>
       <h3>Admin core đã hoạt động</h3>
-      <div class="roadmap-grid"><span class="done">✓ Users & access</span><span class="done">✓ 14.6 Plans & features</span><span class="done">✓ 14.7 Pricing / subscription / license</span><span class="done">✓ 14.7 Transactions</span><span class="done">✓ 14.8 AI cost & margin</span><span class="done">✓ 14.9.1 Security events</span><span>14.9.2 Audit viewer</span></div>
+      <div class="roadmap-grid"><span class="done">✓ Users & access</span><span class="done">✓ 14.6 Plans & features</span><span class="done">✓ 14.7 Pricing / subscription / license</span><span class="done">✓ 14.7 Transactions</span><span class="done">✓ 14.8 AI cost & margin</span><span class="done">✓ 14.9.1 Security events</span><span class="done">✓ 14.9.2 Audit viewer</span><span class="done">✓ 14.9.3 Operational health</span><span class="done">✓ 14.9.4 Error monitoring</span><span class="done">✓ 14.9.5 Safety controls</span></div>
     </article>`;
   $("[data-open-audit]")?.addEventListener("click", () => void loadView("audit"));
 }
 
 function metric(label, value, hint) {
   return `<article class="metric-card"><span>${escapeHtml(label)}</span><strong>${fmtNumber(value)}</strong><small>${escapeHtml(hint)}</small></article>`;
+}
+function metricText(label, value, hint) {
+  return `<article class="metric-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value ?? "—")}</strong><small>${escapeHtml(hint)}</small></article>`;
 }
 
 const FEATURE_LABELS = {
@@ -1961,9 +2022,474 @@ function auditRows(rows, compact = false) {
   return `<div class="audit-list ${compact ? "compact" : ""}">${rows.map((a) => `<div class="audit-row"><span class="audit-dot"></span><div><strong>${escapeHtml(a.action)}</strong><span>${escapeHtml(a.actorEmail || `User #${a.actorUserId || "system"}`)}${a.targetEmail ? ` → ${escapeHtml(a.targetEmail)}` : ""}</span><small>${escapeHtml(a.details || "")} · ${fmtDate(a.createdAt)}</small></div></div>`).join("")}</div>`;
 }
 
+function auditActorLabel(entry) {
+  if (entry.actorEmail) return entry.actorEmail;
+  if (entry.actorUserId) return `User #${entry.actorUserId}`;
+  return "System / unknown";
+}
+
+function auditTargetLabel(entry) {
+  if (entry.targetEmail) return entry.targetEmail;
+  if (entry.targetUserId) return `User #${entry.targetUserId}`;
+  return "—";
+}
+
+function auditCategoryClass(category) {
+  if (category === "ACCESS") return "access";
+  if (category === "BILLING") return "billing";
+  if (category === "AI_COST") return "ai-cost";
+  if (category === "PLANS") return "plans";
+  return "operations";
+}
+
 async function loadAudit() {
-  const rows = await api("/api/v1/admin/audit?limit=150");
-  $("#auditTable").innerHTML = `<div class="card-heading"><div><span class="eyebrow">AUDIT TRAIL</span><h3>Thao tác quản trị</h3></div><span class="muted">${rows.length} bản ghi gần nhất</span></div>${auditRows(rows)}`;
+  const params = new URLSearchParams();
+  params.set("days", String(state.auditDays || 7));
+  params.set("limit", "300");
+  if (state.auditCategory) params.set("category", state.auditCategory);
+  if (state.auditAction) params.set("action", state.auditAction);
+  if (state.auditActor) params.set("actor", state.auditActor);
+  if (state.auditTarget) params.set("target", state.auditTarget);
+  if (state.auditQuery) params.set("query", state.auditQuery);
+
+  const data = await api(`/api/v1/admin/audit-dashboard?${params.toString()}`);
+  state.auditDashboard = data;
+  if (data.summary?.timeZone) state.adminTimeZone = data.summary.timeZone;
+
+  $("#auditDays").value = String(state.auditDays || 7);
+  $("#auditCategory").value = state.auditCategory;
+  $("#auditAction").value = state.auditAction;
+  $("#auditActor").value = state.auditActor;
+  $("#auditTarget").value = state.auditTarget;
+  $("#auditQuery").value = state.auditQuery;
+
+  const summary = data.summary || {};
+  $("#auditMetrics").innerHTML = `
+    ${metric("Audit actions", summary.totalActions, `${state.auditDays} day window`)}
+    ${metric("Actors", summary.uniqueActors, "unique admin actors")}
+    ${metric("Affected users", summary.affectedUsers, "unique target users")}
+    ${metric("Access", summary.accessActions, "account / role / session")}
+    ${metric("Billing", summary.billingActions, "payment / license / subscription")}
+    ${metric("Sensitive", summary.sensitiveActions, "refund / revoke / cancel / backfill")}
+  `;
+
+  renderAuditTable(data.entries || []);
+}
+
+function renderAuditTable(entries) {
+  const target = $("#auditTable");
+  if (!entries.length) {
+    target.innerHTML = '<div class="empty large">Không có audit log phù hợp bộ lọc.</div>';
+    return;
+  }
+
+  target.innerHTML = `
+    <div class="card-heading"><div><span class="eyebrow">AUDIT TRAIL</span><h3>Thao tác quản trị</h3></div><span class="muted">${entries.length} bản ghi</span></div>
+    <table class="audit-table">
+      <thead><tr><th>Time / Action</th><th>Actor → Target</th><th>Request</th><th>Category</th></tr></thead>
+      <tbody>${entries.map((entry) => `
+        <tr class="clickable" data-audit-id="${entry.id}">
+          <td><strong>${escapeHtml(entry.action)}</strong><small>#${entry.id} · ${fmtDate(entry.createdAt)}</small></td>
+          <td><strong>${escapeHtml(auditActorLabel(entry))}</strong><small>${escapeHtml(entry.actorRole || "role unavailable")}${entry.targetUserId ? ` · → ${escapeHtml(auditTargetLabel(entry))}` : " · No target user"}</small></td>
+          <td><strong class="mono-value">${escapeHtml(entry.requestId || "Legacy / unavailable")}</strong><small>${escapeHtml([entry.httpMethod, entry.requestPath].filter(Boolean).join(" ") || "No request metadata")}</small></td>
+          <td><span class="audit-category ${auditCategoryClass(entry.category)}">${escapeHtml(entry.category || "OPERATIONS")}</span></td>
+        </tr>`).join("")}</tbody>
+    </table>`;
+
+  $$('[data-audit-id]').forEach((row) => row.addEventListener("click", () => {
+    openAuditEntry(Number(row.dataset.auditId));
+  }));
+}
+
+function openAuditEntry(auditId) {
+  const entry = (state.auditDashboard?.entries || []).find((item) => Number(item.id) === Number(auditId));
+  if (!entry) return;
+
+  state.selectedAuditId = auditId;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerTitle").textContent = `${entry.action} · #${entry.id}`;
+  $("#drawerBody").innerHTML = `
+    <section class="drawer-section first audit-entry-detail">
+      <div class="section-heading"><div><span class="eyebrow">AUDIT ENTRY</span><h3>${escapeHtml(entry.action)}</h3></div><span class="audit-category ${auditCategoryClass(entry.category)}">${escapeHtml(entry.category || "OPERATIONS")}</span></div>
+      <div class="detail-grid">
+        <div><span>Created</span><strong>${fmtDate(entry.createdAt)}</strong><small>${escapeHtml(state.adminTimeZone)}</small></div>
+        <div><span>Actor</span><strong>${escapeHtml(auditActorLabel(entry))}</strong><small>${escapeHtml(entry.actorRole || "role unavailable")}${entry.actorUserId ? ` · User #${entry.actorUserId}` : " · System / unknown"}</small></div>
+        <div><span>Target</span><strong>${escapeHtml(auditTargetLabel(entry))}</strong><small>${entry.targetUserId ? `User #${entry.targetUserId}` : "No target user"}</small></div>
+        <div><span>Audit ID</span><strong class="mono-value">#${entry.id}</strong></div>
+      </div>
+    </section>
+    <section class="drawer-section audit-entry-detail">
+      <div class="section-heading"><div><span class="eyebrow">REQUEST METADATA</span><h3>Trace context</h3></div></div>
+      <div class="detail-grid">
+        <div><span>Request ID</span><strong class="mono-value">${escapeHtml(entry.requestId || "—")}</strong></div>
+        <div><span>Method</span><strong>${escapeHtml(entry.httpMethod || "—")}</strong></div>
+        <div><span>Path</span><strong class="mono-value">${escapeHtml(entry.requestPath || "—")}</strong></div>
+        <div><span>Remote IP</span><strong class="mono-value">${escapeHtml(entry.remoteIp || "—")}</strong></div>
+        <div><span>X-Forwarded-For</span><strong class="mono-value">${escapeHtml(entry.forwardedFor || "—")}</strong><small>Chỉ đáng tin khi reverse proxy được cấu hình đúng.</small></div>
+        <div class="full"><span>User-Agent</span><strong class="mono-value">${escapeHtml(entry.userAgent || "—")}</strong></div>
+      </div>
+      ${entry.requestId ? "" : '<div class="notice info">Bản ghi này được tạo trước 14.9.2 hoặc ngoài HTTP request nên chưa có request metadata.</div>'}
+    </section>
+    <section class="drawer-section audit-entry-detail">
+      <div class="section-heading"><div><span class="eyebrow">DETAILS</span><h3>Audit reason / metadata</h3></div></div>
+      <div class="notice info mono-value">${escapeHtml(entry.details || "No additional details")}</div>
+      <small class="muted">Audit log không lưu password, JWT, request body, prompt, OCR hoặc nội dung dịch.</small>
+    </section>`;
+}
+
+
+function safetyModeClass(mode) {
+  return mode === "READ_ONLY" ? "warn" : "ok";
+}
+
+async function loadSafety() {
+  const data = await api("/api/v1/admin/safety");
+  state.adminSafety = data;
+
+  const readOnly = Boolean(data.readOnly);
+  const mode = String(data.mode || "NORMAL");
+  $("#safetyModeBadge").textContent = mode;
+  $("#safetyModeBadge").className = `status-pill ${safetyModeClass(mode)}`;
+
+  $("#safetyNotice").innerHTML = readOnly
+    ? `<div class="notice warning"><strong>Admin Console đang READ_ONLY.</strong> Các POST / PUT / PATCH / DELETE dưới <span class="mono-value">/api/v1/admin/**</span> đang bị chặn, ngoại trừ login, thay đổi safety mode và acknowledge/resolve incident.</div>`
+    : `<div class="notice info"><strong>Admin write mode đang NORMAL.</strong> Guard rails chống tự khóa, tự revoke session và khóa SUPER_ADMIN cuối cùng vẫn luôn hoạt động.</div>`;
+
+  $("#safetyMetrics").innerHTML = `
+    ${metricText("Write mode", mode, readOnly ? "writes locked" : "writes enabled")}
+    ${metric("Active SUPER_ADMIN", data.activeSuperAdmins, "must remain >= 1")}
+    ${metricText("Changed by", data.changedByEmail || (data.changedByUserId ? `User #${data.changedByUserId}` : "System"), data.changedAt ? fmtDate(data.changedAt) : "initial state")}
+  `;
+
+  const canChange = state.admin?.role === "SUPER_ADMIN";
+  const targetMode = readOnly ? "NORMAL" : "READ_ONLY";
+  const actionLabel = readOnly ? "Tắt READ_ONLY" : "Bật READ_ONLY";
+  const confirmation = readOnly ? "DISABLE READ_ONLY" : "ENABLE READ_ONLY";
+
+  $("#safetyStatePanel").innerHTML = `
+    <div class="card-heading"><div><span class="eyebrow">CURRENT STATE</span><h3>${escapeHtml(mode)}</h3></div><span class="status-badge ${safetyModeClass(mode)}">${readOnly ? "LOCKED" : "NORMAL"}</span></div>
+    <div class="detail-grid safety-detail-grid">
+      <div class="full"><span>Reason</span><strong>${escapeHtml(data.reason || "—")}</strong></div>
+      <div><span>Changed by</span><strong>${escapeHtml(data.changedByEmail || (data.changedByUserId ? `User #${data.changedByUserId}` : "System"))}</strong></div>
+      <div><span>Changed at</span><strong>${data.changedAt ? fmtDate(data.changedAt) : "—"}</strong></div>
+    </div>
+    <div class="drawer-actions safety-mode-actions">
+      ${canChange ? `<button id="changeSafetyModeButton" class="${readOnly ? "primary" : "danger-button"}">${escapeHtml(actionLabel)}</button>` : '<span class="muted">Chỉ SUPER_ADMIN được thay đổi safety mode.</span>'}
+    </div>
+    ${canChange ? `<small class="muted">Confirmation phrase: <span class="mono-value">${escapeHtml(confirmation)}</span></small>` : ""}
+  `;
+
+  $("#safetyPolicyPanel").innerHTML = `
+    <div class="card-heading"><div><span class="eyebrow">GUARD RAILS</span><h3>Protected operations</h3></div></div>
+    <div class="safety-policy-list">
+      <div><strong>Self lock</strong><span>Admin không thể suspend chính tài khoản đang dùng.</span></div>
+      <div><strong>Self session revoke</strong><span>Admin không thể revoke-all session của chính mình từ Admin Console.</span></div>
+      <div><strong>Last SUPER_ADMIN</strong><span>Không thể suspend SUPER_ADMIN hoạt động cuối cùng.</span></div>
+      <div><strong>READ_ONLY write lock</strong><span>Chặn create/update/refund/revoke/cancel/backfill và các Admin write endpoint khác.</span></div>
+      <div><strong>Incident bypass</strong><span>Acknowledge / Resolve error event vẫn hoạt động trong READ_ONLY để xử lý sự cố.</span></div>
+      <div><strong>Audit trail</strong><span>Thay đổi safety mode được ghi Audit Log và Security Events ở mức CRITICAL.</span></div>
+    </div>
+  `;
+
+  $("#changeSafetyModeButton")?.addEventListener("click", () => void changeSafetyMode(targetMode));
+}
+
+async function changeSafetyMode(targetMode) {
+  if (state.admin?.role !== "SUPER_ADMIN") {
+    toast("Chỉ SUPER_ADMIN được thay đổi Admin safety mode.", "error");
+    return;
+  }
+
+  const enabling = targetMode === "READ_ONLY";
+  const phrase = enabling ? "ENABLE READ_ONLY" : "DISABLE READ_ONLY";
+  const reason = window.prompt(
+    enabling ? "Lý do bật READ_ONLY:" : "Lý do tắt READ_ONLY:",
+    enabling ? "Maintenance / investigate incident" : "Maintenance complete"
+  );
+  if (!reason?.trim()) return;
+
+  const confirmation = window.prompt(`Nhập chính xác confirmation phrase: ${phrase}`, "");
+  if (confirmation === null) return;
+
+  try {
+    await api("/api/v1/admin/safety/mode", {
+      method: "POST",
+      body: JSON.stringify({
+        mode: targetMode,
+        reason: reason.trim(),
+        confirmation: confirmation.trim()
+      })
+    });
+    toast(`Admin safety mode → ${targetMode}`, enabling ? "info" : "success");
+    await loadSafety();
+  } catch (error) {
+    toast(error.message, "error");
+  }
+}
+
+function errorStatusClass(status) {
+  if (status === "RESOLVED") return "ok";
+  if (status === "ACKNOWLEDGED") return "info";
+  return "warn";
+}
+
+async function loadErrors() {
+  const params = new URLSearchParams();
+  params.set("days", String(state.errorDays || 7));
+  params.set("limit", "300");
+  if (state.errorStatus) params.set("status", state.errorStatus);
+  if (state.errorSeverity) params.set("severity", state.errorSeverity);
+  if (state.errorModule) params.set("module", state.errorModule);
+  if (state.errorCode) params.set("errorCode", state.errorCode);
+  if (state.errorQuery) params.set("query", state.errorQuery);
+
+  const data = await api(`/api/v1/admin/error-events?${params.toString()}`);
+  state.errorDashboard = data;
+  if (data.summary?.timeZone) state.adminTimeZone = data.summary.timeZone;
+
+  $("#errorDays").value = String(state.errorDays || 7);
+  $("#errorStatus").value = state.errorStatus;
+  $("#errorSeverity").value = state.errorSeverity;
+  $("#errorModule").value = state.errorModule;
+  $("#errorCode").value = state.errorCode;
+  $("#errorQuery").value = state.errorQuery;
+
+  const summary = data.summary || {};
+  $("#errorMetrics").innerHTML = `
+    ${metric("Error events", summary.totalEvents, `${state.errorDays} day window`)}
+    ${metric("Open", summary.openEvents, "needs investigation")}
+    ${metric("Acknowledged", summary.acknowledgedEvents, "being investigated")}
+    ${metric("Resolved", summary.resolvedEvents, "closed")}
+    ${metric("Critical open", summary.criticalOpenEvents, "open + acknowledged")}
+    ${metric("Retryable open", summary.retryableOpenEvents, "candidate for retry")}
+  `;
+
+  renderErrorEvents(data.events || []);
+}
+
+function renderErrorEvents(events) {
+  const target = $("#errorEventsTable");
+  if (!events.length) {
+    target.innerHTML = '<div class="empty large">Không có error event phù hợp bộ lọc.</div>';
+    return;
+  }
+
+  target.innerHTML = `
+    <table class="errors-table">
+      <thead><tr><th>Time / Error</th><th>Module / Request</th><th>Severity</th><th>Status</th><th>Retry</th></tr></thead>
+      <tbody>${events.map((event) => `
+        <tr class="clickable" data-error-event-id="${event.id}">
+          <td><strong>${escapeHtml(event.errorCode)}</strong><small>#${event.id} · ${fmtDate(event.occurredAt)}</small></td>
+          <td><strong>${escapeHtml(event.module)}</strong><small class="mono-value">${escapeHtml(event.requestId || event.requestPath || event.exceptionType || "—")}</small></td>
+          <td><span class="status-badge ${securitySeverityClass(event.severity)}">${escapeHtml(event.severity)}</span></td>
+          <td><span class="status-badge ${errorStatusClass(event.status)}">${escapeHtml(event.status)}</span></td>
+          <td><span class="status-badge ${event.retryable ? "info" : "ok"}">${event.retryable ? "YES" : "NO"}</span></td>
+        </tr>`).join("")}</tbody>
+    </table>`;
+
+  $$('[data-error-event-id]').forEach((row) => row.addEventListener("click", () => {
+    void openErrorEvent(Number(row.dataset.errorEventId));
+  }));
+}
+
+async function openErrorEvent(eventId) {
+  state.selectedErrorEventId = eventId;
+  $("#drawerBackdrop").classList.remove("hidden");
+  $("#userDrawer").classList.remove("hidden");
+  $("#drawerTitle").textContent = `Error #${eventId}`;
+  $("#drawerBody").innerHTML = '<div class="loading">Đang tải error metadata...</div>';
+
+  try {
+    const event = await api(`/api/v1/admin/error-events/${eventId}`);
+    $("#drawerTitle").textContent = `${event.errorCode} · #${event.id}`;
+    $("#drawerBody").innerHTML = `
+      <section class="drawer-section first error-entry-detail">
+        <div class="section-heading"><div><span class="eyebrow">ERROR EVENT</span><h3>${escapeHtml(event.summary)}</h3></div><div class="security-badges"><span class="status-badge ${securitySeverityClass(event.severity)}">${escapeHtml(event.severity)}</span><span class="status-badge ${errorStatusClass(event.status)}">${escapeHtml(event.status)}</span></div></div>
+        <div class="detail-grid">
+          <div><span>Occurred</span><strong>${fmtDate(event.occurredAt)}</strong><small>${escapeHtml(state.adminTimeZone)}</small></div>
+          <div><span>Module</span><strong>${escapeHtml(event.module)}</strong><small>${event.retryable ? "Retryable" : "Not marked retryable"}</small></div>
+          <div><span>Error code</span><strong class="mono-value">${escapeHtml(event.errorCode)}</strong></div>
+          <div><span>Exception</span><strong class="mono-value">${escapeHtml(event.exceptionType || "—")}</strong></div>
+          <div><span>Actor</span><strong>${escapeHtml(event.actorEmail || (event.actorUserId ? `User #${event.actorUserId}` : "System / unknown"))}</strong></div>
+          <div><span>HTTP status</span><strong>${escapeHtml(event.httpStatus ?? "—")}</strong></div>
+        </div>
+      </section>
+      <section class="drawer-section error-entry-detail">
+        <div class="section-heading"><div><span class="eyebrow">TRACE CONTEXT</span><h3>Request metadata</h3></div></div>
+        <div class="detail-grid">
+          <div><span>Request ID</span><strong class="mono-value">${escapeHtml(event.requestId || "—")}</strong></div>
+          <div><span>Method</span><strong>${escapeHtml(event.httpMethod || "—")}</strong></div>
+          <div><span>Path</span><strong class="mono-value">${escapeHtml(event.requestPath || "—")}</strong></div>
+          <div><span>Remote IP</span><strong class="mono-value">${escapeHtml(event.remoteIp || "—")}</strong></div>
+          <div><span>X-Forwarded-For</span><strong class="mono-value">${escapeHtml(event.forwardedFor || "—")}</strong></div>
+          <div><span>User-Agent</span><strong class="mono-value">${escapeHtml(event.userAgent || "—")}</strong></div>
+        </div>
+      </section>
+      <section class="drawer-section error-entry-detail">
+        <div class="section-heading"><div><span class="eyebrow">INCIDENT STATE</span><h3>Investigation lifecycle</h3></div></div>
+        <div class="detail-grid">
+          <div><span>Acknowledged by</span><strong>${escapeHtml(event.acknowledgedByEmail || (event.acknowledgedByUserId ? `User #${event.acknowledgedByUserId}` : "—"))}</strong><small>${fmtDate(event.acknowledgedAt)}</small></div>
+          <div><span>Resolved by</span><strong>${escapeHtml(event.resolvedByEmail || (event.resolvedByUserId ? `User #${event.resolvedByUserId}` : "—"))}</strong><small>${fmtDate(event.resolvedAt)}</small></div>
+          <div class="full"><span>Acknowledgement note</span><strong>${escapeHtml(event.acknowledgementNote || "—")}</strong></div>
+          <div class="full"><span>Resolution note</span><strong>${escapeHtml(event.resolutionNote || "—")}</strong></div>
+        </div>
+        <div class="drawer-actions">
+          ${event.status === "OPEN" ? '<button id="ackErrorEventButton" class="ghost">Acknowledge</button>' : ""}
+          ${event.status !== "RESOLVED" ? '<button id="resolveErrorEventButton" class="primary">Resolve</button>' : ""}
+        </div>
+        <small class="muted">Error ledger chỉ lưu metadata; không lưu password, JWT, request body, prompt, OCR hoặc nội dung dịch.</small>
+      </section>`;
+
+    $("#ackErrorEventButton")?.addEventListener("click", () => void updateErrorEvent(event.id, "acknowledge"));
+    $("#resolveErrorEventButton")?.addEventListener("click", () => void updateErrorEvent(event.id, "resolve"));
+  } catch (error) {
+    $("#drawerBody").innerHTML = `<div class="inline-error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function updateErrorEvent(eventId, action) {
+  const label = action === "resolve" ? "resolution" : "acknowledgement";
+  const reason = window.prompt(`Nhập ${label} note để ghi audit:`);
+  if (!reason?.trim()) return;
+  try {
+    await api(`/api/v1/admin/error-events/${eventId}/${action}`, {
+      method: "POST",
+      body: JSON.stringify({ reason: reason.trim() })
+    });
+    toast(action === "resolve" ? "Đã resolve error event." : "Đã acknowledge error event.", "success");
+    await loadErrors();
+    await openErrorEvent(eventId);
+  } catch (error) {
+    toast(error.message, "error");
+  }
+}
+
+function fmtBytes(value) {
+  const bytes = Number(value || 0);
+  if (bytes < 1024) return `${fmtNumber(bytes)} B`;
+  if (bytes < 1024 ** 2) return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(bytes / 1024)} KB`;
+  if (bytes < 1024 ** 3) return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 1 }).format(bytes / (1024 ** 2))} MB`;
+  return `${new Intl.NumberFormat("vi-VN", { maximumFractionDigits: 2 }).format(bytes / (1024 ** 3))} GB`;
+}
+
+function fmtDuration(secondsValue) {
+  let seconds = Math.max(0, Number(secondsValue || 0));
+  const days = Math.floor(seconds / 86400);
+  seconds %= 86400;
+  const hours = Math.floor(seconds / 3600);
+  seconds %= 3600;
+  const minutes = Math.floor(seconds / 60);
+  if (days) return `${days}d ${hours}h ${minutes}m`;
+  if (hours) return `${hours}h ${minutes}m`;
+  return `${minutes}m`;
+}
+
+function healthStatusClass(status) {
+  if (status === "CRITICAL") return "critical";
+  if (status === "WARNING") return "warn";
+  return "ok";
+}
+
+function healthStatusBadge(status) {
+  return `<span class="status-badge ${healthStatusClass(status)}">${escapeHtml(status || "UNKNOWN")}</span>`;
+}
+
+async function loadOperationalHealth() {
+  const data = await api("/api/v1/admin/operational-health");
+  state.operationalHealth = data;
+
+  $("#healthGeneratedAt").textContent = data.generatedAt ? `Snapshot ${fmtDate(data.generatedAt)}` : "Snapshot";
+  $("#healthNotice").innerHTML = data.status === "HEALTHY"
+    ? '<div class="notice info health-notice">Không có cảnh báo vận hành nổi bật trong snapshot hiện tại.</div>'
+    : `<div class="notice ${data.status === "CRITICAL" ? "warn" : "warn"} health-notice"><strong>${escapeHtml(data.status)}</strong> · Có check cần chú ý. Xem bảng Health checks bên dưới.</div>`;
+
+  $("#healthMetrics").innerHTML = `
+    ${healthMetric("Overall", data.status, `${data.liveness || "?"} live · ${data.readiness || "?"} ready`, data.status)}
+    ${healthMetric("Uptime", fmtDuration(data.uptimeSeconds), "backend process", "HEALTHY")}
+    ${healthMetric("DB latency", `${fmtNumber(data.database?.latencyMs)} ms`, data.database?.reachable ? "reachable" : "unreachable", data.database?.reachable ? (Number(data.database?.latencyMs || 0) >= 500 ? "WARNING" : "HEALTHY") : "CRITICAL")}
+    ${healthMetric("HTTP 5xx", fmtPercent(data.http?.serverErrorRatePercent), `${fmtNumber(data.http?.serverErrorsSinceStart)} / ${fmtNumber(data.http?.requestsSinceStart)} since start`, Number(data.http?.requestsSinceStart || 0) >= 20 && Number(data.http?.serverErrorRatePercent || 0) >= 5 ? "WARNING" : "HEALTHY")}
+    ${healthMetric("Heap", fmtPercent(data.jvm?.heapUsagePercent), `${fmtBytes(data.jvm?.heapUsedBytes)} / ${fmtBytes(data.jvm?.heapMaxBytes)}`, Number(data.jvm?.heapUsagePercent || 0) >= 85 ? "WARNING" : "HEALTHY")}
+    ${healthMetric("AI cost coverage", fmtPercent(data.ai?.costCoveragePercent), `${fmtNumber(data.ai?.missingCost24h)} missing · 24h`, Number(data.ai?.missingCost24h || 0) > 0 ? "WARNING" : "HEALTHY")}
+  `;
+
+  $("#healthPlatform").innerHTML = `
+    <div class="card-heading"><div><span class="eyebrow">PLATFORM</span><h3>Backend / Database</h3></div>${healthStatusBadge(data.database?.reachable ? "HEALTHY" : "CRITICAL")}</div>
+    <div class="health-detail-grid">
+      <div><span>Liveness</span><strong>${escapeHtml(data.liveness || "—")}</strong></div>
+      <div><span>Readiness</span><strong>${escapeHtml(data.readiness || "—")}</strong></div>
+      <div><span>DB version</span><strong>${escapeHtml(data.database?.version || "—")}</strong></div>
+      <div><span>Flyway</span><strong>${escapeHtml(data.database?.latestMigrationVersion ? `V${data.database.latestMigrationVersion}` : "—")}</strong><small>${escapeHtml(data.database?.latestMigrationDescription || "")}</small></div>
+      <div><span>Failed migrations</span><strong>${fmtNumber(data.database?.failedMigrations)}</strong></div>
+      <div><span>CPU available</span><strong>${fmtNumber(data.jvm?.availableProcessors)}</strong></div>
+      <div><span>HTTP avg latency</span><strong>${fmtLatency(data.http?.averageLatencyMs)}</strong></div>
+      <div><span>HTTP 4xx</span><strong>${fmtNumber(data.http?.clientErrorsSinceStart)}</strong><small>since backend start</small></div>
+    </div>`;
+
+  $("#healthAi").innerHTML = `
+    <div class="card-heading"><div><span class="eyebrow">AI · 24H</span><h3>AI reliability</h3></div>${healthStatusBadge(Number(data.ai?.missingCost24h || 0) > 0 ? "WARNING" : "HEALTHY")}</div>
+    <div class="health-detail-grid">
+      <div><span>Requests</span><strong>${fmtNumber(data.ai?.requests24h)}</strong></div>
+      <div><span>Failed</span><strong>${fmtNumber(data.ai?.failed24h)}</strong></div>
+      <div><span>Success rate</span><strong>${fmtPercent(data.ai?.successRatePercent)}</strong></div>
+      <div><span>Cost coverage</span><strong>${fmtPercent(data.ai?.costCoveragePercent)}</strong></div>
+      <div><span>Calculated</span><strong>${fmtNumber(data.ai?.calculatedCost24h)}</strong></div>
+      <div><span>Missing cost</span><strong>${fmtNumber(data.ai?.missingCost24h)}</strong></div>
+    </div>`;
+
+  $("#healthRevenue").innerHTML = `
+    <div class="card-heading"><div><span class="eyebrow">PAYMENTS · 24H</span><h3>Revenue pipeline</h3></div>${healthStatusBadge(Number(data.revenue?.missingRevenue24h || 0) > 0 ? "WARNING" : "HEALTHY")}</div>
+    <div class="health-detail-grid">
+      <div><span>Paid</span><strong>${fmtNumber(data.revenue?.paidTransactions24h)}</strong></div>
+      <div><span>Failed</span><strong>${fmtNumber(data.revenue?.failedTransactions24h)}</strong></div>
+      <div><span>Normalized</span><strong>${fmtNumber(data.revenue?.normalizedRevenue24h)}</strong></div>
+      <div><span>Missing FX</span><strong>${fmtNumber(data.revenue?.missingRevenue24h)}</strong></div>
+      <div class="full"><span>Revenue coverage</span><strong>${fmtPercent(data.revenue?.revenueCoveragePercent)}</strong></div>
+    </div>`;
+
+  $("#healthSecurity").innerHTML = `
+    <div class="card-heading"><div><span class="eyebrow">SECURITY · 24H</span><h3>Security signals</h3></div>${healthStatusBadge(Number(data.security?.critical24h || 0) > 0 ? "CRITICAL" : Number(data.security?.warnings24h || 0) > 0 ? "WARNING" : "HEALTHY")}</div>
+    <div class="health-detail-grid">
+      <div><span>Critical</span><strong>${fmtNumber(data.security?.critical24h)}</strong></div>
+      <div><span>Warnings</span><strong>${fmtNumber(data.security?.warnings24h)}</strong></div>
+      <div><span>Denied</span><strong>${fmtNumber(data.security?.denied24h)}</strong></div>
+      <div><span>Failed logins</span><strong>${fmtNumber(data.security?.failedLogins24h)}</strong></div>
+    </div>`;
+
+  $("#healthErrors").innerHTML = `
+    <div class="card-heading"><div><span class="eyebrow">ERRORS</span><h3>Open incidents</h3></div>${healthStatusBadge(Number(data.errors?.criticalOpenEvents || 0) > 0 ? "CRITICAL" : Number(data.errors?.openEvents || 0) > 0 ? "WARNING" : "HEALTHY")}</div>
+    <div class="health-detail-grid">
+      <div><span>Open</span><strong>${fmtNumber(data.errors?.openEvents)}</strong></div>
+      <div><span>Critical open</span><strong>${fmtNumber(data.errors?.criticalOpenEvents)}</strong></div>
+      <div><span>Retryable</span><strong>${fmtNumber(data.errors?.retryableOpenEvents)}</strong></div>
+      <div><span>New · 24h</span><strong>${fmtNumber(data.errors?.newEvents24h)}</strong></div>
+    </div>`;
+
+  renderHealthChecks(data.checks || []);
+}
+
+function healthMetric(label, value, hint, status) {
+  return `<article class="metric-card health-metric ${healthStatusClass(status)}"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(hint)}</small></article>`;
+}
+
+function renderHealthChecks(checks) {
+  const target = $("#healthChecks");
+  if (!checks.length) {
+    target.innerHTML = '<div class="empty large">Không có health check.</div>';
+    return;
+  }
+  target.innerHTML = `
+    <div class="card-heading health-check-heading"><div><span class="eyebrow">HEALTH CHECKS</span><h3>Operational checks</h3></div><span class="muted">${checks.length} checks</span></div>
+    <table class="health-check-table">
+      <thead><tr><th>Status</th><th>Check</th><th>Observed</th><th>Detail</th></tr></thead>
+      <tbody>${checks.map((check) => `
+        <tr>
+          <td>${healthStatusBadge(check.status)}</td>
+          <td><strong>${escapeHtml(check.title)}</strong><small>${escapeHtml(check.code)}</small></td>
+          <td><strong>${escapeHtml(check.observedValue || "—")}</strong></td>
+          <td><span>${escapeHtml(check.detail || "")}</span></td>
+        </tr>`).join("")}</tbody>
+    </table>`;
 }
 
 function closeDrawer() {
@@ -1978,6 +2504,8 @@ function closeDrawer() {
   state.selectedFxRateId = null;
   state.selectedAiDrilldown = null;
   state.selectedSecurityEventId = null;
+  state.selectedAuditId = null;
+  state.selectedErrorEventId = null;
 }
 
 $("#loginForm").addEventListener("submit", async (event) => {
@@ -1986,7 +2514,9 @@ $("#loginForm").addEventListener("submit", async (event) => {
   button.disabled = true; button.textContent = "Đang xác thực...";
   $("#loginError").classList.add("hidden");
   try {
-    state.backendUrl = $("#backendUrl").value.trim().replace(/\/$/, "");
+    state.backendUrl = validateBackendUrl(
+      allowBackendOverride ? $("#backendUrl").value : defaultBackendUrl
+    );
     const login = await api("/api/v1/admin/auth/login", {
       method: "POST",
       body: JSON.stringify({ email: $("#email").value.trim(), password: $("#password").value })
@@ -2002,6 +2532,57 @@ $("#loginForm").addEventListener("submit", async (event) => {
   }
 });
 
+
+$("#errorDays").addEventListener("change", () => {
+  state.errorDays = Number($("#errorDays").value || 7);
+  sessionStorage.setItem("ait.admin.errorDays", String(state.errorDays));
+  void loadErrors();
+});
+$("#errorStatus").addEventListener("change", () => { state.errorStatus = $("#errorStatus").value; void loadErrors(); });
+$("#errorSeverity").addEventListener("change", () => { state.errorSeverity = $("#errorSeverity").value; void loadErrors(); });
+$("#errorModule").addEventListener("change", () => { state.errorModule = $("#errorModule").value; void loadErrors(); });
+$("#errorSearchButton").addEventListener("click", () => {
+  state.errorCode = $("#errorCode").value.trim().toUpperCase();
+  state.errorQuery = $("#errorQuery").value.trim();
+  void loadErrors();
+});
+$("#errorClearButton").addEventListener("click", () => {
+  state.errorStatus = "";
+  state.errorSeverity = "";
+  state.errorModule = "";
+  state.errorCode = "";
+  state.errorQuery = "";
+  void loadErrors();
+});
+[$("#errorCode"), $("#errorQuery")].forEach((input) => input.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") $("#errorSearchButton").click();
+}));
+
+
+$("#auditDays").addEventListener("change", () => {
+  state.auditDays = Number($("#auditDays").value || 7);
+  sessionStorage.setItem("ait.admin.auditDays", String(state.auditDays));
+  void loadAudit();
+});
+$("#auditCategory").addEventListener("change", () => { state.auditCategory = $("#auditCategory").value; void loadAudit(); });
+$("#auditSearchButton").addEventListener("click", () => {
+  state.auditAction = $("#auditAction").value.trim().toUpperCase();
+  state.auditActor = $("#auditActor").value.trim();
+  state.auditTarget = $("#auditTarget").value.trim();
+  state.auditQuery = $("#auditQuery").value.trim();
+  void loadAudit();
+});
+$("#auditClearButton").addEventListener("click", () => {
+  state.auditCategory = "";
+  state.auditAction = "";
+  state.auditActor = "";
+  state.auditTarget = "";
+  state.auditQuery = "";
+  void loadAudit();
+});
+[$("#auditAction"), $("#auditActor"), $("#auditTarget"), $("#auditQuery")].forEach((input) => input.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") $("#auditSearchButton").click();
+}));
 
 $("#securityDays").addEventListener("change", () => {
   state.securityDays = Number($("#securityDays").value || 7);
