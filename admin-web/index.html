@@ -19,7 +19,7 @@
         <p>Quản lý người dùng, quyền truy cập và vận hành hệ thống.</p>
       </div>
       <form id="loginForm" class="login-form">
-        <label>
+        <label id="backendUrlField">
           <span>Backend URL</span>
           <input id="backendUrl" type="url" value="http://localhost:8080" required />
         </label>
@@ -47,7 +47,6 @@
       <nav>
         <button class="nav-item active" data-view="dashboard"><span>◫</span> Tổng quan</button>
         <button class="nav-item" data-view="users"><span>◎</span> Người dùng</button>
-        <button class="nav-item" data-view="audit"><span>≡</span> Audit log</button>
         <div class="nav-separator">COMMERCIAL</div>
         <button class="nav-item" data-view="plans"><span>◇</span> Plans & Features <em>14.6</em></button>
         <button class="nav-item" data-view="pricing"><span>₫</span> Pricing <em>14.7</em></button>
@@ -57,6 +56,10 @@
         <button class="nav-item" data-view="margin"><span>％</span> Revenue & Margin <em>14.8.6</em></button>
         <div class="nav-separator">OPERATIONS</div>
         <button class="nav-item" data-view="security"><span>⌾</span> Security Events <em>14.9.1</em></button>
+        <button class="nav-item" data-view="audit"><span>≡</span> Audit Log <em>14.9.2</em></button>
+        <button class="nav-item" data-view="health"><span>♡</span> Operational Health <em>14.9.3</em></button>
+        <button class="nav-item" data-view="errors"><span>!</span> Errors & Failed Jobs <em>14.9.4</em></button>
+        <button class="nav-item" data-view="safety"><span>⛨</span> Safety Controls <em>14.9.5</em></button>
       </nav>
       <div class="sidebar-footer">
         <div id="adminIdentity" class="admin-identity"></div>
@@ -224,7 +227,75 @@
       </section>
 
       <section id="auditView" class="view hidden">
+        <div class="audit-toolbar card">
+          <div><span class="eyebrow">ADMIN AUDIT TRAIL</span><h3>Audit Log Viewer</h3><small>Lịch sử thao tác quản trị có actor, target, request ID và request metadata. Dữ liệu audit cũ trước 14.9.2 có thể chưa có request metadata.</small></div>
+          <div class="audit-actions">
+            <select id="auditDays"><option value="1">Hôm nay</option><option value="7" selected>7 ngày</option><option value="30">30 ngày</option><option value="90">90 ngày</option></select>
+            <select id="auditCategory"><option value="">Mọi category</option><option value="ACCESS">ACCESS</option><option value="PLANS">PLANS</option><option value="BILLING">BILLING</option><option value="AI_COST">AI_COST</option><option value="OPERATIONS">OPERATIONS</option></select>
+          </div>
+        </div>
+        <div class="audit-search card">
+          <input id="auditAction" type="search" placeholder="Action chính xác, ví dụ PAYMENT_REFUNDED" />
+          <input id="auditActor" type="search" placeholder="Actor email hoặc user ID" />
+          <input id="auditTarget" type="search" placeholder="Target email hoặc user ID" />
+          <input id="auditQuery" type="search" placeholder="Details, request ID, path, IP..." />
+          <button id="auditSearchButton" class="primary compact">Lọc</button>
+          <button id="auditClearButton" class="ghost compact">Xóa lọc</button>
+        </div>
+        <div id="auditMetrics" class="metric-grid audit-metrics"></div>
         <div class="card table-card"><div id="auditTable"></div></div>
+      </section>
+
+
+
+      <section id="errorsView" class="view hidden">
+        <div class="errors-toolbar card">
+          <div><span class="eyebrow">ERROR MONITORING</span><h3>Errors & Failed Jobs</h3><small>HTTP 5xx, AI/provider failures và failed-job metadata. Không lưu request body, JWT, prompt, OCR hoặc nội dung dịch.</small></div>
+          <div class="errors-actions">
+            <select id="errorDays"><option value="1">Hôm nay</option><option value="7" selected>7 ngày</option><option value="30">30 ngày</option><option value="90">90 ngày</option></select>
+            <select id="errorStatus"><option value="">Mọi status</option><option value="OPEN">OPEN</option><option value="ACKNOWLEDGED">ACKNOWLEDGED</option><option value="RESOLVED">RESOLVED</option></select>
+            <select id="errorSeverity"><option value="">Mọi severity</option><option value="WARNING">WARNING</option><option value="CRITICAL">CRITICAL</option></select>
+            <select id="errorModule"><option value="">Mọi module</option><option value="HTTP">HTTP</option><option value="AI">AI</option><option value="PAYMENT">PAYMENT</option><option value="REVENUE">REVENUE</option><option value="JOB">JOB</option><option value="ADMIN">ADMIN</option><option value="SYSTEM">SYSTEM</option></select>
+          </div>
+        </div>
+        <div class="errors-search card">
+          <input id="errorCode" type="search" placeholder="Error code chính xác, ví dụ INTERNAL_ERROR" />
+          <input id="errorQuery" type="search" placeholder="Exception, request ID, path, IP..." />
+          <button id="errorSearchButton" class="primary compact">Lọc</button>
+          <button id="errorClearButton" class="ghost compact">Xóa lọc</button>
+        </div>
+        <div id="errorMetrics" class="metric-grid errors-metrics"></div>
+        <div class="card table-card"><div id="errorEventsTable"></div></div>
+      </section>
+
+      <section id="safetyView" class="view hidden">
+        <div class="safety-toolbar card">
+          <div><span class="eyebrow">ADMIN SAFETY</span><h3>Safety Controls</h3><small>Persistent write lock và guard rails cho thao tác quản trị nhạy cảm. Chỉ SUPER_ADMIN được đổi safety mode.</small></div>
+          <div class="safety-actions"><span id="safetyModeBadge" class="status-pill">Chưa tải</span></div>
+        </div>
+        <div id="safetyNotice"></div>
+        <div id="safetyMetrics" class="metric-grid safety-metrics"></div>
+        <div class="safety-grid">
+          <article class="card"><div id="safetyStatePanel"></div></article>
+          <article class="card"><div id="safetyPolicyPanel"></div></article>
+        </div>
+      </section>
+
+      <section id="healthView" class="view hidden">
+        <div class="health-toolbar card">
+          <div><span class="eyebrow">OPERATIONS HEALTH</span><h3>Operational Health Dashboard</h3><small>Snapshot vận hành backend: DB/Flyway, JVM, HTTP, AI cost coverage, revenue normalization và security signals.</small></div>
+          <div class="health-actions"><span id="healthGeneratedAt" class="status-pill">Chưa tải snapshot</span></div>
+        </div>
+        <div id="healthNotice"></div>
+        <div id="healthMetrics" class="metric-grid health-metrics"></div>
+        <div class="health-grid">
+          <article class="card"><div id="healthPlatform"></div></article>
+          <article class="card"><div id="healthAi"></div></article>
+          <article class="card"><div id="healthRevenue"></div></article>
+          <article class="card"><div id="healthSecurity"></div></article>
+          <article class="card"><div id="healthErrors"></div></article>
+        </div>
+        <div class="card table-card"><div id="healthChecks"></div></div>
       </section>
     </main>
   </div>
@@ -238,6 +309,7 @@
     <div id="drawerBody" class="drawer-body"></div>
   </aside>
 
+  <script src="./config.js"></script>
   <script type="module" src="./src/app.js"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@ package com.dangt.aitranslator.backend.session;
 
 import com.dangt.aitranslator.backend.common.ForbiddenException;
 import com.dangt.aitranslator.backend.common.UnauthorizedException;
+import com.dangt.aitranslator.backend.entitlement.EntitlementService;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.Base64;
 
@@ -21,14 +23,17 @@ import java.util.Base64;
 public class RefreshTokenService {
 
     private final AuthSessionRepository sessionRepository;
+    private final EntitlementService entitlementService;
     private final Duration refreshLifetime;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public RefreshTokenService(
             AuthSessionRepository sessionRepository,
+            EntitlementService entitlementService,
             @Value("${app.auth.refresh-token-days:30}") long refreshTokenDays
     ) {
         this.sessionRepository = sessionRepository;
+        this.entitlementService = entitlementService;
         this.refreshLifetime = Duration.ofDays(refreshTokenDays);
     }
 
@@ -41,6 +46,18 @@ public class RefreshTokenService {
         String deviceId = normalizeDeviceId(requestedDeviceId);
         String deviceName = normalizeDeviceName(requestedDeviceName);
         Instant now = Instant.now();
+
+        long activeOtherDevices = sessionRepository
+                .findAllByUser_IdAndRevokedAtIsNullOrderByCreatedAtDesc(user.getId())
+                .stream()
+                .filter(session -> session.isActive(now))
+                .map(AuthSession::getDeviceId)
+                .filter(Objects::nonNull)
+                .filter(existingDeviceId -> !deviceId.equals(existingDeviceId))
+                .distinct()
+                .count();
+
+        entitlementService.requireDeviceSlot(user, activeOtherDevices);
 
         List<AuthSession> oldSessions =
                 sessionRepository

@@ -53,7 +53,8 @@ public class TranslationService {
 
     public TranslateResponse translate(
             Long userId,
-            TranslateRequest request
+            TranslateRequest request,
+            boolean allowTranslationMemory
     ) {
         final String requestId =
                 shortRequestId();
@@ -90,13 +91,15 @@ public class TranslationService {
                 );
 
         Optional<TranslationMemoryMatch> memoryMatch =
-                memoryService.findExact(
-                        userId,
-                        profile.getId(),
-                        cleanText,
-                        request.sourceLanguage(),
-                        request.targetLanguage()
-                );
+                allowTranslationMemory
+                        ? memoryService.findExact(
+                                userId,
+                                profile.getId(),
+                                cleanText,
+                                request.sourceLanguage(),
+                                request.targetLanguage()
+                        )
+                        : Optional.empty();
 
         if (memoryMatch.isPresent()) {
             TranslationMemoryMatch match =
