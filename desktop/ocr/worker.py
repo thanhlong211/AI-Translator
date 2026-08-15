@@ -22,6 +22,7 @@ if hasattr(sys.stderr, "reconfigure"):
 
 OUTPUT_MARKER = "__OCR_JSON__"
 PROTOCOL_VERSION = 2
+MODEL_SOURCE = "development"
 
 
 def emit(data: dict[str, Any]) -> None:
@@ -44,6 +45,83 @@ def package_version(name: str) -> str | None:
         return None
 
 
+def paddlex_dependency_report(extra: str = "ocr-core") -> dict[str, Any]:
+    """Report PaddleX extra dependencies visible in this runtime.
+
+    PaddleX validates OCR optional extras through distribution metadata before
+    pipeline creation. Frozen apps therefore need both modules and dist-info.
+    """
+    try:
+        from packaging.markers import default_environment
+        from packaging.requirements import Requirement
+    except Exception as error:
+        return {
+            "extra": extra,
+            "checked": 0,
+            "missing": [f"packaging: {error}"],
+        }
+
+    try:
+        requirements = importlib.metadata.requires("paddlex") or []
+    except Exception as error:
+        return {
+            "extra": extra,
+            "checked": 0,
+            "missing": [f"paddlex metadata: {error}"],
+        }
+
+    environment = default_environment()
+    environment["extra"] = extra
+    checked: list[str] = []
+    missing: list[str] = []
+
+    for raw_requirement in requirements:
+        try:
+            requirement = Requirement(raw_requirement)
+        except Exception:
+            continue
+
+        if requirement.marker is not None:
+            try:
+                if not requirement.marker.evaluate(environment):
+                    continue
+            except Exception:
+                continue
+
+        checked.append(requirement.name)
+        try:
+            installed = importlib.metadata.version(requirement.name)
+            if requirement.specifier and installed not in requirement.specifier:
+                missing.append(
+                    f"{requirement.name} {installed} !~ {requirement.specifier}"
+                )
+        except importlib.metadata.PackageNotFoundError:
+            missing.append(requirement.name)
+        except Exception as error:
+            missing.append(f"{requirement.name}: {error}")
+
+    return {
+        "extra": extra,
+        "checked": len(checked),
+        "missing": missing,
+    }
+
+
+def detected_model_source() -> str:
+    try:
+        model_dirs = production_model_dirs()
+    except Exception:
+        if getattr(sys, "frozen", False):
+            return "bundled-missing"
+        return MODEL_SOURCE
+
+    if model_dirs is not None:
+        return "bundled"
+    if getattr(sys, "frozen", False):
+        return "bundled-missing"
+    return MODEL_SOURCE
+
+
 def runtime_metadata(startup_ms: int = 0) -> dict[str, Any]:
     return {
         "protocol": PROTOCOL_VERSION,
@@ -51,7 +129,9 @@ def runtime_metadata(startup_ms: int = 0) -> dict[str, Any]:
         "pythonVersion": sys.version.split()[0],
         "paddleOcrVersion": package_version("paddleocr"),
         "paddlePaddleVersion": package_version("paddlepaddle"),
-        "startupMs": max(0, int(startup_ms))
+        "startupMs": max(0, int(startup_ms)),
+        "frozen": bool(getattr(sys, "frozen", False)),
+        "modelSource": detected_model_source()
     }
 
 
@@ -129,16 +209,69 @@ def polygon_to_box(polygon: Any) -> dict[str, float]:
     }
 
 
+def production_model_root() -> Path | None:
+    explicit = os.environ.get("AI_TRANSLATOR_OCR_MODEL_ROOT", "").strip()
+    if explicit:
+        return Path(explicit).expanduser().resolve()
+
+    if getattr(sys, "frozen", False):
+        # PyInstaller onedir layout:
+        # runtime/worker/ai-translator-ocr-worker.exe
+        # runtime/models/...
+        return Path(sys.executable).resolve().parent.parent / "models"
+
+    return None
+
+
+def production_model_dirs() -> tuple[Path, Path] | None:
+    root = production_model_root()
+    if root is None:
+        return None
+
+    detection = root / "PP-OCRv6_medium_det"
+    recognition = root / "PP-OCRv6_medium_rec"
+
+    if detection.is_dir() and recognition.is_dir():
+        return detection, recognition
+
+    if getattr(sys, "frozen", False) or os.environ.get(
+        "AI_TRANSLATOR_OCR_MODEL_ROOT", ""
+    ).strip():
+        raise FileNotFoundError(
+            "Thiếu OCR production model bundle: "
+            f"{detection.name}, {recognition.name}."
+        )
+
+    return None
+
+
 def create_ocr() -> Any:
     # Import here so startup failures can be returned to Electron
     # with a structured fatal message instead of silently exiting.
     from paddleocr import PaddleOCR
 
+    global MODEL_SOURCE
+    model_dirs = production_model_dirs()
+
+    common_options = {
+        "use_doc_orientation_classify": False,
+        "use_doc_unwarping": False,
+        "use_textline_orientation": False,
+    }
+
+    if model_dirs is not None:
+        detection, recognition = model_dirs
+        MODEL_SOURCE = "bundled"
+        return PaddleOCR(
+            text_detection_model_dir=str(detection),
+            text_recognition_model_dir=str(recognition),
+            **common_options,
+        )
+
+    MODEL_SOURCE = "development-cache"
     return PaddleOCR(
         lang="japan",
-        use_doc_orientation_classify=False,
-        use_doc_unwarping=False,
-        use_textline_orientation=False
+        **common_options,
     )
 
 
@@ -231,7 +364,8 @@ def recognize(
 def run_diagnostics() -> None:
     emit({
         "type": "diagnostics",
-        **runtime_metadata()
+        **runtime_metadata(),
+        "dependencyCheck": paddlex_dependency_report("ocr-core"),
     })
 
 
