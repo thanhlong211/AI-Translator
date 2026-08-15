@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const os = require("os");
 const readline = require("readline");
 const { spawn } = require("child_process");
 
@@ -125,25 +126,55 @@ class OcrWorkerManager {
 
   _runtimePaths() {
     const directory = path.resolve(this.getOcrDirectory());
-    const workerPath = path.join(directory, "worker.py");
+    const workerScriptPath = path.join(directory, "worker.py");
+    const packagedWorkerPath = path.join(
+      directory,
+      "runtime",
+      "worker",
+      "ai-translator-ocr-worker.exe"
+    );
+    const modelRoot = path.join(directory, "runtime", "models");
+    const detectionModelPath = path.join(
+      modelRoot,
+      "PP-OCRv6_medium_det"
+    );
+    const recognitionModelPath = path.join(
+      modelRoot,
+      "PP-OCRv6_medium_rec"
+    );
 
+    const explicitWorker = String(
+      this.env.AI_TRANSLATOR_OCR_WORKER || ""
+    ).trim();
     const explicitPython = String(
       this.env.AI_TRANSLATOR_OCR_PYTHON || ""
     ).trim();
 
-    const candidates = [];
+    const workerCandidates = [];
+    if (explicitWorker) {
+      workerCandidates.push(path.resolve(explicitWorker));
+    }
+    if (this.platform === "win32") {
+      workerCandidates.push(packagedWorkerPath);
+    }
 
+    const workerExecutablePath =
+      workerCandidates.find((candidate) => fs.existsSync(candidate)) ||
+      workerCandidates[0] ||
+      null;
+
+    const pythonCandidates = [];
     if (explicitPython) {
-      candidates.push(path.resolve(explicitPython));
+      pythonCandidates.push(path.resolve(explicitPython));
     }
 
     if (this.platform === "win32") {
-      candidates.push(
+      pythonCandidates.push(
         path.join(directory, "runtime", "python", "python.exe"),
         path.join(directory, ".venv", "Scripts", "python.exe")
       );
     } else {
-      candidates.push(
+      pythonCandidates.push(
         path.join(directory, "runtime", "python", "bin", "python3"),
         path.join(directory, ".venv", "bin", "python3"),
         path.join(directory, ".venv", "bin", "python")
@@ -151,27 +182,83 @@ class OcrWorkerManager {
     }
 
     const pythonPath =
-      candidates.find((candidate) => fs.existsSync(candidate)) ||
-      candidates[0];
+      pythonCandidates.find((candidate) => fs.existsSync(candidate)) ||
+      pythonCandidates[0] ||
+      null;
+
+    const executableReady = Boolean(
+      workerExecutablePath && fs.existsSync(workerExecutablePath)
+    );
+    const modelBundleReady =
+      fs.existsSync(detectionModelPath) &&
+      fs.existsSync(recognitionModelPath);
+
+    const runtimeKind = executableReady ? "executable" : "python";
+    const commandPath = executableReady
+      ? workerExecutablePath
+      : pythonPath;
+    const commandArgs = executableReady
+      ? []
+      : ["-X", "utf8", workerScriptPath];
+
+    const cacheBase = String(
+      this.env.AI_TRANSLATOR_OCR_CACHE_DIR || ""
+    ).trim() || path.join(
+      this.env.LOCALAPPDATA || os.tmpdir(),
+      "AI-Translator",
+      "ocr-cache"
+    );
 
     return {
       directory,
-      workerPath,
+      workerScriptPath,
+      workerExecutablePath,
+      packagedWorkerPath,
+      modelRoot,
+      detectionModelPath,
+      recognitionModelPath,
+      modelBundleReady,
       pythonPath,
-      pythonSource: explicitPython ? "override" : "bundled"
+      runtimeKind,
+      runtimeSource: executableReady
+        ? explicitWorker
+          ? "override-executable"
+          : "packaged-executable"
+        : explicitPython
+          ? "override-python"
+          : "development-python",
+      commandPath,
+      commandArgs,
+      cacheBase
     };
   }
 
   _validateRuntime(paths) {
-    if (!fs.existsSync(paths.workerPath)) {
+    if (paths.runtimeKind === "executable") {
+      if (!paths.commandPath || !fs.existsSync(paths.commandPath)) {
+        throw new Error(
+          "Không tìm thấy OCR worker.exe. Hãy cài lại AI Translator hoặc build lại OCR production runtime."
+        );
+      }
+
+      if (!paths.modelBundleReady) {
+        throw new Error(
+          "OCR worker.exe đã có nhưng thiếu model production. Hãy build lại desktop/ocr/runtime."
+        );
+      }
+
+      return;
+    }
+
+    if (!fs.existsSync(paths.workerScriptPath)) {
       throw new Error(
-        "Không tìm thấy OCR worker. Hãy cài lại AI Translator hoặc chạy script chuẩn bị OCR runtime."
+        "Không tìm thấy OCR worker.py. Hãy cài lại AI Translator hoặc khôi phục desktop/ocr/worker.py."
       );
     }
 
     if (!paths.pythonPath || !fs.existsSync(paths.pythonPath)) {
       throw new Error(
-        "Không tìm thấy Python runtime cho OCR. Hãy chạy desktop/ocr/prepare-runtime.ps1 trước khi test."
+        "Không tìm thấy OCR runtime. Production cần worker.exe; development có thể chạy desktop/ocr/prepare-runtime.ps1."
       );
     }
   }
@@ -191,8 +278,18 @@ class OcrWorkerManager {
         pythonConfigured: Boolean(
           paths.pythonPath && fs.existsSync(paths.pythonPath)
         ),
-        workerConfigured: fs.existsSync(paths.workerPath),
-        pythonSource: paths.pythonSource,
+        executableConfigured: Boolean(
+          paths.workerExecutablePath &&
+          fs.existsSync(paths.workerExecutablePath)
+        ),
+        workerConfigured:
+          Boolean(
+            paths.workerExecutablePath &&
+            fs.existsSync(paths.workerExecutablePath)
+          ) || fs.existsSync(paths.workerScriptPath),
+        modelBundleConfigured: paths.modelBundleReady,
+        runtimeKind: paths.runtimeKind,
+        runtimeSource: paths.runtimeSource,
         pythonVersion: this.runtimeInfo?.pythonVersion || null,
         paddleOcrVersion: this.runtimeInfo?.paddleOcrVersion || null,
         paddlePaddleVersion: this.runtimeInfo?.paddlePaddleVersion || null,
@@ -267,18 +364,26 @@ class OcrWorkerManager {
     this.startTimer.unref?.();
 
     try {
+      const childEnv = {
+        ...this.env,
+        PYTHONUTF8: "1",
+        PYTHONIOENCODING: "utf-8",
+        PYTHONUNBUFFERED: "1",
+        PADDLE_PDX_CACHE_HOME: paths.cacheBase
+      };
+
+      if (paths.modelBundleReady) {
+        childEnv.AI_TRANSLATOR_OCR_MODEL_ROOT = paths.modelRoot;
+        childEnv.PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK = "True";
+      }
+
       this.child = this.spawnImpl(
-        paths.pythonPath,
-        ["-X", "utf8", paths.workerPath],
+        paths.commandPath,
+        paths.commandArgs,
         {
           windowsHide: true,
           stdio: ["pipe", "pipe", "pipe"],
-          env: {
-            ...this.env,
-            PYTHONUTF8: "1",
-            PYTHONIOENCODING: "utf-8",
-            PYTHONUNBUFFERED: "1"
-          }
+          env: childEnv
         }
       );
     } catch (error) {
@@ -289,7 +394,9 @@ class OcrWorkerManager {
     }
 
     this._log("info", "engine starting", {
-      pythonSource: paths.pythonSource,
+      runtimeKind: paths.runtimeKind,
+      runtimeSource: paths.runtimeSource,
+      modelBundle: paths.modelBundleReady,
       startupTimeoutMs: this.startupTimeoutMs
     });
 
