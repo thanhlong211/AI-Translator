@@ -1,0 +1,46 @@
+appId: com.dangt.aitranslator
+productName: AI Translator
+
+asar: true
+compression: normal
+npmRebuild: true
+buildDependenciesFromSource: false
+
+# Keep release artifacts outside dist/ so Vite and Electron packaging do not mix.
+directories:
+  output: release
+  buildResources: electron/assets
+
+# The renderer is built by Vite into dist/. Electron main/preload and overlay HTML
+# remain under electron/. Production node_modules are resolved from package.json by
+# electron-builder and are not copied from this files list manually.
+files:
+  - dist/**/*
+  - electron/**/*
+  - package.json
+  - "!electron/**/*.md"
+  - "!electron/**/*.map"
+
+# Native/spawned packages must live outside app.asar at runtime. electron-builder
+# also auto-detects native modules, but these explicit patterns make the Windows
+# desktop contract deterministic for sharp and screenshot-desktop.
+asarUnpack:
+  - node_modules/sharp/**/*
+  - node_modules/@img/**/*
+  - node_modules/screenshot-desktop/**/*
+
+# OcrWorkerManager resolves packaged OCR at process.resourcesPath/ocr.
+# Only the production runtime is copied; .venv, worker.py, build cache and model
+# download cache are intentionally excluded.
+extraResources:
+  - from: ocr/runtime
+    to: ocr/runtime
+    filter:
+      - "**/*"
+  - from: electron/assets/tray.png
+    to: assets/tray.png
+
+win:
+  icon: electron/assets/icon.ico
+  executableName: AI Translator
+  requestedExecutionLevel: asInvoker
