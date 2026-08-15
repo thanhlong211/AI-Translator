@@ -41,6 +41,25 @@ extraResources:
     to: assets/tray.png
 
 win:
+  target:
+    - target: nsis
+      arch:
+        - x64
   icon: electron/assets/icon.ico
   executableName: AI Translator
   requestedExecutionLevel: asInvoker
+
+# Batch 15.1.3 - Windows installer. Use the assisted NSIS flow so the user can
+# review the destination and installation scope. Per-user is selected by default.
+# User data is intentionally preserved during uninstall/upgrade.
+nsis:
+  oneClick: false
+  perMachine: false
+  selectPerMachineByDefault: false
+  allowElevation: true
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: AI Translator
+  runAfterFinish: true
+  artifactName: "AI-Translator-Setup-${version}-${arch}.${ext}"

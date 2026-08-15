@@ -115,6 +115,10 @@ try {
         throw "dist/index.html not found after renderer build."
     }
 
+    $verifyRenderer = Join-Path $PSScriptRoot "verify-renderer-build.ps1"
+    & powershell -ExecutionPolicy Bypass -File $verifyRenderer -DesktopDir $DesktopDir
+    if ($LASTEXITCODE -ne 0) { throw "Renderer file-protocol verification failed." }
+
     if (-not $NoClean -and (Test-Path $ReleaseDir)) {
         Write-Host "Cleaning previous release directory..."
         Remove-Item $ReleaseDir -Recurse -Force
