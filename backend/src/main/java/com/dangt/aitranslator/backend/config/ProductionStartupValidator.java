@@ -219,50 +219,76 @@ public class ProductionStartupValidator implements ApplicationRunner {
     }
 
     private void validatePasswordResetDelivery(List<String> problems) {
-        String mode = property("app.password-reset.delivery");
-        if (!"SMTP".equalsIgnoreCase(mode)) {
-            problems.add("PASSWORD_RESET_DELIVERY must be SMTP in production.");
-        }
+        String mode = property("app.password-reset.delivery").toUpperCase(Locale.ROOT);
 
-
-        requireNonBlank(
-                "spring.mail.host",
-                "MAIL_HOST is required for password reset delivery in production.",
-                problems
-        );
         requireNonBlank(
                 "app.password-reset.mail-from",
                 "PASSWORD_RESET_MAIL_FROM is required in production.",
                 problems
         );
 
-        boolean smtpAuth = booleanProperty(
-                "spring.mail.properties.mail.smtp.auth",
-                true
-        );
-        if (smtpAuth) {
+        if ("RESEND".equals(mode)) {
             requireNonBlank(
-                    "spring.mail.username",
-                    "MAIL_USERNAME is required when SMTP authentication is enabled.",
+                    "app.password-reset.resend-api-key",
+                    "RESEND_API_KEY is required when PASSWORD_RESET_DELIVERY=RESEND.",
                     problems
             );
-            requireNonBlank(
-                    "spring.mail.password",
-                    "MAIL_PASSWORD is required when SMTP authentication is enabled.",
-                    problems
-            );
-        }
 
-        boolean startTls = booleanProperty(
-                "spring.mail.properties.mail.smtp.starttls.enable",
-                false
-        );
-        boolean ssl = booleanProperty(
-                "spring.mail.properties.mail.smtp.ssl.enable",
-                false
-        );
-        if (!startTls && !ssl) {
-            problems.add("Production SMTP must enable STARTTLS or SSL.");
+            String apiUrl = property("app.password-reset.resend-api-url");
+            try {
+                URI uri = URI.create(apiUrl);
+                String host = String.valueOf(uri.getHost()).toLowerCase(Locale.ROOT);
+                if (!"https".equalsIgnoreCase(uri.getScheme())
+                        || host.isBlank()
+                        || "null".equals(host)
+                        || host.equals("localhost")
+                        || host.equals("127.0.0.1")
+                        || host.equals("::1")
+                        || uri.getUserInfo() != null) {
+                    throw new IllegalArgumentException("unsafe resend API URL");
+                }
+            } catch (Exception ex) {
+                problems.add("RESEND_API_URL must be a public HTTPS URL.");
+            }
+        } else if ("SMTP".equals(mode)) {
+            requireNonBlank(
+                    "spring.mail.host",
+                    "MAIL_HOST is required for password reset delivery in production.",
+                    problems
+            );
+
+            boolean smtpAuth = booleanProperty(
+                    "spring.mail.properties.mail.smtp.auth",
+                    true
+            );
+            if (smtpAuth) {
+                requireNonBlank(
+                        "spring.mail.username",
+                        "MAIL_USERNAME is required when SMTP authentication is enabled.",
+                        problems
+                );
+                requireNonBlank(
+                        "spring.mail.password",
+                        "MAIL_PASSWORD is required when SMTP authentication is enabled.",
+                        problems
+                );
+            }
+
+            boolean startTls = booleanProperty(
+                    "spring.mail.properties.mail.smtp.starttls.enable",
+                    false
+            );
+            boolean ssl = booleanProperty(
+                    "spring.mail.properties.mail.smtp.ssl.enable",
+                    false
+            );
+            if (!startTls && !ssl) {
+                problems.add("Production SMTP must enable STARTTLS or SSL.");
+            }
+        } else {
+            problems.add(
+                    "PASSWORD_RESET_DELIVERY must be RESEND or SMTP in production."
+            );
         }
 
         String resetUrl = property("app.password-reset.reset-url-base").toLowerCase(Locale.ROOT);
