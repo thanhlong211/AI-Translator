@@ -44,6 +44,8 @@ $workerExe = Join-Path $runtime "worker\ai-translator-ocr-worker.exe"
 $detModel = Join-Path $runtime "models\PP-OCRv6_medium_det"
 $recModel = Join-Path $runtime "models\PP-OCRv6_medium_rec"
 $tray = Join-Path $resources "assets\tray.png"
+# Batch 15.1.4 packaged release-config gate
+$releaseConfig = Join-Path $resources "config\release-config.json"
 
 Assert-File $appExe "main executable"
 Assert-File $appAsar "app.asar"
@@ -52,6 +54,13 @@ Assert-File $workerExe "OCR worker.exe"
 Assert-Directory $detModel "OCR detection model"
 Assert-Directory $recModel "OCR recognition model"
 Assert-File $tray "tray icon"
+Assert-File $releaseConfig "production release config"
+
+$VerifyReleaseConfig = Join-Path $PSScriptRoot "verify-release-config.ps1"
+& powershell -ExecutionPolicy Bypass -File $VerifyReleaseConfig -DesktopDir $DesktopDir -ConfigPath $releaseConfig
+if ($LASTEXITCODE -ne 0) {
+    throw "Packaged production release configuration verification failed."
+}
 
 # Critical negative checks: development OCR payload must never leak into the app.
 $forbidden = @(

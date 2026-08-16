@@ -25,3 +25,6 @@ dist-ssr
 .env
 # Electron Builder output
 release/
+
+# Generated production release configuration
+.release-config/
