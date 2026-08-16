@@ -89,6 +89,28 @@ Push-Location $DesktopDir
 try {
     Write-Host "[AI Translator] Batch 15.1.2.3 - deterministic Electron unpacked Windows x64 build" -ForegroundColor Cyan
 
+    # Batch 15.1.4 prepare production release config
+    $PrepareReleaseConfig = Join-Path $PSScriptRoot "prepare-release-config.ps1"
+    $ReleaseConfigFile = Join-Path $DesktopDir ".release-config\release-config.json"
+
+    if (-not [string]::IsNullOrWhiteSpace([string]$env:AI_TRANSLATOR_PRODUCTION_BACKEND_URL)) {
+        & powershell -ExecutionPolicy Bypass -File $PrepareReleaseConfig `
+            -DesktopDir $DesktopDir `
+            -BackendUrl $env:AI_TRANSLATOR_PRODUCTION_BACKEND_URL
+        if ($LASTEXITCODE -ne 0) {
+            throw "Production release config generation failed."
+        }
+    }
+    elseif (-not (Test-Path $ReleaseConfigFile -PathType Leaf)) {
+        throw @"
+Production release config is missing.
+
+Set:
+  `$env:AI_TRANSLATOR_PRODUCTION_BACKEND_URL = "https://api.example.com"
+
+Then run this packaging command again.
+"@
+    }
     if (-not $SkipInputCheck) {
         & powershell -ExecutionPolicy Bypass -File $VerifyInputs -DesktopDir $DesktopDir
         if ($LASTEXITCODE -ne 0) { throw "Packaging input verification failed." }

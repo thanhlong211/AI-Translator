@@ -9,6 +9,15 @@ if (-not $DesktopDir) {
     $DesktopDir = Split-Path -Parent $PSScriptRoot
 }
 $DesktopDir = (Resolve-Path $DesktopDir).Path
+# Batch 15.1.4 release-config gate
+$VerifyReleaseConfig = Join-Path $PSScriptRoot "verify-release-config.ps1"
+if (-not (Test-Path $VerifyReleaseConfig -PathType Leaf)) {
+    throw "verify-release-config.ps1 not found: $VerifyReleaseConfig"
+}
+& powershell -ExecutionPolicy Bypass -File $VerifyReleaseConfig -DesktopDir $DesktopDir
+if ($LASTEXITCODE -ne 0) {
+    throw "Production release configuration verification failed."
+}
 
 function Assert-PathExists {
     param([string]$Path, [string]$Label)

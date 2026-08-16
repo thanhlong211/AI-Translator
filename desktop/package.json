@@ -14,7 +14,9 @@
                     "package:dir":  "powershell -ExecutionPolicy Bypass -File ./scripts/build-unpacked.ps1",
                     "package:verify":  "powershell -ExecutionPolicy Bypass -File ./scripts/verify-packaged-app.ps1",
                     "package:installer":  "powershell -ExecutionPolicy Bypass -File ./scripts/build-installer.ps1",
-                    "package:installer:verify":  "powershell -ExecutionPolicy Bypass -File ./scripts/verify-installer.ps1"
+                    "package:installer:verify":  "powershell -ExecutionPolicy Bypass -File ./scripts/verify-installer.ps1",
+                    "release:config":  "powershell -ExecutionPolicy Bypass -File ./scripts/prepare-release-config.ps1",
+                    "release:verify":  "powershell -ExecutionPolicy Bypass -File ./scripts/verify-release-config.ps1"
                 },
     "dependencies":  {
                          "react":  "^19.2.7",

@@ -37,6 +37,8 @@ extraResources:
     to: ocr/runtime
     filter:
       - "**/*"
+  - from: .release-config/release-config.json
+    to: config/release-config.json
   - from: electron/assets/tray.png
     to: assets/tray.png
 
