@@ -326,10 +326,11 @@ public class SocialAuthService {
         UserAccount user = userRepository.findById(attempt.resolvedUserId())
                 .orElseThrow(() -> new UnauthorizedException("Không tìm thấy tài khoản OAuth."));
 
-        AuthResponse auth = authService.createSessionForUser(
+        AuthResponse auth = createVerifiedSocialSession(
                 user,
                 attempt.deviceId(),
-                attempt.deviceName()
+                attempt.deviceName(),
+                now
         );
 
         jdbcTemplate.update(
@@ -346,6 +347,24 @@ public class SocialAuthService {
                 null,
                 auth,
                 findIdentityForUserProvider(user.getId(), attempt.provider())
+        );
+    }
+
+    AuthResponse createVerifiedSocialSession(
+            UserAccount user,
+            String deviceId,
+            String deviceName,
+            Instant now
+    ) {
+        if (!user.isEmailVerified()) {
+            user.markEmailVerified(now);
+            userRepository.saveAndFlush(user);
+        }
+
+        return authService.createSessionForUser(
+                user,
+                deviceId,
+                deviceName
         );
     }
 

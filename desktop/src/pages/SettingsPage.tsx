@@ -262,6 +262,84 @@ interface OcrWorkerHealth {
     };
 }
 
+interface PasswordFieldProps {
+    value: string;
+    onChange: (value: string) => void;
+    placeholder?: string;
+    autoComplete?: string;
+    disabled?: boolean;
+}
+
+function PasswordField({
+    value,
+    onChange,
+    placeholder,
+    autoComplete,
+    disabled = false
+}: PasswordFieldProps) {
+    const [visible, setVisible] =
+        useState(false);
+
+    const label =
+        visible
+            ? "Ẩn mật khẩu"
+            : "Hiện mật khẩu";
+
+    return (
+        <div className="password-input-shell">
+            <input
+                type={
+                    visible
+                        ? "text"
+                        : "password"
+                }
+                value={value}
+                onChange={(event) => {
+                    onChange(
+                        event.target.value
+                    );
+                }}
+                placeholder={placeholder}
+                autoComplete={autoComplete}
+                disabled={disabled}
+            />
+
+            <button
+                type="button"
+                className="password-visibility-toggle"
+                onClick={() => {
+                    setVisible(
+                        (current) =>
+                            !current
+                    );
+                }}
+                aria-label={label}
+                aria-pressed={visible}
+                title={label}
+                disabled={disabled}
+            >
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                >
+                    <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+                    <circle
+                        cx="12"
+                        cy="12"
+                        r="2.75"
+                    />
+
+                    {visible && (
+                        <path d="M4 4l16 16" />
+                    )}
+                </svg>
+            </button>
+        </div>
+    );
+}
+
+
 interface OcrDesktopApi {
     getOcrWorkerHealth?: () => Promise<OcrWorkerHealth>;
     restartOcrWorker?: () => Promise<OcrWorkerHealth>;
@@ -282,6 +360,13 @@ interface SettingsPageProps {
     password: string;
     authMessage: string;
     isAuthLoading: boolean;
+    emailVerificationRequired: boolean;
+    emailVerificationEmail: string;
+    emailVerificationCode: string;
+    emailVerificationMessage: string;
+    emailVerificationCooldownSeconds: number;
+    isEmailVerificationRequestLoading: boolean;
+    isEmailVerificationConfirmLoading: boolean;
     deviceTransferRequired: boolean;
     deviceTransferEmail: string;
     deviceTransferCode: string;
@@ -331,6 +416,18 @@ interface SettingsPageProps {
 
     onSubmitAuth:
         (event: FormEvent) => void;
+
+    onEmailVerificationCodeChange:
+        (value: string) => void;
+
+    onRequestEmailVerification:
+        () => void;
+
+    onConfirmEmailVerification:
+        (event: FormEvent) => void;
+
+    onCancelEmailVerification:
+        () => void;
 
     onDeviceTransferEmailChange:
         (value: string) => void;
@@ -418,6 +515,13 @@ export function SettingsPage({
     password,
     authMessage,
     isAuthLoading,
+    emailVerificationRequired,
+    emailVerificationEmail,
+    emailVerificationCode,
+    emailVerificationMessage,
+    emailVerificationCooldownSeconds,
+    isEmailVerificationRequestLoading,
+    isEmailVerificationConfirmLoading,
     deviceTransferRequired,
     deviceTransferEmail,
     deviceTransferCode,
@@ -443,6 +547,10 @@ export function SettingsPage({
     onEmailChange,
     onPasswordChange,
     onSubmitAuth,
+    onEmailVerificationCodeChange,
+    onRequestEmailVerification,
+    onConfirmEmailVerification,
+    onCancelEmailVerification,
     onDeviceTransferEmailChange,
     onDeviceTransferCodeChange,
     onRequestDeviceTransfer,
@@ -1567,12 +1675,9 @@ export function SettingsPage({
                                 <label className="control-field">
                                     <span>{t("settings.auth.password")}</span>
 
-                                    <input
-                                        type="password"
+                                    <PasswordField
                                         value={password}
-                                        onChange={(event) => {
-                                            onPasswordChange(event.target.value);
-                                        }}
+                                        onChange={onPasswordChange}
                                         placeholder={
                                             authMode === "login"
                                                 ? t("settings.auth.passwordPlaceholder")
@@ -1601,6 +1706,104 @@ export function SettingsPage({
                                             : t("settings.auth.createAccount")}
                                 </button>
                             </form>
+
+                            {emailVerificationRequired && (
+                                <div className="password-recovery-panel">
+                                    <form
+                                        className="auth-form compact-password-form"
+                                        onSubmit={onConfirmEmailVerification}
+                                    >
+                                        <div className="notice info compact-notice">
+                                            Xác minh email để hoàn tất đăng nhập.
+                                            Mã xác minh gồm 6 số và có hiệu lực trong 10 phút.
+                                        </div>
+
+                                        <label className="control-field">
+                                            <span>Email tài khoản</span>
+
+                                            <input
+                                                type="email"
+                                                value={emailVerificationEmail}
+                                                readOnly
+                                                autoComplete="email"
+                                            />
+                                        </label>
+
+                                        <button
+                                            type="button"
+                                            className="secondary-action"
+                                            disabled={
+                                                !backend.connected ||
+                                                isEmailVerificationRequestLoading ||
+                                                isEmailVerificationConfirmLoading ||
+                                                emailVerificationCooldownSeconds > 0
+                                            }
+                                            onClick={onRequestEmailVerification}
+                                        >
+                                            {isEmailVerificationRequestLoading
+                                                ? "Đang gửi mã..."
+                                                : emailVerificationCooldownSeconds > 0
+                                                    ? `Gửi lại sau ${emailVerificationCooldownSeconds}s`
+                                                    : "Gửi mã xác minh"}
+                                        </button>
+
+                                        <label className="control-field">
+                                            <span>Mã xác minh 6 số</span>
+
+                                            <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
+                                                maxLength={6}
+                                                value={emailVerificationCode}
+                                                onChange={(event) => {
+                                                    onEmailVerificationCodeChange(
+                                                        event.target.value
+                                                            .replace(/\D/g, "")
+                                                            .slice(0, 6)
+                                                    );
+                                                }}
+                                                placeholder="000000"
+                                                autoComplete="one-time-code"
+                                                autoFocus
+                                            />
+                                        </label>
+
+                                        <button
+                                            type="submit"
+                                            className="primary-action"
+                                            disabled={
+                                                !backend.connected ||
+                                                isEmailVerificationRequestLoading ||
+                                                isEmailVerificationConfirmLoading ||
+                                                emailVerificationCode.length !== 6
+                                            }
+                                        >
+                                            {isEmailVerificationConfirmLoading
+                                                ? "Đang xác minh..."
+                                                : "Xác minh và đăng nhập"}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="text-action"
+                                            disabled={
+                                                isEmailVerificationRequestLoading ||
+                                                isEmailVerificationConfirmLoading
+                                            }
+                                            onClick={onCancelEmailVerification}
+                                        >
+                                            Hủy xác minh
+                                        </button>
+
+                                        {emailVerificationMessage && (
+                                            <div className="notice info compact-notice">
+                                                {emailVerificationMessage}
+                                            </div>
+                                        )}
+                                    </form>
+                                </div>
+                            )}
 
                             {authMode === "login" && deviceTransferRequired && (
                                 <div className="password-recovery-panel">
@@ -1782,19 +1985,17 @@ export function SettingsPage({
                                         <div className="password-two-column">
                                             <label className="control-field">
                                                 <span>Mật khẩu mới</span>
-                                                <input
-                                                    type="password"
+                                                <PasswordField
                                                     value={recoveryNewPassword}
-                                                    onChange={(event) => setRecoveryNewPassword(event.target.value)}
+                                                    onChange={setRecoveryNewPassword}
                                                     autoComplete="new-password"
                                                 />
                                             </label>
                                             <label className="control-field">
                                                 <span>Xác nhận mật khẩu</span>
-                                                <input
-                                                    type="password"
+                                                <PasswordField
                                                     value={recoveryConfirmPassword}
-                                                    onChange={(event) => setRecoveryConfirmPassword(event.target.value)}
+                                                    onChange={setRecoveryConfirmPassword}
                                                     autoComplete="new-password"
                                                 />
                                             </label>
@@ -1956,28 +2157,25 @@ export function SettingsPage({
                     <form className="password-security-form" onSubmit={submitPasswordChange}>
                         <label className="control-field">
                             <span>Mật khẩu hiện tại</span>
-                            <input
-                                type="password"
+                            <PasswordField
                                 value={currentPassword}
-                                onChange={(event) => setCurrentPassword(event.target.value)}
+                                onChange={setCurrentPassword}
                                 autoComplete="current-password"
                             />
                         </label>
                         <label className="control-field">
                             <span>Mật khẩu mới</span>
-                            <input
-                                type="password"
+                            <PasswordField
                                 value={nextPassword}
-                                onChange={(event) => setNextPassword(event.target.value)}
+                                onChange={setNextPassword}
                                 autoComplete="new-password"
                             />
                         </label>
                         <label className="control-field">
                             <span>Xác nhận mật khẩu mới</span>
-                            <input
-                                type="password"
+                            <PasswordField
                                 value={confirmNextPassword}
-                                onChange={(event) => setConfirmNextPassword(event.target.value)}
+                                onChange={setConfirmNextPassword}
                                 autoComplete="new-password"
                             />
                         </label>

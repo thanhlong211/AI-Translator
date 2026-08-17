@@ -1,13 +1,14 @@
 package com.dangt.aitranslator.backend.auth;
 
+import com.dangt.aitranslator.backend.auth.email.EmailVerificationRequiredException;
 import com.dangt.aitranslator.backend.common.ApiError;
+import jakarta.servlet.http.HttpServletRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +26,11 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @Operation(summary = "Đăng ký tài khoản + tạo device session")
-    @ApiResponse(responseCode = "201", description = "Đăng ký thành công")
+    @Operation(summary = "Đăng ký tài khoản và gửi mã xác minh email")
+    @ApiResponse(
+            responseCode = "403",
+            description = "Tài khoản đã được tạo và cần xác minh email"
+    )
     @ApiResponse(
             responseCode = "409",
             description = "Email đã tồn tại",
@@ -40,11 +44,16 @@ public class AuthController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse register(
-            @Valid @RequestBody RegisterRequest request
+    public void register(
+            @Valid @RequestBody RegisterRequest request,
+            HttpServletRequest httpRequest
     ) {
-        return authService.register(request);
+        authService.register(
+                request,
+                clientIp(httpRequest)
+        );
+
+        throw new EmailVerificationRequiredException();
     }
 
     @Operation(summary = "Đăng nhập + tạo/đổi device session")
@@ -82,4 +91,33 @@ public class AuthController {
     ) {
         return authService.logout(request);
     }
+
+    private String clientIp(
+            HttpServletRequest request
+    ) {
+        String forwarded =
+                request.getHeader(
+                        "X-Forwarded-For"
+                );
+
+        if (
+                forwarded != null
+                && !forwarded.isBlank()
+        ) {
+            String first =
+                    forwarded
+                            .split(
+                                    ",",
+                                    2
+                            )[0]
+                            .trim();
+
+            if (!first.isBlank()) {
+                return first;
+            }
+        }
+
+        return request.getRemoteAddr();
+    }
+
 }
