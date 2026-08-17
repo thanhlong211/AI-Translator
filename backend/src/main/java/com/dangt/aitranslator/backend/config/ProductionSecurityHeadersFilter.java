@@ -30,9 +30,22 @@ public class ProductionSecurityHeadersFilter extends OncePerRequestFilter {
                 "Permissions-Policy",
                 "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
         );
+        String contentSecurityPolicy =
+                isSocialAuthCallback(request)
+                        ? "default-src 'none'; "
+                        + "style-src 'unsafe-inline'; "
+                        + "script-src 'unsafe-inline'; "
+                        + "frame-ancestors 'none'; "
+                        + "base-uri 'none'; "
+                        + "form-action 'none'"
+                        : "default-src 'none'; "
+                        + "frame-ancestors 'none'; "
+                        + "base-uri 'none'; "
+                        + "form-action 'none'";
+
         response.setHeader(
                 "Content-Security-Policy",
-                "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'"
+                contentSecurityPolicy
         );
 
         if (request.getRequestURI().startsWith("/api/")) {
@@ -51,5 +64,12 @@ public class ProductionSecurityHeadersFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private static boolean isSocialAuthCallback(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+
+        return "/api/v1/auth/social/google/callback".equals(uri)
+                || "/api/v1/auth/social/facebook/callback".equals(uri);
     }
 }
