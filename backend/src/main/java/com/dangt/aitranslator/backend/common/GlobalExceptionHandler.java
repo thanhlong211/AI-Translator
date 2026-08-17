@@ -104,6 +104,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(
+            DeviceBindingException.class
+    )
+    ResponseEntity<ApiError> deviceBinding(
+            DeviceBindingException ex
+    ) {
+        return error(
+                HttpStatus.FORBIDDEN,
+                ex.getCode(),
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(
             ForbiddenException.class
     )
     ResponseEntity<ApiError> forbidden(

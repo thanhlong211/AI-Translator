@@ -35,6 +35,15 @@ public class UserAccount {
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
 
+    @Column(name = "bound_device_id", length = 100)
+    private String boundDeviceId;
+
+    @Column(name = "bound_device_name", length = 190)
+    private String boundDeviceName;
+
+    @Column(name = "device_bound_at")
+    private Instant deviceBoundAt;
+
     protected UserAccount() {
     }
 
@@ -54,4 +63,25 @@ public class UserAccount {
     public String getRole() { return role; }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
+    public String getBoundDeviceId() { return boundDeviceId; }
+    public String getBoundDeviceName() { return boundDeviceName; }
+    public Instant getDeviceBoundAt() { return deviceBoundAt; }
+
+    public void bindDevice(
+            String deviceId,
+            String deviceName,
+            Instant now
+    ) {
+        this.boundDeviceId = deviceId;
+        this.boundDeviceName = deviceName;
+        this.deviceBoundAt = now;
+        this.updatedAt = now;
+    }
+
+    public void clearDeviceBinding(Instant now) {
+        this.boundDeviceId = null;
+        this.boundDeviceName = null;
+        this.deviceBoundAt = null;
+        this.updatedAt = now;
+    }
 }
