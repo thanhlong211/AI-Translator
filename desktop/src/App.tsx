@@ -688,6 +688,69 @@ function App() {
     ] = useState(false);
 
     const [
+        emailVerificationRequired,
+        setEmailVerificationRequired
+    ] = useState(false);
+
+    const [
+        emailVerificationEmail,
+        setEmailVerificationEmail
+    ] = useState("");
+
+    const [
+        emailVerificationCode,
+        setEmailVerificationCode
+    ] = useState("");
+
+    const [
+        emailVerificationMessage,
+        setEmailVerificationMessage
+    ] = useState("");
+
+    const [
+        emailVerificationCooldownSeconds,
+        setEmailVerificationCooldownSeconds
+    ] = useState(0);
+
+    const [
+        isEmailVerificationRequestLoading,
+        setIsEmailVerificationRequestLoading
+    ] = useState(false);
+
+    const [
+        isEmailVerificationConfirmLoading,
+        setIsEmailVerificationConfirmLoading
+    ] = useState(false);
+
+    useEffect(() => {
+        if (
+            emailVerificationCooldownSeconds <= 0
+        ) {
+            return;
+        }
+
+        const timer =
+            window.setTimeout(
+                () => {
+                    setEmailVerificationCooldownSeconds(
+                        (current) =>
+                            Math.max(
+                                0,
+                                current - 1
+                            )
+                    );
+                },
+                1000
+            );
+
+        return () => {
+            window.clearTimeout(timer);
+        };
+    }, [
+        emailVerificationCooldownSeconds
+    ]);
+
+    const [
         deviceTransferRequired,
         setDeviceTransferRequired
     ] = useState(false);
@@ -1766,6 +1829,191 @@ function App() {
         throw error;
     }
 
+    function clearEmailVerificationState() {
+        setEmailVerificationRequired(false);
+        setEmailVerificationEmail("");
+        setEmailVerificationCode("");
+        setEmailVerificationMessage("");
+        setEmailVerificationCooldownSeconds(0);
+    }
+
+    function openEmailVerificationFromError(
+        error: unknown,
+        initialEmail = "",
+        codeAlreadySent = false
+    ): boolean {
+        if (
+            authErrorCode(error) !==
+            "EMAIL_VERIFICATION_REQUIRED"
+        ) {
+            return false;
+        }
+
+        setEmailVerificationRequired(true);
+
+        setEmailVerificationEmail(
+            initialEmail.trim()
+        );
+
+        setEmailVerificationCode("");
+
+        setEmailVerificationMessage(
+            codeAlreadySent
+                ? "Mã xác minh đã được gửi đến email của bạn."
+                : "Email chưa được xác minh. Hãy gửi mã xác minh để tiếp tục."
+        );
+
+        setEmailVerificationCooldownSeconds(
+            codeAlreadySent
+                ? 60
+                : 0
+        );
+
+        clearDeviceTransferState();
+
+        setAuthMessage(
+            "Vui lòng xác minh email để tiếp tục đăng nhập."
+        );
+
+        return true;
+    }
+
+    async function requestEmailVerification() {
+        const cleanEmail =
+            emailVerificationEmail.trim();
+
+        if (!backend.connected) {
+            setEmailVerificationMessage(
+                "Không thể kết nối dịch vụ. Vui lòng thử lại."
+            );
+            return;
+        }
+
+        if (!cleanEmail) {
+            setEmailVerificationMessage(
+                "Không xác định được email cần xác minh."
+            );
+            return;
+        }
+
+        if (
+            emailVerificationCooldownSeconds > 0
+        ) {
+            return;
+        }
+
+        try {
+            setIsEmailVerificationRequestLoading(
+                true
+            );
+
+            setEmailVerificationMessage("");
+
+            const result =
+                unwrapStructuredAuthResult<{
+                    accepted?: boolean;
+                    cooldownSeconds?: number;
+                    message?: string;
+                }>(
+                    await api.requestEmailVerification({
+                        email: cleanEmail
+                    })
+                );
+
+            const cooldown =
+                Number(
+                    result?.cooldownSeconds
+                );
+
+            setEmailVerificationCooldownSeconds(
+                Number.isFinite(cooldown)
+                    ? Math.max(
+                        0,
+                        cooldown
+                    )
+                    : 60
+            );
+
+            setEmailVerificationMessage(
+                result?.message ||
+                "Nếu email cần xác minh, mã xác minh đã được gửi."
+            );
+        } catch (error) {
+            setEmailVerificationMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+        } finally {
+            setIsEmailVerificationRequestLoading(
+                false
+            );
+        }
+    }
+
+    async function confirmEmailVerification(
+        event: FormEvent
+    ) {
+        event.preventDefault();
+
+        const cleanEmail =
+            emailVerificationEmail.trim();
+
+        if (
+            emailVerificationCode.length !== 6
+        ) {
+            setEmailVerificationMessage(
+                "Nhập mã xác minh gồm 6 chữ số."
+            );
+            return;
+        }
+
+        try {
+            setIsEmailVerificationConfirmLoading(
+                true
+            );
+
+            setEmailVerificationMessage("");
+
+            const result: AuthStatus =
+                unwrapStructuredAuthResult<AuthStatus>(
+                    await api.confirmEmailVerification({
+                        email: cleanEmail,
+                        code:
+                            emailVerificationCode
+                    })
+                );
+
+            setAuth(result);
+            setPassword("");
+
+            clearEmailVerificationState();
+            clearDeviceTransferState();
+
+            setAuthMessage(
+                "Xác minh email và đăng nhập thành công."
+            );
+        } catch (error) {
+            setEmailVerificationMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+        } finally {
+            setIsEmailVerificationConfirmLoading(
+                false
+            );
+        }
+    }
+
+    function cancelEmailVerification() {
+        clearEmailVerificationState();
+
+        setAuthMessage(
+            "Đã hủy xác minh email."
+        );
+    }
+
     function clearDeviceTransferState() {
         setDeviceTransferRequired(false);
         setDeviceTransferEmail("");
@@ -2187,6 +2435,7 @@ function App() {
             setPassword("");
             setAuth(result);
 
+            clearEmailVerificationState();
             clearDeviceTransferState();
 
             setAuthMessage(
@@ -2198,18 +2447,30 @@ function App() {
             setPassword("");
 
             if (
-                authMode !== "login" ||
-                !openDeviceTransferFromError(
+                openEmailVerificationFromError(
+                    error,
+                    email,
+                    authMode === "register"
+                )
+            ) {
+                return;
+            }
+
+            if (
+                authMode === "login" &&
+                openDeviceTransferFromError(
                     error,
                     email
                 )
             ) {
-                setAuthMessage(
-                    error instanceof Error
-                        ? error.message
-                        : String(error)
-                );
+                return;
             }
+
+            setAuthMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
         } finally {
             setIsAuthLoading(false);
         }
@@ -5187,6 +5448,27 @@ function App() {
                         isAuthLoading={
                             isAuthLoading
                         }
+                        emailVerificationRequired={
+                            emailVerificationRequired
+                        }
+                        emailVerificationEmail={
+                            emailVerificationEmail
+                        }
+                        emailVerificationCode={
+                            emailVerificationCode
+                        }
+                        emailVerificationMessage={
+                            emailVerificationMessage
+                        }
+                        emailVerificationCooldownSeconds={
+                            emailVerificationCooldownSeconds
+                        }
+                        isEmailVerificationRequestLoading={
+                            isEmailVerificationRequestLoading
+                        }
+                        isEmailVerificationConfirmLoading={
+                            isEmailVerificationConfirmLoading
+                        }
                         deviceTransferRequired={
                             deviceTransferRequired
                         }
@@ -5257,6 +5539,9 @@ function App() {
                                 setAuthMessage(
                                     ""
                                 );
+
+                                clearEmailVerificationState();
+                                clearDeviceTransferState();
                             }
                         }
                         onEmailChange={
@@ -5267,6 +5552,18 @@ function App() {
                         }
                         onSubmitAuth={
                             submitAuth
+                        }
+                        onEmailVerificationCodeChange={
+                            setEmailVerificationCode
+                        }
+                        onRequestEmailVerification={
+                            requestEmailVerification
+                        }
+                        onConfirmEmailVerification={
+                            confirmEmailVerification
+                        }
+                        onCancelEmailVerification={
+                            cancelEmailVerification
                         }
                         onDeviceTransferEmailChange={
                             setDeviceTransferEmail

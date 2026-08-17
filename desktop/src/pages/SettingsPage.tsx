@@ -282,6 +282,13 @@ interface SettingsPageProps {
     password: string;
     authMessage: string;
     isAuthLoading: boolean;
+    emailVerificationRequired: boolean;
+    emailVerificationEmail: string;
+    emailVerificationCode: string;
+    emailVerificationMessage: string;
+    emailVerificationCooldownSeconds: number;
+    isEmailVerificationRequestLoading: boolean;
+    isEmailVerificationConfirmLoading: boolean;
     deviceTransferRequired: boolean;
     deviceTransferEmail: string;
     deviceTransferCode: string;
@@ -331,6 +338,18 @@ interface SettingsPageProps {
 
     onSubmitAuth:
         (event: FormEvent) => void;
+
+    onEmailVerificationCodeChange:
+        (value: string) => void;
+
+    onRequestEmailVerification:
+        () => void;
+
+    onConfirmEmailVerification:
+        (event: FormEvent) => void;
+
+    onCancelEmailVerification:
+        () => void;
 
     onDeviceTransferEmailChange:
         (value: string) => void;
@@ -418,6 +437,13 @@ export function SettingsPage({
     password,
     authMessage,
     isAuthLoading,
+    emailVerificationRequired,
+    emailVerificationEmail,
+    emailVerificationCode,
+    emailVerificationMessage,
+    emailVerificationCooldownSeconds,
+    isEmailVerificationRequestLoading,
+    isEmailVerificationConfirmLoading,
     deviceTransferRequired,
     deviceTransferEmail,
     deviceTransferCode,
@@ -443,6 +469,10 @@ export function SettingsPage({
     onEmailChange,
     onPasswordChange,
     onSubmitAuth,
+    onEmailVerificationCodeChange,
+    onRequestEmailVerification,
+    onConfirmEmailVerification,
+    onCancelEmailVerification,
     onDeviceTransferEmailChange,
     onDeviceTransferCodeChange,
     onRequestDeviceTransfer,
@@ -1601,6 +1631,104 @@ export function SettingsPage({
                                             : t("settings.auth.createAccount")}
                                 </button>
                             </form>
+
+                            {emailVerificationRequired && (
+                                <div className="password-recovery-panel">
+                                    <form
+                                        className="auth-form compact-password-form"
+                                        onSubmit={onConfirmEmailVerification}
+                                    >
+                                        <div className="notice info compact-notice">
+                                            Xác minh email để hoàn tất đăng nhập.
+                                            Mã xác minh gồm 6 số và có hiệu lực trong 10 phút.
+                                        </div>
+
+                                        <label className="control-field">
+                                            <span>Email tài khoản</span>
+
+                                            <input
+                                                type="email"
+                                                value={emailVerificationEmail}
+                                                readOnly
+                                                autoComplete="email"
+                                            />
+                                        </label>
+
+                                        <button
+                                            type="button"
+                                            className="secondary-action"
+                                            disabled={
+                                                !backend.connected ||
+                                                isEmailVerificationRequestLoading ||
+                                                isEmailVerificationConfirmLoading ||
+                                                emailVerificationCooldownSeconds > 0
+                                            }
+                                            onClick={onRequestEmailVerification}
+                                        >
+                                            {isEmailVerificationRequestLoading
+                                                ? "Đang gửi mã..."
+                                                : emailVerificationCooldownSeconds > 0
+                                                    ? `Gửi lại sau ${emailVerificationCooldownSeconds}s`
+                                                    : "Gửi mã xác minh"}
+                                        </button>
+
+                                        <label className="control-field">
+                                            <span>Mã xác minh 6 số</span>
+
+                                            <input
+                                                type="text"
+                                                inputMode="numeric"
+                                                pattern="[0-9]*"
+                                                maxLength={6}
+                                                value={emailVerificationCode}
+                                                onChange={(event) => {
+                                                    onEmailVerificationCodeChange(
+                                                        event.target.value
+                                                            .replace(/\D/g, "")
+                                                            .slice(0, 6)
+                                                    );
+                                                }}
+                                                placeholder="000000"
+                                                autoComplete="one-time-code"
+                                                autoFocus
+                                            />
+                                        </label>
+
+                                        <button
+                                            type="submit"
+                                            className="primary-action"
+                                            disabled={
+                                                !backend.connected ||
+                                                isEmailVerificationRequestLoading ||
+                                                isEmailVerificationConfirmLoading ||
+                                                emailVerificationCode.length !== 6
+                                            }
+                                        >
+                                            {isEmailVerificationConfirmLoading
+                                                ? "Đang xác minh..."
+                                                : "Xác minh và đăng nhập"}
+                                        </button>
+
+                                        <button
+                                            type="button"
+                                            className="text-action"
+                                            disabled={
+                                                isEmailVerificationRequestLoading ||
+                                                isEmailVerificationConfirmLoading
+                                            }
+                                            onClick={onCancelEmailVerification}
+                                        >
+                                            Hủy xác minh
+                                        </button>
+
+                                        {emailVerificationMessage && (
+                                            <div className="notice info compact-notice">
+                                                {emailVerificationMessage}
+                                            </div>
+                                        )}
+                                    </form>
+                                </div>
+                            )}
 
                             {authMode === "login" && deviceTransferRequired && (
                                 <div className="password-recovery-panel">

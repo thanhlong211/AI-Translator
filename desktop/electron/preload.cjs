@@ -416,6 +416,20 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  requestEmailVerification: (payload) => {
+    return invokeStructuredAuth(
+      "auth:request-email-verification",
+      payload
+    );
+  },
+
+  confirmEmailVerification: (payload) => {
+    return invokeStructuredAuth(
+      "auth:confirm-email-verification",
+      payload
+    );
+  },
+
   forgotPassword: (payload) => {
     return ipcRenderer.invoke(
       "auth:forgot-password",

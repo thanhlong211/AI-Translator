@@ -261,6 +261,12 @@ const BACKEND_LOGIN_URL =
 const BACKEND_REGISTER_URL =
   `${BACKEND_AUTH_BASE_URL}/register`;
 
+const BACKEND_EMAIL_VERIFICATION_REQUEST_URL =
+  `${BACKEND_AUTH_BASE_URL}/email-verification/request`;
+
+const BACKEND_EMAIL_VERIFICATION_CONFIRM_URL =
+  `${BACKEND_AUTH_BASE_URL}/email-verification/confirm`;
+
 const BACKEND_PASSWORD_FORGOT_URL =
   `${BACKEND_AUTH_BASE_URL}/password/forgot`;
 
@@ -3025,6 +3031,53 @@ async function registerDesktop(
 
         password:
           String(password || ""),
+
+        deviceId,
+
+        deviceName:
+          getDeviceName(),
+      }
+    );
+
+  await applyAuthPayload(
+    payload
+  );
+
+  return getDesktopAuthStatus();
+}
+
+
+async function requestEmailVerificationDesktop(
+  email
+) {
+  return callPublicAuthApi(
+    BACKEND_EMAIL_VERIFICATION_REQUEST_URL,
+    {
+      email:
+        String(email || "")
+          .trim(),
+    }
+  );
+}
+
+async function confirmEmailVerificationDesktop(
+  email,
+  code
+) {
+  const deviceId =
+    await ensureDeviceId();
+
+  const payload =
+    await callPublicAuthApi(
+      BACKEND_EMAIL_VERIFICATION_CONFIRM_URL,
+      {
+        email:
+          String(email || "")
+            .trim(),
+
+        code:
+          String(code || "")
+            .trim(),
 
         deviceId,
 
@@ -12210,6 +12263,32 @@ ipcMain.handle(
     );
   }
 );
+
+ipcMain.handle(
+  "auth:request-email-verification",
+  async (_event, payload) => {
+    return runAuthIpc(
+      () =>
+        requestEmailVerificationDesktop(
+          payload?.email
+        )
+    );
+  }
+);
+
+ipcMain.handle(
+  "auth:confirm-email-verification",
+  async (_event, payload) => {
+    return runAuthIpc(
+      () =>
+        confirmEmailVerificationDesktop(
+          payload?.email,
+          payload?.code
+        )
+    );
+  }
+);
+
 
 ipcMain.handle(
   "auth:request-device-transfer",
