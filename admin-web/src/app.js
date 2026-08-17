@@ -1124,7 +1124,9 @@ function renderUserDrawer(detail) {
       <div class="action-row">
         <button id="toggleStatus" class="${isSuspended ? "primary" : "danger-button"}">${isSuspended ? "Mở khóa user" : "Khóa user"}</button>
         <button id="revokeSessions" class="ghost">Thu hồi mọi session</button>
+        <button id="resetDeviceBinding" class="danger-button">Reset liên kết thiết bị</button>
       </div>
+      <small class="muted">Reset thiết bị sẽ gỡ máy đang liên kết và thu hồi toàn bộ session của tài khoản.</small>
     </section>
     <section class="drawer-section">
       <div class="section-heading"><div><span class="eyebrow">PLAN OVERRIDE</span><h3>Quyền gói tạm thời</h3></div></div>
@@ -1157,6 +1159,24 @@ function renderUserDrawer(detail) {
   $("#revokeSessions").addEventListener("click", async () => {
     const reason = requireReason(); if (!reason) return;
     await userAction(`/api/v1/admin/users/${user.id}/sessions/revoke-all`, "POST", { reason });
+  });
+
+  $("#resetDeviceBinding").addEventListener("click", async () => {
+    const reason = requireReason(); if (!reason) return;
+
+    const confirmed = window.confirm(
+      `Reset liên kết thiết bị cho ${user.email}?\n\n` +
+      "Toàn bộ phiên đăng nhập hiện tại sẽ bị thu hồi. " +
+      "Lần đăng nhập tiếp theo sẽ liên kết tài khoản với thiết bị mới."
+    );
+
+    if (!confirmed) return;
+
+    await userAction(
+      `/api/v1/admin/users/${user.id}/device-binding/reset`,
+      "POST",
+      { reason }
+    );
   });
   $("#savePlan").addEventListener("click", async () => {
     const reason = requireReason(); if (!reason) return;

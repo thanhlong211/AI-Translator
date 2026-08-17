@@ -15,6 +15,7 @@ public record LoginRequest(
         @Schema(example = "StrongPassword123!")
         String password,
 
+        @NotBlank
         @Size(max = 100)
         @Schema(example = "desktop-uuid")
         String deviceId,

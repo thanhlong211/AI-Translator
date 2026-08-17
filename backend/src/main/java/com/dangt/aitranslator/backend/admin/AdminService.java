@@ -472,6 +472,53 @@ public class AdminService {
     }
 
     @Transactional
+    public AdminActionResponse resetDeviceBinding(
+            UserAccount actor,
+            long userId,
+            AdminReasonRequest request
+    ) {
+        TargetUser target = requireTarget(userId);
+
+        requireCanManage(actor, target);
+        safetyService.requireCanRevokeSessions(actor, userId);
+
+        int revokedSessions = revokeAllSessions(userId);
+
+        int updated = jdbcTemplate.update(
+                """
+                UPDATE users
+                SET bound_device_id = NULL,
+                    bound_device_name = NULL,
+                    device_bound_at = NULL,
+                    updated_at = CURRENT_TIMESTAMP(6)
+                WHERE id = ?
+                """,
+                userId
+        );
+
+        if (updated != 1) {
+            throw new IllegalArgumentException(
+                    "Không tìm thấy user cần reset thiết bị."
+            );
+        }
+
+        auditService.record(
+                actor.getId(),
+                "USER_DEVICE_BINDING_RESET",
+                userId,
+                "sessionsRevoked="
+                        + revokedSessions
+                        + "; reason="
+                        + request.reason().trim()
+        );
+
+        return AdminActionResponse.ok(
+                "Đã gỡ liên kết thiết bị và thu hồi toàn bộ phiên đăng nhập."
+        );
+    }
+
+
+    @Transactional
     public AdminActionResponse setPlanOverride(
             UserAccount actor,
             long userId,

@@ -16,7 +16,6 @@ import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.Base64;
 
 @Service
@@ -24,16 +23,19 @@ public class RefreshTokenService {
 
     private final AuthSessionRepository sessionRepository;
     private final EntitlementService entitlementService;
+    private final DeviceBindingService deviceBindingService;
     private final Duration refreshLifetime;
     private final SecureRandom secureRandom = new SecureRandom();
 
     public RefreshTokenService(
             AuthSessionRepository sessionRepository,
             EntitlementService entitlementService,
+            DeviceBindingService deviceBindingService,
             @Value("${app.auth.refresh-token-days:30}") long refreshTokenDays
     ) {
         this.sessionRepository = sessionRepository;
         this.entitlementService = entitlementService;
+        this.deviceBindingService = deviceBindingService;
         this.refreshLifetime = Duration.ofDays(refreshTokenDays);
     }
 
@@ -46,6 +48,12 @@ public class RefreshTokenService {
         String deviceId = normalizeDeviceId(requestedDeviceId);
         String deviceName = normalizeDeviceName(requestedDeviceName);
         Instant now = Instant.now();
+
+        user = deviceBindingService.requireOrBind(
+                user,
+                deviceId,
+                deviceName
+        );
 
         long activeOtherDevices = sessionRepository
                 .findAllByUser_IdAndRevokedAtIsNullOrderByCreatedAtDesc(user.getId())
@@ -116,6 +124,12 @@ public class RefreshTokenService {
             session.revoke(now);
             throw new ForbiddenException("Tài khoản hiện không hoạt động.");
         }
+
+        user = deviceBindingService.requireOrBind(
+                user,
+                session.getDeviceId(),
+                session.getDeviceName()
+        );
 
         String newRawToken = generateRawToken();
 
@@ -217,13 +231,17 @@ public class RefreshTokenService {
 
     private String normalizeDeviceId(String value) {
         if (value == null || value.isBlank()) {
-            return UUID.randomUUID().toString();
+            throw new IllegalArgumentException(
+                    "Thiếu mã nhận dạng thiết bị."
+            );
         }
 
         String clean = value.trim();
 
         if (clean.length() > 100) {
-            clean = clean.substring(0, 100);
+            throw new IllegalArgumentException(
+                    "Mã nhận dạng thiết bị vượt quá giới hạn."
+            );
         }
 
         return clean;

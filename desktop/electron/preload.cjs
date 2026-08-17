@@ -1,5 +1,16 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
+async function invokeStructuredAuth(
+  channel,
+  payload
+) {
+  return ipcRenderer.invoke(
+    channel,
+    payload
+  );
+}
+
+
 contextBridge.exposeInMainWorld("electronAPI", {
   openSelector: (options) => {
     return ipcRenderer.invoke(
@@ -392,14 +403,14 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
   login: (credentials) => {
-    return ipcRenderer.invoke(
+    return invokeStructuredAuth(
       "auth:login",
       credentials
     );
   },
 
   register: (credentials) => {
-    return ipcRenderer.invoke(
+    return invokeStructuredAuth(
       "auth:register",
       credentials
     );
@@ -419,6 +430,20 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  requestDeviceTransfer: (payload) => {
+    return invokeStructuredAuth(
+      "auth:request-device-transfer",
+      payload
+    );
+  },
+
+  confirmDeviceTransfer: (payload) => {
+    return invokeStructuredAuth(
+      "auth:confirm-device-transfer",
+      payload
+    );
+  },
+
   changePassword: (payload) => {
     return ipcRenderer.invoke(
       "auth:change-password",
@@ -433,7 +458,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
   socialLogin: (provider) => {
-    return ipcRenderer.invoke(
+    return invokeStructuredAuth(
       "auth:social-login",
       provider
     );
