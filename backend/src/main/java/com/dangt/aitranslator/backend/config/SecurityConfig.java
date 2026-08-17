@@ -40,6 +40,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/logout",
                                 "/api/v1/auth/password/forgot",
                                 "/api/v1/auth/password/reset",
+                                "/api/v1/auth/email-verification/**",
                                 "/api/v1/auth/device-transfer/**",
                                 "/api/v1/auth/social/**",
                                 "/api/v1/admin/auth/login",

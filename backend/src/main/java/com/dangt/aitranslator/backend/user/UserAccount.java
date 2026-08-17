@@ -44,6 +44,9 @@ public class UserAccount {
     @Column(name = "device_bound_at")
     private Instant deviceBoundAt;
 
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
+
     protected UserAccount() {
     }
 
@@ -66,6 +69,20 @@ public class UserAccount {
     public String getBoundDeviceId() { return boundDeviceId; }
     public String getBoundDeviceName() { return boundDeviceName; }
     public Instant getDeviceBoundAt() { return deviceBoundAt; }
+    public Instant getEmailVerifiedAt() { return emailVerifiedAt; }
+
+    public boolean isEmailVerified() {
+        return emailVerifiedAt != null;
+    }
+
+    public void markEmailVerified(Instant now) {
+        if (emailVerifiedAt != null) {
+            return;
+        }
+
+        emailVerifiedAt = now;
+        updatedAt = now;
+    }
 
     public void bindDevice(
             String deviceId,

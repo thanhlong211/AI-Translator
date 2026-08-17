@@ -164,7 +164,9 @@ public class ApiRateLimitFilter extends OncePerRequestFilter {
         if (path.startsWith("/api/v1/auth/password/")) {
             return passwordRule;
         }
-
+        if (path.startsWith("/api/v1/auth/email-verification/")) {
+            return passwordRule;
+        }
         if (path.startsWith("/api/v1/auth/device-transfer/")) {
             return passwordRule;
         }

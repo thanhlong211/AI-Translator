@@ -39,6 +39,39 @@ class ApiRateLimitFilterTest {
         assertThat(secondResponse.getContentAsString()).contains("RATE_LIMITED");
     }
 
+    @Test
+    void emailVerificationUsesPasswordRule() throws Exception {
+        ApiRateLimitFilter filter = new ApiRateLimitFilter(
+                JsonMapper.builder().findAndAddModules().build(),
+                true,
+                100, 300,
+                100, 300,
+                100, 3600,
+                1, 900,
+                100, 300,
+                100, 60,
+                100, 60,
+                100, 60
+        );
+
+        MockHttpServletRequest first = request(
+                "/api/v1/auth/email-verification/request"
+        );
+        MockHttpServletResponse firstResponse = new MockHttpServletResponse();
+        filter.doFilter(first, firstResponse, new MockFilterChain());
+        assertThat(firstResponse.getStatus()).isEqualTo(200);
+
+        MockHttpServletRequest second = request(
+                "/api/v1/auth/email-verification/confirm"
+        );
+        MockHttpServletResponse secondResponse = new MockHttpServletResponse();
+        filter.doFilter(second, secondResponse, new MockFilterChain());
+
+        assertThat(secondResponse.getStatus()).isEqualTo(429);
+        assertThat(secondResponse.getHeader("Retry-After")).isNotBlank();
+        assertThat(secondResponse.getContentAsString()).contains("RATE_LIMITED");
+    }
+
     private MockHttpServletRequest request(String path) {
         MockHttpServletRequest request = new MockHttpServletRequest("POST", path);
         request.setRemoteAddr("127.0.0.1");
