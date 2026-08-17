@@ -582,6 +582,22 @@ public class AdminController {
         return adminService.revokeSessions(actor, userId, request);
     }
 
+    @PostMapping("/users/{userId}/device-binding/reset")
+    public AdminActionResponse resetDeviceBinding(
+            @PathVariable long userId,
+            @Valid @RequestBody AdminReasonRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+
+        return adminService.resetDeviceBinding(
+                actor,
+                userId,
+                request
+        );
+    }
+
+
     @PutMapping("/users/{userId}/plan-override")
     public AdminActionResponse setPlan(
             @PathVariable long userId,
