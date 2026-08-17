@@ -439,6 +439,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  cancelSocialLogin: () => {
+    return ipcRenderer.invoke(
+      "auth:cancel-social-login"
+    );
+  },
+
   refreshSession: () => {
     return ipcRenderer.invoke(
       "auth:refresh"

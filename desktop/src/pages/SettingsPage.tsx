@@ -328,6 +328,9 @@ interface SettingsPageProps {
     onSocialLogin:
         (provider: SocialAuthProviderCode) => void;
 
+    onCancelSocialLogin:
+        () => void;
+
     onLinkAccountIdentity:
         (provider: SocialAuthProviderCode) => void;
 
@@ -412,6 +415,7 @@ export function SettingsPage({
     onPasswordChange,
     onSubmitAuth,
     onSocialLogin,
+    onCancelSocialLogin,
     onLinkAccountIdentity,
     onRefreshAccountIdentities,
     onLogout,
@@ -1482,6 +1486,18 @@ export function SettingsPage({
                                     </div>
                                 )}
                             </div>
+
+                            {socialAuthLoadingProvider !== null && (
+                                <div className="social-auth-cancel-row">
+                                    <button
+                                        type="button"
+                                        className="text-action"
+                                        onClick={onCancelSocialLogin}
+                                    >
+                                        Hủy đăng nhập
+                                    </button>
+                                </div>
+                            )}
 
                             <div className="social-auth-divider">
                                 <span>{t("settings.auth.orEmail")}</span>

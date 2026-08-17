@@ -3237,13 +3237,81 @@ function waitMs(ms) {
   });
 }
 
-let socialBrowserFlowPromise = null;
+let activeSocialBrowserFlow = null;
+
+function waitForSocialBrowserFlow(
+  flow,
+  ms
+) {
+  return new Promise((resolve) => {
+    if (flow.cancelled) {
+      resolve();
+      return;
+    }
+
+    let settled = false;
+
+    const finish = () => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      clearTimeout(timer);
+
+      if (flow.wake === finish) {
+        flow.wake = null;
+      }
+
+      resolve();
+    };
+
+    const timer =
+      setTimeout(
+        finish,
+        ms
+      );
+
+    flow.wake =
+      finish;
+  });
+}
+
+async function cancelSocialBrowserFlow() {
+  const flow =
+    activeSocialBrowserFlow;
+
+  if (!flow) {
+    return {
+      success: true,
+      cancelled: false,
+    };
+  }
+
+  flow.cancelled = true;
+
+  if (typeof flow.wake === "function") {
+    flow.wake();
+  }
+
+  /*
+   * Chỉ trả response cancel sau khi flow cũ đã chạy finally.
+   * Như vậy renderer có thể bật lại nút Google/Facebook an toàn
+   * mà không gặp race với flow trước.
+   */
+  await flow.donePromise;
+
+  return {
+    success: true,
+    cancelled: true,
+  };
+}
 
 async function startSocialBrowserFlow(
   provider,
   mode = "LOGIN"
 ) {
-  if (socialBrowserFlowPromise) {
+  if (activeSocialBrowserFlow) {
     throw new Error(
       "Một cửa sổ đăng nhập Social đang chờ hoàn tất."
     );
@@ -3252,172 +3320,224 @@ async function startSocialBrowserFlow(
   const providerCode =
     normalizeSocialProvider(provider);
 
-  socialBrowserFlowPromise =
-    (async () => {
-      const isLink =
-        String(mode).toUpperCase() ===
-        "LINK";
+  let resolveDone;
 
-      let startPayload;
+  const flow = {
+    cancelled: false,
+    wake: null,
+    donePromise:
+      new Promise((resolve) => {
+        resolveDone = resolve;
+      }),
+  };
 
-      if (isLink) {
-        const response =
-          await authorizedBackendFetch(
-            `${BACKEND_IDENTITIES_URL}/${providerCode}/link/start`,
-            {
-              method: "POST",
-              headers: {
-                Accept: "application/json",
-              },
-            }
-          );
+  activeSocialBrowserFlow =
+    flow;
 
-        startPayload =
-          await parseBackendJson(response);
+  try {
+    const isLink =
+      String(mode).toUpperCase() ===
+      "LINK";
 
-        if (!response.ok) {
-          throw new Error(
-            startPayload?.error ||
-            `Backend lỗi HTTP ${response.status}.`
-          );
-        }
-      } else {
-        startPayload =
-          await callPublicAuthApi(
-            `${BACKEND_SOCIAL_AUTH_URL}/${providerCode}/start`,
-            {
-              deviceId:
-                await ensureDeviceId(),
-              deviceName:
-                getDeviceName(),
-            }
-          );
-      }
+    let startPayload;
 
-      if (
-        !startPayload?.success ||
-        !startPayload?.attemptId ||
-        !startPayload?.pollSecret ||
-        !startPayload?.authorizationUrl
-      ) {
+    if (isLink) {
+      const response =
+        await authorizedBackendFetch(
+          `${BACKEND_IDENTITIES_URL}/${providerCode}/link/start`,
+          {
+            method: "POST",
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+      startPayload =
+        await parseBackendJson(response);
+
+      if (!response.ok) {
         throw new Error(
-          "Backend không tạo được phiên Social Login."
+          startPayload?.error ||
+          `Backend lỗi HTTP ${response.status}.`
         );
       }
-
-      const authorizationUrl =
-        validateSocialAuthorizationUrl(
-          providerCode,
-          startPayload.authorizationUrl
+    } else {
+      startPayload =
+        await callPublicAuthApi(
+          `${BACKEND_SOCIAL_AUTH_URL}/${providerCode}/start`,
+          {
+            deviceId:
+              await ensureDeviceId(),
+            deviceName:
+              getDeviceName(),
+          }
         );
+    }
 
-      await shell.openExternal(
-        authorizationUrl
+    if (flow.cancelled) {
+      throw new Error(
+        "Đã hủy đăng nhập."
+      );
+    }
+
+    if (
+      !startPayload?.success ||
+      !startPayload?.attemptId ||
+      !startPayload?.pollSecret ||
+      !startPayload?.authorizationUrl
+    ) {
+      throw new Error(
+        "Backend không tạo được phiên Social Login."
+      );
+    }
+
+    const authorizationUrl =
+      validateSocialAuthorizationUrl(
+        providerCode,
+        startPayload.authorizationUrl
       );
 
-      const expiresAt =
-        new Date(
-          startPayload.expiresAt ||
-          Date.now() + 5 * 60 * 1000
-        ).getTime();
+    await shell.openExternal(
+      authorizationUrl
+    );
 
-      const pollDelay =
-        Math.max(
-          800,
-          Math.min(
-            2500,
-            Number(
-              startPayload.pollAfterMs ||
-              1200
-            )
+    const backendExpiresAt =
+      new Date(
+        startPayload.expiresAt ||
+        Date.now() + 5 * 60 * 1000
+      ).getTime();
+
+    /*
+     * Không giữ Desktop ở trạng thái loading theo toàn bộ
+     * OAuth attempt lifetime. Nếu browser bị đóng mà không callback,
+     * client tự giải phóng flow sau tối đa 2 phút.
+     */
+    const clientExpiresAt =
+      Math.min(
+        backendExpiresAt + 3000,
+        Date.now() + 2 * 60 * 1000
+      );
+
+    const pollDelay =
+      Math.max(
+        800,
+        Math.min(
+          2500,
+          Number(
+            startPayload.pollAfterMs ||
+            1200
           )
+        )
+      );
+
+    while (
+      Date.now() <
+      clientExpiresAt
+    ) {
+      await waitForSocialBrowserFlow(
+        flow,
+        pollDelay
+      );
+
+      if (flow.cancelled) {
+        throw new Error(
+          "Đã hủy đăng nhập."
         );
+      }
 
-      while (
-        Date.now() <
-        expiresAt + 3000
-      ) {
-        await waitMs(pollDelay);
+      let poll;
 
-        let poll;
-
-        try {
-          poll =
-            await callPublicAuthApi(
-              `${BACKEND_SOCIAL_AUTH_URL}/attempts/${encodeURIComponent(startPayload.attemptId)}/poll`,
-              {
-                pollSecret:
-                  startPayload.pollSecret,
-              }
-            );
-        } catch (error) {
-          if (
-            !error?.statusCode &&
-            Date.now() < expiresAt
-          ) {
-            continue;
-          }
-
-          throw error;
+      try {
+        poll =
+          await callPublicAuthApi(
+            `${BACKEND_SOCIAL_AUTH_URL}/attempts/${encodeURIComponent(startPayload.attemptId)}/poll`,
+            {
+              pollSecret:
+                startPayload.pollSecret,
+            }
+          );
+      } catch (error) {
+        if (flow.cancelled) {
+          throw new Error(
+            "Đã hủy đăng nhập."
+          );
         }
 
         if (
-          poll?.status ===
-          "PENDING"
+          !error?.statusCode &&
+          Date.now() <
+            clientExpiresAt
         ) {
           continue;
         }
 
-        if (
-          isLink &&
-          poll?.status ===
-          "LINKED"
-        ) {
-          return {
-            success: true,
-            status: "LINKED",
-            provider:
-              poll.provider,
-            identity:
-              poll.identity || null,
-          };
-        }
+        throw error;
+      }
 
-        if (
-          !isLink &&
-          poll?.status ===
-          "SUCCESS" &&
-          poll?.auth
-        ) {
-          await applyAuthPayload(
-            poll.auth
-          );
+      if (
+        poll?.status ===
+        "PENDING"
+      ) {
+        continue;
+      }
 
-          return {
-            success: true,
-            status: "SUCCESS",
-            provider:
-              poll.provider,
-            auth:
-              await getDesktopAuthStatus(),
-          };
-        }
+      if (
+        isLink &&
+        poll?.status ===
+        "LINKED"
+      ) {
+        return {
+          success: true,
+          status: "LINKED",
+          provider:
+            poll.provider,
+          identity:
+            poll.identity || null,
+        };
+      }
 
-        throw new Error(
-          poll?.message ||
-          "Social Login không hoàn tất."
+      if (
+        !isLink &&
+        poll?.status ===
+        "SUCCESS" &&
+        poll?.auth
+      ) {
+        await applyAuthPayload(
+          poll.auth
         );
+
+        return {
+          success: true,
+          status: "SUCCESS",
+          provider:
+            poll.provider,
+          auth:
+            await getDesktopAuthStatus(),
+        };
       }
 
       throw new Error(
-        "Phiên Social Login đã hết hạn. Vui lòng thử lại."
+        poll?.message ||
+        "Social Login không hoàn tất."
       );
-    })();
+    }
 
-  try {
-    return await socialBrowserFlowPromise;
+    throw new Error(
+      "Đăng nhập chưa hoàn tất. Vui lòng thử lại."
+    );
   } finally {
-    socialBrowserFlowPromise = null;
+    if (
+      activeSocialBrowserFlow ===
+      flow
+    ) {
+      activeSocialBrowserFlow =
+        null;
+    }
+
+    if (typeof resolveDone === "function") {
+      resolveDone();
+    }
   }
 }
 
@@ -12026,6 +12146,13 @@ ipcMain.handle(
     return socialLoginDesktop(
       provider
     );
+  }
+);
+
+ipcMain.handle(
+  "auth:cancel-social-login",
+  async () => {
+    return cancelSocialBrowserFlow();
   }
 );
 

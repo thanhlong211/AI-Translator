@@ -1657,6 +1657,33 @@ function App() {
         }
     }
 
+    async function cancelSocialLogin() {
+        if (!socialAuthLoadingProvider) {
+            return;
+        }
+
+        try {
+            const result =
+                await api.cancelSocialLogin?.();
+
+            setAuthMessage(
+                result?.cancelled
+                    ? "Đã hủy đăng nhập."
+                    : "Không có phiên đăng nhập Social đang chờ."
+            );
+        } catch (error) {
+            setAuthMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+        } finally {
+            setSocialAuthLoadingProvider(
+                null
+            );
+        }
+    }
+
     async function loadAccountIdentities() {
         if (!auth.authenticated) {
             setAccountIdentities([]);
@@ -4819,6 +4846,9 @@ function App() {
                         }
                         onSocialLogin={
                             socialLogin
+                        }
+                        onCancelSocialLogin={
+                            cancelSocialLogin
                         }
                         onLinkAccountIdentity={
                             linkAccountIdentity
