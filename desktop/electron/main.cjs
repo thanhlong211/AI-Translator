@@ -103,7 +103,7 @@ function normalizeBackendBaseUrl(
 
   if (!clean) {
     throw new Error(
-      "Backend URL chÆ°a Ä‘Æ°á»£c cáº¥u hÃ¬nh."
+      "Backend URL chưa được cấu hình."
     );
   }
 
@@ -112,7 +112,7 @@ function normalizeBackendBaseUrl(
     parsed = new URL(clean);
   } catch {
     throw new Error(
-      `Backend URL khÃ´ng há»£p lá»‡: ${clean}`
+      `Backend URL không hợp lệ: ${clean}`
     );
   }
 
@@ -121,7 +121,7 @@ function normalizeBackendBaseUrl(
     !(allowInsecure && parsed.protocol === "http:")
   ) {
     throw new Error(
-      "Production backend báº¯t buá»™c dÃ¹ng HTTPS."
+      "Production backend bắt buộc dùng HTTPS."
     );
   }
 
@@ -139,13 +139,13 @@ function normalizeBackendBaseUrl(
 
   if (!allowLocalhost && isLocalhost) {
     throw new Error(
-      "Production backend khÃ´ng Ä‘Æ°á»£c trá» tá»›i localhost."
+      "Production backend không được trỏ tới localhost."
     );
   }
 
   if (parsed.username || parsed.password) {
     throw new Error(
-      "Backend URL khÃ´ng Ä‘Æ°á»£c chá»©a username/password."
+      "Backend URL không được chứa username/password."
     );
   }
 
@@ -155,7 +155,7 @@ function normalizeBackendBaseUrl(
     parsed.hash
   ) {
     throw new Error(
-      "Backend URL pháº£i lÃ  origin, vÃ­ dá»¥ https://api.example.com"
+      "Backend URL phải là origin, ví dụ https://api.example.com"
     );
   }
 
@@ -178,7 +178,7 @@ function loadPackagedReleaseConfig() {
     );
   } catch (error) {
     throw new Error(
-      `Thiáº¿u production release config: ${configPath}. ${error?.message || error}`
+      `Thiếu production release config: ${configPath}. ${error?.message || error}`
     );
   }
 
@@ -187,13 +187,13 @@ function loadPackagedReleaseConfig() {
     config = JSON.parse(raw);
   } catch (error) {
     throw new Error(
-      `Production release config khÃ´ng pháº£i JSON há»£p lá»‡: ${error?.message || error}`
+      `Production release config không phải JSON hợp lệ: ${error?.message || error}`
     );
   }
 
   if (Number(config?.schemaVersion) !== 1) {
     throw new Error(
-      "Production release config schema khÃ´ng Ä‘Æ°á»£c há»— trá»£."
+      "Production release config schema không được hỗ trợ."
     );
   }
 
@@ -203,7 +203,7 @@ function loadPackagedReleaseConfig() {
       .toLowerCase() !== "production"
   ) {
     throw new Error(
-      "Packaged desktop chá»‰ cháº¥p nháº­n environment=production."
+      "Packaged desktop chỉ chấp nhận environment=production."
     );
   }
 
@@ -451,8 +451,8 @@ const translationContextByProfile =
 /*
  * Batch 10 - Manga Page Translation Session
  *
- * Session giá»¯ riÃªng vÃ¹ng quÃ©t + context 10 cÃ¢u gáº§n nháº¥t cho manga.
- * NÃ³ khÃ´ng dÃ¹ng chung context cá»§a Quick Translate/Study Ä‘á»ƒ trÃ¡nh nhiá»…u há»™i thoáº¡i.
+ * Session giữ riêng vùng quét + context 10 câu gần nhất cho manga.
+ * Nó không dùng chung context của Quick Translate/Study để tránh nhiễu hội thoại.
  */
 let mangaPanelSession = null;
 
@@ -460,9 +460,9 @@ let mangaPanelSession = null;
 /*
  * Batch 12 - Plans / Entitlements / License
  *
- * Backend lÃ  source-of-truth cho plan/features/limits.
- * Desktop chá»‰ giá»¯ má»™t snapshot an toÃ n Ä‘á»ƒ UI/overlay feature-gate.
- * Náº¿u chÆ°a Ä‘Äƒng nháº­p hoáº·c backend chÆ°a tráº£ entitlement, paid feature máº·c Ä‘á»‹nh OFF.
+ * Backend là source-of-truth cho plan/features/limits.
+ * Desktop chỉ giữ một snapshot an toàn để UI/overlay feature-gate.
+ * Nếu chưa đăng nhập hoặc backend chưa trả entitlement, paid feature mặc định OFF.
  */
 const DEFAULT_ACCOUNT_ENTITLEMENTS = Object.freeze({
   planCode: "FREE",
@@ -746,18 +746,18 @@ const PAID_FEATURE_REQUIREMENTS = Object.freeze({
 function getPaidFeatureRequirement(featureKey) {
   return PAID_FEATURE_REQUIREMENTS[String(featureKey || "")] || {
     featureKey: String(featureKey || ""),
-    featureName: String(featureKey || "TÃ­nh nÄƒng"),
+    featureName: String(featureKey || "Tính năng"),
   };
 }
 
 function paidFeatureRequiredMessage(featureKey) {
   const requirement = getPaidFeatureRequirement(featureKey);
   const currentPlan =
-    String(accountEntitlements.planName || accountEntitlements.planCode || "gÃ³i hiá»‡n táº¡i").trim();
+    String(accountEntitlements.planName || accountEntitlements.planCode || "gói hiện tại").trim();
 
   return (
-    `${requirement.featureName} chÆ°a Ä‘Æ°á»£c báº­t trong ${currentPlan}. ` +
-    "Má»Ÿ Settings â†’ Plan & License Ä‘á»ƒ xem quyá»n hiá»‡n táº¡i hoáº·c Ä‘á»•i gÃ³i."
+    `${requirement.featureName} chưa được bật trong ${currentPlan}. ` +
+    "Mở Settings → Plan & License để xem quyền hiện tại hoặc đổi gói."
   );
 }
 
@@ -964,7 +964,7 @@ async function buildMangaSelectionFingerprint(
 ) {
   if (!screenshotBuffer) {
     throw new Error(
-      "KhÃ´ng cÃ³ screenshot Ä‘á»ƒ kiá»ƒm tra trang manga."
+      "Không có screenshot để kiểm tra trang manga."
     );
   }
 
@@ -975,7 +975,7 @@ async function buildMangaSelectionFingerprint(
 
   if (!normalizedSelection) {
     throw new Error(
-      "VÃ¹ng Manga Session khÃ´ng há»£p lá»‡."
+      "Vùng Manga Session không hợp lệ."
     );
   }
 
@@ -989,7 +989,7 @@ async function buildMangaSelectionFingerprint(
     !metadata.height
   ) {
     throw new Error(
-      "KhÃ´ng Ä‘á»c Ä‘Æ°á»£c kÃ­ch thÆ°á»›c screenshot khi theo dÃµi manga."
+      "Không đọc được kích thước screenshot khi theo dõi manga."
     );
   }
 
@@ -1305,7 +1305,7 @@ async function pollMangaContinuousMode() {
       mangaContinuousState.error =
         String(
           autoResult?.error ||
-          "KhÃ´ng thá»ƒ tá»± dá»‹ch trang má»›i."
+          "Không thể tự dịch trang mới."
         );
       mangaContinuousState.cooldownUntil =
         Date.now() +
@@ -1375,7 +1375,7 @@ function setMangaContinuousEnabled(
 
     if (!mangaPanelSession) {
       throw new Error(
-        `ChÆ°a cÃ³ Manga Session. HÃ£y dÃ¹ng ${shortcutDisplay(shortcutSettings.panel)} Ä‘á»ƒ chá»n trang Ä‘áº§u tiÃªn.`
+        `Chưa có Manga Session. Hãy dùng ${shortcutDisplay(shortcutSettings.panel)} để chọn trang đầu tiên.`
       );
     }
 
@@ -1414,7 +1414,7 @@ function setMangaContinuousEnabled(
 function toggleMangaContinuousPause() {
   if (!mangaContinuousState.enabled) {
     throw new Error(
-      "Continuous Manga chÆ°a Ä‘Æ°á»£c báº­t."
+      "Continuous Manga chưa được bật."
     );
   }
 
@@ -1579,7 +1579,7 @@ function beginMangaPanelSession({
 
   if (!normalizedSelection) {
     throw new Error(
-      "KhÃ´ng thá»ƒ táº¡o Manga Session tá»« vÃ¹ng chá»n hiá»‡n táº¡i."
+      "Không thể tạo Manga Session từ vùng chọn hiện tại."
     );
   }
 
@@ -1717,7 +1717,7 @@ function getMangaPanelSessionDetails() {
 function resetMangaPanelSessionChapter() {
   if (!mangaPanelSession) {
     throw new Error(
-      "ChÆ°a cÃ³ Manga Session Ä‘á»ƒ báº¯t Ä‘áº§u chapter má»›i."
+      "Chưa có Manga Session để bắt đầu chapter mới."
     );
   }
 
@@ -1780,7 +1780,7 @@ function ensureMangaPanelSessionCompatible(
 ) {
   if (!mangaPanelSession) {
     throw new Error(
-      `ChÆ°a cÃ³ Manga Session. HÃ£y dÃ¹ng ${shortcutDisplay(shortcutSettings.panel)} Ä‘á»ƒ chá»n vÃ¹ng trang Ä‘áº§u tiÃªn.`
+      `Chưa có Manga Session. Hãy dùng ${shortcutDisplay(shortcutSettings.panel)} để chọn vùng trang đầu tiên.`
     );
   }
 
@@ -1808,7 +1808,7 @@ function ensureMangaPanelSessionCompatible(
       target
   ) {
     throw new Error(
-      `Profile hoáº·c cáº·p ngÃ´n ngá»¯ Ä‘Ã£ thay Ä‘á»•i. HÃ£y dÃ¹ng ${shortcutDisplay(shortcutSettings.panel)} Ä‘á»ƒ báº¯t Ä‘áº§u Manga Session má»›i.`
+      `Profile hoặc cặp ngôn ngữ đã thay đổi. Hãy dùng ${shortcutDisplay(shortcutSettings.panel)} để bắt đầu Manga Session mới.`
     );
   }
 
@@ -2020,7 +2020,7 @@ function rememberTranslationContext(
     translatedText,
 
     /*
-     * Legacy alias cho backend/client cÅ©.
+     * Legacy alias cho backend/client cũ.
      */
     vietnamese:
       translatedText,
@@ -2416,7 +2416,7 @@ async function fetchWithTimeout(
       ) {
         const timeoutError =
           new Error(
-            "Java backend pháº£n há»“i quÃ¡ thá»i gian."
+            "Java backend phản hồi quá thời gian."
           );
 
         timeoutError.requestId =
@@ -2460,7 +2460,7 @@ async function fetchWithTimeout(
 
   throw lastError ||
     new Error(
-      "KhÃ´ng káº¿t ná»‘i Ä‘Æ°á»£c Java backend."
+      "Không kết nối được Java backend."
     );
 }
 
@@ -2710,7 +2710,7 @@ async function saveRefreshToken(
 
   if (!clean) {
     throw new Error(
-      "Refresh token trá»‘ng."
+      "Refresh token trống."
     );
   }
 
@@ -2719,7 +2719,7 @@ async function saveRefreshToken(
       .isEncryptionAvailable()
   ) {
     throw new Error(
-      "Windows secure storage chÆ°a sáºµn sÃ ng."
+      "Windows secure storage chưa sẵn sàng."
     );
   }
 
@@ -2861,11 +2861,11 @@ async function parseBackendJson(
       !String(
         payload.error
       ).includes(
-        "MÃ£ lá»—i:"
+        "Mã lỗi:"
       )
     ) {
       payload.error =
-        `${payload.error}\nMÃ£ lá»—i: ${requestId}`;
+        `${payload.error}\nMã lỗi: ${requestId}`;
     }
   }
 
@@ -2899,7 +2899,7 @@ async function callPublicAuthApi(
       );
   } catch (error) {
     throw new Error(
-      "KhÃ´ng káº¿t ná»‘i Ä‘Æ°á»£c Java backend. " +
+      "Không kết nối được Java backend. " +
       (
         error instanceof Error
           ? error.message
@@ -2917,7 +2917,7 @@ async function callPublicAuthApi(
     const error =
       new Error(
         payload?.error ||
-        `Backend lá»—i HTTP ${response.status}.`
+        `Backend lỗi HTTP ${response.status}.`
       );
 
     error.statusCode =
@@ -2939,7 +2939,7 @@ async function applyAuthPayload(
     !payload?.user
   ) {
     throw new Error(
-      "Backend khÃ´ng tráº£ vá» phiÃªn Ä‘Äƒng nháº­p há»£p lá»‡."
+      "Backend không trả về phiên đăng nhập hợp lệ."
     );
   }
 
@@ -3100,7 +3100,7 @@ async function changePasswordDesktop(
   if (!response.ok) {
     const error = new Error(
       payload?.error ||
-      `Backend lá»—i HTTP ${response.status}.`
+      `Backend lỗi HTTP ${response.status}.`
     );
     error.statusCode =
       response.status;
@@ -3108,9 +3108,9 @@ async function changePasswordDesktop(
   }
 
   /*
-   * Backend Ä‘Ã£ revoke toÃ n bá»™ refresh sessions.
-   * Desktop Ä‘Äƒng nháº­p láº¡i ngay báº±ng máº­t kháº©u má»›i Ä‘á»ƒ
-   * giá»¯ Ä‘Ãºng má»™t session má»›i trÃªn thiáº¿t bá»‹ hiá»‡n táº¡i.
+   * Backend đã revoke toàn bộ refresh sessions.
+   * Desktop đăng nhập lại ngay bằng mật khẩu mới để
+   * giữ đúng một session mới trên thiết bị hiện tại.
    */
   clearAccessSession();
   await clearStoredRefreshToken();
@@ -3160,7 +3160,7 @@ async function getSocialProvidersDesktop() {
       );
   } catch (error) {
     throw new Error(
-      "KhÃ´ng táº£i Ä‘Æ°á»£c cáº¥u hÃ¬nh Social Login. " +
+      "Không tải được cấu hình Social Login. " +
       (
         error instanceof Error
           ? error.message
@@ -3175,7 +3175,7 @@ async function getSocialProvidersDesktop() {
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `Backend lá»—i HTTP ${response.status}.`
+      `Backend lỗi HTTP ${response.status}.`
     );
   }
 
@@ -3195,7 +3195,7 @@ function normalizeSocialProvider(provider) {
     value !== "facebook"
   ) {
     throw new Error(
-      "NhÃ  cung cáº¥p Ä‘Äƒng nháº­p khÃ´ng Ä‘Æ°á»£c há»— trá»£."
+      "Nhà cung cấp đăng nhập không được hỗ trợ."
     );
   }
 
@@ -3224,7 +3224,7 @@ function validateSocialAuthorizationUrl(
     !allowedHost
   ) {
     throw new Error(
-      "Backend tráº£ vá» OAuth URL khÃ´ng há»£p lá»‡."
+      "Backend trả về OAuth URL không hợp lệ."
     );
   }
 
@@ -3245,7 +3245,7 @@ async function startSocialBrowserFlow(
 ) {
   if (socialBrowserFlowPromise) {
     throw new Error(
-      "Má»™t cá»­a sá»• Ä‘Äƒng nháº­p Social Ä‘ang chá» hoÃ n táº¥t."
+      "Một cửa sổ đăng nhập Social đang chờ hoàn tất."
     );
   }
 
@@ -3278,7 +3278,7 @@ async function startSocialBrowserFlow(
         if (!response.ok) {
           throw new Error(
             startPayload?.error ||
-            `Backend lá»—i HTTP ${response.status}.`
+            `Backend lỗi HTTP ${response.status}.`
           );
         }
       } else {
@@ -3301,7 +3301,7 @@ async function startSocialBrowserFlow(
         !startPayload?.authorizationUrl
       ) {
         throw new Error(
-          "Backend khÃ´ng táº¡o Ä‘Æ°á»£c phiÃªn Social Login."
+          "Backend không tạo được phiên Social Login."
         );
       }
 
@@ -3405,12 +3405,12 @@ async function startSocialBrowserFlow(
 
         throw new Error(
           poll?.message ||
-          "Social Login khÃ´ng hoÃ n táº¥t."
+          "Social Login không hoàn tất."
         );
       }
 
       throw new Error(
-        "PhiÃªn Social Login Ä‘Ã£ háº¿t háº¡n. Vui lÃ²ng thá»­ láº¡i."
+        "Phiên Social Login đã hết hạn. Vui lòng thử lại."
       );
     })();
 
@@ -3450,7 +3450,7 @@ async function getAccountIdentitiesDesktop() {
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `Backend lá»—i HTTP ${response.status}.`
+      `Backend lỗi HTTP ${response.status}.`
     );
   }
 
@@ -3507,11 +3507,11 @@ async function refreshDesktopSession() {
         return true;
       } catch (error) {
         /*
-         * Chá»‰ xÃ³a refresh token khi backend
-         * xÃ¡c nháº­n token/session khÃ´ng cÃ²n há»£p lá»‡.
+         * Chỉ xóa refresh token khi backend
+         * xác nhận token/session không còn hợp lệ.
          *
-         * Náº¿u backend offline, giá»¯ token Ä‘á»ƒ
-         * cÃ³ thá»ƒ thá»­ khÃ´i phá»¥c phiÃªn sau.
+         * Nếu backend offline, giữ token để
+         * có thể thử khôi phục phiên sau.
          */
         if (
           error?.statusCode === 400 ||
@@ -3565,8 +3565,8 @@ async function logoutDesktop() {
     }
   } catch (error) {
     /*
-     * Logout local váº«n pháº£i thÃ nh cÃ´ng
-     * náº¿u backend Ä‘ang offline.
+     * Logout local vẫn phải thành công
+     * nếu backend đang offline.
      */
     console.error(
       "BACKEND LOGOUT ERROR:",
@@ -3629,7 +3629,7 @@ async function ensureAuthenticated() {
 
   if (!restored) {
     throw new Error(
-      "Báº¡n cáº§n Ä‘Äƒng nháº­p AI Translator."
+      "Bạn cần đăng nhập AI Translator."
     );
   }
 
@@ -3677,7 +3677,7 @@ async function authorizedBackendFetch(
 
     if (!refreshed) {
       throw new Error(
-        "PhiÃªn Ä‘Äƒng nháº­p Ä‘Ã£ háº¿t háº¡n. HÃ£y Ä‘Äƒng nháº­p láº¡i."
+        "Phiên đăng nhập đã hết hạn. Hãy đăng nhập lại."
       );
     }
 
@@ -3725,7 +3725,7 @@ async function refreshAccountEntitlements({
     if (!response.ok) {
       throw new Error(
         payload?.error ||
-        `KhÃ´ng táº£i Ä‘Æ°á»£c entitlement (HTTP ${response.status}).`
+        `Không tải được entitlement (HTTP ${response.status}).`
       );
     }
 
@@ -3824,13 +3824,13 @@ async function getPublicPricingCatalog(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c báº£ng giÃ¡ (HTTP ${response.status}).`
+      `Không tải được bảng giá (HTTP ${response.status}).`
     );
   }
 
   if (!Array.isArray(payload)) {
     throw new Error(
-      "Backend tráº£ vá» pricing catalog khÃ´ng há»£p lá»‡."
+      "Backend trả về pricing catalog không hợp lệ."
     );
   }
 
@@ -3849,7 +3849,7 @@ async function activateDesktopLicense(
 
   if (!cleanKey) {
     throw new Error(
-      "Nháº­p license key trÆ°á»›c khi kÃ­ch hoáº¡t."
+      "Nhập license key trước khi kích hoạt."
     );
   }
 
@@ -3882,7 +3882,7 @@ async function activateDesktopLicense(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KÃ­ch hoáº¡t license tháº¥t báº¡i (HTTP ${response.status}).`
+      `Kích hoạt license thất bại (HTTP ${response.status}).`
     );
   }
 
@@ -3994,7 +3994,7 @@ async function listVocabulary(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c tá»« vá»±ng (${response.status}).`
+      `Không tải được từ vựng (${response.status}).`
     );
   }
 
@@ -4023,7 +4023,7 @@ async function getVocabularyStats() {
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c thá»‘ng kÃª tá»« vá»±ng (${response.status}).`
+      `Không tải được thống kê từ vựng (${response.status}).`
     );
   }
 
@@ -4062,7 +4062,7 @@ async function saveVocabulary(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng lÆ°u Ä‘Æ°á»£c tá»« vá»±ng (${response.status}).`
+      `Không lưu được từ vựng (${response.status}).`
     );
   }
 
@@ -4083,7 +4083,7 @@ async function updateVocabulary(
     cleanId <= 0
   ) {
     throw new Error(
-      "Vocabulary ID khÃ´ng há»£p lá»‡."
+      "Vocabulary ID không hợp lệ."
     );
   }
 
@@ -4116,7 +4116,7 @@ async function updateVocabulary(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng cáº­p nháº­t Ä‘Æ°á»£c tá»« vá»±ng (${response.status}).`
+      `Không cập nhật được từ vựng (${response.status}).`
     );
   }
 
@@ -4136,7 +4136,7 @@ async function deleteVocabulary(
     cleanId <= 0
   ) {
     throw new Error(
-      "Vocabulary ID khÃ´ng há»£p lá»‡."
+      "Vocabulary ID không hợp lệ."
     );
   }
 
@@ -4161,7 +4161,7 @@ async function deleteVocabulary(
 
     throw new Error(
       payload?.error ||
-      "KhÃ´ng xÃ³a Ä‘Æ°á»£c tá»« vá»±ng."
+      "Không xóa được từ vựng."
     );
   }
 
@@ -4259,7 +4259,7 @@ async function listGrammar(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c ngá»¯ phÃ¡p (${response.status}).`
+      `Không tải được ngữ pháp (${response.status}).`
     );
   }
 
@@ -4288,7 +4288,7 @@ async function getGrammarStats() {
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c thá»‘ng kÃª ngá»¯ phÃ¡p (${response.status}).`
+      `Không tải được thống kê ngữ pháp (${response.status}).`
     );
   }
 
@@ -4327,7 +4327,7 @@ async function saveGrammar(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng lÆ°u Ä‘Æ°á»£c ngá»¯ phÃ¡p (${response.status}).`
+      `Không lưu được ngữ pháp (${response.status}).`
     );
   }
 
@@ -4348,7 +4348,7 @@ async function updateGrammar(
     cleanId <= 0
   ) {
     throw new Error(
-      "Grammar ID khÃ´ng há»£p lá»‡."
+      "Grammar ID không hợp lệ."
     );
   }
 
@@ -4381,7 +4381,7 @@ async function updateGrammar(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng cáº­p nháº­t Ä‘Æ°á»£c ngá»¯ phÃ¡p (${response.status}).`
+      `Không cập nhật được ngữ pháp (${response.status}).`
     );
   }
 
@@ -4401,7 +4401,7 @@ async function deleteGrammar(
     cleanId <= 0
   ) {
     throw new Error(
-      "Grammar ID khÃ´ng há»£p lá»‡."
+      "Grammar ID không hợp lệ."
     );
   }
 
@@ -4426,7 +4426,7 @@ async function deleteGrammar(
 
     throw new Error(
       payload?.error ||
-      "KhÃ´ng xÃ³a Ä‘Æ°á»£c ngá»¯ phÃ¡p."
+      "Không xóa được ngữ pháp."
     );
   }
 
@@ -4469,7 +4469,7 @@ async function getReviewQueue(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c hÃ ng Ä‘á»£i Ã´n táº­p (${response.status}).`
+      `Không tải được hàng đợi ôn tập (${response.status}).`
     );
   }
 
@@ -4509,7 +4509,7 @@ async function getPracticeReviewQueue(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c bá»™ Ã´n tá»± do (${response.status}).`
+      `Không tải được bộ ôn tự do (${response.status}).`
     );
   }
 
@@ -4538,7 +4538,7 @@ async function getReviewStats() {
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c thá»‘ng kÃª Ã´n táº­p (${response.status}).`
+      `Không tải được thống kê ôn tập (${response.status}).`
     );
   }
 
@@ -4577,7 +4577,7 @@ async function answerReviewItem(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng cháº¥m Ä‘Æ°á»£c Ä‘Ã¡p Ã¡n Ã´n táº­p (${response.status}).`
+      `Không chấm được đáp án ôn tập (${response.status}).`
     );
   }
 
@@ -4606,7 +4606,7 @@ async function getLearningDashboard() {
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c Learning Dashboard (${response.status}).`
+      `Không tải được Learning Dashboard (${response.status}).`
     );
   }
 
@@ -4635,7 +4635,7 @@ async function listTranslationProfiles() {
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c Profiles (${response.status}).`
+      `Không tải được Profiles (${response.status}).`
     );
   }
 
@@ -4676,7 +4676,7 @@ async function createTranslationProfile(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº¡o Ä‘Æ°á»£c Profile (${response.status}).`
+      `Không tạo được Profile (${response.status}).`
     );
   }
 
@@ -4719,7 +4719,7 @@ async function updateTranslationProfile(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng cáº­p nháº­t Ä‘Æ°á»£c Profile (${response.status}).`
+      `Không cập nhật được Profile (${response.status}).`
     );
   }
 
@@ -4757,7 +4757,7 @@ async function deleteTranslationProfile(
 
     throw new Error(
       payload?.error ||
-      "KhÃ´ng thá»ƒ xÃ³a Profile."
+      "Không thể xóa Profile."
     );
   }
 
@@ -4805,7 +4805,7 @@ async function setDefaultTranslationProfile(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      "KhÃ´ng thá»ƒ Ä‘áº·t Profile máº·c Ä‘á»‹nh."
+      "Không thể đặt Profile mặc định."
     );
   }
 
@@ -4876,7 +4876,7 @@ async function ensureActiveTranslationProfile() {
 
   if (!profiles.length) {
     throw new Error(
-      "ChÆ°a cÃ³ Translation Profile. HÃ£y táº¡o má»™t Profile trÆ°á»›c khi dá»‹ch."
+      "Chưa có Translation Profile. Hãy tạo một Profile trước khi dịch."
     );
   }
 
@@ -4929,7 +4929,7 @@ async function getDeviceSessions() {
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `KhÃ´ng táº£i Ä‘Æ°á»£c danh sÃ¡ch thiáº¿t bá»‹ (${response.status}).`
+      `Không tải được danh sách thiết bị (${response.status}).`
     );
   }
 
@@ -4949,7 +4949,7 @@ async function revokeDeviceSession(
     cleanId <= 0
   ) {
     throw new Error(
-      "Session ID khÃ´ng há»£p lá»‡."
+      "Session ID không hợp lệ."
     );
   }
 
@@ -4974,7 +4974,7 @@ async function revokeDeviceSession(
 
     throw new Error(
       payload?.error ||
-      "KhÃ´ng thá»ƒ thu há»“i thiáº¿t bá»‹."
+      "Không thể thu hồi thiết bị."
     );
   }
 
@@ -5120,8 +5120,8 @@ function normalizeShortcut(
   }
 
   /*
-   * Cho phÃ©p user nháº­p Ctrl+Shift+X
-   * nhÆ°ng lÆ°u theo Electron accelerator Ä‘a ná»n táº£ng.
+   * Cho phép user nhập Ctrl+Shift+X
+   * nhưng lưu theo Electron accelerator đa nền tảng.
    */
   clean =
     clean.replace(
@@ -5895,8 +5895,8 @@ function registerShortcuts() {
     );
 
     /*
-     * Náº¿u file preference cÅ© chá»©a accelerator lá»—i,
-     * thá»­ quay vá» defaults Ä‘á»ƒ app váº«n dÃ¹ng Ä‘Æ°á»£c.
+     * Nếu file preference cũ chứa accelerator lỗi,
+     * thử quay về defaults để app vẫn dùng được.
      */
     unregisterAppShortcuts(
       shortcutSettings
@@ -6006,7 +6006,7 @@ async function updateShortcutSettings(
     shortcutValues.length
   ) {
     throw new Error(
-      "Bá»‘n phÃ­m Dá»‹ch nhanh, QuÃ©t khung truyá»‡n, Trang tiáº¿p theo vÃ  Study pháº£i khÃ¡c nhau."
+      "Bốn phím Dịch nhanh, Quét khung truyện, Trang tiếp theo và Study phải khác nhau."
     );
   }
 
@@ -6037,7 +6037,7 @@ async function updateShortcutSettings(
     );
 
     throw new Error(
-      `KhÃ´ng thá»ƒ Ä‘Äƒng kÃ½ phÃ­m táº¯t ${shortcutDisplay(result.failed)}. CÃ³ thá»ƒ phÃ­m nÃ y Ä‘ang Ä‘Æ°á»£c á»©ng dá»¥ng khÃ¡c sá»­ dá»¥ng.`
+      `Không thể đăng ký phím tắt ${shortcutDisplay(result.failed)}. Có thể phím này đang được ứng dụng khác sử dụng.`
     );
   }
 
@@ -6087,8 +6087,8 @@ async function waitForExternalForegroundSnapshot(
       };
 
       /*
-       * Má»™t title rá»—ng váº«n lÃ  target há»£p lá»‡
-       * vá»›i game/app native, nÃªn chá»‰ cáº§n HWND + PID.
+       * Một title rỗng vẫn là target hợp lệ
+       * với game/app native, nên chỉ cần HWND + PID.
        */
       if (
         snapshot.hwnd &&
@@ -6160,8 +6160,8 @@ function sameTrackedWindow(
     );
 
   /*
-   * Browser tab switch thÆ°á»ng Ä‘á»•i title trong cÃ¹ng HWND.
-   * Náº¿u má»™t trong hai title rá»—ng thÃ¬ chá»‰ dÃ¹ng HWND + PID.
+   * Browser tab switch thường đổi title trong cùng HWND.
+   * Nếu một trong hai title rỗng thì chỉ dùng HWND + PID.
    */
   if (
     targetTitle &&
@@ -6243,11 +6243,11 @@ function startOverlayLifecycle(
     false;
 
   /*
-   * Vá»›i manual page navigation, user cÃ³ thá»ƒ Ä‘á»•i chapter/page trÆ°á»›c khi
-   * nháº¥n Ctrl+Shift+Y. Title cá»§a browser vÃ¬ váº­y cÃ³ thá»ƒ khÃ¡c snapshot cÅ©.
-   * Láº§n Ä‘áº§u source HWND + PID quay láº¡i foreground Ä‘Æ°á»£c dÃ¹ng lÃ m baseline
-   * title má»›i. Sau khi Ä‘Ã£ arm, title Ä‘á»•i trong cÃ¹ng HWND Ä‘Æ°á»£c xem lÃ 
-   * browser tab/page-context change vÃ  overlay sáº½ tá»± áº©n.
+   * Với manual page navigation, user có thể đổi chapter/page trước khi
+   * nhấn Ctrl+Shift+Y. Title của browser vì vậy có thể khác snapshot cũ.
+   * Lần đầu source HWND + PID quay lại foreground được dùng làm baseline
+   * title mới. Sau khi đã arm, title đổi trong cùng HWND được xem là
+   * browser tab/page-context change và overlay sẽ tự ẩn.
    */
   let lifecycleTarget =
     activeOverlayTargetWindow
@@ -6300,9 +6300,9 @@ function startOverlayLifecycle(
           }
 
           /*
-           * Selection/loading/overlay focus transition cÃ³ thá»ƒ táº¡m thá»i
-           * lÃ m app khÃ¡c thÃ nh foreground. Cho source window thá»i gian
-           * quay láº¡i trÆ°á»›c khi bá» lifecycle.
+           * Selection/loading/overlay focus transition có thể tạm thời
+           * làm app khác thành foreground. Cho source window thời gian
+           * quay lại trước khi bỏ lifecycle.
            */
           if (
             Date.now() -
@@ -6332,9 +6332,9 @@ function startOverlayLifecycle(
             );
 
           /*
-           * Má»™t sá»‘ browser tráº£ title rá»—ng á»Ÿ sample Ä‘áº§u tiÃªn sau khi loading
-           * overlay Ä‘Ã³ng. Láº¥y title tháº­t Ä‘áº§u tiÃªn lÃ m baseline thay vÃ¬ Ä‘á»ƒ
-           * lifecycle máº¥t kháº£ nÄƒng phÃ¡t hiá»‡n tab switch.
+           * Một số browser trả title rỗng ở sample đầu tiên sau khi loading
+           * overlay đóng. Lấy title thật đầu tiên làm baseline thay vì để
+           * lifecycle mất khả năng phát hiện tab switch.
            */
           if (
             !baselineTitle &&
@@ -6409,8 +6409,8 @@ function createWindow() {
       nodeIntegration: false,
 
       /*
-       * Main window thÆ°á»ng bá»‹ hide trong lÃºc scan. Giá»¯ renderer hoáº¡t Ä‘á»™ng
-       * Ä‘á»ƒ trÃ¡nh má»™t sá»‘ lá»—i repaint/blank trÃªn Windows khi show láº¡i.
+       * Main window thường bị hide trong lúc scan. Giữ renderer hoạt động
+       * để tránh một số lỗi repaint/blank trên Windows khi show lại.
        */
       backgroundThrottling: false,
       paintWhenInitiallyHidden: true,
@@ -6590,8 +6590,8 @@ function showMainWindow() {
   mainWindow.focus();
 
   /*
-   * BÃ¬nh thÆ°á»ng khÃ´ng reload => giá»¯ state UI.
-   * Chá»‰ reload khi React #root thá»±c sá»± rá»—ng/tráº¯ng.
+   * Bình thường không reload => giữ state UI.
+   * Chỉ reload khi React #root thực sự rỗng/trắng.
    */
   recoverMainRendererIfBlank(
     mainWindow
@@ -6637,7 +6637,7 @@ function createTray() {
     Menu.buildFromTemplate([
       {
         label:
-          "Má»Ÿ AI Translator",
+          "Mở AI Translator",
 
         click: () => {
           showMainWindow();
@@ -6646,7 +6646,7 @@ function createTray() {
 
       {
         label:
-          `Dá»‹ch nhanh (${shortcutDisplay(shortcutSettings.translate)})`,
+          `Dịch nhanh (${shortcutDisplay(shortcutSettings.translate)})`,
 
         accelerator:
           shortcutSettings.translate,
@@ -6661,7 +6661,7 @@ function createTray() {
 
       {
         label:
-          `QuÃ©t khung truyá»‡n (${shortcutDisplay(shortcutSettings.panel)})`,
+          `Quét khung truyện (${shortcutDisplay(shortcutSettings.panel)})`,
 
         accelerator:
           shortcutSettings.panel,
@@ -6676,7 +6676,7 @@ function createTray() {
 
       {
         label:
-          `Dá»‹ch trang manga hiá»‡n táº¡i (${shortcutDisplay(shortcutSettings.panelNext)})`,
+          `Dịch trang manga hiện tại (${shortcutDisplay(shortcutSettings.panelNext)})`,
 
         accelerator:
           shortcutSettings.panelNext,
@@ -6690,7 +6690,7 @@ function createTray() {
 
       {
         label:
-          `Há»c cÃ¢u (${shortcutDisplay(shortcutSettings.study)})`,
+          `Học câu (${shortcutDisplay(shortcutSettings.study)})`,
 
         accelerator:
           shortcutSettings.study,
@@ -6706,8 +6706,8 @@ function createTray() {
       {
         label:
           isTranslationOverlayPinned()
-            ? "Bá» ghim báº£n dá»‹ch"
-            : "Ghim báº£n dá»‹ch",
+            ? "Bỏ ghim bản dịch"
+            : "Ghim bản dịch",
 
         click: () => {
           const pinned =
@@ -6731,7 +6731,7 @@ function createTray() {
 
       {
         label:
-          "áº¨n báº£n dá»‹ch",
+          "Ẩn bản dịch",
 
         click: () => {
           hideTranslationExperience(
@@ -6747,7 +6747,7 @@ function createTray() {
 
       {
         label:
-          "ThoÃ¡t",
+          "Thoát",
 
         click: () => {
           isQuitting = true;
@@ -6822,8 +6822,8 @@ async function openScreenSelector(
     );
 
     /*
-     * áº¨n toÃ n bá»™ UI cá»§a app trÆ°á»›c screenshot.
-     * Overlay dá»‹ch cÅ© cÅ©ng pháº£i áº©n Ä‘á»ƒ khÃ´ng lá»t vÃ o OCR.
+     * Ẩn toàn bộ UI của app trước screenshot.
+     * Overlay dịch cũ cũng phải ẩn để không lọt vào OCR.
      */
     stopOverlayLifecycle();
     hideSelectionTranslation();
@@ -6834,9 +6834,9 @@ async function openScreenSelector(
     }
 
     /*
-     * Chá» Windows tráº£ focus vá» browser/app nguá»“n.
-     * Foreground tracker cháº¡y liÃªn tá»¥c nÃªn snapshot nÃ y
-     * khÃ´ng cáº§n spawn PowerShell theo tá»«ng láº§n scan.
+     * Chờ Windows trả focus về browser/app nguồn.
+     * Foreground tracker chạy liên tục nên snapshot này
+     * không cần spawn PowerShell theo từng lần scan.
      */
     await delay(300);
 
@@ -6898,7 +6898,7 @@ async function cropSelectedArea(
   options = {}
 ) {
   if (!screenshotBuffer) {
-    throw new Error("KhÃ´ng tÃ¬m tháº¥y áº£nh mÃ n hÃ¬nh Ä‘á»ƒ crop.");
+    throw new Error("Không tìm thấy ảnh màn hình để crop.");
   }
 
   const display = screen.getPrimaryDisplay();
@@ -6906,14 +6906,14 @@ async function cropSelectedArea(
   const metadata = await sharp(screenshotBuffer).metadata();
 
   if (!metadata.width || !metadata.height) {
-    throw new Error("KhÃ´ng Ä‘á»c Ä‘Æ°á»£c kÃ­ch thÆ°á»›c screenshot.");
+    throw new Error("Không đọc được kích thước screenshot.");
   }
 
   /*
-   * Xá»­ lÃ½ Windows Display Scaling.
+   * Xử lý Windows Display Scaling.
    *
-   * Tá»a Ä‘á»™ overlay cÃ³ thá»ƒ tÃ­nh theo logical pixels,
-   * trong khi screenshot dÃ¹ng physical pixels.
+   * Tọa độ overlay có thể tính theo logical pixels,
+   * trong khi screenshot dùng physical pixels.
    */
   const scaleX = metadata.width / display.bounds.width;
 
@@ -6951,7 +6951,7 @@ async function cropSelectedArea(
   height = Math.min(metadata.height - top, height + cropPadding * 2);
 
   if (width <= 0 || height <= 0) {
-    throw new Error("VÃ¹ng chá»n khÃ´ng há»£p lá»‡.");
+    throw new Error("Vùng chọn không hợp lệ.");
   }
 
   const imagePath = path.join(getRuntimeDirectory(), "selected.png");
@@ -7029,7 +7029,7 @@ async function analyzeJapaneseForStudy(
 
   if (!text) {
     throw new Error(
-      "VÄƒn báº£n OCR trá»‘ng."
+      "Văn bản OCR trống."
     );
   }
 
@@ -7101,7 +7101,7 @@ async function analyzeJapaneseForStudy(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `Study backend lá»—i HTTP ${response.status}.`
+      `Study backend lỗi HTTP ${response.status}.`
     );
   }
 
@@ -7111,7 +7111,7 @@ async function analyzeJapaneseForStudy(
   ) {
     throw new Error(
       payload?.error ||
-      "Java backend khÃ´ng tráº£ vá» Study Analysis."
+      "Java backend không trả về Study Analysis."
     );
   }
 
@@ -7208,7 +7208,7 @@ async function translateText(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `Java backend lá»—i HTTP ${response.status}.`
+      `Java backend lỗi HTTP ${response.status}.`
     );
   }
 
@@ -7218,7 +7218,7 @@ async function translateText(
   ) {
     throw new Error(
       payload?.error ||
-      "Java backend khÃ´ng tráº£ vá» káº¿t quáº£ dá»‹ch."
+      "Java backend không trả về kết quả dịch."
     );
   }
 
@@ -7341,7 +7341,7 @@ async function translateBatchBlocks(
 
   if (!normalizedBlocks.length) {
     throw new Error(
-      "KhÃ´ng cÃ³ text block Ä‘á»ƒ dá»‹ch."
+      "Không có text block để dịch."
     );
   }
 
@@ -7420,7 +7420,7 @@ async function translateBatchBlocks(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `Batch translation backend lá»—i HTTP ${response.status}.`
+      `Batch translation backend lỗi HTTP ${response.status}.`
     );
   }
 
@@ -7432,7 +7432,7 @@ async function translateBatchBlocks(
   ) {
     throw new Error(
       payload?.error ||
-      "Java backend khÃ´ng tráº£ vá» batch translations."
+      "Java backend không trả về batch translations."
     );
   }
 
@@ -8020,19 +8020,19 @@ async function submitOverlayTranslationCorrection(
 
   if (!sourceText) {
     throw new Error(
-      "KhÃ´ng cÃ³ vÄƒn báº£n nguá»“n Ä‘á»ƒ lÆ°u báº£n sá»­a."
+      "Không có văn bản nguồn để lưu bản sửa."
     );
   }
 
   if (!aiTranslation) {
     throw new Error(
-      "KhÃ´ng cÃ³ báº£n dá»‹ch hiá»‡n táº¡i Ä‘á»ƒ so sÃ¡nh."
+      "Không có bản dịch hiện tại để so sánh."
     );
   }
 
   if (!correctedTranslation) {
     throw new Error(
-      "Báº£n sá»­a khÃ´ng Ä‘Æ°á»£c Ä‘á»ƒ trá»‘ng."
+      "Bản sửa không được để trống."
     );
   }
 
@@ -8110,7 +8110,7 @@ async function submitOverlayTranslationCorrection(
   if (!response.ok) {
     throw new Error(
       payload?.error ||
-      `LÆ°u báº£n sá»­a lá»—i HTTP ${response.status}.`
+      `Lưu bản sửa lỗi HTTP ${response.status}.`
     );
   }
 
@@ -8414,8 +8414,8 @@ function shouldMergeOcrBox(groupBox, entryBox) {
     entry.height > entry.width * 1.25;
 
   /*
-   * Manga Nháº­t thÆ°á»ng Ä‘Æ°á»£c OCR thÃ nh nhiá»u cá»™t dá»c trong cÃ¹ng bubble.
-   * Gá»™p cÃ¡c cá»™t náº±m cáº¡nh nhau khi chÃºng chá»“ng nhau Ä‘Ã¡ng ká»ƒ theo trá»¥c Y.
+   * Manga Nhật thường được OCR thành nhiều cột dọc trong cùng bubble.
+   * Gộp các cột nằm cạnh nhau khi chúng chồng nhau đáng kể theo trục Y.
    */
   const adjacentVerticalColumns =
     (groupVertical || entryVertical) &&
@@ -8426,7 +8426,7 @@ function shouldMergeOcrBox(groupBox, entryBox) {
     );
 
   /*
-   * Text ngang / nhiá»u dÃ²ng: gá»™p khi cÃ¹ng cá»™t vÃ  khoáº£ng cÃ¡ch dá»c nhá».
+   * Text ngang / nhiều dòng: gộp khi cùng cột và khoảng cách dọc nhỏ.
    */
   const adjacentHorizontalLines =
     horizontalOverlapRatio >= 0.28 &&
@@ -8611,8 +8611,8 @@ function shouldUseJapaneseReadingOrder(
   }
 
   /*
-   * AUTO mode: Hiragana/Katakana lÃ  tÃ­n hiá»‡u máº¡nh Ä‘Ã¢y lÃ  manga Nháº­t.
-   * Nhá» váº­y user khÃ´ng pháº£i Ä‘á»•i AUTO -> JA chá»‰ Ä‘á»ƒ cÃ³ reading order Ä‘Ãºng.
+   * AUTO mode: Hiragana/Katakana là tín hiệu mạnh đây là manga Nhật.
+   * Nhờ vậy user không phải đổi AUTO -> JA chỉ để có reading order đúng.
    */
   return entries.some(
     (entry) =>
@@ -8640,7 +8640,7 @@ function isLikelyPanelNoise(
   const compact =
     text.replace(/\s+/g, "");
 
-  /* URL / watermark / page number thÆ°á»ng khÃ´ng pháº£i thoáº¡i manga. */
+  /* URL / watermark / page number thường không phải thoại manga. */
   if (
     /(?:https?:\/\/|www\.|\.(?:com|net|org|jp|io)\b)/iu.test(compact) ||
     /^\d{1,5}$/u.test(compact)
@@ -8705,7 +8705,7 @@ async function buildFullScreenOcrBlocks(
 
   if (!metadata.width || !metadata.height) {
     throw new Error(
-      "KhÃ´ng Ä‘á»c Ä‘Æ°á»£c kÃ­ch thÆ°á»›c full-screen screenshot."
+      "Không đọc được kích thước full-screen screenshot."
     );
   }
 
@@ -8876,8 +8876,8 @@ async function buildFullScreenOcrBlocks(
 
   if (merged.length > 80) {
     throw new Error(
-      `MÃ n hÃ¬nh cÃ³ ${merged.length} vÃ¹ng chá»¯. ` +
-      "Batch hiá»‡n giá»›i háº¡n 80 vÃ¹ng; hÃ£y dÃ¹ng chá»n vÃ¹ng hoáº·c giáº£m ná»™i dung hiá»ƒn thá»‹."
+      `Màn hình có ${merged.length} vùng chữ. ` +
+      "Batch hiện giới hạn 80 vùng; hãy dùng chọn vùng hoặc giảm nội dung hiển thị."
     );
   }
 
@@ -9168,8 +9168,8 @@ async function buildPanelOcrBlocks(
 
   const mergeOptions = {
     /*
-     * Fallback cá»§a Smart OCR Grouping.
-     * Cháº·n chain-merge cháº¡y suá»‘t mÃ©p trang.
+     * Fallback của Smart OCR Grouping.
+     * Chặn chain-merge chạy suốt mép trang.
      */
     maxGroupWidth:
       Math.max(
@@ -9432,8 +9432,8 @@ async function buildPanelOcrBlocks(
 
   if (merged.length > 50) {
     throw new Error(
-      `Khung truyá»‡n cÃ³ ${merged.length} vÃ¹ng chá»¯. ` +
-      "HÃ£y chá»n má»™t khung/trang truyá»‡n nhá» hÆ¡n."
+      `Khung truyện có ${merged.length} vùng chữ. ` +
+      "Hãy chọn một khung/trang truyện nhỏ hơn."
     );
   }
 
@@ -9512,8 +9512,8 @@ async function buildPanelOcrBlocks(
     );
 
   /*
-   * Batch 09.1: giá»¯ geometry cháº©n Ä‘oÃ¡n riÃªng khá»i translation blocks.
-   * Debug overlay chá»‰ dÃ¹ng Ä‘á»ƒ nhÃ¬n detector, khÃ´ng thay Ä‘á»•i OCR/AI payload.
+   * Batch 09.1: giữ geometry chẩn đoán riêng khỏi translation blocks.
+   * Debug overlay chỉ dùng để nhìn detector, không thay đổi OCR/AI payload.
    */
   const debugGeometry = {
     diagnostics: {
@@ -9812,9 +9812,9 @@ async function processMangaPanelTranslation({
       loadingToken,
       {
         message:
-          "Äang nháº­n diá»‡n speech bubbleâ€¦",
+          "Đang nhận diện speech bubble…",
         detail:
-          `Manga Session Â· Trang ${Math.max(1, (mangaPanelSession?.pageNumber || 0) + 1)}`,
+          `Manga Session · Trang ${Math.max(1, (mangaPanelSession?.pageNumber || 0) + 1)}`,
       }
     );
   }
@@ -9828,7 +9828,7 @@ async function processMangaPanelTranslation({
 
   if (!layout.blocks.length) {
     throw new Error(
-      "KhÃ´ng tÃ¬m tháº¥y vÃ¹ng chá»¯ trong khung truyá»‡n Ä‘Ã£ chá»n."
+      "Không tìm thấy vùng chữ trong khung truyện đã chọn."
     );
   }
 
@@ -9837,9 +9837,9 @@ async function processMangaPanelTranslation({
       loadingToken,
       {
         message:
-          `Äang dá»‹ch ${layout.blocks.length} khung chá»¯â€¦`,
+          `Đang dịch ${layout.blocks.length} khung chữ…`,
         detail:
-          `${source} â†’ ${target} Â· Session context ${getMangaPanelSessionContext().length}/${getDesktopContextItemLimit()}`,
+          `${source} → ${target} · Session context ${getMangaPanelSessionContext().length}/${getDesktopContextItemLimit()}`,
       }
     );
   }
@@ -9887,7 +9887,7 @@ async function processMangaPanelTranslation({
 
         if (!translated) {
           throw new Error(
-            `Backend thiáº¿u báº£n dá»‹ch cho ${block.id}.`
+            `Backend thiếu bản dịch cho ${block.id}.`
           );
         }
 
@@ -9945,9 +9945,9 @@ async function processMangaPanelTranslation({
       loadingToken,
       {
         message:
-          "Äang dá»±ng khung dá»‹châ€¦",
+          "Đang dựng khung dịch…",
         detail:
-          `Trang ${sessionState?.pageNumber || 1} Â· ${translatedBlocks.length} vÃ¹ng Â· Overlay`,
+          `Trang ${sessionState?.pageNumber || 1} · ${translatedBlocks.length} vùng · Overlay`,
       }
     );
   }
@@ -10139,7 +10139,7 @@ async function runMangaSessionNextPage(
     isMangaSessionProcessing
   ) {
     throw new Error(
-      "AI Translator Ä‘ang xá»­ lÃ½ má»™t láº§n quÃ©t khÃ¡c."
+      "AI Translator đang xử lý một lần quét khác."
     );
   }
 
@@ -10201,7 +10201,7 @@ async function runMangaSessionNextPage(
     }
 
     /*
-     * KhÃ´ng hiá»‡n Loading trÆ°á»›c screenshot Ä‘á»ƒ OCR khÃ´ng báº¯t nháº§m HUD.
+     * Không hiện Loading trước screenshot để OCR không bắt nhầm HUD.
      */
     await delay(220);
 
@@ -10222,9 +10222,9 @@ async function runMangaSessionNextPage(
         mode: "panel",
         selection,
         message:
-          `Äang quÃ©t trang ${nextPageNumber}â€¦`,
+          `Đang quét trang ${nextPageNumber}…`,
         detail:
-          `Manga Session Â· ${shortcutDisplay(shortcutSettings.panelNext)}`,
+          `Manga Session · ${shortcutDisplay(shortcutSettings.panelNext)}`,
       });
 
     const cropResult =
@@ -10240,9 +10240,9 @@ async function runMangaSessionNextPage(
       loadingToken,
       {
         message:
-          `Äang nháº­n diá»‡n chá»¯ trang ${nextPageNumber}â€¦`,
+          `Đang nhận diện chữ trang ${nextPageNumber}…`,
         detail:
-          "OCR Â· PaddleOCR Â· vÃ¹ng quÃ©t Ä‘Ã£ lÆ°u",
+          "OCR · PaddleOCR · vùng quét đã lưu",
       }
     );
 
@@ -10310,7 +10310,7 @@ async function runMangaSessionNextPage(
         loadingToken,
         {
           message:
-            `KhÃ´ng thá»ƒ dá»‹ch trang ${nextPageNumber}`,
+            `Không thể dịch trang ${nextPageNumber}`,
           detail:
             message,
         }
@@ -10367,8 +10367,8 @@ async function runFullScreenTranslation(
   ) {
     throw new Error(
       isMangaSessionProcessing
-        ? "Manga Session Ä‘ang xá»­ lÃ½ trang hiá»‡n táº¡i."
-        : "Full Screen Translation Ä‘ang xá»­ lÃ½."
+        ? "Manga Session đang xử lý trang hiện tại."
+        : "Full Screen Translation đang xử lý."
     );
   }
 
@@ -10434,9 +10434,9 @@ async function runFullScreenTranslation(
         displayId:
           screen.getPrimaryDisplay().id,
         message:
-          "Äang nháº­n diá»‡n chá»¯ toÃ n mÃ n hÃ¬nhâ€¦",
+          "Đang nhận diện chữ toàn màn hình…",
         detail:
-          "OCR Â· PaddleOCR",
+          "OCR · PaddleOCR",
       });
 
     const ocrStartedAt =
@@ -10467,7 +10467,7 @@ async function runFullScreenTranslation(
 
     if (!layout.blocks.length) {
       throw new Error(
-        "KhÃ´ng tÃ¬m tháº¥y vÃ¹ng chá»¯ Ä‘á»§ Ä‘á»™ tin cáº­y trÃªn mÃ n hÃ¬nh."
+        "Không tìm thấy vùng chữ đủ độ tin cậy trên màn hình."
       );
     }
 
@@ -10475,9 +10475,9 @@ async function runFullScreenTranslation(
       loadingToken,
       {
         message:
-          `Äang dá»‹ch ${layout.blocks.length} vÃ¹ng chá»¯â€¦`,
+          `Đang dịch ${layout.blocks.length} vùng chữ…`,
         detail:
-          `${currentTranslationSourceLanguage} â†’ ${currentTranslationTargetLanguage} Â· Batch AI`,
+          `${currentTranslationSourceLanguage} → ${currentTranslationTargetLanguage} · Batch AI`,
       }
     );
 
@@ -10528,7 +10528,7 @@ async function runFullScreenTranslation(
 
           if (!translated) {
             throw new Error(
-              `Backend thiáº¿u báº£n dá»‹ch cho ${block.id}.`
+              `Backend thiếu bản dịch cho ${block.id}.`
             );
           }
 
@@ -10619,9 +10619,9 @@ async function runFullScreenTranslation(
       loadingToken,
       {
         message:
-          "Äang dá»±ng cÃ¡c khung dá»‹châ€¦",
+          "Đang dựng các khung dịch…",
         detail:
-          `${translatedBlocks.length} vÃ¹ng Â· Overlay`,
+          `${translatedBlocks.length} vùng · Overlay`,
       }
     );
 
@@ -10960,7 +10960,7 @@ ipcMain.handle(
       isMangaSessionProcessing
     ) {
       throw new Error(
-        "AI Translator Ä‘ang xá»­ lÃ½. HÃ£y Ä‘á»£i láº§n quÃ©t hiá»‡n táº¡i hoÃ n táº¥t."
+        "AI Translator đang xử lý. Hãy đợi lần quét hiện tại hoàn tất."
       );
     }
 
@@ -10976,7 +10976,7 @@ ipcMain.handle(
         success: false,
         visible: false,
         error:
-          "ChÆ°a cÃ³ Manga Session Ä‘ang hoáº¡t Ä‘á»™ng.",
+          "Chưa có Manga Session đang hoạt động.",
       };
     }
 
@@ -11047,10 +11047,10 @@ ipcMain.handle(
       toggleFullScreenOverlayEditing();
 
     /*
-     * Giá»¯ lifecycle cháº¡y cáº£ trong Edit Mode. Foreground tracker Ä‘Ã£ bá» qua
-     * cÃ¡c window thuá»™c chÃ­nh Electron process, vÃ¬ váº­y drag/resize/edit text
-     * khÃ´ng lÃ m overlay tá»± áº©n. Náº¿u user thá»±c sá»± chuyá»ƒn sang tab/app khÃ¡c,
-     * overlay váº«n pháº£i biáº¿n máº¥t nhÆ° cháº¿ Ä‘á»™ bÃ¬nh thÆ°á»ng.
+     * Giữ lifecycle chạy cả trong Edit Mode. Foreground tracker đã bỏ qua
+     * các window thuộc chính Electron process, vì vậy drag/resize/edit text
+     * không làm overlay tự ẩn. Nếu user thực sự chuyển sang tab/app khác,
+     * overlay vẫn phải biến mất như chế độ bình thường.
      */
     if (
       !editing &&
@@ -11171,7 +11171,7 @@ ipcMain.handle(
     } else if (options) {
       /*
        * Backward compatibility:
-       * v6.3 renderer gá»­i trá»±c tiáº¿p level string.
+       * v6.3 renderer gửi trực tiếp level string.
        */
       setStudyLevel(
         options
@@ -11273,12 +11273,12 @@ function cleanOcrResult(ocrResult) {
 
     const area = width * height;
 
-    const numericOnly = /^[0-9ï¼-ï¼™]+$/.test(text);
+    const numericOnly = /^[0-9０-９]+$/.test(text);
 
     const tinyBox = width < 15 || height < 15 || area < 300;
 
     /*
-     * Loáº¡i káº¿t quáº£ Ä‘á»™ tin cáº­y quÃ¡ tháº¥p.
+     * Loại kết quả độ tin cậy quá thấp.
      */
     if (score < 0.6) {
       console.log("OCR NOISE REMOVED:", {
@@ -11291,8 +11291,8 @@ function cleanOcrResult(ocrResult) {
     }
 
     /*
-     * Loáº¡i chuá»—i toÃ n sá»‘ náº±m trong box cá»±c nhá».
-     * ÄÃ¢y thÆ°á»ng lÃ  furigana bá»‹ nháº­n sai.
+     * Loại chuỗi toàn số nằm trong box cực nhỏ.
+     * Đây thường là furigana bị nhận sai.
      */
     if (numericOnly && tinyBox) {
       console.log("TINY NUMBER REMOVED:", {
@@ -11339,8 +11339,8 @@ ipcMain.on("selection-complete", async (_event, selection) => {
   selectorIsOpen = false;
 
   /*
-   * Chuyá»ƒn screenshot vÃ o biáº¿n cá»¥c bá»™,
-   * ngÄƒn sá»± kiá»‡n khÃ¡c sá»­ dá»¥ng láº¡i áº£nh nÃ y.
+   * Chuyển screenshot vào biến cục bộ,
+   * ngăn sự kiện khác sử dụng lại ảnh này.
    */
   const screenshotBuffer = pendingScreenshot;
 
@@ -11365,7 +11365,7 @@ ipcMain.on("selection-complete", async (_event, selection) => {
         mode: scanMode,
         selection,
         message:
-          "Äang chuáº©n bá»‹ vÃ¹ng áº£nhâ€¦",
+          "Đang chuẩn bị vùng ảnh…",
         detail:
           scanMode === "study"
             ? "Study Mode"
@@ -11394,9 +11394,9 @@ ipcMain.on("selection-complete", async (_event, selection) => {
       loadingToken,
       {
         message:
-          "Äang nháº­n diá»‡n chá»¯â€¦",
+          "Đang nhận diện chữ…",
         detail:
-          "OCR Â· PaddleOCR",
+          "OCR · PaddleOCR",
       }
     );
 
@@ -11479,9 +11479,9 @@ ipcMain.on("selection-complete", async (_event, selection) => {
         loadingToken,
         {
           message:
-            "Äang dá»‹ch vÃ  phÃ¢n tÃ­ch Studyâ€¦",
+            "Đang dịch và phân tích Study…",
           detail:
-            "JA â†’ VI Â· Dá»‹ch nhanh + phÃ¢n tÃ­ch song song",
+            "JA → VI · Dịch nhanh + phân tích song song",
         }
       );
 
@@ -11517,8 +11517,8 @@ ipcMain.on("selection-complete", async (_event, selection) => {
       } catch (fastError) {
         /*
          * Fallback:
-         * Náº¿u fast translation lá»—i nhÆ°ng Study váº«n cháº¡y Ä‘Æ°á»£c,
-         * dÃ¹ng translation tá»« Study response thay vÃ¬ máº¥t toÃ n bá»™ káº¿t quáº£.
+         * Nếu fast translation lỗi nhưng Study vẫn chạy được,
+         * dùng translation từ Study response thay vì mất toàn bộ kết quả.
          */
         console.warn(
           "FAST TRANSLATE FAILED, WAITING STUDY FALLBACK:",
@@ -11679,9 +11679,9 @@ ipcMain.on("selection-complete", async (_event, selection) => {
         loadingToken,
         {
           message:
-            "Báº£n dá»‹ch Ä‘Ã£ hiá»‡n Â· Ä‘ang phÃ¢n tÃ­ch Studyâ€¦",
+            "Bản dịch đã hiện · đang phân tích Study…",
           detail:
-            "Tá»« vá»±ng Â· ngá»¯ phÃ¡p Â· JLPT",
+            "Từ vựng · ngữ pháp · JLPT",
         }
       );
 
@@ -11809,9 +11809,9 @@ ipcMain.on("selection-complete", async (_event, selection) => {
         loadingToken,
         {
           message:
-            "Äang dá»‹ch vÃ¹ng Ä‘Ã£ chá»nâ€¦",
+            "Đang dịch vùng đã chọn…",
           detail:
-            `${pendingTranslationSourceLanguage} â†’ ${pendingTranslationTargetLanguage} Â· AI`,
+            `${pendingTranslationSourceLanguage} → ${pendingTranslationTargetLanguage} · AI`,
         }
       );
 
@@ -11896,9 +11896,9 @@ ipcMain.on("selection-complete", async (_event, selection) => {
     );
 
     /*
-     * V6.9.1: khÃ´ng má»Ÿ Result Popup ká»ƒ cáº£ khi lá»—i.
-     * App chÃ­nh váº«n nháº­n scan-result/study-result Ä‘á»ƒ hiá»ƒn thá»‹ tráº¡ng thÃ¡i
-     * khi user quay láº¡i cá»­a sá»• AI Translator.
+     * V6.9.1: không mở Result Popup kể cả khi lỗi.
+     * App chính vẫn nhận scan-result/study-result để hiển thị trạng thái
+     * khi user quay lại cửa sổ AI Translator.
      */
   } finally {
     if (
@@ -12494,8 +12494,8 @@ ipcMain.handle("capture-screen", async () => {
 // ======================================================
 // GLOBAL SHORTCUTS
 // ======================================================
-// registerShortcuts() Ä‘Æ°á»£c Ä‘á»‹nh nghÄ©a á»Ÿ pháº§n helpers vÃ¬
-// Settings cÃ³ thá»ƒ re-register accelerator lÃºc runtime.
+// registerShortcuts() được định nghĩa ở phần helpers vì
+// Settings có thể re-register accelerator lúc runtime.
 
 function startOcrWorker() {
   return getOcrWorkerManager().start();
@@ -12586,8 +12586,8 @@ app.on("will-quit", () => {
 
 app.on("window-all-closed", () => {
   /*
-   * KhÃ´ng thoÃ¡t vÃ¬ á»©ng dá»¥ng
-   * tiáº¿p tá»¥c cháº¡y trong System Tray.
+   * Không thoát vì ứng dụng
+   * tiếp tục chạy trong System Tray.
    */
 });
 app.on("before-quit", () => {
