@@ -1,5 +1,7 @@
 package com.dangt.aitranslator.backend.auth;
 
+import com.dangt.aitranslator.backend.auth.email.EmailVerificationRequiredException;
+import com.dangt.aitranslator.backend.auth.email.EmailVerificationService;
 import com.dangt.aitranslator.backend.common.ConflictException;
 import com.dangt.aitranslator.backend.common.ForbiddenException;
 import com.dangt.aitranslator.backend.common.EmailNormalizer;
@@ -20,21 +22,27 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final RefreshTokenService refreshTokenService;
+    private final EmailVerificationService emailVerificationService;
 
     public AuthService(
             UserRepository userRepository,
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
-            RefreshTokenService refreshTokenService
+            RefreshTokenService refreshTokenService,
+            EmailVerificationService emailVerificationService
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenService = refreshTokenService;
+        this.emailVerificationService = emailVerificationService;
     }
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public void register(
+            RegisterRequest request,
+            String requestedIp
+    ) {
         String email = EmailNormalizer.normalize(request.email());
 
         if (userRepository.existsByEmail(email)) {
@@ -52,10 +60,9 @@ public class AuthService {
             throw new ConflictException("Email này đã được đăng ký.");
         }
 
-        return createSessionForUser(
+        emailVerificationService.issueForUser(
                 user,
-                request.deviceId(),
-                request.deviceName()
+                requestedIp
         );
     }
 
@@ -79,6 +86,10 @@ public class AuthService {
             throw new UnauthorizedException(
                     "Email hoặc mật khẩu không đúng."
             );
+        }
+
+        if (!user.isEmailVerified()) {
+            throw new EmailVerificationRequiredException();
         }
 
         return createSessionForUser(

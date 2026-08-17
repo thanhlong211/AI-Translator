@@ -1,5 +1,7 @@
 package com.dangt.aitranslator.backend.common;
 
+import com.dangt.aitranslator.backend.auth.email.EmailVerificationRequiredException;
+
 import com.dangt.aitranslator.backend.admin.AdminErrorEventService;
 import com.dangt.aitranslator.backend.admin.AdminSecurityEventService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -99,6 +101,19 @@ public class GlobalExceptionHandler {
         return error(
                 HttpStatus.UNAUTHORIZED,
                 "UNAUTHORIZED",
+                ex.getMessage()
+        );
+    }
+
+    @ExceptionHandler(
+            EmailVerificationRequiredException.class
+    )
+    ResponseEntity<ApiError> emailVerificationRequired(
+            EmailVerificationRequiredException ex
+    ) {
+        return error(
+                HttpStatus.FORBIDDEN,
+                ex.getCode(),
                 ex.getMessage()
         );
     }
