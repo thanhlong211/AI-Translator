@@ -2923,6 +2923,19 @@ async function callPublicAuthApi(
     error.statusCode =
       response.status;
 
+    error.code =
+      String(
+        payload?.code ||
+        payload?.errorCode ||
+        ""
+      );
+
+    error.requestId =
+      String(
+        payload?.requestId ||
+        ""
+      );
+
     throw error;
   }
 
@@ -3017,6 +3030,61 @@ async function registerDesktop(
 
         deviceName:
           getDeviceName(),
+      }
+    );
+
+  await applyAuthPayload(
+    payload
+  );
+
+  return getDesktopAuthStatus();
+}
+
+
+async function requestDeviceTransferDesktop(
+  email
+) {
+  const deviceId =
+    await ensureDeviceId();
+
+  return callPublicAuthApi(
+    `${BACKEND_BASE_URL}/api/v1/auth/device-transfer/request`,
+    {
+      email:
+        String(email || "")
+          .trim(),
+
+      deviceId,
+
+      deviceName:
+        getDeviceName(),
+    }
+  );
+}
+
+async function confirmDeviceTransferDesktop(
+  email,
+  code
+) {
+  const deviceId =
+    await ensureDeviceId();
+
+  const payload =
+    await callPublicAuthApi(
+      `${BACKEND_BASE_URL}/api/v1/auth/device-transfer/confirm`,
+      {
+        email:
+          String(email || "")
+            .trim(),
+
+        deviceId,
+
+        deviceName:
+          getDeviceName(),
+
+        code:
+          String(code || "")
+            .trim(),
       }
     );
 
@@ -3517,10 +3585,21 @@ async function startSocialBrowserFlow(
         };
       }
 
-      throw new Error(
+      const socialError =
+        new Error(
         poll?.message ||
         "Social Login không hoàn tất."
-      );
+        );
+
+      socialError.code =
+        String(
+          poll?.code ||
+          poll?.errorCode ||
+          poll?.error?.code ||
+          ""
+        );
+
+      throw socialError;
     }
 
     throw new Error(
@@ -12057,6 +12136,48 @@ ipcMain.handle(
 );
 
 
+async function runAuthIpc(
+  task
+) {
+  try {
+    return {
+      ok: true,
+      value:
+        await task(),
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      error: {
+        message:
+          error instanceof Error
+            ? error.message
+            : String(error),
+
+        code:
+          String(
+            error?.code ||
+            ""
+          ),
+
+        statusCode:
+          Number.isFinite(
+            Number(error?.statusCode)
+          )
+            ? Number(error.statusCode)
+            : null,
+
+        requestId:
+          String(
+            error?.requestId ||
+            ""
+          ),
+      },
+    };
+  }
+}
+
+
 ipcMain.handle(
   "auth:get-status",
   async () => {
@@ -12067,9 +12188,12 @@ ipcMain.handle(
 ipcMain.handle(
   "auth:login",
   async (_event, credentials) => {
-    return loginDesktop(
-      credentials?.email,
-      credentials?.password
+    return runAuthIpc(
+      () =>
+        loginDesktop(
+          credentials?.email,
+          credentials?.password
+        )
     );
   }
 );
@@ -12077,12 +12201,41 @@ ipcMain.handle(
 ipcMain.handle(
   "auth:register",
   async (_event, credentials) => {
-    return registerDesktop(
-      credentials?.email,
-      credentials?.password
+    return runAuthIpc(
+      () =>
+        registerDesktop(
+          credentials?.email,
+          credentials?.password
+        )
     );
   }
 );
+
+ipcMain.handle(
+  "auth:request-device-transfer",
+  async (_event, payload) => {
+    return runAuthIpc(
+      () =>
+        requestDeviceTransferDesktop(
+          payload?.email
+        )
+    );
+  }
+);
+
+ipcMain.handle(
+  "auth:confirm-device-transfer",
+  async (_event, payload) => {
+    return runAuthIpc(
+      () =>
+        confirmDeviceTransferDesktop(
+          payload?.email,
+          payload?.code
+        )
+    );
+  }
+);
+
 
 ipcMain.handle(
   "auth:forgot-password",
@@ -12143,8 +12296,11 @@ ipcMain.handle(
 ipcMain.handle(
   "auth:social-login",
   async (_event, provider) => {
-    return socialLoginDesktop(
-      provider
+    return runAuthIpc(
+      () =>
+        socialLoginDesktop(
+          provider
+        )
     );
   }
 );

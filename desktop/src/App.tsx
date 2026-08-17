@@ -688,6 +688,69 @@ function App() {
     ] = useState(false);
 
     const [
+        deviceTransferRequired,
+        setDeviceTransferRequired
+    ] = useState(false);
+
+    const [
+        deviceTransferEmail,
+        setDeviceTransferEmail
+    ] = useState("");
+
+    const [
+        deviceTransferCode,
+        setDeviceTransferCode
+    ] = useState("");
+
+    const [
+        deviceTransferMessage,
+        setDeviceTransferMessage
+    ] = useState("");
+
+    const [
+        isDeviceTransferRequestLoading,
+        setIsDeviceTransferRequestLoading
+    ] = useState(false);
+
+    const [
+        isDeviceTransferConfirmLoading,
+        setIsDeviceTransferConfirmLoading
+    ] = useState(false);
+
+    const [
+        deviceTransferCooldownSeconds,
+        setDeviceTransferCooldownSeconds
+    ] = useState(0);
+
+    useEffect(() => {
+        if (
+            deviceTransferCooldownSeconds <= 0
+        ) {
+            return;
+        }
+
+        const timer =
+            window.setTimeout(
+                () => {
+                    setDeviceTransferCooldownSeconds(
+                        (current) =>
+                            Math.max(
+                                0,
+                                current - 1
+                            )
+                    );
+                },
+                1000
+            );
+
+        return () => {
+            window.clearTimeout(timer);
+        };
+    }, [
+        deviceTransferCooldownSeconds
+    ]);
+
+    const [
         isCheckingBackend,
         setIsCheckingBackend
     ] = useState(false);
@@ -1616,6 +1679,322 @@ function App() {
         }
     }
 
+    function authErrorCode(
+        error: unknown
+    ): string {
+        if (
+            typeof error !== "object" ||
+            error === null
+        ) {
+            return "";
+        }
+
+        return String(
+            (
+                error as {
+                    code?: unknown;
+                }
+            ).code ||
+            ""
+        );
+    }
+
+    function unwrapStructuredAuthResult<T>(
+        result: unknown
+    ): T {
+        if (
+            typeof result !== "object" ||
+            result === null ||
+            !("ok" in result)
+        ) {
+            return result as T;
+        }
+
+        const structured =
+            result as {
+                ok?: boolean;
+                value?: T;
+                error?: {
+                    message?: unknown;
+                    code?: unknown;
+                    statusCode?: unknown;
+                    requestId?: unknown;
+                };
+            };
+
+        if (structured.ok) {
+            return structured.value as T;
+        }
+
+        const info =
+            structured.error || {};
+
+        const error =
+            new Error(
+                String(
+                    info.message ||
+                    "Không thể hoàn tất yêu cầu đăng nhập."
+                )
+            ) as Error & {
+                code?: string;
+                statusCode?: number | null;
+                requestId?: string;
+            };
+
+        error.code =
+            String(
+                info.code ||
+                ""
+            );
+
+        const statusCode =
+            Number(
+                info.statusCode
+            );
+
+        error.statusCode =
+            Number.isFinite(statusCode)
+                ? statusCode
+                : null;
+
+        error.requestId =
+            String(
+                info.requestId ||
+                ""
+            );
+
+        throw error;
+    }
+
+    function clearDeviceTransferState() {
+        setDeviceTransferRequired(false);
+        setDeviceTransferEmail("");
+        setDeviceTransferCode("");
+        setDeviceTransferMessage("");
+        setDeviceTransferCooldownSeconds(0);
+    }
+
+    function openDeviceTransferFromError(
+        error: unknown,
+        initialEmail = ""
+    ): boolean {
+        if (
+            authErrorCode(error) !==
+            "DEVICE_BINDING_MISMATCH"
+        ) {
+            return false;
+        }
+
+        setDeviceTransferRequired(true);
+        setDeviceTransferEmail(
+            initialEmail.trim()
+        );
+        setDeviceTransferCode("");
+        setDeviceTransferMessage("");
+        setDeviceTransferCooldownSeconds(0);
+
+        setAuthMessage(
+            "Tài khoản này đang liên kết với thiết bị khác. " +
+            "Xác minh email để chuyển tài khoản sang máy này."
+        );
+
+        return true;
+    }
+
+    async function requestDeviceTransfer() {
+        const cleanEmail =
+            deviceTransferEmail.trim();
+
+        if (!backend.connected) {
+            setDeviceTransferMessage(
+                "Không thể kết nối dịch vụ. Vui lòng thử lại."
+            );
+            return;
+        }
+
+        if (!cleanEmail) {
+            setDeviceTransferMessage(
+                "Nhập email của tài khoản cần chuyển."
+            );
+            return;
+        }
+
+        if (
+            deviceTransferCooldownSeconds > 0
+        ) {
+            return;
+        }
+
+        const request =
+            (
+                api as typeof api & {
+                    requestDeviceTransfer?: (
+                        payload: {
+                            email: string;
+                        }
+                    ) => Promise<{
+                        accepted?: boolean;
+                        message?: string;
+                        cooldownSeconds?: number;
+                    }>;
+                }
+            ).requestDeviceTransfer;
+
+        if (!request) {
+            setDeviceTransferMessage(
+                "Desktop hiện tại chưa hỗ trợ chuyển thiết bị."
+            );
+            return;
+        }
+
+        try {
+            setIsDeviceTransferRequestLoading(
+                true
+            );
+            setDeviceTransferMessage("");
+
+            const result =
+                unwrapStructuredAuthResult<{
+                    accepted?: boolean;
+                    message?: string;
+                    cooldownSeconds?: number;
+                }>(
+                    await request({
+                        email: cleanEmail
+                    })
+                );
+
+            setDeviceTransferEmail(
+                cleanEmail
+            );
+
+            const cooldown =
+                Number(
+                    result?.cooldownSeconds
+                );
+
+            setDeviceTransferCooldownSeconds(
+                Number.isFinite(cooldown) &&
+                cooldown > 0
+                    ? Math.ceil(cooldown)
+                    : 60
+            );
+
+            setDeviceTransferMessage(
+                result?.message ||
+                "Nếu tài khoản đủ điều kiện, mã xác minh đã được gửi tới email."
+            );
+        } catch (error) {
+            setDeviceTransferMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+        } finally {
+            setIsDeviceTransferRequestLoading(
+                false
+            );
+        }
+    }
+
+    async function confirmDeviceTransfer(
+        event: FormEvent
+    ) {
+        event.preventDefault();
+
+        const cleanEmail =
+            deviceTransferEmail.trim();
+
+        const cleanCode =
+            deviceTransferCode.trim();
+
+        if (!backend.connected) {
+            setDeviceTransferMessage(
+                "Không thể kết nối dịch vụ. Vui lòng thử lại."
+            );
+            return;
+        }
+
+        if (!cleanEmail) {
+            setDeviceTransferMessage(
+                "Nhập email của tài khoản."
+            );
+            return;
+        }
+
+        if (
+            !/^\d{6}$/.test(
+                cleanCode
+            )
+        ) {
+            setDeviceTransferMessage(
+                "Mã xác minh phải gồm đúng 6 chữ số."
+            );
+            return;
+        }
+
+        const confirm =
+            (
+                api as typeof api & {
+                    confirmDeviceTransfer?: (
+                        payload: {
+                            email: string;
+                            code: string;
+                        }
+                    ) => Promise<AuthStatus>;
+                }
+            ).confirmDeviceTransfer;
+
+        if (!confirm) {
+            setDeviceTransferMessage(
+                "Desktop hiện tại chưa hỗ trợ xác nhận chuyển thiết bị."
+            );
+            return;
+        }
+
+        try {
+            setIsDeviceTransferConfirmLoading(
+                true
+            );
+            setDeviceTransferMessage("");
+
+            const result =
+                unwrapStructuredAuthResult<AuthStatus>(
+                    await confirm({
+                        email: cleanEmail,
+                        code: cleanCode
+                    })
+                );
+
+            setAuth(result);
+            setPassword("");
+
+            clearDeviceTransferState();
+
+            setAuthMessage(
+                "Đã chuyển tài khoản sang thiết bị này và đăng nhập thành công."
+            );
+        } catch (error) {
+            setDeviceTransferMessage(
+                error instanceof Error
+                    ? error.message
+                    : String(error)
+            );
+        } finally {
+            setIsDeviceTransferConfirmLoading(
+                false
+            );
+        }
+    }
+
+    function cancelDeviceTransfer() {
+        clearDeviceTransferState();
+
+        setAuthMessage(
+            "Đã hủy chuyển thiết bị."
+        );
+    }
+
     async function socialLogin(
         provider: SocialAuthProviderCode
     ) {
@@ -1635,21 +2014,33 @@ function App() {
             );
 
             const result: AuthStatus =
-                await api.socialLogin(
-                    provider
+                unwrapStructuredAuthResult<AuthStatus>(
+                    await api.socialLogin(
+                        provider
+                    )
                 );
 
             setAuth(result);
             setPassword("");
+
+            clearDeviceTransferState();
+
             setAuthMessage(
                 `Đăng nhập bằng ${provider === "GOOGLE" ? "Google" : "Facebook"} thành công.`
             );
         } catch (error) {
-            setAuthMessage(
-                error instanceof Error
-                    ? error.message
-                    : String(error)
-            );
+            if (
+                !openDeviceTransferFromError(
+                    error,
+                    email
+                )
+            ) {
+                setAuthMessage(
+                    error instanceof Error
+                        ? error.message
+                        : String(error)
+                );
+            }
         } finally {
             setSocialAuthLoadingProvider(
                 null
@@ -1783,16 +2174,20 @@ function App() {
 
             const result:
                 AuthStatus =
-                authMode === "login"
-                    ? await api.login(
-                        credentials
-                    )
-                    : await api.register(
-                        credentials
-                    );
+                unwrapStructuredAuthResult<AuthStatus>(
+                    authMode === "login"
+                        ? await api.login(
+                            credentials
+                        )
+                        : await api.register(
+                            credentials
+                        )
+                );
 
             setPassword("");
             setAuth(result);
+
+            clearDeviceTransferState();
 
             setAuthMessage(
                 authMode === "login"
@@ -1802,11 +2197,19 @@ function App() {
         } catch (error) {
             setPassword("");
 
-            setAuthMessage(
-                error instanceof Error
-                    ? error.message
-                    : String(error)
-            );
+            if (
+                authMode !== "login" ||
+                !openDeviceTransferFromError(
+                    error,
+                    email
+                )
+            ) {
+                setAuthMessage(
+                    error instanceof Error
+                        ? error.message
+                        : String(error)
+                );
+            }
         } finally {
             setIsAuthLoading(false);
         }
@@ -4784,6 +5187,27 @@ function App() {
                         isAuthLoading={
                             isAuthLoading
                         }
+                        deviceTransferRequired={
+                            deviceTransferRequired
+                        }
+                        deviceTransferEmail={
+                            deviceTransferEmail
+                        }
+                        deviceTransferCode={
+                            deviceTransferCode
+                        }
+                        deviceTransferMessage={
+                            deviceTransferMessage
+                        }
+                        deviceTransferCooldownSeconds={
+                            deviceTransferCooldownSeconds
+                        }
+                        isDeviceTransferRequestLoading={
+                            isDeviceTransferRequestLoading
+                        }
+                        isDeviceTransferConfirmLoading={
+                            isDeviceTransferConfirmLoading
+                        }
                         socialProviders={
                             socialProviders
                         }
@@ -4843,6 +5267,21 @@ function App() {
                         }
                         onSubmitAuth={
                             submitAuth
+                        }
+                        onDeviceTransferEmailChange={
+                            setDeviceTransferEmail
+                        }
+                        onDeviceTransferCodeChange={
+                            setDeviceTransferCode
+                        }
+                        onRequestDeviceTransfer={
+                            requestDeviceTransfer
+                        }
+                        onConfirmDeviceTransfer={
+                            confirmDeviceTransfer
+                        }
+                        onCancelDeviceTransfer={
+                            cancelDeviceTransfer
                         }
                         onSocialLogin={
                             socialLogin

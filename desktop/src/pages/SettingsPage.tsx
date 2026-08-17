@@ -282,6 +282,13 @@ interface SettingsPageProps {
     password: string;
     authMessage: string;
     isAuthLoading: boolean;
+    deviceTransferRequired: boolean;
+    deviceTransferEmail: string;
+    deviceTransferCode: string;
+    deviceTransferMessage: string;
+    deviceTransferCooldownSeconds: number;
+    isDeviceTransferRequestLoading: boolean;
+    isDeviceTransferConfirmLoading: boolean;
     socialProviders: SocialAuthProviderStatus[];
     accountIdentities: AccountIdentity[];
     socialAuthLoadingProvider: SocialAuthProviderCode | null;
@@ -324,6 +331,21 @@ interface SettingsPageProps {
 
     onSubmitAuth:
         (event: FormEvent) => void;
+
+    onDeviceTransferEmailChange:
+        (value: string) => void;
+
+    onDeviceTransferCodeChange:
+        (value: string) => void;
+
+    onRequestDeviceTransfer:
+        () => void;
+
+    onConfirmDeviceTransfer:
+        (event: FormEvent) => void;
+
+    onCancelDeviceTransfer:
+        () => void;
 
     onSocialLogin:
         (provider: SocialAuthProviderCode) => void;
@@ -396,6 +418,13 @@ export function SettingsPage({
     password,
     authMessage,
     isAuthLoading,
+    deviceTransferRequired,
+    deviceTransferEmail,
+    deviceTransferCode,
+    deviceTransferMessage,
+    deviceTransferCooldownSeconds,
+    isDeviceTransferRequestLoading,
+    isDeviceTransferConfirmLoading,
     socialProviders,
     accountIdentities,
     socialAuthLoadingProvider,
@@ -414,6 +443,11 @@ export function SettingsPage({
     onEmailChange,
     onPasswordChange,
     onSubmitAuth,
+    onDeviceTransferEmailChange,
+    onDeviceTransferCodeChange,
+    onRequestDeviceTransfer,
+    onConfirmDeviceTransfer,
+    onCancelDeviceTransfer,
     onSocialLogin,
     onCancelSocialLogin,
     onLinkAccountIdentity,
@@ -552,6 +586,7 @@ export function SettingsPage({
         setIsResetting
     ] = useState(false);
 
+    const [deviceTransferOpen, setDeviceTransferOpen] = useState(false);
     const [passwordRecoveryOpen, setPasswordRecoveryOpen] = useState(false);
     const [recoveryEmail, setRecoveryEmail] = useState(email);
     const [recoveryToken, setRecoveryToken] = useState("");
@@ -605,6 +640,14 @@ export function SettingsPage({
         isRestartingOcr,
         setIsRestartingOcr
     ] = useState(false);
+
+    useEffect(() => {
+        if (!deviceTransferRequired) {
+            setDeviceTransferOpen(false);
+        }
+    }, [
+        deviceTransferRequired
+    ]);
 
     useEffect(() => {
         const handleOpenSettingsCategory = (event: Event) => {
@@ -1559,12 +1602,136 @@ export function SettingsPage({
                                 </button>
                             </form>
 
+                            {authMode === "login" && deviceTransferRequired && (
+                                <div className="password-recovery-panel">
+                                    <div className="notice info compact-notice">
+                                        Tài khoản này đang liên kết với thiết bị khác.
+                                    </div>
+
+                                    {!deviceTransferOpen ? (
+                                        <button
+                                            type="button"
+                                            className="secondary-action"
+                                            onClick={() => {
+                                                setPasswordRecoveryOpen(false);
+                                                setDeviceTransferOpen(true);
+                                            }}
+                                        >
+                                            Chuyển tài khoản sang máy này
+                                        </button>
+                                    ) : (
+                                        <form
+                                            className="auth-form compact-password-form"
+                                            onSubmit={onConfirmDeviceTransfer}
+                                        >
+                                            <div className="notice info compact-notice">
+                                                Xác minh email để chuyển tài khoản sang máy này.
+                                                Sau khi chuyển thành công, các phiên đăng nhập cũ
+                                                của tài khoản sẽ bị thu hồi.
+                                            </div>
+
+                                            <label className="control-field">
+                                                <span>Email tài khoản</span>
+
+                                                <input
+                                                    type="email"
+                                                    value={deviceTransferEmail}
+                                                    onChange={(event) => {
+                                                        onDeviceTransferEmailChange(
+                                                            event.target.value
+                                                        );
+                                                    }}
+                                                    placeholder="name@example.com"
+                                                    autoComplete="email"
+                                                />
+                                            </label>
+
+                                            <button
+                                                type="button"
+                                                className="secondary-action"
+                                                disabled={
+                                                    !backend.connected ||
+                                                    isDeviceTransferRequestLoading ||
+                                                    isDeviceTransferConfirmLoading ||
+                                                    deviceTransferCooldownSeconds > 0
+                                                }
+                                                onClick={onRequestDeviceTransfer}
+                                            >
+                                                {isDeviceTransferRequestLoading
+                                                    ? "Đang gửi mã..."
+                                                    : deviceTransferCooldownSeconds > 0
+                                                        ? `Gửi lại sau ${deviceTransferCooldownSeconds}s`
+                                                        : "Gửi mã xác minh"}
+                                            </button>
+
+                                            <label className="control-field">
+                                                <span>Mã xác minh 6 số</span>
+
+                                                <input
+                                                    type="text"
+                                                    inputMode="numeric"
+                                                    pattern="[0-9]*"
+                                                    maxLength={6}
+                                                    value={deviceTransferCode}
+                                                    onChange={(event) => {
+                                                        onDeviceTransferCodeChange(
+                                                            event.target.value
+                                                                .replace(/\D/g, "")
+                                                                .slice(0, 6)
+                                                        );
+                                                    }}
+                                                    placeholder="000000"
+                                                    autoComplete="one-time-code"
+                                                />
+                                            </label>
+
+                                            <button
+                                                type="submit"
+                                                className="primary-action"
+                                                disabled={
+                                                    !backend.connected ||
+                                                    isDeviceTransferRequestLoading ||
+                                                    isDeviceTransferConfirmLoading ||
+                                                    deviceTransferCode.length !== 6
+                                                }
+                                            >
+                                                {isDeviceTransferConfirmLoading
+                                                    ? "Đang xác nhận..."
+                                                    : "Xác nhận chuyển thiết bị"}
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                className="text-action"
+                                                disabled={
+                                                    isDeviceTransferRequestLoading ||
+                                                    isDeviceTransferConfirmLoading
+                                                }
+                                                onClick={() => {
+                                                    setDeviceTransferOpen(false);
+                                                    onCancelDeviceTransfer();
+                                                }}
+                                            >
+                                                Hủy chuyển thiết bị
+                                            </button>
+
+                                            {deviceTransferMessage && (
+                                                <div className="notice info compact-notice">
+                                                    {deviceTransferMessage}
+                                                </div>
+                                            )}
+                                        </form>
+                                    )}
+                                </div>
+                            )}
+
                             {authMode === "login" && (
                                 <div className="password-recovery-entry">
                                     <button
                                         type="button"
                                         className="text-action"
                                         onClick={() => {
+                                            setDeviceTransferOpen(false);
                                             setPasswordRecoveryOpen((value) => !value);
                                             setRecoveryEmail(email);
                                             setRecoveryMessage("");
