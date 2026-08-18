@@ -252,6 +252,113 @@ public class PaymentTransactionService {
     }
 
     @Transactional
+    public PaymentTransaction attachProviderReferences(
+            String publicId,
+            String providerReference,
+            String providerCustomerReference,
+            String providerSubscriptionReference
+    ) {
+        PaymentTransaction before =
+                requireByPublicId(
+                        cleanRequired(
+                                publicId,
+                                80,
+                                "Transaction"
+                        ),
+                        true
+                );
+
+        String cleanProviderReference =
+                cleanOptional(
+                        providerReference,
+                        190
+                );
+
+        String cleanCustomerReference =
+                cleanOptional(
+                        providerCustomerReference,
+                        190
+                );
+
+        String cleanSubscriptionReference =
+                cleanOptional(
+                        providerSubscriptionReference,
+                        190
+                );
+
+        ensureCompatibleReference(
+                "Provider reference",
+                before.providerReference(),
+                cleanProviderReference
+        );
+
+        ensureCompatibleReference(
+                "Provider customer reference",
+                before.providerCustomerReference(),
+                cleanCustomerReference
+        );
+
+        ensureCompatibleReference(
+                "Provider subscription reference",
+                before.providerSubscriptionReference(),
+                cleanSubscriptionReference
+        );
+
+        jdbcTemplate.update(
+                """
+                UPDATE payment_transactions
+                SET provider_reference =
+                        COALESCE(
+                            provider_reference,
+                            ?
+                        ),
+                    provider_customer_reference =
+                        COALESCE(
+                            provider_customer_reference,
+                            ?
+                        ),
+                    provider_subscription_reference =
+                        COALESCE(
+                            provider_subscription_reference,
+                            ?
+                        ),
+                    updated_at =
+                        CURRENT_TIMESTAMP(6)
+                WHERE id = ?
+                """,
+                cleanProviderReference,
+                cleanCustomerReference,
+                cleanSubscriptionReference,
+                before.id()
+        );
+
+        return requireById(
+                before.id(),
+                false
+        );
+    }
+
+    private static void ensureCompatibleReference(
+            String label,
+            String existing,
+            String incoming
+    ) {
+        if (
+                incoming == null
+                        || existing == null
+        ) {
+            return;
+        }
+
+        if (!existing.equals(incoming)) {
+            throw new IllegalStateException(
+                    label
+                            + " không khớp giá trị đã lưu."
+            );
+        }
+    }
+
+    @Transactional
     public PaymentTransaction markSucceeded(
             String publicId,
             String providerReference,
