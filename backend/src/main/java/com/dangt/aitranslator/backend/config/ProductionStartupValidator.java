@@ -155,6 +155,8 @@ public class ProductionStartupValidator implements ApplicationRunner {
         String googleSecret = property("app.auth.social.google.client-secret");
         String facebookId = property("app.auth.social.facebook.client-id");
         String facebookSecret = property("app.auth.social.facebook.client-secret");
+        String facebookGraphApiVersion =
+                property("app.auth.social.facebook.graph-api-version");
 
         validateProviderPair(
                 "Google",
@@ -173,9 +175,22 @@ public class ProductionStartupValidator implements ApplicationRunner {
                 problems
         );
 
+        boolean facebookConfigured =
+                !facebookId.isBlank()
+                        && !facebookSecret.isBlank();
+
+        if (
+                facebookConfigured
+                && facebookGraphApiVersion.isBlank()
+        ) {
+            problems.add(
+                    "FACEBOOK_GRAPH_API_VERSION is required when Facebook Login is configured in production."
+            );
+        }
+
         boolean anyProviderConfigured =
                 (!googleId.isBlank() && !googleSecret.isBlank())
-                        || (!facebookId.isBlank() && !facebookSecret.isBlank());
+                        || facebookConfigured;
 
         if (!anyProviderConfigured) {
             return;
