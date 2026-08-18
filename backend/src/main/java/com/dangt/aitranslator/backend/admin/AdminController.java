@@ -20,6 +20,7 @@ public class AdminController {
     private final AdminGuard adminGuard;
     private final AdminService adminService;
     private final AdminPricingService pricingService;
+    private final AdminProviderPriceMappingService providerPriceMappingService;
     private final AdminSubscriptionService subscriptionService;
     private final AdminLicenseService licenseService;
     private final AdminTransactionService transactionService;
@@ -41,6 +42,7 @@ public class AdminController {
             AdminGuard adminGuard,
             AdminService adminService,
             AdminPricingService pricingService,
+            AdminProviderPriceMappingService providerPriceMappingService,
             AdminSubscriptionService subscriptionService,
             AdminLicenseService licenseService,
             AdminTransactionService transactionService,
@@ -61,6 +63,7 @@ public class AdminController {
         this.adminGuard = adminGuard;
         this.adminService = adminService;
         this.pricingService = pricingService;
+        this.providerPriceMappingService = providerPriceMappingService;
         this.subscriptionService = subscriptionService;
         this.licenseService = licenseService;
         this.transactionService = transactionService;
@@ -166,6 +169,31 @@ public class AdminController {
     ) {
         UserAccount actor = adminGuard.requireAdmin(jwt);
         return pricingService.updatePrice(actor, priceId, request);
+    }
+
+    @GetMapping("/prices/{priceId}/provider-mappings")
+    public List<AdminProviderPriceMappingResponse> providerPriceMappings(
+            @PathVariable long priceId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        adminGuard.requireAdmin(jwt);
+        return providerPriceMappingService.listMappings(priceId);
+    }
+
+    @PutMapping("/prices/{priceId}/provider-mappings/{provider}")
+    public AdminProviderPriceMappingResponse updateProviderPriceMapping(
+            @PathVariable long priceId,
+            @PathVariable String provider,
+            @Valid @RequestBody AdminProviderPriceMappingUpdateRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UserAccount actor = adminGuard.requireAdmin(jwt);
+        return providerPriceMappingService.upsertMapping(
+                actor,
+                priceId,
+                provider,
+                request
+        );
     }
 
     @GetMapping("/licenses")
