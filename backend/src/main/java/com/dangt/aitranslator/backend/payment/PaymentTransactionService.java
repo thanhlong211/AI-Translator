@@ -490,7 +490,11 @@ public class PaymentTransactionService {
                 SET status = 'SUCCEEDED',
                     provider_reference = ?,
                     provider_customer_reference = ?,
-                    provider_subscription_reference = ?,
+                    provider_subscription_reference =
+                            COALESCE(
+                                provider_subscription_reference,
+                                ?
+                            ),
                     subscription_id = ?,
                     paid_at = ?,
                     failure_code = NULL,
