@@ -143,8 +143,11 @@ public class PasswordService {
                     """,
                     tokenHash
             );
-            log.error("Password reset delivery failed for userId={}", user.id(), ex);
-            return genericForgotResponse();
+            log.error(
+                "Password reset delivery failed for userId={} cause={}",
+                user.id(),
+                ex.getClass().getSimpleName()
+            );
         }
 
         return genericForgotResponse();

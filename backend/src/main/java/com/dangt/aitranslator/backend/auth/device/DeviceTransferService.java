@@ -272,9 +272,9 @@ public class DeviceTransferService {
             );
 
             log.error(
-                    "Device transfer delivery failed for userId={}",
-                    lockedUser.getId(),
-                    ex
+                "Device transfer delivery failed for userId={} cause={}",
+                lockedUser.getId(),
+                ex.getClass().getSimpleName()
             );
         }
 
