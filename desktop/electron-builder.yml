@@ -47,7 +47,8 @@ win:
     - target: nsis
       arch:
         - x64
-  icon: electron/assets/icon.ico
+  # buildResources already points to electron/assets, so resolve icon from there.
+  icon: icon.ico
   executableName: AI Translator
   requestedExecutionLevel: asInvoker
 
@@ -63,5 +64,7 @@ nsis:
   createDesktopShortcut: true
   createStartMenuShortcut: true
   shortcutName: AI Translator
+  installerIcon: icon.ico
+  uninstallerIcon: icon.ico
   runAfterFinish: true
   artifactName: "AI-Translator-Setup-${version}-${arch}.${ext}"
