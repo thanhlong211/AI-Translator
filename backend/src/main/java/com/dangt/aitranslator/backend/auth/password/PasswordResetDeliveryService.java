@@ -56,10 +56,9 @@ public class PasswordResetDeliveryService {
 
         if ("LOG".equals(deliveryMode)) {
             log.warn(
-                    "DEV PASSWORD RESET for {} expires in {} minutes: {}",
-                    maskEmail(email),
-                    ttlMinutes,
-                    resetUrl.isBlank() ? resetToken : resetUrl
+                "DEV PASSWORD RESET requested for {} expires in {} minutes; raw reset token is not logged.",
+                maskEmail(email),
+                ttlMinutes
             );
             return;
         }
@@ -121,10 +120,9 @@ public class PasswordResetDeliveryService {
 
             if (response.statusCode() < 200 || response.statusCode() >= 300) {
                 throw new IllegalStateException(
-                        "Resend API returned HTTP "
-                                + response.statusCode()
-                                + ": "
-                                + safeResponseBody(response.body())
+                    "Resend API returned HTTP "
+                        + response.statusCode()
+                        + "."
                 );
             }
         } catch (InterruptedException ex) {
@@ -187,12 +185,6 @@ public class PasswordResetDeliveryService {
         return out.toString();
     }
 
-    private String safeResponseBody(String body) {
-        String clean = String.valueOf(body == null ? "" : body)
-                .replaceAll("[\\r\\n]+", " ")
-                .trim();
-        return clean.length() <= 500 ? clean : clean.substring(0, 500);
-    }
 
     private String maskEmail(String email) {
         int at = email.indexOf('@');

@@ -86,10 +86,9 @@ public class DeviceTransferDeliveryService {
     ) {
         if ("LOG".equals(deliveryMode)) {
             log.warn(
-                    "DEV DEVICE TRANSFER for {} expires in {} minutes: {}",
-                    maskEmail(email),
-                    ttlMinutes,
-                    code
+                "DEV DEVICE TRANSFER requested for {} expires in {} minutes; raw verification code is not logged.",
+                maskEmail(email),
+                ttlMinutes
             );
             return;
         }
@@ -225,17 +224,11 @@ public class DeviceTransferDeliveryService {
                                     )
                     );
 
-            if (
-                    response.statusCode() < 200
-                    || response.statusCode() >= 300
-            ) {
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
                 throw new IllegalStateException(
-                        "Resend API returned HTTP "
-                                + response.statusCode()
-                                + ": "
-                                + safeResponseBody(
-                                        response.body()
-                                )
+                    "Resend API returned HTTP "
+                        + response.statusCode()
+                        + "."
                 );
             }
         } catch (InterruptedException ex) {
@@ -337,28 +330,6 @@ public class DeviceTransferDeliveryService {
         return out.toString();
     }
 
-    private String safeResponseBody(
-            String body
-    ) {
-        String clean =
-                String.valueOf(
-                        body == null
-                                ? ""
-                                : body
-                )
-                .replaceAll(
-                        "[\\r\\n]+",
-                        " "
-                )
-                .trim();
-
-        return clean.length() <= 500
-                ? clean
-                : clean.substring(
-                        0,
-                        500
-                );
-    }
 
     private String maskEmail(
             String email

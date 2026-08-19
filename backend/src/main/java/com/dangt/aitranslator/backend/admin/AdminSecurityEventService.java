@@ -310,10 +310,10 @@ public class AdminSecurityEventService {
             );
         } catch (DataAccessException ex) {
             log.warn(
-                    "Unable to persist admin security event type={} requestId={}",
-                    eventType,
-                    RequestCorrelation.currentId(),
-                    ex
+                "Unable to persist admin security event type={} requestId={} cause={}",
+                eventType,
+                RequestCorrelation.currentId(),
+                ex.getClass().getSimpleName()
             );
         }
     }

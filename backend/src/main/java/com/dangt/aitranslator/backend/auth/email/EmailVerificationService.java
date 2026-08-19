@@ -368,9 +368,9 @@ public class EmailVerificationService {
             );
 
             log.error(
-                    "Email verification delivery failed for userId={}",
-                    lockedUser.getId(),
-                    ex
+                "Email verification delivery failed for userId={} cause={}",
+                lockedUser.getId(),
+                ex.getClass().getSimpleName()
             );
         }
     }
