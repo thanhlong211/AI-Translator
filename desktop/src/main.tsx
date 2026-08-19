@@ -2,6 +2,8 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import "./index.css";
+import "./aitranova-theme.css";
+
 import App from "./App.tsx";
 import { I18nProvider } from "./i18n";
 import { ThemeProvider } from "./theme";
@@ -13,5 +15,5 @@ createRoot(document.getElementById("root")!).render(
                 <App />
             </I18nProvider>
         </ThemeProvider>
-    </StrictMode>
+    </StrictMode>,
 );

@@ -1,4 +1,5 @@
 import type { PageId } from "../app/types";
+import brandMark from "../assets/AitraNova_mark.png";
 import { useI18n } from "../i18n";
 import { Icon } from "./Icon";
 
@@ -33,13 +34,20 @@ export function Sidebar({
         <aside className="sidebar">
             <div className="brand">
                 <div className="brand-mark" aria-hidden="true">
-                    <span>A</span>
+                    <img
+                        src={brandMark}
+                        alt=""
+                    />
                 </div>
 
                 <div className="brand-copy">
-                    <strong>AI Translator</strong>
-                    <span>Desktop</span>
+                    <strong>AitraNova</strong>
+                    <span>AI Translator · v1.0.0</span>
                 </div>
+
+                <span className="brand-beta-badge">
+                    BETA
+                </span>
             </div>
 
             <nav className="side-nav">
