@@ -21,431 +21,431 @@ class LemonSqueezyWebhookServiceTest {
     @Test
     void orderCreatedActivatesAfterValidation() {
         Fixture f =
-                fixture(
-                        "order_created",
-                        false
-                );
+            fixture(
+                "order_created",
+                false
+            );
 
         PaymentTransaction transaction =
-                transaction();
+            transaction();
 
         when(
-                f.transactions.findByPublicId(
-                        "AIT-TX-1"
-                )
+            f.transactions.findByPublicId(
+                "AIT-TX-1"
+            )
         ).thenReturn(
-                transaction
+            transaction
         );
 
         when(
-                f.mapping.requireVariantId(
-                        3L
-                )
+            f.mapping.requireVariantId(
+                3L
+            )
         ).thenReturn(
-                "555"
+            "555"
         );
 
         when(
-                f.transactions.attachProviderReferences(
-                        "AIT-TX-1",
-                        "77",
-                        "88",
-                        null
-                )
+            f.transactions.attachProviderReferences(
+                "AIT-TX-1",
+                "77",
+                "88",
+                null
+            )
         ).thenReturn(
-                transaction
+            transaction
         );
 
         when(
-                f.transactions.markSucceeded(
-                        eq("AIT-TX-1"),
-                        eq("77"),
-                        eq("88"),
-                        eq(null),
-                        eq(
-                                Instant.parse(
-                                        "2026-08-18T12:00:00Z"
-                                )
-                        )
-                )
-        ).thenReturn(
-                transaction
-        );
-
-        LemonSqueezyWebhookResponse response =
-                f.service.handle(
-                        orderPayload(
-                                999,
-                                "USD",
-                                "555"
-                        ).getBytes(
-                                StandardCharsets.UTF_8
-                        ),
-                        "signature",
-                        "order_created"
-                );
-
-        assertThat(
-                response.received()
-        ).isTrue();
-
-        assertThat(
-                response.duplicate()
-        ).isFalse();
-
-        verify(
-                f.transactions
-        ).markSucceeded(
+            f.transactions.markSucceeded(
                 eq("AIT-TX-1"),
                 eq("77"),
                 eq("88"),
                 eq(null),
                 eq(
-                        Instant.parse(
-                                "2026-08-18T12:00:00Z"
-                        )
+                    Instant.parse(
+                        "2026-08-18T12:00:00Z"
+                    )
                 )
+            )
+        ).thenReturn(
+            transaction
+        );
+
+        LemonSqueezyWebhookResponse response =
+            f.service.handle(
+                orderPayload(
+                    999,
+                    "USD",
+                    "555"
+                ).getBytes(
+                    StandardCharsets.UTF_8
+                ),
+                "signature",
+                "order_created"
+            );
+
+        assertThat(
+            response.received()
+        ).isTrue();
+
+        assertThat(
+            response.duplicate()
+        ).isFalse();
+
+        verify(
+            f.transactions
+        ).markSucceeded(
+            eq("AIT-TX-1"),
+            eq("77"),
+            eq("88"),
+            eq(null),
+            eq(
+                Instant.parse(
+                    "2026-08-18T12:00:00Z"
+                )
+            )
         );
 
         verify(
-                f.ledger
+            f.ledger
         ).markProcessed(
-                5L,
-                99L
+            5L,
+            99L
         );
     }
 
     @Test
     void subscriptionCreatedOnlyAttachesReferences() {
         Fixture f =
-                fixture(
-                        "subscription_created",
-                        false
-                );
+            fixture(
+                "subscription_created",
+                false
+            );
 
         PaymentTransaction transaction =
-                transaction();
+            transaction();
 
         when(
-                f.transactions.findByPublicId(
-                        "AIT-TX-1"
-                )
+            f.transactions.findByPublicId(
+                "AIT-TX-1"
+            )
         ).thenReturn(
-                transaction
+            transaction
         );
 
         when(
-                f.mapping.requireVariantId(
-                        3L
-                )
+            f.mapping.requireVariantId(
+                3L
+            )
         ).thenReturn(
-                "555"
+            "555"
         );
 
         when(
-                f.transactions.attachProviderReferences(
-                        "AIT-TX-1",
-                        "77",
-                        "88",
-                        "123"
-                )
-        ).thenReturn(
-                transaction
-        );
-
-        String payload =
-                """
-                {
-                  "meta": {
-                    "event_name": "subscription_created",
-                    "custom_data": {
-                      "transaction_public_id": "AIT-TX-1",
-                      "user_id": "42"
-                    }
-                  },
-                  "data": {
-                    "type": "subscriptions",
-                    "id": "123",
-                    "attributes": {
-                      "store_id": 454829,
-                      "customer_id": 88,
-                      "order_id": 77,
-                      "variant_id": 555,
-                      "status": "active"
-                    }
-                  }
-                }
-                """;
-
-        LemonSqueezyWebhookResponse response =
-                f.service.handle(
-                        payload.getBytes(
-                                StandardCharsets.UTF_8
-                        ),
-                        "signature",
-                        "subscription_created"
-                );
-
-        assertThat(
-                response.received()
-        ).isTrue();
-
-        verify(
-                f.transactions
-        ).attachProviderReferences(
+            f.transactions.attachProviderReferences(
                 "AIT-TX-1",
                 "77",
                 "88",
                 "123"
+            )
+        ).thenReturn(
+            transaction
+        );
+
+        String payload =
+            """
+            {
+              "meta": {
+                "event_name": "subscription_created",
+                "custom_data": {
+                  "transaction_public_id": "AIT-TX-1",
+                  "user_id": "42"
+                }
+              },
+              "data": {
+                "type": "subscriptions",
+                "id": "123",
+                "attributes": {
+                  "store_id": 454829,
+                  "customer_id": 88,
+                  "order_id": 77,
+                  "variant_id": 555,
+                  "status": "active"
+                }
+              }
+            }
+            """;
+
+        LemonSqueezyWebhookResponse response =
+            f.service.handle(
+                payload.getBytes(
+                    StandardCharsets.UTF_8
+                ),
+                "signature",
+                "subscription_created"
+            );
+
+        assertThat(
+            response.received()
+        ).isTrue();
+
+        verify(
+            f.transactions
+        ).attachProviderReferences(
+            "AIT-TX-1",
+            "77",
+            "88",
+            "123"
         );
 
         verify(
-                f.transactions,
-                never()
+            f.transactions,
+            never()
         ).markSucceeded(
-                anyString(),
-                any(),
-                any(),
-                any(),
-                any()
+            anyString(),
+            any(),
+            any(),
+            any(),
+            any()
         );
     }
 
     @Test
     void duplicateDoesNotProcessPayment() {
         Fixture f =
-                fixture(
-                        "order_created",
-                        true
-                );
+            fixture(
+                "order_created",
+                true
+            );
 
         LemonSqueezyWebhookResponse response =
-                f.service.handle(
-                        orderPayload(
-                                999,
-                                "USD",
-                                "555"
-                        ).getBytes(
-                                StandardCharsets.UTF_8
-                        ),
-                        "signature",
-                        "order_created"
-                );
+            f.service.handle(
+                orderPayload(
+                    999,
+                    "USD",
+                    "555"
+                ).getBytes(
+                    StandardCharsets.UTF_8
+                ),
+                "signature",
+                "order_created"
+            );
 
         assertThat(
-                response.duplicate()
+            response.duplicate()
         ).isTrue();
 
         verify(
-                f.transactions,
-                never()
+            f.transactions,
+            never()
         ).findByPublicId(
-                anyString()
+            anyString()
         );
     }
 
     @Test
     void amountMismatchFailsLedger() {
         Fixture f =
-                fixture(
-                        "order_created",
-                        false
-                );
+            fixture(
+                "order_created",
+                false
+            );
 
         PaymentTransaction transaction =
-                transaction();
+            transaction();
 
         when(
-                f.transactions.findByPublicId(
-                        "AIT-TX-1"
-                )
+            f.transactions.findByPublicId(
+                "AIT-TX-1"
+            )
         ).thenReturn(
-                transaction
+            transaction
         );
 
         when(
-                f.mapping.requireVariantId(
-                        3L
-                )
+            f.mapping.requireVariantId(
+                3L
+            )
         ).thenReturn(
-                "555"
+            "555"
         );
 
         assertThatThrownBy(
-                () -> f.service.handle(
-                        orderPayload(
-                                998,
-                                "USD",
-                                "555"
-                        ).getBytes(
-                                StandardCharsets.UTF_8
-                        ),
-                        "signature",
-                        "order_created"
-                )
+            () -> f.service.handle(
+                orderPayload(
+                    998,
+                    "USD",
+                    "555"
+                ).getBytes(
+                    StandardCharsets.UTF_8
+                ),
+                "signature",
+                "order_created"
+            )
         ).isInstanceOf(
-                IllegalStateException.class
+            IllegalStateException.class
         );
 
         verify(
-                f.ledger
+            f.ledger
         ).markFailed(
-                eq(5L),
-                anyString()
+            eq(5L),
+            anyString()
         );
 
         verify(
-                f.transactions,
-                never()
+            f.transactions,
+            never()
         ).markSucceeded(
-                anyString(),
-                any(),
-                any(),
-                any(),
-                any()
+            anyString(),
+            any(),
+            any(),
+            any(),
+            any()
         );
     }
 
     private Fixture fixture(
-            String eventType,
-            boolean duplicate
+        String eventType,
+        boolean duplicate
     ) {
         LemonSqueezyWebhookVerifier verifier =
-                mock(
-                        LemonSqueezyWebhookVerifier.class
-                );
+            mock(
+                LemonSqueezyWebhookVerifier.class
+            );
 
         PaymentWebhookEventService ledger =
-                mock(
-                        PaymentWebhookEventService.class
-                );
+            mock(
+                PaymentWebhookEventService.class
+            );
 
         PaymentTransactionService transactions =
-                mock(
-                        PaymentTransactionService.class
-                );
+            mock(
+                PaymentTransactionService.class
+            );
 
         LemonSqueezyPriceMappingService mapping =
-                mock(
-                        LemonSqueezyPriceMappingService.class
-                );
+            mock(
+                LemonSqueezyPriceMappingService.class
+            );
 
         LemonSqueezyWebhookService service =
-                new LemonSqueezyWebhookService(
-                        verifier,
-                        ledger,
-                        transactions,
-                        mapping,
-                        JsonMapper.builder().build(),
-                        "454829"
-                );
+            new LemonSqueezyWebhookService(
+                verifier,
+                ledger,
+                transactions,
+                mapping,
+                JsonMapper.builder().build(),
+                "454829"
+            );
 
         PaymentWebhookClaim claim =
-                duplicate
-                        ? PaymentWebhookClaim
-                        .duplicate(
-                                event(eventType)
-                        )
-                        : PaymentWebhookClaim
-                        .claimed(
-                                event(eventType)
-                        );
+            duplicate
+                ? PaymentWebhookClaim
+                .duplicate(
+                    event(eventType)
+                )
+                : PaymentWebhookClaim
+                .claimed(
+                    event(eventType)
+                );
 
         when(
-                ledger.claim(
-                        eq(
-                                PaymentProvider
-                                        .LEMON_SQUEEZY
-                        ),
-                        anyString(),
-                        eq(eventType),
-                        anyString()
-                )
+            ledger.claim(
+                eq(
+                    PaymentProvider
+                        .LEMON_SQUEEZY
+                ),
+                anyString(),
+                eq(eventType),
+                anyString()
+            )
         ).thenReturn(
-                claim
+            claim
         );
 
         return new Fixture(
-                service,
-                ledger,
-                transactions,
-                mapping
+            service,
+            ledger,
+            transactions,
+            mapping
         );
     }
 
     private PaymentTransaction transaction() {
         PaymentTransaction transaction =
-                mock(
-                        PaymentTransaction.class
-                );
+            mock(
+                PaymentTransaction.class
+            );
 
         when(
-                transaction.id()
+            transaction.id()
         ).thenReturn(
-                99L
+            99L
         );
 
         when(
-                transaction.userId()
+            transaction.userId()
         ).thenReturn(
-                42L
+            42L
         );
 
         when(
-                transaction.priceId()
+            transaction.priceId()
         ).thenReturn(
-                3L
+            3L
         );
 
         when(
-                transaction.currency()
+            transaction.currency()
         ).thenReturn(
-                "USD"
+            "USD"
         );
 
         when(
-                transaction.amountMinor()
+            transaction.amountMinor()
         ).thenReturn(
-                999L
+            999L
         );
 
         when(
-                transaction.provider()
+            transaction.provider()
         ).thenReturn(
-                PaymentProvider
-                        .LEMON_SQUEEZY
+            PaymentProvider
+                .LEMON_SQUEEZY
         );
 
         when(
-                transaction.status()
+            transaction.status()
         ).thenReturn(
-                PaymentStatus.PENDING
+            PaymentStatus.PENDING
         );
 
         return transaction;
     }
 
     private PaymentWebhookEvent event(
-            String eventType
+        String eventType
     ) {
         return new PaymentWebhookEvent(
-                5L,
-                PaymentProvider.LEMON_SQUEEZY,
-                "test-event",
-                eventType,
-                null,
-                "hash",
-                "PROCESSING",
-                null,
-                Instant.now(),
-                null
+            5L,
+            PaymentProvider.LEMON_SQUEEZY,
+            "test-event",
+            eventType,
+            null,
+            "hash",
+            "PROCESSING",
+            null,
+            Instant.now(),
+            null
         );
     }
 
     private String orderPayload(
-            long subtotal,
-            String currency,
-            String variantId
+        long subtotal,
+        String currency,
+        String variantId
     ) {
         return """
                 {
@@ -471,25 +471,28 @@ class LemonSqueezyWebhookServiceTest {
                       "status": "paid",
                       "refunded": false,
                       "first_order_item": {
-                        "variant_id": %s
+                        "variant_id": %s,
+                        "price": %d,
+                        "quantity": 1
                       },
                       "created_at": "2026-08-18T12:00:00Z"
                     }
                   }
                 }
                 """.formatted(
-                currency,
-                subtotal,
-                subtotal,
-                variantId
+            currency,
+            subtotal,
+            subtotal,
+            variantId,
+            subtotal
         );
     }
 
     private record Fixture(
-            LemonSqueezyWebhookService service,
-            PaymentWebhookEventService ledger,
-            PaymentTransactionService transactions,
-            LemonSqueezyPriceMappingService mapping
+        LemonSqueezyWebhookService service,
+        PaymentWebhookEventService ledger,
+        PaymentTransactionService transactions,
+        LemonSqueezyPriceMappingService mapping
     ) {
     }
 }

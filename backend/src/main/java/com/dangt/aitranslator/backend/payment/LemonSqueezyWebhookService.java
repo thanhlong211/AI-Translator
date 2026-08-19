@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
+import java.util.Currency;
 import java.util.HexFormat;
 import java.util.Locale;
 
@@ -267,23 +268,50 @@ public class LemonSqueezyWebhookService {
             );
         }
 
-        BigDecimal subtotal =
+        JsonNode firstOrderItem =
+                attributes.path(
+                        "first_order_item"
+                );
+
+        BigDecimal itemPrice =
                 requiredDecimal(
-                        attributes.path(
-                                "subtotal"
+                        firstOrderItem.path(
+                                "price"
                         ),
-                        "data.attributes.subtotal"
+                        "first_order_item.price"
+                );
+
+        Long quantityValue =
+                optionalLong(
+                        firstOrderItem.path(
+                                "quantity"
+                        )
+                );
+
+        long quantity =
+                quantityValue == null
+                        ? 1L
+                        : quantityValue;
+
+        if (quantity != 1L) {
+            throw new IllegalStateException(
+                    "Payment flow hiện chỉ hỗ trợ quantity = 1."
+            );
+        }
+
+        BigDecimal expectedLemonPrice =
+                lemonPriceAmount(
+                        transaction.amountMinor(),
+                        currency
                 );
 
         if (
-                subtotal.compareTo(
-                        BigDecimal.valueOf(
-                                transaction.amountMinor()
-                        )
+                itemPrice.compareTo(
+                        expectedLemonPrice
                 ) != 0
         ) {
             throw new IllegalStateException(
-                    "Số tiền Lemon Squeezy không khớp payment transaction."
+                    "Giá Variant Lemon Squeezy không khớp payment transaction."
             );
         }
 
@@ -935,6 +963,54 @@ public class LemonSqueezyWebhookService {
                     ex
             );
         }
+    }
+
+    private static BigDecimal lemonPriceAmount(
+            long amountMinor,
+            String currencyCode
+    ) {
+        if (amountMinor < 0) {
+            throw new IllegalArgumentException(
+                    "Payment amount không hợp lệ."
+            );
+        }
+
+        String normalizedCurrency =
+                clean(currencyCode)
+                        .toUpperCase(
+                                Locale.ROOT
+                        );
+
+        final int fractionDigits;
+
+        try {
+            fractionDigits =
+                    Currency.getInstance(
+                            normalizedCurrency
+                    ).getDefaultFractionDigits();
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalArgumentException(
+                    "Payment currency không hợp lệ.",
+                    ex
+            );
+        }
+
+        if (
+                fractionDigits < 0
+                        || fractionDigits > 2
+        ) {
+            throw new IllegalStateException(
+                    "Currency chưa được hỗ trợ cho Lemon Squeezy payment."
+            );
+        }
+
+        return BigDecimal
+                .valueOf(
+                        amountMinor
+                )
+                .scaleByPowerOfTen(
+                        2 - fractionDigits
+                );
     }
 
     private static String safeFailure(
