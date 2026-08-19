@@ -88,7 +88,10 @@ public class EntitlementService {
 
     @Transactional(readOnly = true)
     public void requireTranslationQuota(UserAccount user) {
-        EntitlementResponse entitlement = resolve(user);
+        requireTranslationQuota(resolve(user));
+    }
+
+    public void requireTranslationQuota(EntitlementResponse entitlement) {
         long limit = entitlement.limits().getOrDefault(
                 "monthlyTranslations",
                 0L
@@ -114,11 +117,17 @@ public class EntitlementService {
 
     @Transactional(readOnly = true)
     public void requireContextItems(UserAccount user, int requestedItems) {
+        requireContextItems(resolve(user), requestedItems);
+    }
+
+    public void requireContextItems(
+            EntitlementResponse entitlement,
+            int requestedItems
+    ) {
         if (requestedItems < 0) {
             throw new IllegalArgumentException("Số context item không hợp lệ.");
         }
 
-        EntitlementResponse entitlement = resolve(user);
         long limit = entitlement.limits().getOrDefault("contextItems", 0L);
         if (limit < 0 || requestedItems <= limit) {
             return;
@@ -244,13 +253,20 @@ public class EntitlementService {
 
     @Transactional(readOnly = true)
     public boolean hasFeature(UserAccount user, String featureKey) {
+        return hasFeature(resolve(user), featureKey);
+    }
+
+    public boolean hasFeature(
+            EntitlementResponse entitlement,
+            String featureKey
+    ) {
         String cleanKey = String.valueOf(featureKey == null ? "" : featureKey).trim();
         if (cleanKey.isEmpty()) {
             return false;
         }
 
         return Boolean.TRUE.equals(
-                resolve(user).features().get(cleanKey)
+                entitlement.features().get(cleanKey)
         );
     }
 
@@ -261,12 +277,25 @@ public class EntitlementService {
             String featureName,
             String requiredPlan
     ) {
+        requireFeature(
+                resolve(user),
+                featureKey,
+                featureName,
+                requiredPlan
+        );
+    }
+
+    public void requireFeature(
+            EntitlementResponse entitlement,
+            String featureKey,
+            String featureName,
+            String requiredPlan
+    ) {
         String cleanKey = String.valueOf(featureKey == null ? "" : featureKey).trim();
         if (cleanKey.isEmpty()) {
             throw new IllegalArgumentException("Feature key không được để trống.");
         }
 
-        EntitlementResponse entitlement = resolve(user);
         if (Boolean.TRUE.equals(entitlement.features().get(cleanKey))) {
             return;
         }

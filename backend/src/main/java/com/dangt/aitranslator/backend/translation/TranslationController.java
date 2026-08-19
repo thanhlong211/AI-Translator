@@ -2,6 +2,7 @@ package com.dangt.aitranslator.backend.translation;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
 import com.dangt.aitranslator.backend.common.ApiError;
+import com.dangt.aitranslator.backend.entitlement.EntitlementResponse;
 import com.dangt.aitranslator.backend.entitlement.EntitlementService;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -25,6 +28,9 @@ import org.springframework.web.bind.annotation.*;
                 "OCR text → Profile Prompt Engine → AI Provider → ngôn ngữ đích."
 )
 public class TranslationController {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(TranslationController.class);
 
     private final TranslationService translationService;
     private final CurrentUserService currentUserService;
@@ -105,13 +111,36 @@ public class TranslationController {
             @AuthenticationPrincipal
             Jwt jwt
     ) {
+        final long accessStartedAt =
+                System.nanoTime();
+
+        long stageStartedAt =
+                System.nanoTime();
+
         UserAccount user =
                 currentUserService
                         .requireActiveUser(jwt);
 
+        long userMs =
+                elapsedMs(stageStartedAt);
+
+        stageStartedAt =
+                System.nanoTime();
+
+        /*
+         * Resolve entitlement exactly once for this request.
+         * The previous flow resolved the same plan/features/limits/usage
+         * independently for feature, context, quota and memory checks.
+         */
+        EntitlementResponse entitlement =
+                entitlementService.resolve(user);
+
+        long entitlementMs =
+                elapsedMs(stageStartedAt);
+
         if (request.purpose() == TranslationPurpose.QUICK_TRANSLATE) {
             entitlementService.requireFeature(
-                    user,
+                    entitlement,
                     "quickTranslate",
                     "Quick Translate",
                     "FREE"
@@ -120,7 +149,7 @@ public class TranslationController {
 
         if (request.purpose() == TranslationPurpose.STUDY_FAST) {
             entitlementService.requireFeature(
-                    user,
+                    entitlement,
                     "studyMode",
                     "Study Mode",
                     "PRO"
@@ -128,22 +157,41 @@ public class TranslationController {
         }
 
         entitlementService.requireContextItems(
-                user,
+                entitlement,
                 request.context().size()
         );
 
         entitlementService
-                .requireTranslationQuota(user);
+                .requireTranslationQuota(entitlement);
 
         boolean allowTranslationMemory = entitlementService.hasFeature(
-                user,
+                entitlement,
                 "translationMemory"
+        );
+
+        long accessMs =
+                elapsedMs(accessStartedAt);
+
+        log.info(
+                "PERF translate-access purpose={} contextItems={} userMs={} entitlementMs={} accessMs={}",
+                request.purpose(),
+                request.context().size(),
+                userMs,
+                entitlementMs,
+                accessMs
         );
 
         return translationService.translate(
                 user.getId(),
                 request,
                 allowTranslationMemory
+        );
+    }
+
+    private long elapsedMs(long startedAt) {
+        return Math.max(
+                0,
+                (System.nanoTime() - startedAt) / 1_000_000L
         );
     }
 }

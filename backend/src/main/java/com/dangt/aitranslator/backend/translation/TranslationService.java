@@ -90,6 +90,9 @@ public class TranslationService {
                         stageStartedAt
                 );
 
+        stageStartedAt =
+                System.nanoTime();
+
         Optional<TranslationMemoryMatch> memoryMatch =
                 allowTranslationMemory
                         ? memoryService.findExact(
@@ -100,6 +103,11 @@ public class TranslationService {
                                 request.targetLanguage()
                         )
                         : Optional.empty();
+
+        long memoryMs =
+                elapsedMs(
+                        stageStartedAt
+                );
 
         if (memoryMatch.isPresent()) {
             TranslationMemoryMatch match =
@@ -122,7 +130,7 @@ public class TranslationService {
                     );
 
             log.info(
-                    "TRANSLATION_MEMORY_HIT requestId={} memoryId={} chars={} sourceLanguage={} matchedSourceLanguage={} targetLanguage={} profileId={} totalMs={}",
+                    "TRANSLATION_MEMORY_HIT requestId={} memoryId={} chars={} sourceLanguage={} matchedSourceLanguage={} targetLanguage={} profileId={} profileMs={} memoryMs={} totalMs={}",
                     requestId,
                     match.memoryId(),
                     cleanText.length(),
@@ -130,6 +138,8 @@ public class TranslationService {
                     match.matchedSourceLanguage(),
                     request.targetLanguage(),
                     profile.getId(),
+                    profileMs,
+                    memoryMs,
                     totalMs
             );
 
@@ -177,6 +187,7 @@ public class TranslationService {
         TranslationAiResult aiResult = null;
         String translatedText;
         long aiMs;
+        long aiUsageLedgerMs = 0;
 
         try {
             aiResult =
@@ -202,6 +213,9 @@ public class TranslationService {
                 );
             }
 
+            long ledgerStartedAt =
+                    System.nanoTime();
+
             aiUsageLedgerService.recordSuccess(
                     userId,
                     requestId,
@@ -209,6 +223,11 @@ public class TranslationService {
                     aiResult.usage(),
                     aiMs
             );
+
+            aiUsageLedgerMs =
+                    elapsedMs(
+                            ledgerStartedAt
+                    );
         } catch (RuntimeException ex) {
             aiMs =
                     elapsedMs(
@@ -273,7 +292,7 @@ public class TranslationService {
                 );
 
         log.info(
-                "PERF translate requestId={} chars={} sourceLanguage={} targetLanguage={} provider={} model={} profileMs={} promptMs={} aiMs={} persistenceMs={} totalMs={}",
+                "PERF translate requestId={} chars={} sourceLanguage={} targetLanguage={} provider={} model={} profileMs={} memoryMs={} promptMs={} aiMs={} aiUsageLedgerMs={} persistenceMs={} totalMs={}",
                 requestId,
                 cleanText.length(),
                 request.sourceLanguage(),
@@ -281,8 +300,10 @@ public class TranslationService {
                 aiResult.provider(),
                 aiResult.model(),
                 profileMs,
+                memoryMs,
                 promptMs,
                 aiMs,
+                aiUsageLedgerMs,
                 persistenceMs,
                 totalMs
         );
