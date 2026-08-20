@@ -6713,16 +6713,30 @@ function createWindow() {
     });
   });
 
-  mainWindow.on("close", (event) => {
+mainWindow.on("close", (event) => {
     if (isQuitting) {
       return;
     }
 
-    event.preventDefault();
+    event.preventDefault(); // Ngăn chặn tắt app ngay lập tức
 
-    mainWindow.hide();
+    // Hiển thị hộp thoại 2 lựa chọn
+    const choice = dialog.showMessageBoxSync(mainWindow, {
+      type: 'question',
+      buttons: ['Thu nhỏ xuống khay (Tray)', 'Thoát ứng dụng'],
+      title: 'AI Manga Pro',
+      message: 'Bạn muốn ứng dụng tiếp tục chạy ngầm hay thoát hoàn toàn?',
+      defaultId: 0, // Nhấn Enter sẽ chọn nút 0 (Thu nhỏ)
+      cancelId: 0   // Nhấn X trên hộp thoại sẽ mặc định là Thu nhỏ
+    });
 
-    console.log("MAIN WINDOW HIDDEN TO TRAY");
+    if (choice === 0) {
+      mainWindow.hide();
+      console.log("MAIN WINDOW HIDDEN TO TRAY");
+    } else {
+      isQuitting = true;
+      app.quit();
+    }
   });
 
   return mainWindow;
