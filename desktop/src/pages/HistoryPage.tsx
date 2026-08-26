@@ -1,9 +1,19 @@
 import type {
     LearningDashboard,
-    LearningWeakItem
+    LearningWeakItem,
+    StudyLanguage
 } from "../app/types";
 
+import {
+    LearningLanguageTabs
+} from "../components/LearningLanguageTabs";
+
 interface HistoryPageProps {
+    language: StudyLanguage;
+
+    onLanguageChange:
+        (language: StudyLanguage) => void;
+
     dashboard: LearningDashboard;
     loading: boolean;
     message: string;
@@ -64,6 +74,8 @@ function masteryLabel(
 }
 
 export function HistoryPage({
+    language,
+    onLanguageChange,
     dashboard,
     loading,
     message,
@@ -82,6 +94,14 @@ export function HistoryPage({
 
     return (
         <div className="page-stack learning-dashboard-page">
+            <LearningLanguageTabs
+                value={language}
+                disabled={loading}
+                onChange={
+                    onLanguageChange
+                }
+            />
+
             <section className="page-intro-row learning-dashboard-intro">
                 <div>
                     <span className="eyebrow violet">

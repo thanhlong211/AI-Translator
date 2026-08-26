@@ -4,6 +4,7 @@ import com.dangt.aitranslator.backend.study.StudyLanguage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
+import java.util.List;
 
 public interface ReviewEventRepository
         extends JpaRepository<ReviewEvent, Long> {
@@ -48,14 +49,27 @@ public interface ReviewEventRepository
             Instant since
     );
 
-    java.util.List<ReviewEvent>
+    List<ReviewEvent>
     findByUserIdAndReviewedAtGreaterThanEqualOrderByReviewedAtAsc(
             Long userId,
             Instant since
     );
 
-    java.util.List<ReviewEvent>
+    List<ReviewEvent>
+    findByUserIdAndLanguageAndReviewedAtGreaterThanEqualOrderByReviewedAtAsc(
+            Long userId,
+            StudyLanguage language,
+            Instant since
+    );
+
+    List<ReviewEvent>
     findTop100ByUserIdOrderByReviewedAtDesc(
             Long userId
+    );
+
+    List<ReviewEvent>
+    findTop100ByUserIdAndLanguageOrderByReviewedAtDesc(
+            Long userId,
+            StudyLanguage language
     );
 }

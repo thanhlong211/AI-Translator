@@ -797,9 +797,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
 
 
-  getLearningDashboard: () => {
+  getLearningDashboard: (
+    language
+  ) => {
     return ipcRenderer.invoke(
-      "learning:dashboard"
+      "learning:dashboard",
+      language
     );
   },
 

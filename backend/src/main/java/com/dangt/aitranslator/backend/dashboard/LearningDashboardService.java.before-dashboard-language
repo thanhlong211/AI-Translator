@@ -3,7 +3,6 @@ package com.dangt.aitranslator.backend.dashboard;
 import com.dangt.aitranslator.backend.grammar.UserGrammar;
 import com.dangt.aitranslator.backend.grammar.UserGrammarRepository;
 import com.dangt.aitranslator.backend.review.*;
-import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.vocabulary.UserVocabulary;
 import com.dangt.aitranslator.backend.vocabulary.UserVocabularyRepository;
 import org.springframework.beans.factory.annotation.Value;
@@ -58,22 +57,6 @@ public class LearningDashboardService {
     public LearningDashboardResponse dashboard(
             Long userId
     ) {
-        return dashboard(
-                userId,
-                StudyLanguage.JA
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public LearningDashboardResponse dashboard(
-            Long userId,
-            StudyLanguage language
-    ) {
-        StudyLanguage safeLanguage =
-                normalizeLanguage(
-                        language
-                );
-
         LocalDate today =
                 LocalDate.now(
                         learningZone
@@ -91,9 +74,8 @@ public class LearningDashboardService {
 
         List<ReviewEvent> events =
                 reviewEventRepository
-                        .findByUserIdAndLanguageAndReviewedAtGreaterThanEqualOrderByReviewedAtAsc(
+                        .findByUserIdAndReviewedAtGreaterThanEqualOrderByReviewedAtAsc(
                                 userId,
-                                safeLanguage,
                                 since
                         );
 
@@ -120,16 +102,14 @@ public class LearningDashboardService {
 
         List<UserVocabulary> vocabulary =
                 vocabularyRepository
-                        .findTop500ByUserIdAndLanguageOrderByLastSeenAtDesc(
-                                userId,
-                                safeLanguage
+                        .findTop500ByUserIdOrderByLastSeenAtDesc(
+                                userId
                         );
 
         List<UserGrammar> grammar =
                 grammarRepository
-                        .findTop500ByUserIdAndLanguageOrderByLastSeenAtDesc(
-                                userId,
-                                safeLanguage
+                        .findTop500ByUserIdOrderByLastSeenAtDesc(
+                                userId
                         );
 
         List<LearningWeakItem> weakItems =
@@ -236,7 +216,6 @@ public class LearningDashboardService {
         List<LearningRecentReview> recentReviews =
                 buildRecentReviews(
                         userId,
-                        safeLanguage,
                         vocabulary,
                         grammar
                 );
@@ -576,7 +555,6 @@ public class LearningDashboardService {
 
     private List<LearningRecentReview> buildRecentReviews(
             Long userId,
-            StudyLanguage language,
             List<UserVocabulary> vocabulary,
             List<UserGrammar> grammar
     ) {
@@ -611,9 +589,8 @@ public class LearningDashboardService {
                         );
 
         return reviewEventRepository
-                .findTop100ByUserIdAndLanguageOrderByReviewedAtDesc(
-                        userId,
-                        language
+                .findTop100ByUserIdOrderByReviewedAtDesc(
+                        userId
                 )
                 .stream()
                 .filter(
@@ -669,14 +646,6 @@ public class LearningDashboardService {
         return item == null
                 ? "Ngữ pháp đã xóa"
                 : item.getPattern();
-    }
-
-    private StudyLanguage normalizeLanguage(
-            StudyLanguage language
-    ) {
-        return language == StudyLanguage.EN
-                ? StudyLanguage.EN
-                : StudyLanguage.JA;
     }
 
     private ZoneId parseZone(

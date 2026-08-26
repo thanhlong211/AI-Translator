@@ -545,6 +545,16 @@ function App() {
     ] = useState("");
 
     const [
+        dashboardLanguage,
+        setDashboardLanguage
+    ] = useState<StudyLanguage>(
+        () =>
+            readLearningLanguage(
+                "learning.dashboardLanguage"
+            )
+    );
+
+    const [
         learningDashboard,
         setLearningDashboard
     ] = useState<LearningDashboard>({
@@ -1631,7 +1641,8 @@ function App() {
         }
     }, [
         auth.authenticated,
-        activePage
+        activePage,
+        dashboardLanguage
     ]);
 
     /*
@@ -3926,6 +3937,44 @@ function App() {
         );
     }
 
+    function changeDashboardLanguage(
+        language: StudyLanguage
+    ) {
+        if (
+            language ===
+            dashboardLanguage
+        ) {
+            return;
+        }
+
+        setDashboardLanguage(
+            language
+        );
+
+        saveLearningLanguage(
+            "learning.dashboardLanguage",
+            language
+        );
+
+        setLearningDashboard({
+            overview: {
+                reviewed14Days: 0,
+                correct14Days: 0,
+                wrong14Days: 0,
+                accuracy14Days: 0,
+                activeDays14Days: 0,
+                currentStreakDays: 0,
+                weakItems: 0,
+                masteredItems: 0
+            },
+            dailyActivity: [],
+            weakItems: [],
+            recentReviews: []
+        });
+
+        setLearningDashboardMessage("");
+    }
+
     async function loadLearningDashboard() {
         if (!auth.authenticated) {
             return;
@@ -3939,7 +3988,9 @@ function App() {
             const result:
                 LearningDashboard =
                 await api
-                    .getLearningDashboard();
+                    .getLearningDashboard(
+                        dashboardLanguage
+                    );
 
             setLearningDashboard(
                 result
@@ -5668,6 +5719,12 @@ function App() {
             case "history":
                 return (
                     <HistoryPage
+                        language={
+                            dashboardLanguage
+                        }
+                        onLanguageChange={
+                            changeDashboardLanguage
+                        }
                         dashboard={
                             learningDashboard
                         }
@@ -5681,6 +5738,15 @@ function App() {
                             loadLearningDashboard
                         }
                         onOpenReview={() => {
+                            setReviewLanguage(
+                                dashboardLanguage
+                            );
+
+                            saveLearningLanguage(
+                                "learning.reviewLanguage",
+                                dashboardLanguage
+                            );
+
                             setActivePage(
                                 "review"
                             );

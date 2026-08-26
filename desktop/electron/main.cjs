@@ -4977,10 +4977,17 @@ async function answerReviewItem(
   return payload;
 }
 
-async function getLearningDashboard() {
+async function getLearningDashboard(
+  language = "JA"
+) {
+  const safeLanguage =
+    normalizeStudyLanguage(
+      language
+    );
+
   const response =
     await authorizedBackendFetch(
-      BACKEND_LEARNING_DASHBOARD_URL,
+      `${BACKEND_LEARNING_DASHBOARD_URL}?language=${safeLanguage}`,
       {
         method: "GET",
 
@@ -13468,8 +13475,10 @@ ipcMain.handle(
 
 ipcMain.handle(
   "learning:dashboard",
-  async () => {
-    return getLearningDashboard();
+  async (_event, language) => {
+    return getLearningDashboard(
+      language
+    );
   }
 );
 
