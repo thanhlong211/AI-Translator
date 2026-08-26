@@ -1,5 +1,7 @@
 package com.dangt.aitranslator.backend.vocabulary;
 
+import com.dangt.aitranslator.backend.study.EnglishStudyVocabularyItem;
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.study.StudyVocabularyItem;
 import jakarta.persistence.*;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -17,6 +19,25 @@ public class UserVocabulary {
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 8)
+    private StudyLanguage language;
+
+    @Column(length = 190)
+    private String lemma;
+
+    @Column(length = 255)
+    private String ipa;
+
+    @Column(
+            name = "cefr_level",
+            length = 20
+    )
+    private String cefrLevel;
+
+    @Column(length = 1000)
+    private String example;
 
     @Column(nullable = false, length = 190)
     private String surface;
@@ -168,6 +189,11 @@ public class UserVocabulary {
                 Instant.now();
 
         this.userId = userId;
+        this.language = StudyLanguage.JA;
+        this.lemma = null;
+        this.ipa = null;
+        this.cefrLevel = null;
+        this.example = null;
         this.surface =
                 cleanRequired(
                         item.surface(),
@@ -226,6 +252,112 @@ public class UserVocabulary {
         this.reviewCorrectCount = 0;
         this.reviewWrongCount = 0;
         this.correctStreak = 0;
+    }
+
+    public UserVocabulary(
+            Long userId,
+            EnglishStudyVocabularyItem item
+    ) {
+        Instant now =
+                Instant.now();
+
+        this.userId = userId;
+        this.language = StudyLanguage.EN;
+
+        this.surface =
+                cleanRequired(
+                        item.surface(),
+                        item.lemma()
+                );
+
+        this.dictionaryForm =
+                cleanRequired(
+                        item.lemma(),
+                        item.surface()
+                );
+
+        this.lemma =
+                this.dictionaryForm;
+
+        this.reading = "";
+
+        this.romaji = null;
+
+        this.ipa =
+                nullIfBlank(
+                        item.ipa()
+                );
+
+        this.meaning =
+                nullIfBlank(
+                        item.meaning()
+                );
+
+        this.partOfSpeech =
+                nullIfBlank(
+                        item.partOfSpeech()
+                );
+
+        this.jlptLevel =
+                "UNKNOWN";
+
+        this.cefrLevel =
+                normalizeCefr(
+                        item.cefrLevel()
+                );
+
+        this.example =
+                nullIfBlank(
+                        item.example()
+                );
+
+        this.status =
+                VocabularyStatus.NEW;
+
+        this.favorite =
+                false;
+
+        this.encounterCount =
+                1;
+
+        this.firstSeenAt =
+                now;
+
+        this.lastSeenAt =
+                now;
+
+        this.createdAt =
+                now;
+
+        this.updatedAt =
+                now;
+
+        this.dueAt =
+                now;
+
+        this.intervalDays =
+                0;
+
+        this.easeFactor =
+                2.50;
+
+        this.repetitions =
+                0;
+
+        this.lapseCount =
+                0;
+
+        this.lastReviewedAt =
+                null;
+
+        this.reviewCorrectCount =
+                0;
+
+        this.reviewWrongCount =
+                0;
+
+        this.correctStreak =
+                0;
     }
 
     public void applyReviewSchedule(
@@ -296,6 +428,33 @@ public class UserVocabulary {
             StudyVocabularyItem item
     ) {
         applyStudyData(item);
+        updatedAt =
+                Instant.now();
+    }
+
+    public void recordEncounter(
+            EnglishStudyVocabularyItem item
+    ) {
+        applyEnglishStudyData(
+                item
+        );
+
+        encounterCount += 1;
+
+        lastSeenAt =
+                Instant.now();
+
+        updatedAt =
+                lastSeenAt;
+    }
+
+    public void mergeStudyData(
+            EnglishStudyVocabularyItem item
+    ) {
+        applyEnglishStudyData(
+                item
+        );
+
         updatedAt =
                 Instant.now();
     }
@@ -388,6 +547,90 @@ public class UserVocabulary {
         }
     }
 
+    private void applyEnglishStudyData(
+            EnglishStudyVocabularyItem item
+    ) {
+        String nextSurface =
+                clean(
+                        item.surface()
+                );
+
+        if (!nextSurface.isBlank()) {
+            this.surface =
+                    nextSurface;
+        }
+
+        String nextLemma =
+                clean(
+                        item.lemma()
+                );
+
+        if (!nextLemma.isBlank()) {
+            this.lemma =
+                    nextLemma;
+            this.dictionaryForm =
+                    nextLemma;
+        }
+
+        String nextIpa =
+                clean(
+                        item.ipa()
+                );
+
+        if (!nextIpa.isBlank()) {
+            this.ipa =
+                    nextIpa;
+        }
+
+        String nextMeaning =
+                clean(
+                        item.meaning()
+                );
+
+        if (!nextMeaning.isBlank()) {
+            this.meaning =
+                    nextMeaning;
+        }
+
+        String nextPartOfSpeech =
+                clean(
+                        item.partOfSpeech()
+                );
+
+        if (!nextPartOfSpeech.isBlank()) {
+            this.partOfSpeech =
+                    nextPartOfSpeech;
+        }
+
+        String nextCefr =
+                normalizeCefr(
+                        item.cefrLevel()
+                );
+
+        if (
+                !"UNKNOWN".equals(
+                        nextCefr
+                )
+                ||
+                this.cefrLevel == null
+                ||
+                this.cefrLevel.isBlank()
+        ) {
+            this.cefrLevel =
+                    nextCefr;
+        }
+
+        String nextExample =
+                clean(
+                        item.example()
+                );
+
+        if (!nextExample.isBlank()) {
+            this.example =
+                    nextExample;
+        }
+    }
+
     private static String cleanRequired(
             String preferred,
             String fallback
@@ -424,6 +667,21 @@ public class UserVocabulary {
         };
     }
 
+    private static String normalizeCefr(
+            String value
+    ) {
+        String normalized =
+                clean(value)
+                        .toUpperCase();
+
+        return switch (normalized) {
+            case "A1", "A2", "B1", "B2", "C1", "C2" ->
+                    normalized;
+            default ->
+                    "UNKNOWN";
+        };
+    }
+
     private static String clean(
             String value
     ) {
@@ -449,6 +707,26 @@ public class UserVocabulary {
 
     public Long getUserId() {
         return userId;
+    }
+
+    public StudyLanguage getLanguage() {
+        return language;
+    }
+
+    public String getLemma() {
+        return lemma;
+    }
+
+    public String getIpa() {
+        return ipa;
+    }
+
+    public String getCefrLevel() {
+        return cefrLevel;
+    }
+
+    public String getExample() {
+        return example;
     }
 
     public String getSurface() {

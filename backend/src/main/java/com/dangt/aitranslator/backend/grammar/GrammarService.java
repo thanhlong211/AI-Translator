@@ -1,6 +1,8 @@
 package com.dangt.aitranslator.backend.grammar;
 
+import com.dangt.aitranslator.backend.study.EnglishStudyGrammarPoint;
 import com.dangt.aitranslator.backend.study.StudyGrammarPoint;
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -94,11 +96,18 @@ public class GrammarService {
             GrammarSaveRequest request
     ) {
         UpsertResult result =
-                upsertOne(
-                        userId,
-                        request.toStudyPoint(),
-                        request.recordEncounter()
-                );
+                request.normalizedLanguage()
+                        == StudyLanguage.EN
+                        ? upsertEnglishOne(
+                                userId,
+                                request.toEnglishStudyPoint(),
+                                request.recordEncounter()
+                        )
+                        : upsertOne(
+                                userId,
+                                request.toStudyPoint(),
+                                request.recordEncounter()
+                        );
 
         return GrammarResponse.from(
                 result.grammar()
@@ -211,6 +220,74 @@ public class GrammarService {
         );
     }
 
+    @Transactional
+    public GrammarSyncSummary recordEnglishStudyGrammar(
+            Long userId,
+            List<EnglishStudyGrammarPoint> items
+    ) {
+        if (
+                items == null ||
+                items.isEmpty()
+        ) {
+            return new GrammarSyncSummary(
+                    true,
+                    0,
+                    0,
+                    0
+            );
+        }
+
+        int inserted = 0;
+        int updated = 0;
+        int skipped = 0;
+
+        Set<String> seenPatterns =
+                new HashSet<>();
+
+        for (
+                EnglishStudyGrammarPoint item
+                : items
+        ) {
+            if (
+                    item == null ||
+                    clean(item.pattern()).isBlank()
+            ) {
+                skipped += 1;
+                continue;
+            }
+
+            String key =
+                    clean(
+                            item.pattern()
+                    ).toLowerCase();
+
+            if (!seenPatterns.add(key)) {
+                skipped += 1;
+                continue;
+            }
+
+            UpsertResult result =
+                    upsertEnglishOne(
+                            userId,
+                            item,
+                            true
+                    );
+
+            if (result.inserted()) {
+                inserted += 1;
+            } else {
+                updated += 1;
+            }
+        }
+
+        return new GrammarSyncSummary(
+                true,
+                inserted,
+                updated,
+                skipped
+        );
+    }
+
     private UpsertResult upsertOne(
             Long userId,
             StudyGrammarPoint item,
@@ -229,8 +306,9 @@ public class GrammarService {
 
         UserGrammar existing =
                 repository
-                        .findByUserIdAndPattern(
+                        .findByUserIdAndLanguageAndPattern(
                                 userId,
+                                StudyLanguage.JA,
                                 pattern
                         )
                         .orElse(null);
@@ -256,6 +334,82 @@ public class GrammarService {
                 normalizedPoint(
                         item
                 );
+
+        if (recordEncounter) {
+            existing.recordEncounter(
+                    normalized
+            );
+        } else {
+            existing.mergeStudyData(
+                    normalized
+            );
+        }
+
+        return new UpsertResult(
+                repository.saveAndFlush(
+                        existing
+                ),
+                false
+        );
+    }
+
+    private UpsertResult upsertEnglishOne(
+            Long userId,
+            EnglishStudyGrammarPoint item,
+            boolean recordEncounter
+    ) {
+        if (item == null) {
+            throw new IllegalArgumentException(
+                    "English grammar item trống."
+            );
+        }
+
+        String pattern =
+                clean(
+                        item.pattern()
+                );
+
+        if (pattern.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Grammar pattern không được để trống."
+            );
+        }
+
+        UserGrammar existing =
+                repository
+                        .findByUserIdAndLanguageAndPattern(
+                                userId,
+                                StudyLanguage.EN,
+                                pattern
+                        )
+                        .orElse(null);
+
+        EnglishStudyGrammarPoint normalized =
+                new EnglishStudyGrammarPoint(
+                        pattern,
+                        normalizeCefr(
+                                item.cefrLevel()
+                        ),
+                        clean(item.meaning()),
+                        clean(item.matchedText()),
+                        clean(item.explanation()),
+                        clean(item.example())
+                );
+
+        if (existing == null) {
+            UserGrammar created =
+                    new UserGrammar(
+                            userId,
+                            normalized
+                    );
+
+            return new UpsertResult(
+                    repository.saveAndFlush(
+                            created
+                    ),
+                    true
+            );
+        }
 
         if (recordEncounter) {
             existing.recordEncounter(
@@ -322,6 +476,21 @@ public class GrammarService {
 
         return switch (normalized) {
             case "N5", "N4", "N3", "N2", "N1" ->
+                    normalized;
+            default ->
+                    "UNKNOWN";
+        };
+    }
+
+    private String normalizeCefr(
+            String value
+    ) {
+        String normalized =
+                clean(value)
+                        .toUpperCase();
+
+        return switch (normalized) {
+            case "A1", "A2", "B1", "B2", "C1", "C2" ->
                     normalized;
             default ->
                     "UNKNOWN";

@@ -1,5 +1,7 @@
 package com.dangt.aitranslator.backend.vocabulary;
 
+import com.dangt.aitranslator.backend.study.EnglishStudyVocabularyItem;
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.study.StudyVocabularyItem;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -101,15 +103,29 @@ public class VocabularyService {
             Long userId,
             VocabularySaveRequest request
     ) {
-        StudyVocabularyItem item =
-                request.toStudyItem();
+        UserVocabulary vocabulary;
 
-        UserVocabulary vocabulary =
-                upsertOne(
-                        userId,
-                        item,
-                        request.recordEncounter()
-                ).vocabulary();
+        if (
+                request.normalizedLanguage()
+                        == StudyLanguage.EN
+        ) {
+            vocabulary =
+                    upsertEnglishOne(
+                            userId,
+                            request.toEnglishStudyItem(),
+                            request.recordEncounter()
+                    ).vocabulary();
+        } else {
+            StudyVocabularyItem item =
+                    request.toStudyItem();
+
+            vocabulary =
+                    upsertOne(
+                            userId,
+                            item,
+                            request.recordEncounter()
+                    ).vocabulary();
+        }
 
         return VocabularyResponse.from(
                 vocabulary
@@ -228,6 +244,80 @@ public class VocabularyService {
         );
     }
 
+    /**
+     * English Study Auto-save.
+     *
+     * Dedupe theo lemma trong cùng user/language.
+     * reading được giữ rỗng để schema legacy vẫn tương thích.
+     */
+    @Transactional
+    public VocabularySyncSummary recordEnglishStudyVocabulary(
+            Long userId,
+            List<EnglishStudyVocabularyItem> items
+    ) {
+        if (
+                items == null ||
+                items.isEmpty()
+        ) {
+            return new VocabularySyncSummary(
+                    true,
+                    0,
+                    0,
+                    0
+            );
+        }
+
+        int inserted = 0;
+        int updated = 0;
+        int skipped = 0;
+
+        Set<String> seenKeys =
+                new HashSet<>();
+
+        for (
+                EnglishStudyVocabularyItem item
+                : items
+        ) {
+            String lemma =
+                    normalizeEnglishLemma(
+                            item
+                    );
+
+            if (lemma.isBlank()) {
+                skipped += 1;
+                continue;
+            }
+
+            String key =
+                    lemma.toLowerCase();
+
+            if (!seenKeys.add(key)) {
+                skipped += 1;
+                continue;
+            }
+
+            UpsertResult result =
+                    upsertEnglishOne(
+                            userId,
+                            item,
+                            true
+                    );
+
+            if (result.inserted()) {
+                inserted += 1;
+            } else {
+                updated += 1;
+            }
+        }
+
+        return new VocabularySyncSummary(
+                true,
+                inserted,
+                updated,
+                skipped
+        );
+    }
+
     private UpsertResult upsertOne(
             Long userId,
             StudyVocabularyItem item,
@@ -245,8 +335,9 @@ public class VocabularyService {
 
         UserVocabulary existing =
                 repository
-                        .findByUserIdAndDictionaryFormAndReading(
+                        .findByUserIdAndLanguageAndDictionaryFormAndReading(
                                 userId,
+                                StudyLanguage.JA,
                                 dictionaryForm,
                                 reading
                         )
@@ -277,6 +368,87 @@ public class VocabularyService {
                         dictionaryForm,
                         reading
                 );
+
+        if (recordEncounter) {
+            existing.recordEncounter(
+                    normalized
+            );
+        } else {
+            existing.mergeStudyData(
+                    normalized
+            );
+        }
+
+        return new UpsertResult(
+                repository.saveAndFlush(
+                        existing
+                ),
+                false
+        );
+    }
+
+    private UpsertResult upsertEnglishOne(
+            Long userId,
+            EnglishStudyVocabularyItem item,
+            boolean recordEncounter
+    ) {
+        if (item == null) {
+            throw new IllegalArgumentException(
+                    "English vocabulary item trống."
+            );
+        }
+
+        String lemma =
+                normalizeEnglishLemma(
+                        item
+                );
+
+        if (lemma.isBlank()) {
+            throw new IllegalArgumentException(
+                    "English vocabulary thiếu lemma/surface."
+            );
+        }
+
+        UserVocabulary existing =
+                repository
+                        .findByUserIdAndLanguageAndDictionaryFormAndReading(
+                                userId,
+                                StudyLanguage.EN,
+                                lemma,
+                                ""
+                        )
+                        .orElse(null);
+
+        EnglishStudyVocabularyItem normalized =
+                new EnglishStudyVocabularyItem(
+                        clean(item.surface()).isBlank()
+                                ? lemma
+                                : clean(item.surface()),
+                        lemma,
+                        clean(item.ipa()),
+                        clean(item.meaning()),
+                        clean(item.partOfSpeech()),
+                        normalizeCefr(
+                                item.cefrLevel()
+                        ),
+                        clean(item.example()),
+                        clean(item.note())
+                );
+
+        if (existing == null) {
+            UserVocabulary created =
+                    new UserVocabulary(
+                            userId,
+                            normalized
+                    );
+
+            return new UpsertResult(
+                    repository.saveAndFlush(
+                            created
+                    ),
+                    true
+            );
+        }
 
         if (recordEncounter) {
             existing.recordEncounter(
@@ -405,6 +577,43 @@ public class VocabularyService {
 
         return switch (normalized) {
             case "N5", "N4", "N3", "N2", "N1" ->
+                    normalized;
+            default ->
+                    "UNKNOWN";
+        };
+    }
+
+    private String normalizeEnglishLemma(
+            EnglishStudyVocabularyItem item
+    ) {
+        if (item == null) {
+            return "";
+        }
+
+        String lemma =
+                clean(
+                        item.lemma()
+                );
+
+        if (lemma.isBlank()) {
+            lemma =
+                    clean(
+                            item.surface()
+                    );
+        }
+
+        return lemma;
+    }
+
+    private String normalizeCefr(
+            String value
+    ) {
+        String normalized =
+                clean(value)
+                        .toUpperCase();
+
+        return switch (normalized) {
+            case "A1", "A2", "B1", "B2", "C1", "C2" ->
                     normalized;
             default ->
                     "UNKNOWN";

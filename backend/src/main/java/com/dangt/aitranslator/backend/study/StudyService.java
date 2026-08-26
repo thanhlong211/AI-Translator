@@ -635,21 +635,36 @@ public class StudyService {
                 );
 
 
-        /*
-         * Chưa lưu English vào bảng Japanese vocabulary/grammar.
-         */
+        stageStartedAt =
+                System.nanoTime();
+
+
         VocabularySyncSummary vocabularySync =
-                VocabularySyncSummary
-                        .disabled();
+                request.autoSaveVocabulary()
+                        ? vocabularyService
+                                .recordEnglishStudyVocabulary(
+                                        userId,
+                                        normalized.englishVocabulary()
+                                )
+                        : VocabularySyncSummary
+                                .disabled();
 
 
         GrammarSyncSummary grammarSync =
-                GrammarSyncSummary
-                        .disabled();
+                request.autoSaveGrammar()
+                        ? grammarService
+                                .recordEnglishStudyGrammar(
+                                        userId,
+                                        normalized.englishGrammar()
+                                )
+                        : GrammarSyncSummary
+                                .disabled();
 
 
         long persistenceMs =
-                0L;
+                elapsedMs(
+                        stageStartedAt
+                );
 
 
         long totalMs =

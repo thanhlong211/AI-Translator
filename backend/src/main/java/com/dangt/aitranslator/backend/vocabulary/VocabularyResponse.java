@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.vocabulary;
 
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import java.time.Instant;
 
 public record VocabularyResponse(
@@ -11,6 +12,11 @@ public record VocabularyResponse(
         String meaning,
         String partOfSpeech,
         String jlptLevel,
+        StudyLanguage language,
+        String lemma,
+        String ipa,
+        String cefrLevel,
+        String example,
         VocabularyStatus status,
         boolean favorite,
         int encounterCount,
@@ -32,6 +38,11 @@ public record VocabularyResponse(
                 vocabulary.getMeaning(),
                 vocabulary.getPartOfSpeech(),
                 vocabulary.getJlptLevel(),
+                vocabulary.getLanguage(),
+                vocabulary.getLemma(),
+                vocabulary.getIpa(),
+                vocabulary.getCefrLevel(),
+                vocabulary.getExample(),
                 vocabulary.getStatus(),
                 vocabulary.isFavorite(),
                 vocabulary.getEncounterCount(),

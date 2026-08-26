@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.review;
 
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.grammar.GrammarStatus;
 import com.dangt.aitranslator.backend.grammar.UserGrammar;
 import com.dangt.aitranslator.backend.grammar.UserGrammarRepository;
@@ -438,7 +439,8 @@ public class ReviewService {
 
         validateVocabularyOption(
                 userId,
-                selectedId
+                selectedId,
+                item.getLanguage()
         );
 
         boolean correct =
@@ -511,7 +513,8 @@ public class ReviewService {
 
         validateGrammarOption(
                 userId,
-                selectedId
+                selectedId,
+                item.getLanguage()
         );
 
         boolean correct =
@@ -585,7 +588,8 @@ public class ReviewService {
 
         validateVocabularyOption(
                 userId,
-                selectedId
+                selectedId,
+                item.getLanguage()
         );
 
         boolean correct =
@@ -718,7 +722,8 @@ public class ReviewService {
 
         validateGrammarOption(
                 userId,
-                selectedId
+                selectedId,
+                item.getLanguage()
         );
 
         boolean correct =
@@ -913,6 +918,9 @@ public class ReviewService {
                                     current.getId()
                             )
                     ||
+                    candidate.getLanguage()
+                            != current.getLanguage()
+                    ||
                     safe(
                             candidate.getMeaning()
                     ).isBlank()
@@ -921,11 +929,15 @@ public class ReviewService {
             }
 
             if (
-                    safe(
-                            candidate.getJlptLevel()
+                    effectiveLevel(
+                            candidate.getLanguage(),
+                            candidate.getJlptLevel(),
+                            candidate.getCefrLevel()
                     ).equalsIgnoreCase(
-                            safe(
-                                    current.getJlptLevel()
+                            effectiveLevel(
+                                    current.getLanguage(),
+                                    current.getJlptLevel(),
+                                    current.getCefrLevel()
                             )
                     )
             ) {
@@ -1037,6 +1049,9 @@ public class ReviewService {
                                     current.getId()
                             )
                     ||
+                    candidate.getLanguage()
+                            != current.getLanguage()
+                    ||
                     safe(
                             candidate.getMeaning()
                     ).isBlank()
@@ -1045,11 +1060,15 @@ public class ReviewService {
             }
 
             if (
-                    safe(
-                            candidate.getJlptLevel()
+                    effectiveLevel(
+                            candidate.getLanguage(),
+                            candidate.getJlptLevel(),
+                            candidate.getCefrLevel()
                     ).equalsIgnoreCase(
-                            safe(
-                                    current.getJlptLevel()
+                            effectiveLevel(
+                                    current.getLanguage(),
+                                    current.getJlptLevel(),
+                                    current.getCefrLevel()
                             )
                     )
             ) {
@@ -1224,34 +1243,56 @@ public class ReviewService {
 
     private void validateVocabularyOption(
             Long userId,
-            long selectedId
+            long selectedId,
+            StudyLanguage expectedLanguage
     ) {
-        vocabularyRepository
-                .findByIdAndUserId(
-                        selectedId,
-                        userId
-                )
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Đáp án từ vựng không tồn tại."
+        UserVocabulary selected =
+                vocabularyRepository
+                        .findByIdAndUserId(
+                                selectedId,
+                                userId
                         )
-                );
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Đáp án từ vựng không tồn tại."
+                                )
+                        );
+
+        if (
+                selected.getLanguage()
+                        != expectedLanguage
+        ) {
+            throw new IllegalArgumentException(
+                    "Đáp án từ vựng không cùng ngôn ngữ."
+            );
+        }
     }
 
     private void validateGrammarOption(
             Long userId,
-            long selectedId
+            long selectedId,
+            StudyLanguage expectedLanguage
     ) {
-        grammarRepository
-                .findByIdAndUserId(
-                        selectedId,
-                        userId
-                )
-                .orElseThrow(() ->
-                        new IllegalArgumentException(
-                                "Đáp án ngữ pháp không tồn tại."
+        UserGrammar selected =
+                grammarRepository
+                        .findByIdAndUserId(
+                                selectedId,
+                                userId
                         )
-                );
+                        .orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        "Đáp án ngữ pháp không tồn tại."
+                                )
+                        );
+
+        if (
+                selected.getLanguage()
+                        != expectedLanguage
+        ) {
+            throw new IllegalArgumentException(
+                    "Đáp án ngữ pháp không cùng ngôn ngữ."
+            );
+        }
     }
 
     private VocabularyStatus vocabularyStatus(
@@ -1286,6 +1327,22 @@ public class ReviewService {
         return repetitions >= 3
                 ? GrammarStatus.KNOWN
                 : GrammarStatus.LEARNING;
+    }
+
+    private String effectiveLevel(
+            StudyLanguage language,
+            String jlptLevel,
+            String cefrLevel
+    ) {
+        if (language == StudyLanguage.EN) {
+            return safe(
+                    cefrLevel
+            );
+        }
+
+        return safe(
+                jlptLevel
+        );
     }
 
     private int practiceMasteryPriority(

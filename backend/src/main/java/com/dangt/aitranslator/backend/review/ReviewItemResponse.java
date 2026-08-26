@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.review;
 
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.grammar.UserGrammar;
 import com.dangt.aitranslator.backend.vocabulary.UserVocabulary;
 
@@ -16,6 +17,10 @@ public record ReviewItemResponse(
         String answer,
         String detail,
         String jlptLevel,
+        StudyLanguage language,
+        String ipa,
+        String cefrLevel,
+        String example,
         String learningStatus,
         boolean favorite,
         int encounterCount,
@@ -59,6 +64,10 @@ public record ReviewItemResponse(
                 vocabulary.getMeaning(),
                 vocabulary.getPartOfSpeech(),
                 vocabulary.getJlptLevel(),
+                vocabulary.getLanguage(),
+                vocabulary.getIpa(),
+                vocabulary.getCefrLevel(),
+                vocabulary.getExample(),
                 vocabulary.getStatus().name(),
                 vocabulary.isFavorite(),
                 vocabulary.getEncounterCount(),
@@ -103,6 +112,10 @@ public record ReviewItemResponse(
                 grammar.getMeaning(),
                 grammar.getExplanation(),
                 grammar.getJlptLevel(),
+                grammar.getLanguage(),
+                "",
+                grammar.getCefrLevel(),
+                grammar.getExample(),
                 grammar.getStatus().name(),
                 grammar.isFavorite(),
                 grammar.getEncounterCount(),

@@ -1,5 +1,7 @@
 package com.dangt.aitranslator.backend.vocabulary;
 
+import com.dangt.aitranslator.backend.study.EnglishStudyVocabularyItem;
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.study.StudyVocabularyItem;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
@@ -36,6 +38,25 @@ public record VocabularySaveRequest(
         @Schema(example = "N5")
         String jlptLevel,
 
+        @Schema(example = "JA")
+        StudyLanguage language,
+
+        @Size(max = 190)
+        @Schema(example = "study")
+        String lemma,
+
+        @Size(max = 255)
+        @Schema(example = "ˈstʌdi")
+        String ipa,
+
+        @Size(max = 20)
+        @Schema(example = "B1")
+        String cefrLevel,
+
+        @Size(max = 1000)
+        @Schema(example = "I study English every day.")
+        String example,
+
         @Schema(
                 description =
                         "true = đây là một lần gặp mới; false = chỉ Save thủ công."
@@ -43,6 +64,39 @@ public record VocabularySaveRequest(
         boolean recordEncounter
 
 ) {
+    public VocabularySaveRequest(
+            String surface,
+            String dictionaryForm,
+            String reading,
+            String romaji,
+            String meaning,
+            String partOfSpeech,
+            String jlptLevel,
+            boolean recordEncounter
+    ) {
+        this(
+                surface,
+                dictionaryForm,
+                reading,
+                romaji,
+                meaning,
+                partOfSpeech,
+                jlptLevel,
+                StudyLanguage.JA,
+                null,
+                null,
+                null,
+                null,
+                recordEncounter
+        );
+    }
+
+    public StudyLanguage normalizedLanguage() {
+        return language == StudyLanguage.EN
+                ? StudyLanguage.EN
+                : StudyLanguage.JA;
+    }
+
     public StudyVocabularyItem toStudyItem() {
         return new StudyVocabularyItem(
                 surface,
@@ -52,6 +106,21 @@ public record VocabularySaveRequest(
                 meaning,
                 partOfSpeech,
                 jlptLevel,
+                ""
+        );
+    }
+
+    public EnglishStudyVocabularyItem toEnglishStudyItem() {
+        return new EnglishStudyVocabularyItem(
+                surface,
+                lemma == null || lemma.isBlank()
+                        ? dictionaryForm
+                        : lemma,
+                ipa,
+                meaning,
+                partOfSpeech,
+                cefrLevel,
+                example,
                 ""
         );
     }

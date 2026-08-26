@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.vocabulary;
 
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,14 @@ public interface UserVocabularyRepository
     findByIdAndUserId(
             Long id,
             Long userId
+    );
+
+    Optional<UserVocabulary>
+    findByUserIdAndLanguageAndDictionaryFormAndReading(
+            Long userId,
+            StudyLanguage language,
+            String dictionaryForm,
+            String reading
     );
 
     Optional<UserVocabulary>

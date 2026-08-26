@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.grammar;
 
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import java.time.Instant;
 
 public record GrammarResponse(
@@ -8,6 +9,10 @@ public record GrammarResponse(
         String jlptLevel,
         String meaning,
         String explanation,
+        StudyLanguage language,
+        String cefrLevel,
+        String matchedText,
+        String example,
         GrammarStatus status,
         boolean favorite,
         int encounterCount,
@@ -26,6 +31,10 @@ public record GrammarResponse(
                 grammar.getJlptLevel(),
                 grammar.getMeaning(),
                 grammar.getExplanation(),
+                grammar.getLanguage(),
+                grammar.getCefrLevel(),
+                grammar.getMatchedText(),
+                grammar.getExample(),
                 grammar.getStatus(),
                 grammar.isFavorite(),
                 grammar.getEncounterCount(),

@@ -1,5 +1,6 @@
 package com.dangt.aitranslator.backend.grammar;
 
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,6 +18,13 @@ public interface UserGrammarRepository
     findByIdAndUserId(
             Long id,
             Long userId
+    );
+
+    Optional<UserGrammar>
+    findByUserIdAndLanguageAndPattern(
+            Long userId,
+            StudyLanguage language,
+            String pattern
     );
 
     Optional<UserGrammar>
