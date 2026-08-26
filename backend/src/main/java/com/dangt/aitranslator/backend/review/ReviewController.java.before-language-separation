@@ -1,7 +1,6 @@
 package com.dangt.aitranslator.backend.review;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
-import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(
         name = "Review",
         description =
-                "SRS trắc nghiệm tách riêng Japanese/English."
+                "SRS trắc nghiệm 4 đáp án cho Vocabulary + Grammar; grade được suy ra tự động từ hành vi đúng/sai."
 )
 @SecurityRequirement(name = "bearerAuth")
 public class ReviewController {
@@ -30,16 +29,16 @@ public class ReviewController {
     ) {
         this.reviewService =
                 reviewService;
-
         this.currentUserService =
                 currentUserService;
     }
 
+    @Operation(
+            summary =
+                    "Lấy các item đến hạn ôn"
+    )
     @GetMapping("/due")
     public ReviewQueueResponse due(
-            @RequestParam(defaultValue = "JA")
-            StudyLanguage language,
-
             @RequestParam(defaultValue = "30")
             int limit,
 
@@ -48,58 +47,63 @@ public class ReviewController {
     ) {
         UserAccount user =
                 currentUserService
-                        .requireActiveUser(jwt);
+                        .requireActiveUser(
+                                jwt
+                        );
 
         return reviewService.due(
                 user.getId(),
-                language,
                 limit
-        );
-    }
-
-    @GetMapping("/practice")
-    public ReviewQueueResponse practice(
-            @RequestParam(defaultValue = "JA")
-            StudyLanguage language,
-
-            @RequestParam(defaultValue = "30")
-            int limit,
-
-            @AuthenticationPrincipal
-            Jwt jwt
-    ) {
-        UserAccount user =
-                currentUserService
-                        .requireActiveUser(jwt);
-
-        return reviewService.practice(
-                user.getId(),
-                language,
-                limit
-        );
-    }
-
-    @GetMapping("/stats")
-    public ReviewStatsResponse stats(
-            @RequestParam(defaultValue = "JA")
-            StudyLanguage language,
-
-            @AuthenticationPrincipal
-            Jwt jwt
-    ) {
-        UserAccount user =
-                currentUserService
-                        .requireActiveUser(jwt);
-
-        return reviewService.stats(
-                user.getId(),
-                language
         );
     }
 
     @Operation(
             summary =
-                    "Chấm đáp án review"
+                    "Lấy bộ câu ôn tự do, không phụ thuộc dueAt"
+    )
+    @GetMapping("/practice")
+    public ReviewQueueResponse practice(
+            @RequestParam(defaultValue = "30")
+            int limit,
+
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
+        UserAccount user =
+                currentUserService
+                        .requireActiveUser(
+                                jwt
+                        );
+
+        return reviewService.practice(
+                user.getId(),
+                limit
+        );
+    }
+
+    @Operation(
+            summary =
+                    "Thống kê ôn tập hiện tại"
+    )
+    @GetMapping("/stats")
+    public ReviewStatsResponse stats(
+            @AuthenticationPrincipal
+            Jwt jwt
+    ) {
+        UserAccount user =
+                currentUserService
+                        .requireActiveUser(
+                                jwt
+                        );
+
+        return reviewService.stats(
+                user.getId()
+        );
+    }
+
+    @Operation(
+            summary =
+                    "Chấm đáp án; practice=false cập nhật SRS, practice=true chỉ luyện tập"
     )
     @PostMapping("/answer")
     public ReviewAnswerResponse answer(
@@ -112,7 +116,9 @@ public class ReviewController {
     ) {
         UserAccount user =
                 currentUserService
-                        .requireActiveUser(jwt);
+                        .requireActiveUser(
+                                jwt
+                        );
 
         return reviewService.answer(
                 user.getId(),

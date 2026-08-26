@@ -33,35 +33,7 @@ public class GrammarService {
             int page,
             int size
     ) {
-        return search(
-                userId,
-                StudyLanguage.JA,
-                query,
-                status,
-                favorite,
-                page,
-                size
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public GrammarPageResponse search(
-            Long userId,
-            StudyLanguage language,
-            String query,
-            GrammarStatus status,
-            Boolean favorite,
-            int page,
-            int size
-    ) {
-        StudyLanguage safeLanguage =
-                normalizeLanguage(language);
-
-        int safePage =
-                Math.max(
-                        0,
-                        page
-                );
+        int safePage = Math.max(0, page);
 
         int safeSize =
                 Math.max(
@@ -81,7 +53,6 @@ public class GrammarService {
         Page<UserGrammar> result =
                 repository.search(
                         userId,
-                        safeLanguage,
                         normalizeQuery(query),
                         status,
                         favorite,
@@ -97,53 +68,25 @@ public class GrammarService {
     public GrammarStatsResponse stats(
             Long userId
     ) {
-        return stats(
-                userId,
-                StudyLanguage.JA
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public GrammarStatsResponse stats(
-            Long userId,
-            StudyLanguage language
-    ) {
-        StudyLanguage safeLanguage =
-                normalizeLanguage(language);
-
         return new GrammarStatsResponse(
-                repository
-                        .countByUserIdAndLanguage(
-                                userId,
-                                safeLanguage
-                        ),
-
-                repository
-                        .countByUserIdAndLanguageAndStatus(
-                                userId,
-                                safeLanguage,
-                                GrammarStatus.NEW
-                        ),
-
-                repository
-                        .countByUserIdAndLanguageAndStatus(
-                                userId,
-                                safeLanguage,
-                                GrammarStatus.LEARNING
-                        ),
-
-                repository
-                        .countByUserIdAndLanguageAndStatus(
-                                userId,
-                                safeLanguage,
-                                GrammarStatus.KNOWN
-                        ),
-
-                repository
-                        .countByUserIdAndLanguageAndFavoriteTrue(
-                                userId,
-                                safeLanguage
-                        )
+                repository.countByUserId(
+                        userId
+                ),
+                repository.countByUserIdAndStatus(
+                        userId,
+                        GrammarStatus.NEW
+                ),
+                repository.countByUserIdAndStatus(
+                        userId,
+                        GrammarStatus.LEARNING
+                ),
+                repository.countByUserIdAndStatus(
+                        userId,
+                        GrammarStatus.KNOWN
+                ),
+                repository.countByUserIdAndFavoriteTrue(
+                        userId
+                )
         );
     }
 
@@ -552,14 +495,6 @@ public class GrammarService {
             default ->
                     "UNKNOWN";
         };
-    }
-
-    private StudyLanguage normalizeLanguage(
-            StudyLanguage language
-    ) {
-        return language == StudyLanguage.EN
-                ? StudyLanguage.EN
-                : StudyLanguage.JA;
     }
 
     private String normalizeQuery(

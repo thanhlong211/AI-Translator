@@ -1,6 +1,5 @@
 package com.dangt.aitranslator.backend.review;
 
-import com.dangt.aitranslator.backend.study.StudyLanguage;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -18,13 +17,6 @@ public class ReviewEvent {
             nullable = false
     )
     private Long userId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(
-            nullable = false,
-            length = 8
-    )
-    private StudyLanguage language;
 
     @Enumerated(EnumType.STRING)
     @Column(
@@ -97,43 +89,8 @@ public class ReviewEvent {
     protected ReviewEvent() {
     }
 
-    /*
-     * Compatibility cho code/test trước multi-language.
-     */
     public ReviewEvent(
             Long userId,
-            ReviewItemType itemType,
-            Long itemId,
-            ReviewGrade grade,
-            ReviewQuestionType questionType,
-            boolean correct,
-            Long responseTimeMs,
-            int previousIntervalDays,
-            int nextIntervalDays,
-            double previousEaseFactor,
-            double nextEaseFactor,
-            Instant reviewedAt
-    ) {
-        this(
-                userId,
-                StudyLanguage.JA,
-                itemType,
-                itemId,
-                grade,
-                questionType,
-                correct,
-                responseTimeMs,
-                previousIntervalDays,
-                nextIntervalDays,
-                previousEaseFactor,
-                nextEaseFactor,
-                reviewedAt
-        );
-    }
-
-    public ReviewEvent(
-            Long userId,
-            StudyLanguage language,
             ReviewItemType itemType,
             Long itemId,
             ReviewGrade grade,
@@ -147,18 +104,11 @@ public class ReviewEvent {
             Instant reviewedAt
     ) {
         this.userId = userId;
-
-        this.language =
-                language == StudyLanguage.EN
-                        ? StudyLanguage.EN
-                        : StudyLanguage.JA;
-
         this.itemType = itemType;
         this.itemId = itemId;
         this.grade = grade;
         this.questionType = questionType;
         this.correct = correct;
-
         this.responseTimeMs =
                 responseTimeMs == null
                         ? null
@@ -169,26 +119,20 @@ public class ReviewEvent {
                                         responseTimeMs
                                 )
                         );
-
         this.previousIntervalDays =
                 previousIntervalDays;
-
         this.nextIntervalDays =
                 nextIntervalDays;
-
         this.previousEaseFactor =
                 previousEaseFactor;
-
         this.nextEaseFactor =
                 nextEaseFactor;
-
         this.reviewedAt =
                 reviewedAt;
     }
 
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
-    public StudyLanguage getLanguage() { return language; }
     public ReviewItemType getItemType() { return itemType; }
     public Long getItemId() { return itemId; }
     public ReviewGrade getGrade() { return grade; }

@@ -1,7 +1,6 @@
 package com.dangt.aitranslator.backend.grammar;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
-import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(
         name = "Grammar",
         description =
-                "Kho cấu trúc/ngữ pháp cá nhân theo user và ngôn ngữ."
+                "Kho cấu trúc/ngữ pháp cá nhân theo từng user."
 )
 @SecurityRequirement(name = "bearerAuth")
 public class GrammarController {
@@ -45,9 +44,6 @@ public class GrammarController {
             @RequestParam(required = false)
             String q,
 
-            @RequestParam(defaultValue = "JA")
-            StudyLanguage language,
-
             @RequestParam(required = false)
             GrammarStatus status,
 
@@ -69,7 +65,6 @@ public class GrammarController {
 
         return grammarService.search(
                 user.getId(),
-                language,
                 q,
                 status,
                 favorite,
@@ -78,11 +73,12 @@ public class GrammarController {
         );
     }
 
+    @Operation(
+            summary =
+                    "Thống kê Grammar Library"
+    )
     @GetMapping("/stats")
     public GrammarStatsResponse stats(
-            @RequestParam(defaultValue = "JA")
-            StudyLanguage language,
-
             @AuthenticationPrincipal
             Jwt jwt
     ) {
@@ -91,11 +87,14 @@ public class GrammarController {
                         .requireActiveUser(jwt);
 
         return grammarService.stats(
-                user.getId(),
-                language
+                user.getId()
         );
     }
 
+    @Operation(
+            summary =
+                    "Lưu thủ công một cấu trúc/ngữ pháp"
+    )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public GrammarResponse save(
@@ -116,6 +115,10 @@ public class GrammarController {
         );
     }
 
+    @Operation(
+            summary =
+                    "Cập nhật tiến độ/favorite/note"
+    )
     @PatchMapping("/{grammarId}")
     public GrammarResponse update(
             @PathVariable
@@ -139,6 +142,10 @@ public class GrammarController {
         );
     }
 
+    @Operation(
+            summary =
+                    "Xóa cấu trúc/ngữ pháp"
+    )
     @DeleteMapping("/{grammarId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(

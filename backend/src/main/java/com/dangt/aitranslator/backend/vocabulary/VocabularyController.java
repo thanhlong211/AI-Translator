@@ -1,9 +1,9 @@
 package com.dangt.aitranslator.backend.vocabulary;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
+import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @Tag(
         name = "Vocabulary",
         description =
-                "Personal Vocabulary theo từng user: search, status, favorite, note và encounter count."
+                "Personal Vocabulary theo từng user và ngôn ngữ."
 )
 @SecurityRequirement(name = "bearerAuth")
 public class VocabularyController {
@@ -45,6 +45,9 @@ public class VocabularyController {
             @RequestParam(required = false)
             String q,
 
+            @RequestParam(defaultValue = "JA")
+            StudyLanguage language,
+
             @RequestParam(required = false)
             VocabularyStatus status,
 
@@ -66,6 +69,7 @@ public class VocabularyController {
 
         return vocabularyService.search(
                 user.getId(),
+                language,
                 q,
                 status,
                 favorite,
@@ -80,6 +84,9 @@ public class VocabularyController {
     )
     @GetMapping("/stats")
     public VocabularyStatsResponse stats(
+            @RequestParam(defaultValue = "JA")
+            StudyLanguage language,
+
             @AuthenticationPrincipal
             Jwt jwt
     ) {
@@ -88,15 +95,14 @@ public class VocabularyController {
                         .requireActiveUser(jwt);
 
         return vocabularyService.stats(
-                user.getId()
+                user.getId(),
+                language
         );
     }
 
     @Operation(
             summary =
-                    "Lưu một từ từ Study UI",
-            description =
-                    "Chống duplicate bằng user + dictionaryForm + reading."
+                    "Lưu một từ từ Study UI"
     )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -118,10 +124,6 @@ public class VocabularyController {
         );
     }
 
-    @Operation(
-            summary =
-                    "Cập nhật trạng thái/favorite/ghi chú"
-    )
     @PatchMapping("/{vocabularyId}")
     public VocabularyResponse update(
             @PathVariable
@@ -145,10 +147,6 @@ public class VocabularyController {
         );
     }
 
-    @Operation(
-            summary =
-                    "Xóa từ khỏi kho cá nhân"
-    )
     @DeleteMapping("/{vocabularyId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(

@@ -55,22 +55,6 @@ public class ReviewService {
             Long userId,
             int limit
     ) {
-        return due(
-                userId,
-                StudyLanguage.JA,
-                limit
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public ReviewQueueResponse due(
-            Long userId,
-            StudyLanguage language,
-            int limit
-    ) {
-        StudyLanguage safeLanguage =
-                normalizeLanguage(language);
-
         int safeLimit =
                 Math.max(
                         1,
@@ -85,32 +69,32 @@ public class ReviewService {
 
         List<UserVocabulary> dueVocabulary =
                 vocabularyRepository
-                        .findTop100ByUserIdAndLanguageAndDueAtLessThanEqualOrderByDueAtAsc(
+                        .findTop100ByUserIdAndDueAtLessThanEqualOrderByDueAtAsc(
                                 userId,
-                                safeLanguage,
                                 now
                         );
 
         List<UserGrammar> dueGrammar =
                 grammarRepository
-                        .findTop100ByUserIdAndLanguageAndDueAtLessThanEqualOrderByDueAtAsc(
+                        .findTop100ByUserIdAndDueAtLessThanEqualOrderByDueAtAsc(
                                 userId,
-                                safeLanguage,
                                 now
                         );
 
+        /*
+         * Distractors lấy từ kho cá nhân, không gọi AI.
+         * Bounded 500 item mỗi loại để queue vẫn nhẹ.
+         */
         List<UserVocabulary> vocabularyPool =
                 vocabularyRepository
-                        .findTop500ByUserIdAndLanguageOrderByLastSeenAtDesc(
-                                userId,
-                                safeLanguage
+                        .findTop500ByUserIdOrderByLastSeenAtDesc(
+                                userId
                         );
 
         List<UserGrammar> grammarPool =
                 grammarRepository
-                        .findTop500ByUserIdAndLanguageOrderByLastSeenAtDesc(
-                                userId,
-                                safeLanguage
+                        .findTop500ByUserIdOrderByLastSeenAtDesc(
+                                userId
                         );
 
         List<ReviewItemResponse> items =
@@ -147,8 +131,7 @@ public class ReviewService {
                                         )
                                         .thenComparing(
                                                 item ->
-                                                        item.itemType()
-                                                                .name()
+                                                        item.itemType().name()
                                         )
                                         .thenComparing(
                                                 ReviewItemResponse::itemId
@@ -161,17 +144,15 @@ public class ReviewService {
 
         long vocabularyDue =
                 vocabularyRepository
-                        .countByUserIdAndLanguageAndDueAtLessThanEqual(
+                        .countByUserIdAndDueAtLessThanEqual(
                                 userId,
-                                safeLanguage,
                                 now
                         );
 
         long grammarDue =
                 grammarRepository
-                        .countByUserIdAndLanguageAndDueAtLessThanEqual(
+                        .countByUserIdAndDueAtLessThanEqual(
                                 userId,
-                                safeLanguage,
                                 now
                         );
 
@@ -188,22 +169,6 @@ public class ReviewService {
             Long userId,
             int limit
     ) {
-        return practice(
-                userId,
-                StudyLanguage.JA,
-                limit
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public ReviewQueueResponse practice(
-            Long userId,
-            StudyLanguage language,
-            int limit
-    ) {
-        StudyLanguage safeLanguage =
-                normalizeLanguage(language);
-
         int safeLimit =
                 Math.max(
                         1,
@@ -215,16 +180,14 @@ public class ReviewService {
 
         List<UserVocabulary> vocabularyPool =
                 vocabularyRepository
-                        .findTop500ByUserIdAndLanguageOrderByLastSeenAtDesc(
-                                userId,
-                                safeLanguage
+                        .findTop500ByUserIdOrderByLastSeenAtDesc(
+                                userId
                         );
 
         List<UserGrammar> grammarPool =
                 grammarRepository
-                        .findTop500ByUserIdAndLanguageOrderByLastSeenAtDesc(
-                                userId,
-                                safeLanguage
+                        .findTop500ByUserIdOrderByLastSeenAtDesc(
+                                userId
                         );
 
         List<ReviewItemResponse> candidates =
@@ -281,18 +244,17 @@ public class ReviewService {
                         .toList();
 
         long vocabularyCount =
-                candidates.stream()
+                candidates
+                        .stream()
                         .filter(
                                 item ->
-                                        item.itemType()
-                                                ==
+                                        item.itemType() ==
                                         ReviewItemType.VOCABULARY
                         )
                         .count();
 
         long grammarCount =
-                candidates.size()
-                -
+                candidates.size() -
                 vocabularyCount;
 
         return new ReviewQueueResponse(
@@ -307,20 +269,6 @@ public class ReviewService {
     public ReviewStatsResponse stats(
             Long userId
     ) {
-        return stats(
-                userId,
-                StudyLanguage.JA
-        );
-    }
-
-    @Transactional(readOnly = true)
-    public ReviewStatsResponse stats(
-            Long userId,
-            StudyLanguage language
-    ) {
-        StudyLanguage safeLanguage =
-                normalizeLanguage(language);
-
         Instant now =
                 Instant.now();
 
@@ -332,36 +280,36 @@ public class ReviewService {
 
         long vocabularyDue =
                 vocabularyRepository
-                        .countByUserIdAndLanguageAndDueAtLessThanEqual(
+                        .countByUserIdAndDueAtLessThanEqual(
                                 userId,
-                                safeLanguage,
                                 now
                         );
 
         long grammarDue =
                 grammarRepository
-                        .countByUserIdAndLanguageAndDueAtLessThanEqual(
+                        .countByUserIdAndDueAtLessThanEqual(
                                 userId,
-                                safeLanguage,
                                 now
                         );
 
         long correct =
                 reviewEventRepository
-                        .countByUserIdAndLanguageAndCorrectTrueAndReviewedAtGreaterThanEqual(
+                        .countByUserIdAndCorrectTrueAndReviewedAtGreaterThanEqual(
                                 userId,
-                                safeLanguage,
                                 since
                         );
 
         long wrong =
                 reviewEventRepository
-                        .countByUserIdAndLanguageAndCorrectFalseAndReviewedAtGreaterThanEqual(
+                        .countByUserIdAndCorrectFalseAndReviewedAtGreaterThanEqual(
                                 userId,
-                                safeLanguage,
                                 since
                         );
 
+        /*
+         * reviewedLast24h ở V6.6.2 chỉ tính quiz khách quan.
+         * Event self-grade cũ trước V8 không làm sai accuracy mới.
+         */
         long reviewed =
                 correct + wrong;
 
@@ -386,35 +334,27 @@ public class ReviewService {
                 correct,
                 wrong,
                 accuracy,
-
                 reviewEventRepository
-                        .countByUserIdAndLanguageAndGradeAndReviewedAtGreaterThanEqual(
+                        .countByUserIdAndGradeAndReviewedAtGreaterThanEqual(
                                 userId,
-                                safeLanguage,
                                 ReviewGrade.AGAIN,
                                 since
                         ),
-
                 reviewEventRepository
-                        .countByUserIdAndLanguageAndGradeAndReviewedAtGreaterThanEqual(
+                        .countByUserIdAndGradeAndReviewedAtGreaterThanEqual(
                                 userId,
-                                safeLanguage,
                                 ReviewGrade.HARD,
                                 since
                         ),
-
                 reviewEventRepository
-                        .countByUserIdAndLanguageAndGradeAndReviewedAtGreaterThanEqual(
+                        .countByUserIdAndGradeAndReviewedAtGreaterThanEqual(
                                 userId,
-                                safeLanguage,
                                 ReviewGrade.GOOD,
                                 since
                         ),
-
                 reviewEventRepository
-                        .countByUserIdAndLanguageAndGradeAndReviewedAtGreaterThanEqual(
+                        .countByUserIdAndGradeAndReviewedAtGreaterThanEqual(
                                 userId,
-                                safeLanguage,
                                 ReviewGrade.EASY,
                                 since
                         )
@@ -724,7 +664,6 @@ public class ReviewService {
         reviewEventRepository.save(
                 new ReviewEvent(
                         userId,
-                        item.getLanguage(),
                         ReviewItemType.VOCABULARY,
                         item.getId(),
                         automaticGrade,
@@ -859,7 +798,6 @@ public class ReviewService {
         reviewEventRepository.save(
                 new ReviewEvent(
                         userId,
-                        item.getLanguage(),
                         ReviewItemType.GRAMMAR,
                         item.getId(),
                         automaticGrade,
@@ -1389,14 +1327,6 @@ public class ReviewService {
         return repetitions >= 3
                 ? GrammarStatus.KNOWN
                 : GrammarStatus.LEARNING;
-    }
-
-    private StudyLanguage normalizeLanguage(
-            StudyLanguage language
-    ) {
-        return language == StudyLanguage.EN
-                ? StudyLanguage.EN
-                : StudyLanguage.JA;
     }
 
     private String effectiveLevel(

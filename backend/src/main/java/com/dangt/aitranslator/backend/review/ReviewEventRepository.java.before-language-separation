@@ -1,6 +1,5 @@
 package com.dangt.aitranslator.backend.review;
 
-import com.dangt.aitranslator.backend.study.StudyLanguage;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.Instant;
@@ -29,25 +28,6 @@ public interface ReviewEventRepository
             Instant since
     );
 
-    long countByUserIdAndLanguageAndGradeAndReviewedAtGreaterThanEqual(
-            Long userId,
-            StudyLanguage language,
-            ReviewGrade grade,
-            Instant since
-    );
-
-    long countByUserIdAndLanguageAndCorrectTrueAndReviewedAtGreaterThanEqual(
-            Long userId,
-            StudyLanguage language,
-            Instant since
-    );
-
-    long countByUserIdAndLanguageAndCorrectFalseAndReviewedAtGreaterThanEqual(
-            Long userId,
-            StudyLanguage language,
-            Instant since
-    );
-
     java.util.List<ReviewEvent>
     findByUserIdAndReviewedAtGreaterThanEqualOrderByReviewedAtAsc(
             Long userId,
@@ -58,4 +38,5 @@ public interface ReviewEventRepository
     findTop100ByUserIdOrderByReviewedAtDesc(
             Long userId
     );
+
 }

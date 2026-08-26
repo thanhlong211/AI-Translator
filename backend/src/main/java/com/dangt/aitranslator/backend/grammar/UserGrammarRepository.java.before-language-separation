@@ -37,29 +37,13 @@ public interface UserGrammarRepository
             Long userId
     );
 
-    long countByUserIdAndLanguage(
-            Long userId,
-            StudyLanguage language
-    );
-
     long countByUserIdAndStatus(
             Long userId,
             GrammarStatus status
     );
 
-    long countByUserIdAndLanguageAndStatus(
-            Long userId,
-            StudyLanguage language,
-            GrammarStatus status
-    );
-
     long countByUserIdAndFavoriteTrue(
             Long userId
-    );
-
-    long countByUserIdAndLanguageAndFavoriteTrue(
-            Long userId,
-            StudyLanguage language
     );
 
     List<UserGrammar>
@@ -68,40 +52,21 @@ public interface UserGrammarRepository
             Instant dueAt
     );
 
-    List<UserGrammar>
-    findTop100ByUserIdAndLanguageAndDueAtLessThanEqualOrderByDueAtAsc(
-            Long userId,
-            StudyLanguage language,
-            Instant dueAt
-    );
-
     long countByUserIdAndDueAtLessThanEqual(
             Long userId,
             Instant dueAt
     );
 
-    long countByUserIdAndLanguageAndDueAtLessThanEqual(
-            Long userId,
-            StudyLanguage language,
-            Instant dueAt
-    );
 
     List<UserGrammar>
     findTop500ByUserIdOrderByLastSeenAtDesc(
             Long userId
     );
 
-    List<UserGrammar>
-    findTop500ByUserIdAndLanguageOrderByLastSeenAtDesc(
-            Long userId,
-            StudyLanguage language
-    );
-
     @Query("""
             select grammar
             from UserGrammar grammar
             where grammar.userId = :userId
-              and grammar.language = :language
               and (
                     :status is null
                     or grammar.status = :status
@@ -118,19 +83,12 @@ public interface UserGrammarRepository
                         like lower(concat('%', :queryText, '%'))
                     or lower(coalesce(grammar.explanation, ''))
                         like lower(concat('%', :queryText, '%'))
-                    or lower(coalesce(grammar.matchedText, ''))
-                        like lower(concat('%', :queryText, '%'))
-                    or lower(coalesce(grammar.example, ''))
-                        like lower(concat('%', :queryText, '%'))
               )
             order by grammar.lastSeenAt desc, grammar.id desc
             """)
     Page<UserGrammar> search(
             @Param("userId")
             Long userId,
-
-            @Param("language")
-            StudyLanguage language,
 
             @Param("queryText")
             String queryText,

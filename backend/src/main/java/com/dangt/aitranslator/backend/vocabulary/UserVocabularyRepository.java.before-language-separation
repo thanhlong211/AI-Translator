@@ -28,9 +28,6 @@ public interface UserVocabularyRepository
             String reading
     );
 
-    /*
-     * Legacy methods giữ lại cho code cũ/dashboard.
-     */
     Optional<UserVocabulary>
     findByUserIdAndDictionaryFormAndReading(
             Long userId,
@@ -42,29 +39,13 @@ public interface UserVocabularyRepository
             Long userId
     );
 
-    long countByUserIdAndLanguage(
-            Long userId,
-            StudyLanguage language
-    );
-
     long countByUserIdAndStatus(
             Long userId,
             VocabularyStatus status
     );
 
-    long countByUserIdAndLanguageAndStatus(
-            Long userId,
-            StudyLanguage language,
-            VocabularyStatus status
-    );
-
     long countByUserIdAndFavoriteTrue(
             Long userId
-    );
-
-    long countByUserIdAndLanguageAndFavoriteTrue(
-            Long userId,
-            StudyLanguage language
     );
 
     List<UserVocabulary>
@@ -73,40 +54,21 @@ public interface UserVocabularyRepository
             Instant dueAt
     );
 
-    List<UserVocabulary>
-    findTop100ByUserIdAndLanguageAndDueAtLessThanEqualOrderByDueAtAsc(
-            Long userId,
-            StudyLanguage language,
-            Instant dueAt
-    );
-
     long countByUserIdAndDueAtLessThanEqual(
             Long userId,
             Instant dueAt
     );
 
-    long countByUserIdAndLanguageAndDueAtLessThanEqual(
-            Long userId,
-            StudyLanguage language,
-            Instant dueAt
-    );
 
     List<UserVocabulary>
     findTop500ByUserIdOrderByLastSeenAtDesc(
             Long userId
     );
 
-    List<UserVocabulary>
-    findTop500ByUserIdAndLanguageOrderByLastSeenAtDesc(
-            Long userId,
-            StudyLanguage language
-    );
-
     @Query("""
             select vocabulary
             from UserVocabulary vocabulary
             where vocabulary.userId = :userId
-              and vocabulary.language = :language
               and (
                     :status is null
                     or vocabulary.status = :status
@@ -125,10 +87,6 @@ public interface UserVocabularyRepository
                         like lower(concat('%', :queryText, '%'))
                     or lower(coalesce(vocabulary.romaji, ''))
                         like lower(concat('%', :queryText, '%'))
-                    or lower(coalesce(vocabulary.lemma, ''))
-                        like lower(concat('%', :queryText, '%'))
-                    or lower(coalesce(vocabulary.ipa, ''))
-                        like lower(concat('%', :queryText, '%'))
                     or lower(coalesce(vocabulary.meaning, ''))
                         like lower(concat('%', :queryText, '%'))
               )
@@ -137,9 +95,6 @@ public interface UserVocabularyRepository
     Page<UserVocabulary> search(
             @Param("userId")
             Long userId,
-
-            @Param("language")
-            StudyLanguage language,
 
             @Param("queryText")
             String queryText,

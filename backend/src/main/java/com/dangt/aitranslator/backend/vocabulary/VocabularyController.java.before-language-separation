@@ -1,9 +1,9 @@
-package com.dangt.aitranslator.backend.grammar;
+package com.dangt.aitranslator.backend.vocabulary;
 
 import com.dangt.aitranslator.backend.auth.CurrentUserService;
-import com.dangt.aitranslator.backend.study.StudyLanguage;
 import com.dangt.aitranslator.backend.user.UserAccount;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -13,24 +13,24 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/grammar")
+@RequestMapping("/api/v1/vocabulary")
 @Tag(
-        name = "Grammar",
+        name = "Vocabulary",
         description =
-                "Kho cấu trúc/ngữ pháp cá nhân theo user và ngôn ngữ."
+                "Personal Vocabulary theo từng user: search, status, favorite, note và encounter count."
 )
 @SecurityRequirement(name = "bearerAuth")
-public class GrammarController {
+public class VocabularyController {
 
-    private final GrammarService grammarService;
+    private final VocabularyService vocabularyService;
     private final CurrentUserService currentUserService;
 
-    public GrammarController(
-            GrammarService grammarService,
+    public VocabularyController(
+            VocabularyService vocabularyService,
             CurrentUserService currentUserService
     ) {
-        this.grammarService =
-                grammarService;
+        this.vocabularyService =
+                vocabularyService;
 
         this.currentUserService =
                 currentUserService;
@@ -38,18 +38,15 @@ public class GrammarController {
 
     @Operation(
             summary =
-                    "Danh sách cấu trúc/ngữ pháp của user"
+                    "Danh sách từ vựng của user"
     )
     @GetMapping
-    public GrammarPageResponse search(
+    public VocabularyPageResponse search(
             @RequestParam(required = false)
             String q,
 
-            @RequestParam(defaultValue = "JA")
-            StudyLanguage language,
-
             @RequestParam(required = false)
-            GrammarStatus status,
+            VocabularyStatus status,
 
             @RequestParam(required = false)
             Boolean favorite,
@@ -67,9 +64,8 @@ public class GrammarController {
                 currentUserService
                         .requireActiveUser(jwt);
 
-        return grammarService.search(
+        return vocabularyService.search(
                 user.getId(),
-                language,
                 q,
                 status,
                 favorite,
@@ -78,11 +74,12 @@ public class GrammarController {
         );
     }
 
+    @Operation(
+            summary =
+                    "Thống kê Personal Vocabulary"
+    )
     @GetMapping("/stats")
-    public GrammarStatsResponse stats(
-            @RequestParam(defaultValue = "JA")
-            StudyLanguage language,
-
+    public VocabularyStatsResponse stats(
             @AuthenticationPrincipal
             Jwt jwt
     ) {
@@ -90,18 +87,23 @@ public class GrammarController {
                 currentUserService
                         .requireActiveUser(jwt);
 
-        return grammarService.stats(
-                user.getId(),
-                language
+        return vocabularyService.stats(
+                user.getId()
         );
     }
 
+    @Operation(
+            summary =
+                    "Lưu một từ từ Study UI",
+            description =
+                    "Chống duplicate bằng user + dictionaryForm + reading."
+    )
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public GrammarResponse save(
+    public VocabularyResponse save(
             @Valid
             @RequestBody
-            GrammarSaveRequest request,
+            VocabularySaveRequest request,
 
             @AuthenticationPrincipal
             Jwt jwt
@@ -110,20 +112,24 @@ public class GrammarController {
                 currentUserService
                         .requireActiveUser(jwt);
 
-        return grammarService.save(
+        return vocabularyService.save(
                 user.getId(),
                 request
         );
     }
 
-    @PatchMapping("/{grammarId}")
-    public GrammarResponse update(
+    @Operation(
+            summary =
+                    "Cập nhật trạng thái/favorite/ghi chú"
+    )
+    @PatchMapping("/{vocabularyId}")
+    public VocabularyResponse update(
             @PathVariable
-            Long grammarId,
+            Long vocabularyId,
 
             @Valid
             @RequestBody
-            GrammarUpdateRequest request,
+            VocabularyUpdateRequest request,
 
             @AuthenticationPrincipal
             Jwt jwt
@@ -132,18 +138,22 @@ public class GrammarController {
                 currentUserService
                         .requireActiveUser(jwt);
 
-        return grammarService.update(
+        return vocabularyService.update(
                 user.getId(),
-                grammarId,
+                vocabularyId,
                 request
         );
     }
 
-    @DeleteMapping("/{grammarId}")
+    @Operation(
+            summary =
+                    "Xóa từ khỏi kho cá nhân"
+    )
+    @DeleteMapping("/{vocabularyId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(
             @PathVariable
-            Long grammarId,
+            Long vocabularyId,
 
             @AuthenticationPrincipal
             Jwt jwt
@@ -152,9 +162,9 @@ public class GrammarController {
                 currentUserService
                         .requireActiveUser(jwt);
 
-        grammarService.delete(
+        vocabularyService.delete(
                 user.getId(),
-                grammarId
+                vocabularyId
         );
     }
 }
