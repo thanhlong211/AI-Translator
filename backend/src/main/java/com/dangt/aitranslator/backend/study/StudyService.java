@@ -39,7 +39,15 @@ public class StudyService {
     private final AiUsageLedgerService aiUsageLedgerService;
     private final ProfileService profileService;
     private final StudyPromptBuilderService promptBuilderService;
+
+    private final EnglishStudyPromptBuilderService
+            englishPromptBuilderService;
+
     private final StudyAnalysisValidator validator;
+
+    private final EnglishStudyAnalysisValidator
+            englishValidator;
+
     private final VocabularyService vocabularyService;
     private final GrammarService grammarService;
 
@@ -53,8 +61,17 @@ public class StudyService {
 
             AiUsageLedgerService aiUsageLedgerService,
             ProfileService profileService,
+
             StudyPromptBuilderService promptBuilderService,
+
+            EnglishStudyPromptBuilderService
+                    englishPromptBuilderService,
+
             StudyAnalysisValidator validator,
+
+            EnglishStudyAnalysisValidator
+                    englishValidator,
+
             VocabularyService vocabularyService,
             GrammarService grammarService
     ) {
@@ -71,7 +88,16 @@ public class StudyService {
                 profileService;
         this.promptBuilderService =
                 promptBuilderService;
-        this.validator = validator;
+
+        this.englishPromptBuilderService =
+                englishPromptBuilderService;
+
+        this.validator =
+                validator;
+
+        this.englishValidator =
+                englishValidator;
+
         this.vocabularyService =
                 vocabularyService;
         this.grammarService =
@@ -113,6 +139,25 @@ public class StudyService {
                 elapsedMs(
                         stageStartedAt
                 );
+
+        /*
+         * English dùng schema/prompt/validator riêng.
+         * Japanese tiếp tục chạy flow hiện tại phía dưới.
+         */
+        if (
+                request.language()
+                        == StudyLanguage.EN
+        ) {
+            return analyzeEnglish(
+                    userId,
+                    request,
+                    cleanText,
+                    profile,
+                    requestId,
+                    totalStartedAt,
+                    profileMs
+            );
+        }
 
         stageStartedAt =
                 System.nanoTime();
@@ -358,6 +403,304 @@ public class StudyService {
                         performance
                 );
     }
+
+
+    private StudyAnalyzeResponse analyzeEnglish(
+            Long userId,
+            StudyAnalyzeRequest request,
+            String cleanText,
+            TranslationProfile profile,
+            String requestId,
+            long totalStartedAt,
+            long profileMs
+    ) {
+        long stageStartedAt =
+                System.nanoTime();
+
+
+        String prompt =
+                englishPromptBuilderService
+                        .build(
+                                profile,
+                                cleanText,
+                                request.level(),
+                                request.context()
+                        );
+
+
+        long promptMs =
+                elapsedMs(
+                        stageStartedAt
+                );
+
+
+        StructuredResponseCreateParams<
+                EnglishStudyStructuredOutput
+        > params =
+                ResponseCreateParams
+                        .builder()
+                        .input(prompt)
+                        .text(
+                                EnglishStudyStructuredOutput.class
+                        )
+                        .model(studyModel)
+                        .build();
+
+
+        final long openAiStartedAt =
+                System.nanoTime();
+
+
+        StructuredResponse<
+                EnglishStudyStructuredOutput
+        > aiResponse = null;
+
+
+        EnglishStudyStructuredOutput
+                structuredOutput;
+
+
+        long openAiMs;
+
+
+        try {
+
+            aiResponse =
+                    openAIClient
+                            .responses()
+                            .create(params);
+
+
+            structuredOutput =
+                    aiResponse
+                            .output()
+                            .stream()
+
+                            .flatMap(item ->
+                                    item
+                                            .message()
+                                            .stream()
+                            )
+
+                            .flatMap(message ->
+                                    message
+                                            .content()
+                                            .stream()
+                            )
+
+                            .flatMap(content ->
+                                    content
+                                            .outputText()
+                                            .stream()
+                            )
+
+                            .findFirst()
+
+                            .orElseThrow(() ->
+                                    new AiResponseFormatException(
+                                            "OpenAI không trả về English Study Analysis."
+                                    )
+                            );
+
+
+            openAiMs =
+                    elapsedMs(
+                            openAiStartedAt
+                    );
+
+
+        } catch (Exception ex) {
+
+            openAiMs =
+                    elapsedMs(
+                            openAiStartedAt
+                    );
+
+
+            AiProviderUsage failureUsage =
+                    aiResponse == null
+
+                            ? OpenAiUsageExtractor
+                                    .empty(
+                                            studyModelName
+                                    )
+
+                            : OpenAiUsageExtractor
+                                    .from(
+                                            aiResponse
+                                                    .rawResponse(),
+
+                                            studyModelName
+                                    );
+
+
+            aiUsageLedgerService
+                    .recordFailure(
+                            userId,
+                            requestId,
+                            "STUDY_ANALYZER",
+                            failureUsage,
+                            openAiMs,
+                            ex
+                    );
+
+
+            log.warn(
+                    "English Study error requestId={} type={} message={}",
+                    requestId,
+                    ex.getClass()
+                            .getSimpleName(),
+                    safeExceptionMessage(
+                            ex
+                    )
+            );
+
+
+            if (
+                    ex instanceof
+                            AiResponseFormatException
+                            formatException
+            ) {
+                throw formatException;
+            }
+
+
+            throw new AiResponseFormatException(
+                    "Không đọc được English Study Analysis. Hãy thử lại.",
+                    ex
+            );
+        }
+
+
+        stageStartedAt =
+                System.nanoTime();
+
+
+        StudyAnalysisPayload normalized;
+
+
+        try {
+
+            normalized =
+                    englishValidator
+                            .validateAndNormalize(
+                                    structuredOutput,
+                                    cleanText
+                            );
+
+
+        } catch (RuntimeException ex) {
+
+            aiUsageLedgerService
+                    .recordFailure(
+                            userId,
+                            requestId,
+                            "STUDY_ANALYZER",
+
+                            OpenAiUsageExtractor
+                                    .from(
+                                            aiResponse
+                                                    .rawResponse(),
+                                            studyModelName
+                                    ),
+
+                            openAiMs,
+                            ex
+                    );
+
+            throw ex;
+        }
+
+
+        long parseMs =
+                elapsedMs(
+                        stageStartedAt
+                );
+
+
+        aiUsageLedgerService
+                .recordSuccess(
+                        userId,
+                        requestId,
+                        "STUDY_ANALYZER",
+
+                        OpenAiUsageExtractor
+                                .from(
+                                        aiResponse
+                                                .rawResponse(),
+                                        studyModelName
+                                ),
+
+                        openAiMs
+                );
+
+
+        /*
+         * Chưa lưu English vào bảng Japanese vocabulary/grammar.
+         */
+        VocabularySyncSummary vocabularySync =
+                VocabularySyncSummary
+                        .disabled();
+
+
+        GrammarSyncSummary grammarSync =
+                GrammarSyncSummary
+                        .disabled();
+
+
+        long persistenceMs =
+                0L;
+
+
+        long totalMs =
+                elapsedMs(
+                        totalStartedAt
+                );
+
+
+        ApiPerformanceTiming performance =
+                new ApiPerformanceTiming(
+                        requestId,
+                        profileMs,
+                        promptMs,
+                        openAiMs,
+                        parseMs,
+                        persistenceMs,
+                        totalMs
+                );
+
+
+        log.info(
+                "PERF study language=EN requestId={} chars={} grammar={} vocabulary={} collocations={} mistakes={} totalMs={}",
+                requestId,
+                cleanText.length(),
+                normalized
+                        .englishGrammar()
+                        .size(),
+                normalized
+                        .englishVocabulary()
+                        .size(),
+                normalized
+                        .collocations()
+                        .size(),
+                normalized
+                        .commonMistakes()
+                        .size(),
+                totalMs
+        );
+
+
+        return StudyAnalyzeResponse
+                .success(
+                        normalized,
+                        profile,
+                        request.level(),
+                        vocabularySync,
+                        grammarSync,
+                        performance
+                );
+    }
+
 
     private StudyAnalysisPayload toPayload(
             StudyStructuredOutput output
