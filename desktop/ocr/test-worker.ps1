@@ -52,6 +52,7 @@ function Read-ProtocolMessage {
     )
 
     $task = $Process.StandardOutput.ReadLineAsync()
+
     while ([DateTime]::UtcNow -lt $Deadline) {
         if (-not $task.Wait(1000)) {
             if ($Process.HasExited) {
@@ -62,11 +63,13 @@ function Read-ProtocolMessage {
         }
 
         $line = $task.Result
+
         if ($null -eq $line) {
             if ($Process.HasExited) {
                 $stderr = $Process.StandardError.ReadToEnd()
                 throw "OCR worker closed stdout ($($Process.ExitCode)). $stderr"
             }
+
             $task = $Process.StandardOutput.ReadLineAsync()
             continue
         }
@@ -75,6 +78,7 @@ function Read-ProtocolMessage {
             if (-not [string]::IsNullOrWhiteSpace($line)) {
                 Write-Host "[worker] $line"
             }
+
             $task = $Process.StandardOutput.ReadLineAsync()
             continue
         }
@@ -85,33 +89,61 @@ function Read-ProtocolMessage {
     throw "Timed out waiting for OCR worker protocol message."
 }
 
+function Write-ProtocolLine {
+    param(
+        [System.Diagnostics.Process]$Process,
+        [string]$Line
+    )
+
+    # Windows PowerShell/.NET Framework ProcessStartInfo does not expose
+    # StandardInputEncoding. Write UTF-8 bytes directly so no BOM is emitted.
+    $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
+    $bytes = $utf8NoBom.GetBytes($Line + "`r`n")
+    $stream = $Process.StandardInput.BaseStream
+    $stream.Write($bytes, 0, $bytes.Length)
+    $stream.Flush()
+}
+
 try {
     Write-Host "Starting packaged OCR worker..."
+
     if (-not $process.Start()) {
         throw "Unable to start OCR worker."
     }
+
     $processStarted = $true
 
-    $deadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
-    $ready = Read-ProtocolMessage -Process $process -Deadline $deadline
+    $startupDeadline = [DateTime]::UtcNow.AddSeconds($TimeoutSeconds)
+    $ready = Read-ProtocolMessage -Process $process -Deadline $startupDeadline
 
     if ($ready.type -eq "fatal") {
-        # The worker emits a structured fatal message before exiting. Drain the
-        # redirected stderr as well so PyInstaller/PaddleX tracebacks are not
-        # hidden behind the short protocol error.
-        try { [void]$process.WaitForExit(5000) } catch { }
+        try {
+            [void]$process.WaitForExit(5000)
+        }
+        catch {
+        }
+
         $stderr = ""
-        try { $stderr = $process.StandardError.ReadToEnd() } catch { }
+
+        try {
+            $stderr = $process.StandardError.ReadToEnd()
+        }
+        catch {
+        }
+
         if (-not [string]::IsNullOrWhiteSpace($stderr)) {
             Write-Host "--- OCR worker stderr ---" -ForegroundColor Yellow
             Write-Host $stderr
             Write-Host "--- end OCR worker stderr ---" -ForegroundColor Yellow
         }
+
         throw "OCR worker fatal startup: $($ready.error)"
     }
+
     if ($ready.type -ne "ready") {
         throw "Expected ready message, received: $($ready.type)"
     }
+
     if ([int]$ready.protocol -ne 2) {
         throw "OCR protocol mismatch. Expected 2, received $($ready.protocol)."
     }
@@ -119,19 +151,50 @@ try {
     Write-Host "Worker ready: PaddleOCR $($ready.paddleOcrVersion), PaddlePaddle $($ready.paddlePaddleVersion), startup $($ready.startupMs) ms"
 
     $pingId = "smoke-ping"
-    $process.StandardInput.WriteLine((@{
+    $pingJson = @{
         id = $pingId
         action = "ping"
-    } | ConvertTo-Json -Compress))
-    $process.StandardInput.Flush()
+    } | ConvertTo-Json -Compress
 
-    $pong = Read-ProtocolMessage -Process $process -Deadline $deadline
-    if ($pong.type -ne "result" -or -not $pong.success -or $pong.id -ne $pingId -or -not $pong.result.pong) {
-        throw "OCR worker ping failed."
+    Write-ProtocolLine -Process $process -Line $pingJson
+
+    $pingDeadline = [DateTime]::UtcNow.AddSeconds(15)
+    $pong = $null
+
+    while ([DateTime]::UtcNow -lt $pingDeadline) {
+        $message = Read-ProtocolMessage -Process $process -Deadline $pingDeadline
+
+        Write-Host ("[OCR protocol] " + ($message | ConvertTo-Json -Compress -Depth 10))
+
+        if ($message.type -eq "fatal") {
+            throw "OCR worker fatal message during ping: $($message.error)"
+        }
+
+        if ($message.type -eq "result" -and $message.id -eq $pingId) {
+            $pong = $message
+            break
+        }
+
+        if ($message.type -eq "result" -and -not $message.success) {
+            throw "OCR worker returned an unexpected error during ping: $($message.error)"
+        }
     }
 
-    $process.StandardInput.WriteLine('{"action":"shutdown"}')
-    $process.StandardInput.Flush()
+    if ($null -eq $pong) {
+        throw "OCR worker ping response was not received."
+    }
+
+    if (-not $pong.success) {
+        throw "OCR worker ping returned success=false. Error: $($pong.error)"
+    }
+
+    if (-not $pong.result.pong) {
+        throw ("OCR worker ping response did not contain result.pong=true. " + ($pong | ConvertTo-Json -Compress -Depth 10))
+    }
+
+    Write-Host "OCR worker ping OK"
+
+    Write-ProtocolLine -Process $process -Line '{"action":"shutdown"}'
 
     if (-not $process.WaitForExit(15000)) {
         $process.Kill()
@@ -151,9 +214,13 @@ finally {
             if (-not $process.HasExited) {
                 $process.Kill()
             }
-        } catch { }
+        }
+        catch {
+        }
     }
+
     $process.Dispose()
+
     if (Test-Path $cacheDir) {
         Remove-Item -Recurse -Force $cacheDir -ErrorAction SilentlyContinue
     }

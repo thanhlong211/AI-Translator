@@ -393,7 +393,7 @@ def run_worker() -> None:
     })
 
     for raw_line in sys.stdin:
-        raw_line = raw_line.strip()
+        raw_line = raw_line.lstrip("\ufeff").strip()
 
         if not raw_line:
             continue
