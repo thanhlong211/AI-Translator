@@ -2776,7 +2776,7 @@ export function SettingsPage({
 
                             <input
                                 type="range"
-                                min="0.65"
+                                min={0.5}
                                 max="1"
                                 step="0.01"
                                 value={
@@ -2813,8 +2813,17 @@ export function SettingsPage({
                                     );
                                 }}
                             >
+                                <option value="0.5">
+                                    Rất nhỏ (50%)
+                                </option>
+                                <option value="0.6">
+                                    60%
+                                </option>
+                                <option value="0.7">
+                                    70%
+                                </option>
                                 <option value="0.8">
-                                    Nhỏ
+                                    Nhỏ (80%)
                                 </option>
                                 <option value="1">
                                     Tiêu chuẩn

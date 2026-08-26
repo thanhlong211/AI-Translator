@@ -421,6 +421,9 @@ function setTranslationLanguages(
 let currentWorkspaceMode =
   "translate";
 
+let currentStudyLanguage =
+  "JA";
+
 let currentStudyLevel =
   "AUTO";
 
@@ -2063,8 +2066,49 @@ function setWorkspaceMode(
   };
 }
 
+function normalizeStudyLanguage(
+  language
+) {
+  return String(
+    language || "JA"
+  )
+    .trim()
+    .toUpperCase() === "EN"
+      ? "EN"
+      : "JA";
+}
+
+
+function studyLevelsForLanguage(
+  language
+) {
+  return normalizeStudyLanguage(
+    language
+  ) === "EN"
+    ? [
+        "AUTO",
+        "A1",
+        "A2",
+        "B1",
+        "B2",
+        "C1",
+        "C2",
+      ]
+    : [
+        "AUTO",
+        "N5",
+        "N4",
+        "N3",
+        "N2",
+        "N1",
+      ];
+}
+
+
 function normalizeStudyLevel(
-  level
+  level,
+  language =
+    currentStudyLanguage
 ) {
   const value =
     String(
@@ -2073,16 +2117,62 @@ function normalizeStudyLevel(
       .trim()
       .toUpperCase();
 
-  return [
-    "AUTO",
-    "N5",
-    "N4",
-    "N3",
-    "N2",
-    "N1",
-  ].includes(value)
+  return studyLevelsForLanguage(
+    language
+  ).includes(value)
     ? value
     : "AUTO";
+}
+
+
+function setStudyLanguage(
+  language
+) {
+  currentStudyLanguage =
+    normalizeStudyLanguage(
+      language
+    );
+
+  currentStudyLevel =
+    normalizeStudyLevel(
+      currentStudyLevel,
+      currentStudyLanguage
+    );
+
+  if (
+    typeof studyPreferences !==
+    "undefined"
+  ) {
+    studyPreferences = {
+      ...studyPreferences,
+
+      language:
+        currentStudyLanguage,
+
+      level:
+        currentStudyLevel,
+    };
+
+    if (app.isReady()) {
+      void saveDesktopPreferences()
+        .catch(
+          (error) => {
+            console.warn(
+              "SAVE STUDY LANGUAGE PREFERENCE ERROR:",
+              error
+            );
+          }
+        );
+    }
+  }
+
+  return {
+    language:
+      currentStudyLanguage,
+
+    level:
+      currentStudyLevel,
+  };
 }
 
 function setStudyLevel(
@@ -2090,7 +2180,8 @@ function setStudyLevel(
 ) {
   currentStudyLevel =
     normalizeStudyLevel(
-      level
+      level,
+      currentStudyLanguage
     );
 
   if (
@@ -5311,6 +5402,9 @@ const DEFAULT_SHORTCUTS = {
 };
 
 const DEFAULT_STUDY_PREFERENCES = {
+  language:
+    "JA",
+
   level:
     "AUTO",
 
@@ -5443,10 +5537,18 @@ function normalizeNumber(
 function normalizeStudyPreferences(
   next
 ) {
+  const language =
+    normalizeStudyLanguage(
+      next?.language
+    );
+
   return {
+    language,
+
     level:
       normalizeStudyLevel(
-        next?.level
+        next?.level,
+        language
       ),
 
     autoSaveVocabulary:
@@ -5490,15 +5592,23 @@ function normalizeOverlayPreferences(
         next?.fontScale,
         DEFAULT_OVERLAY_PREFERENCES
           .fontScale,
-        0.8,
+        0.5,
         1.4
       ),
   };
 }
 
 function applyRuntimePreferences() {
+  currentStudyLanguage =
+    normalizeStudyLanguage(
+      studyPreferences.language
+    );
+
   currentStudyLevel =
-    studyPreferences.level;
+    normalizeStudyLevel(
+      studyPreferences.level,
+      currentStudyLanguage
+    );
 
   currentStudyAutoSaveVocabulary =
     studyPreferences
@@ -7051,6 +7161,282 @@ function getOcrDirectory() {
 // SCREEN SELECTOR
 // ======================================================
 
+
+// ======================================================
+// DESKTOP SCAN ESC CANCELLATION V2
+// ======================================================
+
+class DesktopScanCancelledError
+  extends Error {
+  constructor(
+    context
+  ) {
+    super(
+      "Đã hủy lần quét."
+    );
+
+    this.name =
+      "DesktopScanCancelledError";
+
+    this.code =
+      "SCAN_CANCELLED";
+
+    this.scanId =
+      context?.id ||
+      null;
+  }
+}
+
+
+let activeDesktopScanCancel =
+  null;
+
+let desktopScanCancelSequence =
+  0;
+
+
+function isDesktopScanCancelledError(
+  error
+) {
+  return Boolean(
+    error &&
+    (
+      error.code ===
+        "SCAN_CANCELLED" ||
+      error.name ===
+        "DesktopScanCancelledError"
+    )
+  );
+}
+
+
+function setDesktopScanStage(
+  context,
+  stage
+) {
+  if (
+    !context ||
+    context.cancelled
+  ) {
+    return;
+  }
+
+  context.stage =
+    String(
+      stage ||
+      ""
+    );
+}
+
+
+function throwIfDesktopScanCancelled(
+  context
+) {
+  if (
+    context?.cancelled
+  ) {
+    throw new DesktopScanCancelledError(
+      context
+    );
+  }
+}
+
+
+function releaseDesktopScanCancel(
+  context = activeDesktopScanCancel
+) {
+  if (
+    !context ||
+    context !==
+      activeDesktopScanCancel
+  ) {
+    return;
+  }
+
+  try {
+    globalShortcut.unregister(
+      "Escape"
+    );
+  } catch {
+  }
+
+  activeDesktopScanCancel =
+    null;
+
+  console.log(
+    "SCAN CANCEL RELEASED:",
+    {
+      id:
+        context.id,
+      mode:
+        context.mode,
+      cancelled:
+        context.cancelled,
+    }
+  );
+}
+
+
+function cancelActiveDesktopScan(
+  reason = "escape"
+) {
+  const context =
+    activeDesktopScanCancel;
+
+  if (
+    !context ||
+    context.cancelled
+  ) {
+    return false;
+  }
+
+  context.cancelled =
+    true;
+
+  context.reason =
+    String(
+      reason ||
+      "escape"
+    );
+
+  console.log(
+    "SCAN CANCEL REQUESTED:",
+    {
+      id:
+        context.id,
+      mode:
+        context.mode,
+      stage:
+        context.stage,
+      reason:
+        context.reason,
+    }
+  );
+
+  /*
+   * Nếu user vẫn đang kéo/vẽ selection:
+   * đóng selector ngay lập tức.
+   */
+  if (selectorIsOpen) {
+    pendingScreenshot =
+      null;
+
+    selectorIsOpen =
+      false;
+
+    closeOverlay();
+
+    console.log(
+      "SCAN SELECTOR CANCELLED"
+    );
+  }
+
+  /*
+   * Nếu đã sang OCR / AI:
+   * HUD biến mất ngay.
+   *
+   * OCR worker vẫn được giữ warm.
+   */
+  if (
+    context.loadingToken != null
+  ) {
+    closeTranslationLoading(
+      context.loadingToken
+    );
+
+    context.loadingToken =
+      null;
+  }
+
+  return true;
+}
+
+
+function armDesktopScanCancel(
+  mode
+) {
+  /*
+   * Không để Escape cũ còn sót.
+   */
+  if (
+    activeDesktopScanCancel
+  ) {
+    releaseDesktopScanCancel(
+      activeDesktopScanCancel
+    );
+  }
+
+  const context = {
+    id:
+      ++desktopScanCancelSequence,
+
+    mode:
+      String(
+        mode ||
+        "scan"
+      ),
+
+    stage:
+      "SELECTING",
+
+    cancelled:
+      false,
+
+    reason:
+      "",
+
+    loadingToken:
+      null,
+
+    escapeRegistered:
+      false,
+  };
+
+  activeDesktopScanCancel =
+    context;
+
+  try {
+    globalShortcut.unregister(
+      "Escape"
+    );
+
+    context.escapeRegistered =
+      globalShortcut.register(
+        "Escape",
+        () => {
+          cancelActiveDesktopScan(
+            "escape"
+          );
+        }
+      );
+  } catch (error) {
+    console.error(
+      "SCAN ESC REGISTER ERROR:",
+      error
+    );
+
+    context.escapeRegistered =
+      false;
+  }
+
+  console.log(
+    "SCAN CANCEL ARMED:",
+    {
+      id:
+        context.id,
+      mode:
+        context.mode,
+      stage:
+        context.stage,
+      escapeRegistered:
+        context.escapeRegistered,
+    }
+  );
+
+  return context;
+}
+
+
 async function openScreenSelector(
   requestedMode =
     currentWorkspaceMode
@@ -7128,6 +7514,14 @@ async function openScreenSelector(
     });
 
     console.log("FULL SCREENSHOT READY");
+
+    /*
+     * Bắt đầu nhận ESC trước khi selector xuất hiện.
+     * Vì vậy user có thể hủy ngay cả khi đang kéo chuột.
+     */
+    armDesktopScanCancel(
+      pendingScanMode
+    );
 
     createOverlay();
   } catch (error) {
@@ -7281,10 +7675,11 @@ async function cropSelectedArea(
 // ======================================================
 
 
-async function analyzeJapaneseForStudy(
+async function analyzeForStudy(
   originalText,
   profile,
   context,
+  studyLanguage,
   studyLevel,
   autoSaveVocabulary,
   autoSaveGrammar
@@ -7298,6 +7693,11 @@ async function analyzeJapaneseForStudy(
       "Văn bản OCR trống."
     );
   }
+
+  const language =
+    normalizeStudyLanguage(
+      studyLanguage
+    );
 
   let response;
 
@@ -7327,11 +7727,17 @@ async function analyzeJapaneseForStudy(
                 profile?.id ||
                 null,
 
+              language,
+
               level:
                 normalizeStudyLevel(
-                  studyLevel
+                  studyLevel,
+                  language
                 ),
 
+              /*
+               * Japanese và English đều hỗ trợ persistence.
+               */
               autoSaveVocabulary:
                 Boolean(
                   autoSaveVocabulary
@@ -9584,13 +9990,57 @@ async function buildPanelOcrBlocks(
   };
 
   try {
-    bubbleDetection =
-      await detectMangaSpeechBubbles({
-        imagePath:
-          cropResult?.imagePath,
-        entries:
-          filteredEntries,
-      });
+    /*
+     * Speech-bubble detection giúp grouping đẹp hơn nhưng không được phép
+     * chặn toàn bộ Manga Panel quá lâu. Sau 500ms dùng OCR_GROUP fallback.
+     */
+    const detectorBudgetMs = 500;
+    const detectorStartedAt =
+      performance.now();
+
+    const detectorResult =
+      await Promise.race([
+        detectMangaSpeechBubbles({
+          imagePath:
+            cropResult?.imagePath,
+          entries:
+            filteredEntries,
+        }),
+        delay(
+          detectorBudgetMs
+        ).then(
+          () => ({
+            __timedOut: true,
+          })
+        ),
+      ]);
+
+    const detectorMs =
+      Math.round(
+        performance.now() -
+        detectorStartedAt
+      );
+
+    if (
+      detectorResult?.__timedOut
+    ) {
+      console.log(
+        "MANGA BUBBLE DETECTOR BUDGET:",
+        {
+          detectorMs,
+          detectorBudgetMs,
+          fallback: true,
+        }
+      );
+    } else if (detectorResult) {
+      bubbleDetection =
+        detectorResult;
+
+      console.log(
+        "MANGA BUBBLE DETECTOR TIME:",
+        `${detectorMs}ms`
+      );
+    }
   } catch (error) {
     console.warn(
       "MANGA BUBBLE DETECTOR FALLBACK:",
@@ -10030,14 +10480,15 @@ async function processMangaPanelTranslation({
   targetWindow = null,
   startNewSession = false,
   mangaMode = "PANEL",
+  cancelContext = null,
 } = {}) {
-  await requireFreshDesktopFeatureCapability(
-    startNewSession
-      ? "mangaPanel"
-      : "mangaSession",
-    { notify: false }
+  throwIfDesktopScanCancelled(
+    cancelContext
   );
-
+  /*
+   * Capability đã được kiểm tra trước khi mở selector / chạy trang tiếp theo.
+   * Không gọi fresh capability lần 2 sau OCR vì tạo thêm network RTT.
+   */
   const panelStartedAt =
     performance.now();
 
@@ -10085,12 +10536,25 @@ async function processMangaPanelTranslation({
     );
   }
 
+  const layoutStartedAt =
+    performance.now();
+
   const layout =
     await buildPanelOcrBlocks(
       cropResult,
       ocrResult,
       source
     );
+
+  const layoutMs =
+    Math.round(
+      performance.now() -
+      layoutStartedAt
+    );
+
+  throwIfDesktopScanCancelled(
+    cancelContext
+  );
 
   if (!layout.blocks.length) {
     throw new Error(
@@ -10109,6 +10573,18 @@ async function processMangaPanelTranslation({
       }
     );
   }
+
+  const batchStartedAt =
+    performance.now();
+
+  setDesktopScanStage(
+    cancelContext,
+    "MANGA_TRANSLATE"
+  );
+
+  throwIfDesktopScanCancelled(
+    cancelContext
+  );
 
   const batch =
     await translateBatchBlocks(
@@ -10132,6 +10608,16 @@ async function processMangaPanelTranslation({
           getMangaPanelSessionContext(),
       }
     );
+
+  const batchMs =
+    Math.round(
+      performance.now() -
+      batchStartedAt
+    );
+
+  throwIfDesktopScanCancelled(
+    cancelContext
+  );
 
   const translatedById =
     new Map(
@@ -10350,6 +10836,8 @@ async function processMangaPanelTranslation({
     },
 
     performance: {
+      layoutMs,
+      batchMs,
       totalMs:
         Math.round(
           performance.now() -
@@ -10451,6 +10939,19 @@ async function runMangaSessionNextPage(
 
   let loadingToken = null;
 
+  /*
+   * Continuous Auto chạy nền nên không chiếm phím Esc.
+   *
+   * Ctrl+Shift+Y / renderer manual vẫn có thể dùng Esc
+   * để hủy page hiện tại.
+   */
+  const scanCancel =
+    source === "continuous-auto"
+      ? null
+      : armDesktopScanCancel(
+          "panel-next"
+        );
+
   isMangaSessionProcessing = true;
 
   try {
@@ -10492,6 +10993,23 @@ async function runMangaSessionNextPage(
         detail:
           `Manga Session · ${shortcutDisplay(shortcutSettings.panelNext)}`,
       });
+    
+    if (scanCancel) {
+    
+      scanCancel.loadingToken =
+    
+        loadingToken;
+    
+    }
+
+    setDesktopScanStage(
+      scanCancel,
+      "CROP"
+    );
+
+    throwIfDesktopScanCancelled(
+      scanCancel
+    );
 
     const cropResult =
       await cropSelectedArea(
@@ -10620,7 +11138,12 @@ async function runMangaSessionNextPage(
         message,
     };
   } finally {
-    isMangaSessionProcessing = false;
+    releaseDesktopScanCancel(
+      scanCancel
+    );
+
+    isMangaSessionProcessing =
+      false;
   }
 }
 
@@ -11407,6 +11930,12 @@ ipcMain.handle(
       options &&
       typeof options === "object"
     ) {
+      if (options.language) {
+        setStudyLanguage(
+          options.language
+        );
+      }
+
       if (options.level) {
         setStudyLevel(
           options.level
@@ -11467,6 +11996,16 @@ ipcMain.handle(
     );
   }
 );
+
+ipcMain.handle(
+  "study:set-language",
+  (_event, language) => {
+    return setStudyLanguage(
+      language
+    );
+  }
+);
+
 
 ipcMain.handle(
   "study:set-level",
@@ -11617,6 +12156,20 @@ ipcMain.on("selection-complete", async (_event, selection) => {
   const scanMode =
     pendingScanMode;
 
+  /*
+   * Context đã được tạo trước khi selector xuất hiện.
+   */
+  const scanCancel =
+    activeDesktopScanCancel ||
+    armDesktopScanCancel(
+      scanMode
+    );
+
+  setDesktopScanStage(
+    scanCancel,
+    "PREPARING"
+  );
+
   let loadingToken =
     null;
 
@@ -11652,9 +12205,17 @@ ipcMain.on("selection-complete", async (_event, selection) => {
         }
       );
 
-    const imagePath = cropResult.imagePath;
+    throwIfDesktopScanCancelled(
+      scanCancel
+    );
 
-    console.log("IMAGE SAVED:", imagePath);
+    const imagePath =
+      cropResult.imagePath;
+
+    console.log(
+      "IMAGE SAVED:",
+      imagePath
+    );
 
     updateTranslationLoading(
       loadingToken,
@@ -11666,9 +12227,26 @@ ipcMain.on("selection-complete", async (_event, selection) => {
       }
     );
 
-    const ocrStartedAt = performance.now();
+    setDesktopScanStage(
+      scanCancel,
+      "OCR"
+    );
 
-    const rawOcrResult = await requestOcr(imagePath);
+    throwIfDesktopScanCancelled(
+      scanCancel
+    );
+
+    const ocrStartedAt =
+      performance.now();
+
+    const rawOcrResult =
+      await requestOcr(
+        imagePath
+      );
+
+    throwIfDesktopScanCancelled(
+      scanCancel
+    );
 
     console.log("RAW OCR RESULT:", rawOcrResult);
 
@@ -11688,6 +12266,8 @@ ipcMain.on("selection-complete", async (_event, selection) => {
         cropResult,
         ocrResult,
         loadingToken,
+        cancelContext:
+          scanCancel,
         sourceLanguage:
           pendingTranslationSourceLanguage,
         targetLanguage:
@@ -11715,15 +12295,21 @@ ipcMain.on("selection-complete", async (_event, selection) => {
       const profile =
         activeTranslationProfile;
 
+      const languageSnapshot =
+        currentStudyLanguage;
+
       const context =
         getCurrentTranslationContext(
           profile,
-          "JA",
+          languageSnapshot,
           "VI"
         );
 
       const levelSnapshot =
-        currentStudyLevel;
+        normalizeStudyLevel(
+          currentStudyLevel,
+          languageSnapshot
+        );
 
       const autoSaveSnapshot =
         currentStudyAutoSaveVocabulary;
@@ -11747,15 +12333,16 @@ ipcMain.on("selection-complete", async (_event, selection) => {
           message:
             "Đang dịch và phân tích Study…",
           detail:
-            "JA → VI · Dịch nhanh + phân tích song song",
+            `${languageSnapshot} → VI · Dịch nhanh + phân tích song song`,
         }
       );
 
       const studyPromise =
-        analyzeJapaneseForStudy(
+        analyzeForStudy(
           ocrResult.text,
           profile,
           context,
+          languageSnapshot,
           levelSnapshot,
           autoSaveSnapshot,
           autoSaveGrammarSnapshot
@@ -11775,7 +12362,8 @@ ipcMain.on("selection-complete", async (_event, selection) => {
           await translateWithCache(
           ocrResult.text,
           {
-            sourceLanguage: "JA",
+            sourceLanguage:
+              languageSnapshot,
             targetLanguage: "VI",
             purpose: "STUDY_FAST",
           }
@@ -11811,7 +12399,8 @@ ipcMain.on("selection-complete", async (_event, selection) => {
             analysis.translation ||
             "",
 
-          sourceLanguage: "JA",
+          sourceLanguage:
+            languageSnapshot,
           targetLanguage: "VI",
 
           profile:
@@ -11826,7 +12415,7 @@ ipcMain.on("selection-complete", async (_event, selection) => {
         rememberTranslationContext(
           profile,
           translation,
-          "JA",
+          languageSnapshot,
           "VI"
         );
 
@@ -11888,6 +12477,10 @@ ipcMain.on("selection-complete", async (_event, selection) => {
         return;
       }
 
+      throwIfDesktopScanCancelled(
+        scanCancel
+      );
+
       const fastMs =
         Math.round(
           performance.now() -
@@ -11947,7 +12540,9 @@ ipcMain.on("selection-complete", async (_event, selection) => {
           message:
             "Bản dịch đã hiện · đang phân tích Study…",
           detail:
-            "Từ vựng · ngữ pháp · JLPT",
+            languageSnapshot === "EN"
+              ? "IPA · CEFR · từ vựng · ngữ pháp"
+              : "Từ vựng · ngữ pháp · JLPT",
         }
       );
 
@@ -12092,6 +12687,10 @@ ipcMain.on("selection-complete", async (_event, selection) => {
           }
         );
 
+      throwIfDesktopScanCancelled(
+        scanCancel
+      );
+
       console.log(
         "TRANSLATION TIME:",
         `${Math.round(
@@ -12146,6 +12745,44 @@ ipcMain.on("selection-complete", async (_event, selection) => {
       loadingToken = null;
     }
   } catch (error) {
+    if (
+      isDesktopScanCancelledError(
+        error
+      )
+    ) {
+      console.log(
+        "SCAN CANCELLED:",
+        {
+          id:
+            scanCancel?.id,
+          mode:
+            scanMode,
+          stage:
+            scanCancel?.stage,
+        }
+      );
+
+      /*
+       * Nếu panel đầu tiên đã tạo session nhưng chưa hoàn tất page,
+       * bỏ session rỗng.
+       */
+      if (
+        scanMode === "panel" &&
+        mangaPanelSession &&
+        Number(
+          mangaPanelSession
+            ?.pageNumber ||
+          0
+        ) === 0
+      ) {
+        endMangaPanelSession(
+          "scan-cancelled"
+        );
+      }
+
+      return;
+    }
+
     console.error("SCAN ERROR:", error);
 
     const errorResult = {
@@ -12176,8 +12813,15 @@ ipcMain.on("selection-complete", async (_event, selection) => {
       );
     }
 
-    isProcessingSelection = false;
-    selectorIsOpen = false;
+    releaseDesktopScanCancel(
+      scanCancel
+    );
+
+    isProcessingSelection =
+      false;
+
+    selectorIsOpen =
+      false;
   }
 });
 
