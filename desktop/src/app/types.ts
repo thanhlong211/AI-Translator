@@ -193,13 +193,23 @@ export interface ProfileUpsertPayload {
     }>;
 }
 
+export type StudyLanguage =
+    | "JA"
+    | "EN";
+
 export type StudyLevel =
     | "AUTO"
     | "N5"
     | "N4"
     | "N3"
     | "N2"
-    | "N1";
+    | "N1"
+    | "A1"
+    | "A2"
+    | "B1"
+    | "B2"
+    | "C1"
+    | "C2";
 
 export interface StudySentencePart {
     text: string;
@@ -227,6 +237,38 @@ export interface StudyVocabularyItem {
     partOfSpeech: string;
     jlptLevel: string;
     note: string;
+}
+
+export interface EnglishStudyGrammarPoint {
+    pattern: string;
+    cefrLevel: string;
+    meaning: string;
+    matchedText: string;
+    explanation: string;
+    example: string;
+}
+
+export interface EnglishStudyVocabularyItem {
+    surface: string;
+    lemma: string;
+    ipa: string;
+    meaning: string;
+    partOfSpeech: string;
+    cefrLevel: string;
+    example: string;
+    note: string;
+}
+
+export interface EnglishStudyCollocationItem {
+    phrase: string;
+    meaning: string;
+    example: string;
+}
+
+export interface EnglishStudyCommonMistake {
+    incorrect: string;
+    correct: string;
+    explanation: string;
 }
 
 export interface ApiPerformanceTiming {
@@ -258,6 +300,21 @@ export interface StudyAnalysis {
     grammar: StudyGrammarPoint[];
     vocabulary: StudyVocabularyItem[];
     notes: string[];
+
+    ipa: string;
+    cefrLevel: string;
+
+    englishGrammar:
+        EnglishStudyGrammarPoint[];
+
+    englishVocabulary:
+        EnglishStudyVocabularyItem[];
+
+    collocations:
+        EnglishStudyCollocationItem[];
+
+    commonMistakes:
+        EnglishStudyCommonMistake[];
 }
 
 export interface StudyAnalyzeResponse {
@@ -299,6 +356,13 @@ export interface VocabularyItem {
     meaning?: string | null;
     partOfSpeech?: string | null;
     jlptLevel: string;
+
+    language: StudyLanguage;
+    lemma?: string | null;
+    ipa?: string | null;
+    cefrLevel?: string | null;
+    example?: string | null;
+
     status: VocabularyStatus;
     favorite: boolean;
     encounterCount: number;
@@ -342,6 +406,12 @@ export interface GrammarItem {
     id: number;
     pattern: string;
     jlptLevel: string;
+
+    language: StudyLanguage;
+    cefrLevel?: string | null;
+    matchedText?: string | null;
+    example?: string | null;
+
     meaning?: string | null;
     explanation?: string | null;
     status: GrammarStatus;
@@ -396,6 +466,7 @@ export interface AppPreferences {
     shortcuts: ShortcutSettings;
 
     study: {
+        language: StudyLanguage;
         level: StudyLevel;
         autoSaveVocabulary: boolean;
         autoSaveGrammar: boolean;
@@ -446,6 +517,12 @@ export interface ReviewItem {
     answer?: string | null;
     detail?: string | null;
     jlptLevel: string;
+
+    language: StudyLanguage;
+    ipa?: string | null;
+    cefrLevel?: string | null;
+    example?: string | null;
+
     learningStatus: string;
     favorite: boolean;
     encounterCount: number;

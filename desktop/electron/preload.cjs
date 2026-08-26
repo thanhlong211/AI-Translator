@@ -348,6 +348,13 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
+  setStudyLanguage: (language) => {
+    return ipcRenderer.invoke(
+      "study:set-language",
+      language
+    );
+  },
+
   setStudyLevel: (level) => {
     return ipcRenderer.invoke(
       "study:set-level",
@@ -668,9 +675,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
-  getVocabularyStats: () => {
+  getVocabularyStats: (
+    language
+  ) => {
     return ipcRenderer.invoke(
-      "vocabulary:stats"
+      "vocabulary:stats",
+      language
     );
   },
 
@@ -709,9 +719,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
     );
   },
 
-  getGrammarStats: () => {
+  getGrammarStats: (
+    language
+  ) => {
     return ipcRenderer.invoke(
-      "grammar:stats"
+      "grammar:stats",
+      language
     );
   },
 
@@ -744,26 +757,33 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
 
   getReviewQueue: (
-    limit
+    limit,
+    language
   ) => {
     return ipcRenderer.invoke(
       "review:due",
-      limit
+      limit,
+      language
     );
   },
 
   getPracticeReviewQueue: (
-    limit
+    limit,
+    language
   ) => {
     return ipcRenderer.invoke(
       "review:practice",
-      limit
+      limit,
+      language
     );
   },
 
-  getReviewStats: () => {
+  getReviewStats: (
+    language
+  ) => {
     return ipcRenderer.invoke(
-      "review:stats"
+      "review:stats",
+      language
     );
   },
 

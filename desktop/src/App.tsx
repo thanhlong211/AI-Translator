@@ -29,6 +29,7 @@ import type {
     SocialAuthProviderCode,
     SocialAuthProviderStatus,
     StudyGrammarPoint,
+    StudyLanguage,
     StudyLevel,
     StudyState,
     StudyVocabularyItem,
@@ -61,6 +62,34 @@ import {
     normalizeSourceLanguage,
     normalizeTargetLanguage
 } from "./app/translationLanguages";
+
+function readLearningLanguage(
+    key: string
+): StudyLanguage {
+    try {
+        return localStorage.getItem(
+            key
+        ) === "EN"
+            ? "EN"
+            : "JA";
+    } catch {
+        return "JA";
+    }
+}
+
+function saveLearningLanguage(
+    key: string,
+    language: StudyLanguage
+) {
+    try {
+        localStorage.setItem(
+            key,
+            language
+        );
+    } catch {
+        // Optional local preference.
+    }
+}
 
 function cloneProfile(
     profile:
@@ -255,6 +284,13 @@ function App() {
     });
 
     const [
+        studyLanguage,
+        setStudyLanguage
+    ] = useState<StudyLanguage>(
+        "JA"
+    );
+
+    const [
         studyLevel,
         setStudyLevel
     ] = useState<StudyLevel>(
@@ -352,6 +388,16 @@ function App() {
     ] = useState(0);
 
     const [
+        vocabularyLanguage,
+        setVocabularyLanguage
+    ] = useState<StudyLanguage>(
+        () =>
+            readLearningLanguage(
+                "learning.vocabularyLanguage"
+            )
+    );
+
+    const [
         vocabularyItems,
         setVocabularyItems
     ] = useState<VocabularyItem[]>(
@@ -397,6 +443,16 @@ function App() {
     ] = useState(false);
 
     const [
+        grammarLanguage,
+        setGrammarLanguage
+    ] = useState<StudyLanguage>(
+        () =>
+            readLearningLanguage(
+                "learning.grammarLanguage"
+            )
+    );
+
+    const [
         grammarItems,
         setGrammarItems
     ] = useState<GrammarItem[]>(
@@ -440,6 +496,16 @@ function App() {
         grammarFavoriteOnly,
         setGrammarFavoriteOnly
     ] = useState(false);
+
+    const [
+        reviewLanguage,
+        setReviewLanguage
+    ] = useState<StudyLanguage>(
+        () =>
+            readLearningLanguage(
+                "learning.reviewLanguage"
+            )
+    );
 
     const [
         reviewQueue,
@@ -558,6 +624,7 @@ function App() {
                 "Ctrl+Shift+E"
         },
         study: {
+            language: "JA",
             level: "AUTO",
             autoSaveVocabulary: false,
             autoSaveGrammar: false
@@ -1371,6 +1438,55 @@ function App() {
                 ...current,
                 study: {
                     ...current.study,
+                    language:
+                        studyLanguage
+                }
+            })
+        );
+
+        void api
+            .setStudyLanguage?.(
+                studyLanguage
+            );
+
+        const validLevels:
+            StudyLevel[] =
+            studyLanguage === "EN"
+                ? [
+                    "AUTO",
+                    "A1",
+                    "A2",
+                    "B1",
+                    "B2",
+                    "C1",
+                    "C2"
+                ]
+                : [
+                    "AUTO",
+                    "N5",
+                    "N4",
+                    "N3",
+                    "N2",
+                    "N1"
+                ];
+
+        if (
+            !validLevels.includes(
+                studyLevel
+            )
+        ) {
+            setStudyLevel(
+                "AUTO"
+            );
+        }
+    }, [studyLanguage]);
+
+    useEffect(() => {
+        setAppPreferences(
+            (current) => ({
+                ...current,
+                study: {
+                    ...current.study,
                     level:
                         studyLevel
                 }
@@ -1469,6 +1585,7 @@ function App() {
     }, [
         auth.authenticated,
         activePage,
+        vocabularyLanguage,
         vocabularyStatusFilter,
         vocabularyFavoriteOnly
     ]);
@@ -1485,6 +1602,7 @@ function App() {
     }, [
         auth.authenticated,
         activePage,
+        grammarLanguage,
         grammarStatusFilter,
         grammarFavoriteOnly
     ]);
@@ -1499,7 +1617,8 @@ function App() {
         }
     }, [
         auth.authenticated,
-        activePage
+        activePage,
+        reviewLanguage
     ]);
 
 
@@ -2868,6 +2987,95 @@ function App() {
         }
     }
 
+    function changeVocabularyLanguage(
+        language: StudyLanguage
+    ) {
+        if (
+            language ===
+            vocabularyLanguage
+        ) {
+            return;
+        }
+
+        setVocabularyLanguage(
+            language
+        );
+
+        saveLearningLanguage(
+            "learning.vocabularyLanguage",
+            language
+        );
+
+        setVocabularyItems([]);
+        setVocabularyMessage("");
+    }
+
+    function changeGrammarLanguage(
+        language: StudyLanguage
+    ) {
+        if (
+            language ===
+            grammarLanguage
+        ) {
+            return;
+        }
+
+        setGrammarLanguage(
+            language
+        );
+
+        saveLearningLanguage(
+            "learning.grammarLanguage",
+            language
+        );
+
+        setGrammarItems([]);
+        setGrammarMessage("");
+    }
+
+    function changeReviewLanguage(
+        language: StudyLanguage
+    ) {
+        if (
+            language ===
+            reviewLanguage
+        ) {
+            return;
+        }
+
+        setReviewLanguage(
+            language
+        );
+
+        saveLearningLanguage(
+            "learning.reviewLanguage",
+            language
+        );
+
+        setReviewQueue({
+            items: [],
+            totalDue: 0,
+            vocabularyDue: 0,
+            grammarDue: 0
+        });
+
+        setReviewStats({
+            dueNow: 0,
+            vocabularyDue: 0,
+            grammarDue: 0,
+            reviewedLast24h: 0,
+            correctLast24h: 0,
+            wrongLast24h: 0,
+            accuracyLast24h: 0,
+            againLast24h: 0,
+            hardLast24h: 0,
+            goodLast24h: 0,
+            easyLast24h: 0
+        });
+
+        setReviewMessage("");
+    }
+
     async function loadVocabulary() {
         if (!auth.authenticated) {
             return;
@@ -2881,6 +3089,9 @@ function App() {
             const result =
                 await api
                     .listVocabulary({
+                        language:
+                            vocabularyLanguage,
+
                         q:
                             vocabularyQuery,
 
@@ -2926,7 +3137,9 @@ function App() {
         try {
             const result =
                 await api
-                    .getVocabularyStats();
+                    .getVocabularyStats(
+                        vocabularyLanguage
+                    );
 
             setVocabularyStats({
                 total:
@@ -3139,6 +3352,9 @@ function App() {
             const result =
                 await api
                     .listGrammar({
+                        language:
+                            grammarLanguage,
+
                         q:
                             grammarQuery,
 
@@ -3184,7 +3400,9 @@ function App() {
         try {
             const result =
                 await api
-                    .getGrammarStats();
+                    .getGrammarStats(
+                        grammarLanguage
+                    );
 
             setGrammarStats({
                 total:
@@ -3379,7 +3597,8 @@ function App() {
                 ReviewQueue =
                 await api
                     .getReviewQueue(
-                        30
+                        30,
+                        reviewLanguage
                     );
 
             setReviewQueue({
@@ -3433,7 +3652,8 @@ function App() {
             ReviewQueue =
             await api
                 .getPracticeReviewQueue(
-                    30
+                    30,
+                    reviewLanguage
                 );
 
         return {
@@ -3473,7 +3693,9 @@ function App() {
             const result:
                 ReviewStats =
                 await api
-                    .getReviewStats();
+                    .getReviewStats(
+                        reviewLanguage
+                    );
 
             setReviewStats({
                 dueNow:
@@ -3758,6 +3980,8 @@ function App() {
                     await api
                         .updateAppPreferences({
                             study: {
+                                language:
+                                    studyLanguage,
                                 level:
                                     studyLevel,
                                 autoSaveVocabulary,
@@ -3809,6 +4033,11 @@ function App() {
 
         setShortcutSettings(
             result.shortcuts
+        );
+
+        setStudyLanguage(
+            result.study.language ||
+            "JA"
         );
 
         setStudyLevel(
@@ -4844,11 +5073,21 @@ function App() {
 
             await api
                 .openStudySelector({
+                    language:
+                        studyLanguage,
+
                     level:
                         studyLevel,
 
-                    autoSaveVocabulary,
-                    autoSaveGrammar
+                    autoSaveVocabulary:
+                        studyLanguage === "JA"
+                            ? autoSaveVocabulary
+                            : false,
+
+                    autoSaveGrammar:
+                        studyLanguage === "JA"
+                            ? autoSaveGrammar
+                            : false
                 });
         } catch (error) {
             setStudy(
@@ -5115,6 +5354,9 @@ function App() {
                             profileDirty
                         }
                         study={study}
+                        studyLanguage={
+                            studyLanguage
+                        }
                         studyLevel={
                             studyLevel
                         }
@@ -5126,6 +5368,9 @@ function App() {
                         }
                         shortcutDisplay={
                             shortcutSettings.studyDisplay
+                        }
+                        onStudyLanguageChange={
+                            setStudyLanguage
                         }
                         onStudyLevelChange={
                             setStudyLevel
@@ -5169,6 +5414,12 @@ function App() {
             case "vocabulary":
                 return (
                     <VocabularyPage
+                        language={
+                            vocabularyLanguage
+                        }
+                        onLanguageChange={
+                            changeVocabularyLanguage
+                        }
                         items={
                             vocabularyItems
                         }
@@ -5217,6 +5468,12 @@ function App() {
             case "grammar":
                 return (
                     <GrammarPage
+                        language={
+                            grammarLanguage
+                        }
+                        onLanguageChange={
+                            changeGrammarLanguage
+                        }
                         items={
                             grammarItems
                         }
@@ -5265,6 +5522,12 @@ function App() {
             case "review":
                 return (
                     <ReviewPage
+                        language={
+                            reviewLanguage
+                        }
+                        onLanguageChange={
+                            changeReviewLanguage
+                        }
                         queue={
                             reviewQueue
                         }

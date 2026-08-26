@@ -10,8 +10,13 @@ import type {
     ReviewItem,
     ReviewMasteryLevel,
     ReviewQueue,
-    ReviewStats
+    ReviewStats,
+    StudyLanguage
 } from "../app/types";
+
+import {
+    LearningLanguageTabs
+} from "../components/LearningLanguageTabs";
 
 type ReviewMode =
     | "DUE"
@@ -22,6 +27,11 @@ type PracticeSource =
     | "SESSION";
 
 interface ReviewPageProps {
+    language: StudyLanguage;
+
+    onLanguageChange:
+        (language: StudyLanguage) => void;
+
     queue: ReviewQueue;
     stats: ReviewStats;
     loading: boolean;
@@ -144,6 +154,8 @@ function reshuffleBatch(
 }
 
 export function ReviewPage({
+    language,
+    onLanguageChange,
     queue,
     stats,
     loading,
@@ -228,6 +240,35 @@ export function ReviewPage({
         useRef(
             Date.now()
         );
+
+    useEffect(() => {
+        /*
+         * Không giữ Practice/session của language cũ
+         * khi chuyển JA <-> EN.
+         */
+        setMode(
+            "DUE"
+        );
+
+        setPracticeSource(
+            "FREE"
+        );
+
+        setPracticeItems([]);
+        setPracticeSeed([]);
+        setDueSessionItems([]);
+
+        setPracticeMessage("");
+
+        setSelectedOptionId("");
+        setFeedback(null);
+        setAnswering(false);
+
+        startedAtRef.current =
+            Date.now();
+    }, [
+        language
+    ]);
 
     const currentOptionSignature =
         current?.options
@@ -641,6 +682,18 @@ export function ReviewPage({
 
     return (
         <div className="page-stack review-page">
+            <LearningLanguageTabs
+                value={language}
+                disabled={
+                    loading ||
+                    answering ||
+                    practiceLoading
+                }
+                onChange={
+                    onLanguageChange
+                }
+            />
+
             <section className="page-intro-row review-intro">
                 <div>
                     <span className="eyebrow violet">
@@ -825,13 +878,29 @@ export function ReviewPage({
                                 {typeLabel(current)}
                             </span>
 
-                            {current.jlptLevel &&
-                            current.jlptLevel !==
-                                "UNKNOWN" && (
-                                <span className="jlpt-badge">
-                                    {current.jlptLevel}
-                                </span>
-                            )}
+                            {language === "EN"
+                                ? (
+                                    current.cefrLevel &&
+                                    current.cefrLevel !==
+                                        "UNKNOWN" && (
+                                        <span className="jlpt-badge">
+                                            {
+                                                current.cefrLevel
+                                            }
+                                        </span>
+                                    )
+                                )
+                                : (
+                                    current.jlptLevel &&
+                                    current.jlptLevel !==
+                                        "UNKNOWN" && (
+                                        <span className="jlpt-badge">
+                                            {
+                                                current.jlptLevel
+                                            }
+                                        </span>
+                                    )
+                                )}
 
                             <span
                                 className={`review-mastery mastery-${current.masteryLevel.toLowerCase()}`}

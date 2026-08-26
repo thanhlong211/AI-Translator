@@ -5,10 +5,20 @@ import {
 import type {
     GrammarItem,
     GrammarStats,
-    GrammarStatus
+    GrammarStatus,
+    StudyLanguage
 } from "../app/types";
 
+import {
+    LearningLanguageTabs
+} from "../components/LearningLanguageTabs";
+
 interface GrammarPageProps {
+    language: StudyLanguage;
+
+    onLanguageChange:
+        (language: StudyLanguage) => void;
+
     items: GrammarItem[];
     stats: GrammarStats;
     loading: boolean;
@@ -52,6 +62,8 @@ const statusLabels:
     };
 
 export function GrammarPage({
+    language,
+    onLanguageChange,
     items,
     stats,
     loading,
@@ -139,6 +151,14 @@ export function GrammarPage({
 
     return (
         <div className="page-stack grammar-library-page">
+            <LearningLanguageTabs
+                value={language}
+                disabled={loading}
+                onChange={
+                    onLanguageChange
+                }
+            />
+
             <section className="page-intro-row">
                 <div>
                     <span className="eyebrow">
@@ -207,7 +227,11 @@ export function GrammarPage({
                                 event.target.value
                             );
                         }}
-                        placeholder="Tìm pattern hoặc ý nghĩa..."
+                        placeholder={
+                            language === "EN"
+                                ? "Tìm cấu trúc English hoặc ý nghĩa..."
+                                : "Tìm pattern hoặc ý nghĩa..."
+                        }
                     />
 
                     <button
@@ -315,14 +339,28 @@ export function GrammarPage({
                                     </div>
 
                                     <div className="grammar-library-badges">
-                                        {item.jlptLevel !==
-                                            "UNKNOWN" && (
-                                            <span className="jlpt-badge">
-                                                {
-                                                    item.jlptLevel
-                                                }
-                                            </span>
-                                        )}
+                                        {language === "EN"
+                                            ? (
+                                                item.cefrLevel &&
+                                                item.cefrLevel !==
+                                                    "UNKNOWN" && (
+                                                    <span className="jlpt-badge">
+                                                        {
+                                                            item.cefrLevel
+                                                        }
+                                                    </span>
+                                                )
+                                            )
+                                            : (
+                                                item.jlptLevel !==
+                                                    "UNKNOWN" && (
+                                                    <span className="jlpt-badge">
+                                                        {
+                                                            item.jlptLevel
+                                                        }
+                                                    </span>
+                                                )
+                                            )}
 
                                         <button
                                             className={

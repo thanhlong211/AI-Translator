@@ -4255,6 +4255,13 @@ async function listVocabulary(
   const params =
     new URLSearchParams();
 
+  params.set(
+    "language",
+    normalizeStudyLanguage(
+      filters?.language
+    )
+  );
+
   const query =
     String(
       filters?.q ||
@@ -4344,10 +4351,18 @@ async function listVocabulary(
   return payload;
 }
 
-async function getVocabularyStats() {
+async function getVocabularyStats(
+  language = "JA"
+) {
+
+  const safeLanguage =
+    normalizeStudyLanguage(
+      language
+    );
+
   const response =
     await authorizedBackendFetch(
-      BACKEND_VOCABULARY_STATS_URL,
+      `${BACKEND_VOCABULARY_STATS_URL}?language=${safeLanguage}`,
       {
         method: "GET",
 
@@ -4520,6 +4535,13 @@ async function listGrammar(
   const params =
     new URLSearchParams();
 
+  params.set(
+    "language",
+    normalizeStudyLanguage(
+      filters?.language
+    )
+  );
+
   const query =
     String(
       filters?.q ||
@@ -4609,10 +4631,18 @@ async function listGrammar(
   return payload;
 }
 
-async function getGrammarStats() {
+async function getGrammarStats(
+  language = "JA"
+) {
+
+  const safeLanguage =
+    normalizeStudyLanguage(
+      language
+    );
+
   const response =
     await authorizedBackendFetch(
-      BACKEND_GRAMMAR_STATS_URL,
+      `${BACKEND_GRAMMAR_STATS_URL}?language=${safeLanguage}`,
       {
         method: "GET",
 
@@ -4780,7 +4810,8 @@ async function deleteGrammar(
 
 
 async function getReviewQueue(
-  limit = 30
+  limit = 30,
+  language = "JA"
 ) {
   const safeLimit =
     Math.max(
@@ -4791,9 +4822,14 @@ async function getReviewQueue(
       )
     );
 
-  const response =
+    const safeLanguage =
+    normalizeStudyLanguage(
+      language
+    );
+
+const response =
     await authorizedBackendFetch(
-      `${BACKEND_REVIEW_DUE_URL}?limit=${safeLimit}`,
+      `${BACKEND_REVIEW_DUE_URL}?limit=${safeLimit}&language=${safeLanguage}`,
       {
         method: "GET",
 
@@ -4820,7 +4856,8 @@ async function getReviewQueue(
 }
 
 async function getPracticeReviewQueue(
-  limit = 30
+  limit = 30,
+  language = "JA"
 ) {
   const safeLimit =
     Math.max(
@@ -4831,9 +4868,14 @@ async function getPracticeReviewQueue(
       )
     );
 
-  const response =
+    const safeLanguage =
+    normalizeStudyLanguage(
+      language
+    );
+
+const response =
     await authorizedBackendFetch(
-      `${BACKEND_REVIEW_PRACTICE_URL}?limit=${safeLimit}`,
+      `${BACKEND_REVIEW_PRACTICE_URL}?limit=${safeLimit}&language=${safeLanguage}`,
       {
         method: "GET",
 
@@ -4859,10 +4901,18 @@ async function getPracticeReviewQueue(
   return payload;
 }
 
-async function getReviewStats() {
+async function getReviewStats(
+  language = "JA"
+) {
+
+  const safeLanguage =
+    normalizeStudyLanguage(
+      language
+    );
+
   const response =
     await authorizedBackendFetch(
-      BACKEND_REVIEW_STATS_URL,
+      `${BACKEND_REVIEW_STATS_URL}?language=${safeLanguage}`,
       {
         method: "GET",
 
@@ -13272,8 +13322,10 @@ ipcMain.handle(
 
 ipcMain.handle(
   "vocabulary:stats",
-  async () => {
-    return getVocabularyStats();
+  async (_event, language) => {
+    return getVocabularyStats(
+      language
+    );
   }
 );
 
@@ -13324,8 +13376,10 @@ ipcMain.handle(
 
 ipcMain.handle(
   "grammar:stats",
-  async () => {
-    return getGrammarStats();
+  async (_event, language) => {
+    return getGrammarStats(
+      language
+    );
   }
 );
 
@@ -13367,26 +13421,38 @@ ipcMain.handle(
 
 ipcMain.handle(
   "review:due",
-  async (_event, limit) => {
+  async (
+    _event,
+    limit,
+    language
+  ) => {
     return getReviewQueue(
-      limit
+      limit,
+      language
     );
   }
 );
 
 ipcMain.handle(
   "review:practice",
-  async (_event, limit) => {
+  async (
+    _event,
+    limit,
+    language
+  ) => {
     return getPracticeReviewQueue(
-      limit
+      limit,
+      language
     );
   }
 );
 
 ipcMain.handle(
   "review:stats",
-  async () => {
-    return getReviewStats();
+  async (_event, language) => {
+    return getReviewStats(
+      language
+    );
   }
 );
 

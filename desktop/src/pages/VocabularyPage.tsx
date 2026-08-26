@@ -3,12 +3,22 @@ import {
 } from "react";
 
 import type {
+    StudyLanguage,
     VocabularyItem,
     VocabularyStats,
     VocabularyStatus
 } from "../app/types";
 
+import {
+    LearningLanguageTabs
+} from "../components/LearningLanguageTabs";
+
 interface VocabularyPageProps {
+    language: StudyLanguage;
+
+    onLanguageChange:
+        (language: StudyLanguage) => void;
+
     items: VocabularyItem[];
     stats: VocabularyStats;
     loading: boolean;
@@ -75,6 +85,8 @@ function formatDate(
 }
 
 export function VocabularyPage({
+    language,
+    onLanguageChange,
     items,
     stats,
     loading,
@@ -163,6 +175,14 @@ export function VocabularyPage({
 
     return (
         <div className="page-stack vocabulary-page">
+            <LearningLanguageTabs
+                value={language}
+                disabled={loading}
+                onChange={
+                    onLanguageChange
+                }
+            />
+
             <section className="page-intro-row vocabulary-intro">
                 <div>
                     <span className="eyebrow">
@@ -241,7 +261,11 @@ export function VocabularyPage({
                                 event.target.value
                             );
                         }}
-                        placeholder="Tìm Kanji, Hiragana, Romaji hoặc nghĩa..."
+                        placeholder={
+                            language === "EN"
+                                ? "Tìm từ, IPA hoặc nghĩa..."
+                                : "Tìm Kanji, Hiragana, Romaji hoặc nghĩa..."
+                        }
                     />
 
                     <button
@@ -374,19 +398,36 @@ export function VocabularyPage({
                                         <div className="library-word-title">
                                             <strong>
                                                 {
-                                                    item.dictionaryForm
+                                                    language === "EN"
+                                                        ? item.lemma ||
+                                                          item.dictionaryForm
+                                                        : item.dictionaryForm
                                                 }
                                             </strong>
 
-                                            {item.jlptLevel &&
-                                                item.jlptLevel !==
-                                                    "UNKNOWN" && (
-                                                <span className="jlpt-badge">
-                                                    {
-                                                        item.jlptLevel
-                                                    }
-                                                </span>
-                                            )}
+                                            {language === "EN"
+                                                ? (
+                                                    item.cefrLevel &&
+                                                    item.cefrLevel !==
+                                                        "UNKNOWN" && (
+                                                        <span className="jlpt-badge">
+                                                            {
+                                                                item.cefrLevel
+                                                            }
+                                                        </span>
+                                                    )
+                                                )
+                                                : (
+                                                    item.jlptLevel &&
+                                                    item.jlptLevel !==
+                                                        "UNKNOWN" && (
+                                                        <span className="jlpt-badge">
+                                                            {
+                                                                item.jlptLevel
+                                                            }
+                                                        </span>
+                                                    )
+                                                )}
                                         </div>
 
                                         {item.surface &&
@@ -415,15 +456,22 @@ export function VocabularyPage({
                                     <div className="library-reading">
                                         <strong>
                                             {
-                                                item.reading ||
-                                                "—"
+                                                language === "EN"
+                                                    ? item.ipa ||
+                                                      "—"
+                                                    : item.reading ||
+                                                      "—"
                                             }
                                         </strong>
 
                                         <span>
                                             {
-                                                item.romaji ||
-                                                ""
+                                                language === "EN"
+                                                    ? item.example
+                                                        ? `Ví dụ: ${item.example}`
+                                                        : ""
+                                                    : item.romaji ||
+                                                      ""
                                             }
                                         </span>
                                     </div>
