@@ -11,13 +11,15 @@ import java.util.List;
 @Schema(
         name = "StudyAnalyzeRequest",
         description =
-                "Câu tiếng Nhật OCR cần dịch và phân tích phục vụ Study Mode."
+                "Văn bản cần dịch và phân tích phục vụ Study Mode."
 )
 public record StudyAnalyzeRequest(
 
         @NotBlank
         @Size(max = 4000)
         @Schema(
+                description =
+                        "Văn bản nguồn cần học. Hỗ trợ Japanese và English.",
                 example = "学校へ行かなければならない。"
         )
         String text,
@@ -28,6 +30,13 @@ public record StudyAnalyzeRequest(
                 example = "1"
         )
         Long profileId,
+
+        @Schema(
+                description =
+                        "Ngôn ngữ đang học: JA hoặc EN. Nếu không truyền sẽ mặc định JA để tương thích client cũ.",
+                example = "JA"
+        )
+        StudyLanguage language,
 
         @Schema(
                 description =
@@ -59,7 +68,14 @@ public record StudyAnalyzeRequest(
         List<TranslationContextItem> context
 
 ) {
+
     public StudyAnalyzeRequest {
+
+        language =
+                language == null
+                        ? StudyLanguage.JA
+                        : language;
+
         level =
                 level == null
                         ? StudyLevel.AUTO
@@ -69,5 +85,30 @@ public record StudyAnalyzeRequest(
                 context == null
                         ? List.of()
                         : List.copyOf(context);
+    }
+
+    /*
+     * Backward compatibility:
+     *
+     * Code Java/test cũ đang gọi constructor không có language
+     * vẫn tiếp tục hoạt động và mặc định là Japanese.
+     */
+    public StudyAnalyzeRequest(
+            String text,
+            Long profileId,
+            StudyLevel level,
+            boolean autoSaveVocabulary,
+            boolean autoSaveGrammar,
+            List<TranslationContextItem> context
+    ) {
+        this(
+                text,
+                profileId,
+                StudyLanguage.JA,
+                level,
+                autoSaveVocabulary,
+                autoSaveGrammar,
+                context
+        );
     }
 }
