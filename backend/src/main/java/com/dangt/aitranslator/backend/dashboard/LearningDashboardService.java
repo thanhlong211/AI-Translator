@@ -417,12 +417,22 @@ public class LearningDashboardService {
         return new LearningWeakItem(
                 ReviewItemType.VOCABULARY,
                 item.getId(),
-                item.getDictionaryForm(),
+                item.getLanguage(),
+                item.getLanguage() == StudyLanguage.EN
+                        ? firstNonBlank(
+                                item.getLemma(),
+                                item.getDictionaryForm(),
+                                item.getSurface()
+                        )
+                        : item.getDictionaryForm(),
                 safe(
                         item.getMeaning()
                 ),
                 safe(
                         item.getJlptLevel()
+                ),
+                safe(
+                        item.getCefrLevel()
                 ),
                 mastery,
                 accuracy,
@@ -474,12 +484,16 @@ public class LearningDashboardService {
         return new LearningWeakItem(
                 ReviewItemType.GRAMMAR,
                 item.getId(),
+                item.getLanguage(),
                 item.getPattern(),
                 safe(
                         item.getMeaning()
                 ),
                 safe(
                         item.getJlptLevel()
+                ),
+                safe(
+                        item.getCefrLevel()
                 ),
                 mastery,
                 accuracy,
@@ -691,6 +705,26 @@ public class LearningDashboardService {
                     "Asia/Ho_Chi_Minh"
             );
         }
+    }
+
+    private String firstNonBlank(
+            String... values
+    ) {
+        if (values == null) {
+            return "";
+        }
+
+        for (String value : values) {
+            if (
+                    value != null
+                    &&
+                    !value.isBlank()
+            ) {
+                return value.trim();
+            }
+        }
+
+        return "";
     }
 
     private String safe(

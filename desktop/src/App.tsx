@@ -1,6 +1,7 @@
 import {
     useEffect,
-    useState
+    useState,
+    useRef
 } from "react";
 
 import type {
@@ -62,20 +63,6 @@ import {
     normalizeSourceLanguage,
     normalizeTargetLanguage
 } from "./app/translationLanguages";
-
-function readLearningLanguage(
-    key: string
-): StudyLanguage {
-    try {
-        return localStorage.getItem(
-            key
-        ) === "EN"
-            ? "EN"
-            : "JA";
-    } catch {
-        return "JA";
-    }
-}
 
 function saveLearningLanguage(
     key: string,
@@ -290,6 +277,65 @@ function App() {
         "JA"
     );
 
+    /*
+     * Mutable source of truth dùng để phát hiện
+     * response JA/EN đã lỗi thời.
+     */
+    const learningLanguageRef =
+        useRef<StudyLanguage>(
+            studyLanguage
+        );
+
+    useEffect(() => {
+        learningLanguageRef.current =
+            studyLanguage;
+    }, [
+        studyLanguage
+    ]);
+
+    /*
+     * Request sequence riêng cho từng Learning loader.
+     * Chỉ request mới nhất được phép update UI.
+     */
+    const learningRequestSeqRef =
+        useRef<Record<string, number>>(
+            {}
+        );
+
+    function beginLearningRequest(
+        key: string
+    ) {
+        const next =
+            (
+                learningRequestSeqRef
+                    .current[key]
+                ?? 0
+            ) + 1;
+
+        learningRequestSeqRef
+            .current[key] =
+                next;
+
+        return next;
+    }
+
+    function isLatestLearningRequest(
+        key: string,
+        requestId: number,
+        requestLanguage: StudyLanguage
+    ) {
+        return (
+            learningLanguageRef.current ===
+                requestLanguage
+            &&
+            learningRequestSeqRef
+                .current[key] ===
+                requestId
+        );
+    }
+
+
+
     const [
         studyLevel,
         setStudyLevel
@@ -388,16 +434,6 @@ function App() {
     ] = useState(0);
 
     const [
-        vocabularyLanguage,
-        setVocabularyLanguage
-    ] = useState<StudyLanguage>(
-        () =>
-            readLearningLanguage(
-                "learning.vocabularyLanguage"
-            )
-    );
-
-    const [
         vocabularyItems,
         setVocabularyItems
     ] = useState<VocabularyItem[]>(
@@ -441,16 +477,6 @@ function App() {
         vocabularyFavoriteOnly,
         setVocabularyFavoriteOnly
     ] = useState(false);
-
-    const [
-        grammarLanguage,
-        setGrammarLanguage
-    ] = useState<StudyLanguage>(
-        () =>
-            readLearningLanguage(
-                "learning.grammarLanguage"
-            )
-    );
 
     const [
         grammarItems,
@@ -498,16 +524,6 @@ function App() {
     ] = useState(false);
 
     const [
-        reviewLanguage,
-        setReviewLanguage
-    ] = useState<StudyLanguage>(
-        () =>
-            readLearningLanguage(
-                "learning.reviewLanguage"
-            )
-    );
-
-    const [
         reviewQueue,
         setReviewQueue
     ] = useState<ReviewQueue>({
@@ -543,16 +559,6 @@ function App() {
         reviewMessage,
         setReviewMessage
     ] = useState("");
-
-    const [
-        dashboardLanguage,
-        setDashboardLanguage
-    ] = useState<StudyLanguage>(
-        () =>
-            readLearningLanguage(
-                "learning.dashboardLanguage"
-            )
-    );
 
     const [
         learningDashboard,
@@ -1595,7 +1601,7 @@ function App() {
     }, [
         auth.authenticated,
         activePage,
-        vocabularyLanguage,
+        studyLanguage,
         vocabularyStatusFilter,
         vocabularyFavoriteOnly
     ]);
@@ -1612,7 +1618,7 @@ function App() {
     }, [
         auth.authenticated,
         activePage,
-        grammarLanguage,
+        studyLanguage,
         grammarStatusFilter,
         grammarFavoriteOnly
     ]);
@@ -1628,7 +1634,7 @@ function App() {
     }, [
         auth.authenticated,
         activePage,
-        reviewLanguage
+        studyLanguage
     ]);
 
 
@@ -1642,7 +1648,7 @@ function App() {
     }, [
         auth.authenticated,
         activePage,
-        dashboardLanguage
+        studyLanguage
     ]);
 
     /*
@@ -2998,25 +3004,157 @@ function App() {
         }
     }
 
-    function changeVocabularyLanguage(
+        /*
+     * Study là source of truth cho toàn bộ Learning.
+     *
+     * Khi Study đổi JA <-> EN:
+     * Vocabulary / Grammar / Review / Dashboard
+     * cùng đổi theo.
+     */
+    useEffect(() => {
+
+
+
+
+        saveLearningLanguage(
+            "learning.language",
+            studyLanguage
+        );
+
+        /*
+         * Giữ các key cũ để migration/backward compatibility.
+         */
+        saveLearningLanguage(
+            "learning.studyLanguage",
+            studyLanguage
+        );
+
+        saveLearningLanguage(
+            "learning.studyLanguage",
+            studyLanguage
+        );
+
+        saveLearningLanguage(
+            "learning.studyLanguage",
+            studyLanguage
+        );
+
+        saveLearningLanguage(
+            "learning.studyLanguage",
+            studyLanguage
+        );
+    }, [
+        studyLanguage
+    ]);
+
+    async function changeLearningLanguage(
+        language: StudyLanguage
+    ) {
+        const nextLanguage:
+            StudyLanguage =
+                language === "EN"
+                    ? "EN"
+                    : "JA";
+
+        /*
+         * Update React ngay để UI phản hồi tức thì.
+         */
+        learningLanguageRef.current =
+            nextLanguage;
+
+        setStudyLanguage(
+            nextLanguage
+        );
+
+
+
+
+
+        saveLearningLanguage(
+            "learning.language",
+            nextLanguage
+        );
+
+        saveLearningLanguage(
+            "learning.studyLanguage",
+            nextLanguage
+        );
+
+        saveLearningLanguage(
+            "learning.studyLanguage",
+            nextLanguage
+        );
+
+        saveLearningLanguage(
+            "learning.studyLanguage",
+            nextLanguage
+        );
+
+        saveLearningLanguage(
+            "learning.studyLanguage",
+            nextLanguage
+        );
+
+        /*
+         * Đồng bộ Electron Main để shortcut Study
+         * cũng dùng đúng language.
+         */
+        try {
+            await api
+                .setStudyLanguage?.(
+                    nextLanguage
+                );
+
+            /*
+             * Persist vào app-preferences.json.
+             * Giữ nguyên level/autosave hiện tại.
+             */
+            const nextPreferences:
+                AppPreferences =
+                    await api
+                        .updateAppPreferences({
+                            study: {
+                                language:
+                                    nextLanguage,
+                                level:
+                                    studyLevel,
+                                autoSaveVocabulary,
+                                autoSaveGrammar
+                            }
+                        });
+
+            if (nextPreferences) {
+                setAppPreferences(
+                    nextPreferences
+                );
+            }
+        } catch (error) {
+            console.error(
+                "[learning-language] " +
+                "Không lưu được preference:",
+                error
+            );
+        }
+    }
+
+function changeVocabularyLanguage(
         language: StudyLanguage
     ) {
         if (
             language ===
-            vocabularyLanguage
+            studyLanguage
         ) {
             return;
         }
 
-        setVocabularyLanguage(
+        void changeLearningLanguage(
             language
         );
 
-        saveLearningLanguage(
-            "learning.vocabularyLanguage",
-            language
-        );
-
+        /*
+         * Không để dữ liệu language cũ nằm trên màn hình
+         * trong lúc request mới đang chạy.
+         */
         setVocabularyItems([]);
         setVocabularyMessage("");
     }
@@ -3026,17 +3164,12 @@ function App() {
     ) {
         if (
             language ===
-            grammarLanguage
+            studyLanguage
         ) {
             return;
         }
 
-        setGrammarLanguage(
-            language
-        );
-
-        saveLearningLanguage(
-            "learning.grammarLanguage",
+        void changeLearningLanguage(
             language
         );
 
@@ -3049,17 +3182,12 @@ function App() {
     ) {
         if (
             language ===
-            reviewLanguage
+            studyLanguage
         ) {
             return;
         }
 
-        setReviewLanguage(
-            language
-        );
-
-        saveLearningLanguage(
-            "learning.reviewLanguage",
+        void changeLearningLanguage(
             language
         );
 
@@ -3088,6 +3216,15 @@ function App() {
     }
 
     async function loadVocabulary() {
+        const requestLanguage =
+            studyLanguage;
+
+        const requestId =
+            beginLearningRequest(
+                "learning:loadVocabulary"
+            );
+
+
         if (!auth.authenticated) {
             return;
         }
@@ -3101,7 +3238,7 @@ function App() {
                 await api
                     .listVocabulary({
                         language:
-                            vocabularyLanguage,
+                            studyLanguage,
 
                         q:
                             vocabularyQuery,
@@ -3117,6 +3254,16 @@ function App() {
                         page: 0,
                         size: 100
                     });
+        if (
+            !isLatestLearningRequest(
+                "learning:loadVocabulary",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
 
             setVocabularyItems(
                 Array.isArray(
@@ -3128,12 +3275,32 @@ function App() {
 
             setVocabularyMessage("");
         } catch (error) {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadVocabulary",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setVocabularyMessage(
                 error instanceof Error
                     ? error.message
                     : String(error)
             );
         } finally {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadVocabulary",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setVocabularyLoading(
                 false
             );
@@ -3141,6 +3308,15 @@ function App() {
     }
 
     async function loadVocabularyStats() {
+        const requestLanguage =
+            studyLanguage;
+
+        const requestId =
+            beginLearningRequest(
+                "learning:loadVocabularyStats"
+            );
+
+
         if (!auth.authenticated) {
             return;
         }
@@ -3149,8 +3325,18 @@ function App() {
             const result =
                 await api
                     .getVocabularyStats(
-                        vocabularyLanguage
+                        studyLanguage
                     );
+        if (
+            !isLatestLearningRequest(
+                "learning:loadVocabularyStats",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
 
             setVocabularyStats({
                 total:
@@ -3186,6 +3372,16 @@ function App() {
                     )
             });
         } catch (error) {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadVocabularyStats",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setVocabularyMessage(
                 error instanceof Error
                     ? error.message
@@ -3351,6 +3547,15 @@ function App() {
     }
 
     async function loadGrammar() {
+        const requestLanguage =
+            studyLanguage;
+
+        const requestId =
+            beginLearningRequest(
+                "learning:loadGrammar"
+            );
+
+
         if (!auth.authenticated) {
             return;
         }
@@ -3364,7 +3569,7 @@ function App() {
                 await api
                     .listGrammar({
                         language:
-                            grammarLanguage,
+                            studyLanguage,
 
                         q:
                             grammarQuery,
@@ -3380,6 +3585,16 @@ function App() {
                         page: 0,
                         size: 100
                     });
+        if (
+            !isLatestLearningRequest(
+                "learning:loadGrammar",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
 
             setGrammarItems(
                 Array.isArray(
@@ -3391,12 +3606,32 @@ function App() {
 
             setGrammarMessage("");
         } catch (error) {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadGrammar",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setGrammarMessage(
                 error instanceof Error
                     ? error.message
                     : String(error)
             );
         } finally {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadGrammar",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setGrammarLoading(
                 false
             );
@@ -3404,6 +3639,15 @@ function App() {
     }
 
     async function loadGrammarStats() {
+        const requestLanguage =
+            studyLanguage;
+
+        const requestId =
+            beginLearningRequest(
+                "learning:loadGrammarStats"
+            );
+
+
         if (!auth.authenticated) {
             return;
         }
@@ -3412,8 +3656,18 @@ function App() {
             const result =
                 await api
                     .getGrammarStats(
-                        grammarLanguage
+                        studyLanguage
                     );
+        if (
+            !isLatestLearningRequest(
+                "learning:loadGrammarStats",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
 
             setGrammarStats({
                 total:
@@ -3449,6 +3703,16 @@ function App() {
                     )
             });
         } catch (error) {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadGrammarStats",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setGrammarMessage(
                 error instanceof Error
                     ? error.message
@@ -3599,6 +3863,15 @@ function App() {
     }
 
     async function loadReviewQueue() {
+        const requestLanguage =
+            studyLanguage;
+
+        const requestId =
+            beginLearningRequest(
+                "learning:loadReviewQueue"
+            );
+
+
         if (!auth.authenticated) {
             return;
         }
@@ -3609,8 +3882,18 @@ function App() {
                 await api
                     .getReviewQueue(
                         30,
-                        reviewLanguage
+                        studyLanguage
                     );
+        if (
+            !isLatestLearningRequest(
+                "learning:loadReviewQueue",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
 
             setReviewQueue({
                 items:
@@ -3640,6 +3923,16 @@ function App() {
                     )
             });
         } catch (error) {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadReviewQueue",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setReviewMessage(
                 error instanceof Error
                     ? error.message
@@ -3650,6 +3943,15 @@ function App() {
 
     async function loadPracticeReviewQueue():
         Promise<ReviewQueue> {
+        const requestLanguage =
+            studyLanguage;
+
+        const requestId =
+            beginLearningRequest(
+                "learning:loadPracticeReviewQueue"
+            );
+
+
         if (!auth.authenticated) {
             return {
                 items: [],
@@ -3664,8 +3966,18 @@ function App() {
             await api
                 .getPracticeReviewQueue(
                     30,
-                    reviewLanguage
+                    studyLanguage
                 );
+        if (
+            !isLatestLearningRequest(
+                "learning:loadPracticeReviewQueue",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
 
         return {
             items:
@@ -3696,6 +4008,15 @@ function App() {
     }
 
     async function loadReviewStats() {
+        const requestLanguage =
+            studyLanguage;
+
+        const requestId =
+            beginLearningRequest(
+                "learning:loadReviewStats"
+            );
+
+
         if (!auth.authenticated) {
             return;
         }
@@ -3705,8 +4026,18 @@ function App() {
                 ReviewStats =
                 await api
                     .getReviewStats(
-                        reviewLanguage
+                        studyLanguage
                     );
+        if (
+            !isLatestLearningRequest(
+                "learning:loadReviewStats",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
 
             setReviewStats({
                 dueNow:
@@ -3785,6 +4116,16 @@ function App() {
                     )
             });
         } catch (error) {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadReviewStats",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setReviewMessage(
                 error instanceof Error
                     ? error.message
@@ -3942,17 +4283,12 @@ function App() {
     ) {
         if (
             language ===
-            dashboardLanguage
+            studyLanguage
         ) {
             return;
         }
 
-        setDashboardLanguage(
-            language
-        );
-
-        saveLearningLanguage(
-            "learning.dashboardLanguage",
+        void changeLearningLanguage(
             language
         );
 
@@ -3976,6 +4312,15 @@ function App() {
     }
 
     async function loadLearningDashboard() {
+        const requestLanguage =
+            studyLanguage;
+
+        const requestId =
+            beginLearningRequest(
+                "learning:loadLearningDashboard"
+            );
+
+
         if (!auth.authenticated) {
             return;
         }
@@ -3989,8 +4334,18 @@ function App() {
                 LearningDashboard =
                 await api
                     .getLearningDashboard(
-                        dashboardLanguage
+                        studyLanguage
                     );
+        if (
+            !isLatestLearningRequest(
+                "learning:loadLearningDashboard",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
 
             setLearningDashboard(
                 result
@@ -3998,12 +4353,32 @@ function App() {
 
             setLearningDashboardMessage("");
         } catch (error) {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadLearningDashboard",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setLearningDashboardMessage(
                 error instanceof Error
                     ? error.message
                     : String(error)
             );
         } finally {
+            if (
+            !isLatestLearningRequest(
+                "learning:loadLearningDashboard",
+                requestId,
+                requestLanguage
+            )
+        ) {
+            return;
+        }
+
             setLearningDashboardLoading(
                 false
             );
@@ -5466,7 +5841,7 @@ function App() {
                 return (
                     <VocabularyPage
                         language={
-                            vocabularyLanguage
+                            studyLanguage
                         }
                         onLanguageChange={
                             changeVocabularyLanguage
@@ -5520,7 +5895,7 @@ function App() {
                 return (
                     <GrammarPage
                         language={
-                            grammarLanguage
+                            studyLanguage
                         }
                         onLanguageChange={
                             changeGrammarLanguage
@@ -5574,7 +5949,7 @@ function App() {
                 return (
                     <ReviewPage
                         language={
-                            reviewLanguage
+                            studyLanguage
                         }
                         onLanguageChange={
                             changeReviewLanguage
@@ -5720,7 +6095,7 @@ function App() {
                 return (
                     <HistoryPage
                         language={
-                            dashboardLanguage
+                            studyLanguage
                         }
                         onLanguageChange={
                             changeDashboardLanguage
@@ -5738,13 +6113,10 @@ function App() {
                             loadLearningDashboard
                         }
                         onOpenReview={() => {
-                            setReviewLanguage(
-                                dashboardLanguage
-                            );
 
                             saveLearningLanguage(
-                                "learning.reviewLanguage",
-                                dashboardLanguage
+                                "learning.studyLanguage",
+                                studyLanguage
                             );
 
                             setActivePage(

@@ -136,11 +136,11 @@ class OcrWorkerManager {
     const modelRoot = path.join(directory, "runtime", "models");
     const detectionModelPath = path.join(
       modelRoot,
-      "PP-OCRv6_medium_det"
+      "PP-OCRv6_small_det"
     );
     const recognitionModelPath = path.join(
       modelRoot,
-      "PP-OCRv6_medium_rec"
+      "PP-OCRv6_small_rec"
     );
 
     const explicitWorker = String(

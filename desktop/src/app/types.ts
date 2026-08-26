@@ -600,9 +600,11 @@ export interface LearningDailyActivity {
 export interface LearningWeakItem {
     itemType: ReviewItemType;
     itemId: number;
+    language: StudyLanguage;
     primaryText: string;
     answer: string;
     jlptLevel: string;
+    cefrLevel: string;
     masteryLevel: ReviewMasteryLevel;
     accuracyPercent: number;
     correctCount: number;

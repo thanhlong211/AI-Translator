@@ -370,10 +370,15 @@ export function HistoryPage({
                                         key={`${item.itemType}-${item.itemId}`}
                                     >
                                         <div className="weak-item-type">
-                                            {item.itemType ===
-                                            "VOCABULARY"
-                                                ? "語"
-                                                : "文"}
+                                            {language === "EN"
+                                                ? item.itemType ===
+                                                  "VOCABULARY"
+                                                    ? "VOC"
+                                                    : "GR"
+                                                : item.itemType ===
+                                                  "VOCABULARY"
+                                                    ? "語"
+                                                    : "文"}
                                         </div>
 
                                         <div className="weak-item-main">
@@ -389,11 +394,34 @@ export function HistoryPage({
                                             </span>
 
                                             <small>
+                                                {(
+                                                    language === "EN"
+                                                        ? item.cefrLevel
+                                                        : item.jlptLevel
+                                                ) &&
+                                                (
+                                                    language === "EN"
+                                                        ? item.cefrLevel
+                                                        : item.jlptLevel
+                                                ) !== "UNKNOWN"
+                                                    ? (
+                                                        <>
+                                                            {
+                                                                language === "EN"
+                                                                    ? item.cefrLevel
+                                                                    : item.jlptLevel
+                                                            }
+                                                            {" "}·{" "}
+                                                        </>
+                                                    )
+                                                    : null}
+
                                                 {
                                                     masteryLabel(
                                                         item.masteryLevel
                                                     )
                                                 }
+
                                                 {" "}·{" "}
                                                 đúng{" "}
                                                 {item.correctCount}

@@ -7,6 +7,7 @@ import type {
     AuthStatus,
     BackendStatus,
     StudyGrammarPoint,
+    StudyLanguage,
     StudyLevel,
     StudyState,
     StudyVocabularyItem,
@@ -15,45 +16,61 @@ import type {
 
 import { Icon } from "../components/Icon";
 
+
 interface StudyPageProps {
     backend: BackendStatus;
     auth: AuthStatus;
     profiles: TranslationProfile[];
     activeProfile: TranslationProfile | null;
     profileDirty: boolean;
+
     study: StudyState;
+    studyLanguage: StudyLanguage;
     studyLevel: StudyLevel;
+
     autoSaveVocabulary: boolean;
     autoSaveGrammar: boolean;
     shortcutDisplay: string;
+
+    onStudyLanguageChange:
+        (language: StudyLanguage) => void;
+
     onStudyLevelChange:
         (level: StudyLevel) => void;
+
     onAutoSaveVocabularyChange:
         (value: boolean) => void;
+
     onAutoSaveGrammarChange:
         (value: boolean) => void;
+
     onSelectProfile:
         (profileId: number) => void;
+
     onScan: () => void;
     onClearResult: () => void;
+
     onSaveVocabulary:
         (
-            item:
-                StudyVocabularyItem
+            item: StudyVocabularyItem
         ) => Promise<void>;
+
     onSaveGrammar:
         (
-            item:
-                StudyGrammarPoint
+            item: StudyGrammarPoint
         ) => Promise<void>;
 }
+
 
 type StudyTab =
     | "structure"
     | "grammar"
-    | "vocabulary";
+    | "vocabulary"
+    | "collocations"
+    | "mistakes";
 
-const studyLevels:
+
+const JAPANESE_LEVELS:
     StudyLevel[] = [
         "AUTO",
         "N5",
@@ -63,7 +80,20 @@ const studyLevels:
         "N1"
     ];
 
-function JlptBadge({
+
+const ENGLISH_LEVELS:
+    StudyLevel[] = [
+        "AUTO",
+        "A1",
+        "A2",
+        "B1",
+        "B2",
+        "C1",
+        "C2"
+    ];
+
+
+function LevelBadge({
     level
 }: {
     level: string;
@@ -84,9 +114,9 @@ function JlptBadge({
     );
 }
 
+
 function wordKey(
-    word:
-        StudyVocabularyItem
+    word: StudyVocabularyItem
 ) {
     return [
         word.dictionaryForm ||
@@ -103,10 +133,12 @@ export function StudyPage({
     activeProfile,
     profileDirty,
     study,
+    studyLanguage,
     studyLevel,
     autoSaveVocabulary,
     autoSaveGrammar,
     shortcutDisplay,
+    onStudyLanguageChange,
     onStudyLevelChange,
     onAutoSaveVocabularyChange,
     onAutoSaveGrammarChange,
@@ -116,6 +148,14 @@ export function StudyPage({
     onSaveVocabulary,
     onSaveGrammar
 }: StudyPageProps) {
+    const isEnglish =
+        studyLanguage === "EN";
+
+    const studyLevels =
+        isEnglish
+            ? ENGLISH_LEVELS
+            : JAPANESE_LEVELS;
+
     const [
         activeTab,
         setActiveTab
@@ -131,12 +171,9 @@ export function StudyPage({
     const [
         savedWordKeys,
         setSavedWordKeys
-    ] = useState<
-        Set<string>
-    >(
+    ] = useState<Set<string>>(
         new Set()
     );
-
 
     const [
         savingGrammarKey,
@@ -146,9 +183,7 @@ export function StudyPage({
     const [
         savedGrammarKeys,
         setSavedGrammarKeys
-    ] = useState<
-        Set<string>
-    >(
+    ] = useState<Set<string>>(
         new Set()
     );
 
@@ -160,12 +195,10 @@ export function StudyPage({
         study.fastTranslation;
 
     const sync =
-        study.result
-            ?.vocabularySync;
+        study.result?.vocabularySync;
 
     const grammarSync =
-        study.result
-            ?.grammarSync;
+        study.result?.grammarSync;
 
     const displayOriginal =
         analysis?.original ||
@@ -190,6 +223,24 @@ export function StudyPage({
         !profileDirty &&
         !study.isScanning;
 
+    const grammarCount =
+        isEnglish
+            ? analysis
+                ?.englishGrammar
+                ?.length ?? 0
+            : analysis
+                ?.grammar
+                ?.length ?? 0;
+
+    const vocabularyCount =
+        isEnglish
+            ? analysis
+                ?.englishVocabulary
+                ?.length ?? 0
+            : analysis
+                ?.vocabulary
+                ?.length ?? 0;
+
     useEffect(() => {
         setSavedWordKeys(
             new Set()
@@ -206,17 +257,15 @@ export function StudyPage({
         study.activeScanId
     ]);
 
+
     async function saveWord(
-        word:
-            StudyVocabularyItem
+        word: StudyVocabularyItem
     ) {
         const key =
             wordKey(word);
 
         try {
-            setSavingWordKey(
-                key
-            );
+            setSavingWordKey(key);
 
             await onSaveVocabulary(
                 word
@@ -225,9 +274,7 @@ export function StudyPage({
             setSavedWordKeys(
                 (current) => {
                     const next =
-                        new Set(
-                            current
-                        );
+                        new Set(current);
 
                     next.add(key);
 
@@ -235,24 +282,19 @@ export function StudyPage({
                 }
             );
         } finally {
-            setSavingWordKey(
-                ""
-            );
+            setSavingWordKey("");
         }
     }
 
 
     async function saveGrammarPoint(
-        grammar:
-            StudyGrammarPoint
+        grammar: StudyGrammarPoint
     ) {
         const key =
             grammar.pattern;
 
         try {
-            setSavingGrammarKey(
-                key
-            );
+            setSavingGrammarKey(key);
 
             await onSaveGrammar(
                 grammar
@@ -261,9 +303,7 @@ export function StudyPage({
             setSavedGrammarKeys(
                 (current) => {
                     const next =
-                        new Set(
-                            current
-                        );
+                        new Set(current);
 
                     next.add(key);
 
@@ -271,14 +311,14 @@ export function StudyPage({
                 }
             );
         } finally {
-            setSavingGrammarKey(
-                ""
-            );
+            setSavingGrammarKey("");
         }
     }
 
+
     return (
         <div className="page-stack study-page">
+
             <section className="study-hero study-hero-v63">
                 <div>
                     <span className="eyebrow violet">
@@ -286,12 +326,15 @@ export function StudyPage({
                     </span>
 
                     <h2>
-                        Bản dịch hiện trước,
-                        phân tích học tập hoàn tất sau
+                        {isEnglish
+                            ? "English Study · IPA, CEFR và phân tích ngữ pháp"
+                            : "Japanese Study · Reading, JLPT và phân tích ngữ pháp"}
                     </h2>
 
                     <p>
-                        Dịch ngay và tự động phân tích từ vựng, ngữ pháp sau đó.
+                        {isEnglish
+                            ? "Dịch nhanh rồi phân tích IPA, CEFR, từ vựng, collocation và lỗi thường gặp."
+                            : "Dịch nhanh rồi phân tích cách đọc, cấu trúc, từ vựng và ngữ pháp."}
                     </p>
                 </div>
 
@@ -300,9 +343,7 @@ export function StudyPage({
                     onClick={onScan}
                     disabled={!canScan}
                 >
-                    <Icon
-                        name="scan"
-                    />
+                    <Icon name="scan" />
 
                     {study.isScanning
                         ? "Đang chọn vùng..."
@@ -316,7 +357,49 @@ export function StudyPage({
                 </button>
             </section>
 
+
             <section className="study-toolbar-card study-toolbar-v64">
+
+                <label className="control-field">
+                    <span>
+                        Ngôn ngữ học
+                    </span>
+
+                    <select
+                        value={studyLanguage}
+                        onChange={(event) => {
+                            const next =
+                                event.target
+                                    .value as
+                                    StudyLanguage;
+
+                            if (
+                                next !==
+                                studyLanguage
+                            ) {
+                                onClearResult();
+
+                                setActiveTab(
+                                    "structure"
+                                );
+
+                                onStudyLanguageChange(
+                                    next
+                                );
+                            }
+                        }}
+                    >
+                        <option value="JA">
+                            Japanese
+                        </option>
+
+                        <option value="EN">
+                            English
+                        </option>
+                    </select>
+                </label>
+
+
                 <label className="control-field">
                     <span>
                         Translation Profile
@@ -334,9 +417,7 @@ export function StudyPage({
                                 )
                             );
                         }}
-                        disabled={
-                            !profiles.length
-                        }
+                        disabled={!profiles.length}
                     >
                         {profiles.map(
                             (profile) => (
@@ -354,9 +435,12 @@ export function StudyPage({
                     </select>
                 </label>
 
+
                 <label className="control-field">
                     <span>
-                        Trình độ giải thích
+                        {isEnglish
+                            ? "CEFR mục tiêu"
+                            : "JLPT / mức giải thích"}
                     </span>
 
                     <select
@@ -364,7 +448,8 @@ export function StudyPage({
                         onChange={(event) => {
                             onStudyLevelChange(
                                 event.target
-                                    .value as StudyLevel
+                                    .value as
+                                    StudyLevel
                             );
                         }}
                     >
@@ -383,12 +468,12 @@ export function StudyPage({
                     </select>
                 </label>
 
+
                 <label className="study-autosave-toggle">
                     <input
                         type="checkbox"
-                        checked={
-                            autoSaveVocabulary
-                        }
+                        checked={autoSaveVocabulary}
+                        
                         onChange={(event) => {
                             onAutoSaveVocabularyChange(
                                 event.target.checked
@@ -402,17 +487,19 @@ export function StudyPage({
                         </strong>
 
                         <small>
-                            Chỉ lưu từ vựng, không lưu cả câu.
+                            {isEnglish
+                                ? "English được lưu riêng theo ngôn ngữ."
+                                : "Chỉ lưu từ vựng, không lưu cả câu."}
                         </small>
                     </span>
                 </label>
 
+
                 <label className="study-autosave-toggle grammar-save-toggle">
                     <input
                         type="checkbox"
-                        checked={
-                            autoSaveGrammar
-                        }
+                        checked={autoSaveGrammar}
+                        
                         onChange={(event) => {
                             onAutoSaveGrammarChange(
                                 event.target.checked
@@ -426,12 +513,23 @@ export function StudyPage({
                         </strong>
 
                         <small>
-                            Chỉ lưu mẫu ngữ pháp và giải thích.
+                            {isEnglish
+                                ? "English sử dụng CEFR thay cho JLPT."
+                                : "Chỉ lưu mẫu ngữ pháp và giải thích."}
                         </small>
                     </span>
                 </label>
 
+
                 <div className="study-toolbar-info">
+                    <span>
+                        Ngôn ngữ:
+                        {" "}
+                        <strong>
+                            {studyLanguage}
+                        </strong>
+                    </span>
+
                     <span>
                         Ngữ cảnh:
                         {" "}
@@ -443,14 +541,9 @@ export function StudyPage({
                         {" "}
                         {activeProfile?.glossary.length ?? 0}
                     </span>
-
-                    <span>
-                        Nhân vật:
-                        {" "}
-                        {activeProfile?.characters.length ?? 0}
-                    </span>
                 </div>
             </section>
+
 
             {profileDirty && (
                 <div className="notice warning">
@@ -471,7 +564,9 @@ export function StudyPage({
                 </div>
             )}
 
-            {sync?.autoSaved && (
+
+            {!isEnglish &&
+                sync?.autoSaved && (
                 <div className="notice success-notice">
                     Từ vựng đã lưu:
                     {" "}
@@ -483,15 +578,13 @@ export function StudyPage({
                     <strong>
                         {sync.updated}
                     </strong>
-                    {" "}từ được cập nhật
-                    {sync.skipped > 0
-                        ? `, bỏ qua ${sync.skipped}`
-                        : ""}.
+                    {" "}từ được cập nhật.
                 </div>
             )}
 
 
-            {grammarSync?.autoSaved && (
+            {!isEnglish &&
+                grammarSync?.autoSaved && (
                 <div className="notice success-notice">
                     Ngữ pháp đã lưu:
                     {" "}
@@ -503,17 +596,17 @@ export function StudyPage({
                     <strong>
                         {grammarSync.updated}
                     </strong>
-                    {" "}cấu trúc được cập nhật
-                    {grammarSync.skipped > 0
-                        ? `, bỏ qua ${grammarSync.skipped}`
-                        : ""}.
+                    {" "}cấu trúc được cập nhật.
                 </div>
             )}
+
 
             {!hasSentence ? (
                 <section className="study-empty-state">
                     <div className="study-empty-mark">
-                        学
+                        {isEnglish
+                            ? "EN"
+                            : "学"}
                     </div>
 
                     <div>
@@ -522,9 +615,10 @@ export function StudyPage({
                         </h3>
 
                         <p>
-                            {shortcutDisplay} để Study.
+                            {shortcutDisplay}
+                            {" "}để Study.
                             Bản dịch nhanh sẽ hiện trước;
-                            cấu trúc/ngữ pháp/từ vựng cập nhật sau.
+                            phân tích chi tiết cập nhật sau.
                         </p>
                     </div>
 
@@ -564,6 +658,7 @@ export function StudyPage({
                 </section>
             ) : (
                 <>
+
                     <section className="study-sentence-card study-result-card">
                         <div className="card-heading">
                             <div>
@@ -577,20 +672,20 @@ export function StudyPage({
                             </div>
 
                             <div className="study-result-meta">
-                                {(
-                                    study.result
-                                        ?.profile
-                                        .name ||
-                                    fast
-                                        ?.profileName
-                                ) && (
-                                    <span className="coming-chip live">
+                                <span className="coming-chip live">
+                                    {isEnglish
+                                        ? "English"
+                                        : "Japanese"}
+                                </span>
+
+                                {study.result
+                                    ?.profile
+                                    ?.name && (
+                                    <span className="coming-chip">
                                         {
                                             study.result
-                                                ?.profile
-                                                .name ||
-                                            fast
-                                                ?.profileName
+                                                .profile
+                                                .name
                                         }
                                     </span>
                                 )}
@@ -605,36 +700,55 @@ export function StudyPage({
 
                                 <button
                                     className="text-action"
-                                    onClick={
-                                        onClearResult
-                                    }
+                                    onClick={onClearResult}
                                 >
                                     Xóa
                                 </button>
                             </div>
                         </div>
 
+
                         <div className="study-source-block">
                             <div className="study-japanese">
                                 {displayOriginal}
                             </div>
 
-                            {analysis?.reading && (
+                            {!isEnglish &&
+                                analysis?.reading && (
                                 <div className="study-reading">
-                                    {
-                                        analysis.reading
-                                    }
+                                    {analysis.reading}
                                 </div>
                             )}
 
-                            {analysis?.romaji && (
+                            {!isEnglish &&
+                                analysis?.romaji && (
                                 <div className="study-romaji">
-                                    {
-                                        analysis.romaji
-                                    }
+                                    {analysis.romaji}
+                                </div>
+                            )}
+
+                            {isEnglish &&
+                                analysis?.ipa && (
+                                <div className="study-reading">
+                                    /{analysis.ipa}/
+                                </div>
+                            )}
+
+                            {isEnglish &&
+                                analysis && (
+                                <div className="study-romaji">
+                                    CEFR:
+                                    {" "}
+                                    <strong>
+                                        {
+                                            analysis.cefrLevel ||
+                                            "UNKNOWN"
+                                        }
+                                    </strong>
                                 </div>
                             )}
                         </div>
+
 
                         <div className="study-translation-block">
                             <span>
@@ -642,11 +756,10 @@ export function StudyPage({
                             </span>
 
                             <p>
-                                {
-                                    displayTranslation
-                                }
+                                {displayTranslation}
                             </p>
                         </div>
+
 
                         {analysis?.sentenceSummary && (
                             <div className="sentence-summary">
@@ -656,13 +769,13 @@ export function StudyPage({
 
                                 <span>
                                     {
-                                        analysis
-                                            .sentenceSummary
+                                        analysis.sentenceSummary
                                     }
                                 </span>
                             </div>
                         )}
                     </section>
+
 
                     {!analysis &&
                         study.isAnalyzing && (
@@ -677,20 +790,25 @@ export function StudyPage({
                                 </strong>
 
                                 <p>
-                                    AI đang phân tích cách đọc, cấu trúc, ngữ pháp và từ vựng.
+                                    {isEnglish
+                                        ? "AI đang phân tích IPA, CEFR, cấu trúc, ngữ pháp và từ vựng."
+                                        : "AI đang phân tích cách đọc, cấu trúc, ngữ pháp và từ vựng."}
+                                    {" "}
                                     Bạn có thể quét câu tiếp theo ngay.
                                 </p>
                             </div>
                         </section>
                     )}
 
+
                     {analysis && (
                         <section className="study-analysis-card">
+
                             <div className="study-tabs">
+
                                 <button
                                     className={
-                                        activeTab ===
-                                        "structure"
+                                        activeTab === "structure"
                                             ? "study-tab active"
                                             : "study-tab"
                                     }
@@ -701,6 +819,7 @@ export function StudyPage({
                                     }}
                                 >
                                     Cấu trúc
+
                                     <span>
                                         {
                                             analysis
@@ -710,10 +829,10 @@ export function StudyPage({
                                     </span>
                                 </button>
 
+
                                 <button
                                     className={
-                                        activeTab ===
-                                        "grammar"
+                                        activeTab === "grammar"
                                             ? "study-tab active"
                                             : "study-tab"
                                     }
@@ -724,19 +843,16 @@ export function StudyPage({
                                     }}
                                 >
                                     Ngữ pháp
+
                                     <span>
-                                        {
-                                            analysis
-                                                .grammar
-                                                .length
-                                        }
+                                        {grammarCount}
                                     </span>
                                 </button>
 
+
                                 <button
                                     className={
-                                        activeTab ===
-                                        "vocabulary"
+                                        activeTab === "vocabulary"
                                             ? "study-tab active"
                                             : "study-tab"
                                     }
@@ -747,19 +863,71 @@ export function StudyPage({
                                     }}
                                 >
                                     Từ vựng
+
                                     <span>
-                                        {
-                                            analysis
-                                                .vocabulary
-                                                .length
-                                        }
+                                        {vocabularyCount}
                                     </span>
                                 </button>
+
+
+                                {isEnglish && (
+                                    <button
+                                        className={
+                                            activeTab === "collocations"
+                                                ? "study-tab active"
+                                                : "study-tab"
+                                        }
+                                        onClick={() => {
+                                            setActiveTab(
+                                                "collocations"
+                                            );
+                                        }}
+                                    >
+                                        Collocations
+
+                                        <span>
+                                            {
+                                                analysis
+                                                    .collocations
+                                                    ?.length ??
+                                                0
+                                            }
+                                        </span>
+                                    </button>
+                                )}
+
+
+                                {isEnglish && (
+                                    <button
+                                        className={
+                                            activeTab === "mistakes"
+                                                ? "study-tab active"
+                                                : "study-tab"
+                                        }
+                                        onClick={() => {
+                                            setActiveTab(
+                                                "mistakes"
+                                            );
+                                        }}
+                                    >
+                                        Lỗi thường gặp
+
+                                        <span>
+                                            {
+                                                analysis
+                                                    .commonMistakes
+                                                    ?.length ??
+                                                0
+                                            }
+                                        </span>
+                                    </button>
+                                )}
                             </div>
 
+
                             <div className="study-tab-content">
-                                {activeTab ===
-                                    "structure" && (
+
+                                {activeTab === "structure" && (
                                     <div className="sentence-parts-list">
                                         {analysis
                                             .sentenceParts
@@ -773,56 +941,47 @@ export function StudyPage({
                                                         key={`${part.text}-${index}`}
                                                     >
                                                         <div className="sentence-part-index">
-                                                            {
-                                                                index +
-                                                                1
-                                                            }
+                                                            {index + 1}
                                                         </div>
 
                                                         <div className="sentence-part-main">
                                                             <div className="sentence-part-title">
                                                                 <strong>
-                                                                    {
-                                                                        part.text
-                                                                    }
+                                                                    {part.text}
                                                                 </strong>
 
-                                                                <span>
-                                                                    {
-                                                                        part.reading
-                                                                    }
-                                                                </span>
+                                                                {!isEnglish &&
+                                                                    part.reading && (
+                                                                    <span>
+                                                                        {part.reading}
+                                                                    </span>
+                                                                )}
 
-                                                                <small>
-                                                                    {
-                                                                        part.romaji
-                                                                    }
-                                                                </small>
+                                                                {!isEnglish &&
+                                                                    part.romaji && (
+                                                                    <small>
+                                                                        {part.romaji}
+                                                                    </small>
+                                                                )}
                                                             </div>
 
                                                             <div className="sentence-part-tags">
                                                                 {part.role && (
                                                                     <span>
-                                                                        {
-                                                                            part.role
-                                                                        }
+                                                                        {part.role}
                                                                     </span>
                                                                 )}
 
                                                                 {part.meaning && (
                                                                     <span>
-                                                                        {
-                                                                            part.meaning
-                                                                        }
+                                                                        {part.meaning}
                                                                     </span>
                                                                 )}
                                                             </div>
 
                                                             {part.explanation && (
                                                                 <p>
-                                                                    {
-                                                                        part.explanation
-                                                                    }
+                                                                    {part.explanation}
                                                                 </p>
                                                             )}
                                                         </div>
@@ -840,8 +999,9 @@ export function StudyPage({
                                     </div>
                                 )}
 
-                                {activeTab ===
-                                    "grammar" && (
+
+                                {activeTab === "grammar" &&
+                                    !isEnglish && (
                                     <div className="grammar-grid">
                                         {analysis.grammar.map(
                                             (
@@ -851,15 +1011,10 @@ export function StudyPage({
                                                 const key =
                                                     grammar.pattern;
 
-                                                const manuallySaved =
-                                                    savedGrammarKeys
-                                                        .has(
-                                                            key
-                                                        );
-
                                                 const alreadySaved =
                                                     autoSaveGrammar ||
-                                                    manuallySaved;
+                                                    savedGrammarKeys
+                                                        .has(key);
 
                                                 return (
                                                     <article
@@ -869,20 +1024,16 @@ export function StudyPage({
                                                         <div className="grammar-card-top">
                                                             <div>
                                                                 <strong>
-                                                                    {
-                                                                        grammar.pattern
-                                                                    }
+                                                                    {grammar.pattern}
                                                                 </strong>
 
                                                                 <span>
-                                                                    {
-                                                                        grammar.matchedText
-                                                                    }
+                                                                    {grammar.matchedText}
                                                                 </span>
                                                             </div>
 
                                                             <div className="grammar-card-actions">
-                                                                <JlptBadge
+                                                                <LevelBadge
                                                                     level={
                                                                         grammar.jlptLevel
                                                                     }
@@ -897,7 +1048,7 @@ export function StudyPage({
                                                                     disabled={
                                                                         alreadySaved ||
                                                                         savingGrammarKey ===
-                                                                            key
+                                                                        key
                                                                     }
                                                                     onClick={() => {
                                                                         void saveGrammarPoint(
@@ -905,8 +1056,7 @@ export function StudyPage({
                                                                         );
                                                                     }}
                                                                 >
-                                                                    {savingGrammarKey ===
-                                                                    key
+                                                                    {savingGrammarKey === key
                                                                         ? "Đang lưu..."
                                                                         : alreadySaved
                                                                             ? "✓ Đã lưu"
@@ -916,15 +1066,11 @@ export function StudyPage({
                                                         </div>
 
                                                         <div className="grammar-meaning">
-                                                            {
-                                                                grammar.meaning
-                                                            }
+                                                            {grammar.meaning}
                                                         </div>
 
                                                         <p>
-                                                            {
-                                                                grammar.explanation
-                                                            }
+                                                            {grammar.explanation}
                                                         </p>
                                                     </article>
                                                 );
@@ -941,8 +1087,75 @@ export function StudyPage({
                                     </div>
                                 )}
 
-                                {activeTab ===
-                                    "vocabulary" && (
+
+                                {activeTab === "grammar" &&
+                                    isEnglish && (
+                                    <div className="grammar-grid">
+                                        {(
+                                            analysis
+                                                .englishGrammar ??
+                                            []
+                                        ).map(
+                                            (
+                                                grammar,
+                                                index
+                                            ) => (
+                                                <article
+                                                    className="grammar-card"
+                                                    key={`${grammar.pattern}-${index}`}
+                                                >
+                                                    <div className="grammar-card-top">
+                                                        <div>
+                                                            <strong>
+                                                                {grammar.pattern}
+                                                            </strong>
+
+                                                            <span>
+                                                                {grammar.matchedText}
+                                                            </span>
+                                                        </div>
+
+                                                        <LevelBadge
+                                                            level={
+                                                                grammar.cefrLevel
+                                                            }
+                                                        />
+                                                    </div>
+
+                                                    <div className="grammar-meaning">
+                                                        {grammar.meaning}
+                                                    </div>
+
+                                                    <p>
+                                                        {grammar.explanation}
+                                                    </p>
+
+                                                    {grammar.example && (
+                                                        <p className="vocab-note">
+                                                            Ví dụ:
+                                                            {" "}
+                                                            {grammar.example}
+                                                        </p>
+                                                    )}
+                                                </article>
+                                            )
+                                        )}
+
+                                        {!(
+                                            analysis
+                                                .englishGrammar ??
+                                            []
+                                        ).length && (
+                                            <div className="empty-inline">
+                                                Không phát hiện grammar nổi bật.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+
+                                {activeTab === "vocabulary" &&
+                                    !isEnglish && (
                                     <div className="study-vocab-list">
                                         {analysis.vocabulary.map(
                                             (
@@ -950,19 +1163,12 @@ export function StudyPage({
                                                 index
                                             ) => {
                                                 const key =
-                                                    wordKey(
-                                                        word
-                                                    );
-
-                                                const manuallySaved =
-                                                    savedWordKeys
-                                                        .has(
-                                                            key
-                                                        );
+                                                    wordKey(word);
 
                                                 const alreadySaved =
                                                     autoSaveVocabulary ||
-                                                    manuallySaved;
+                                                    savedWordKeys
+                                                        .has(key);
 
                                                 return (
                                                     <article
@@ -979,46 +1185,36 @@ export function StudyPage({
 
                                                             {word.surface &&
                                                                 word.surface !==
-                                                                    word.dictionaryForm && (
+                                                                word.dictionaryForm && (
                                                                 <small>
                                                                     Trong câu:
                                                                     {" "}
-                                                                    {
-                                                                        word.surface
-                                                                    }
+                                                                    {word.surface}
                                                                 </small>
                                                             )}
                                                         </div>
 
                                                         <div className="vocab-reading-column">
                                                             <span>
-                                                                {
-                                                                    word.reading
-                                                                }
+                                                                {word.reading}
                                                             </span>
 
                                                             <small>
-                                                                {
-                                                                    word.romaji
-                                                                }
+                                                                {word.romaji}
                                                             </small>
                                                         </div>
 
                                                         <div className="vocab-meaning-column">
                                                             <strong>
-                                                                {
-                                                                    word.meaning
-                                                                }
+                                                                {word.meaning}
                                                             </strong>
 
                                                             <span>
-                                                                {
-                                                                    word.partOfSpeech
-                                                                }
+                                                                {word.partOfSpeech}
                                                             </span>
                                                         </div>
 
-                                                        <JlptBadge
+                                                        <LevelBadge
                                                             level={
                                                                 word.jlptLevel
                                                             }
@@ -1033,7 +1229,7 @@ export function StudyPage({
                                                             disabled={
                                                                 alreadySaved ||
                                                                 savingWordKey ===
-                                                                    key
+                                                                key
                                                             }
                                                             onClick={() => {
                                                                 void saveWord(
@@ -1041,8 +1237,7 @@ export function StudyPage({
                                                                 );
                                                             }}
                                                         >
-                                                            {savingWordKey ===
-                                                            key
+                                                            {savingWordKey === key
                                                                 ? "Đang lưu..."
                                                                 : alreadySaved
                                                                     ? "✓ Đã lưu"
@@ -1051,9 +1246,7 @@ export function StudyPage({
 
                                                         {word.note && (
                                                             <p className="vocab-note">
-                                                                {
-                                                                    word.note
-                                                                }
+                                                                {word.note}
                                                             </p>
                                                         )}
                                                     </article>
@@ -1070,12 +1263,199 @@ export function StudyPage({
                                         )}
                                     </div>
                                 )}
+
+
+                                {activeTab === "vocabulary" &&
+                                    isEnglish && (
+                                    <div className="study-vocab-list">
+                                        {(
+                                            analysis
+                                                .englishVocabulary ??
+                                            []
+                                        ).map(
+                                            (
+                                                word,
+                                                index
+                                            ) => (
+                                                <article
+                                                    className="study-vocab-row"
+                                                    key={`${word.lemma}-${word.surface}-${index}`}
+                                                >
+                                                    <div className="vocab-word">
+                                                        <strong>
+                                                            {
+                                                                word.lemma ||
+                                                                word.surface
+                                                            }
+                                                        </strong>
+
+                                                        {word.surface &&
+                                                            word.surface !==
+                                                            word.lemma && (
+                                                            <small>
+                                                                Trong câu:
+                                                                {" "}
+                                                                {word.surface}
+                                                            </small>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="vocab-reading-column">
+                                                        <span>
+                                                            /{word.ipa}/
+                                                        </span>
+
+                                                        <small>
+                                                            {word.partOfSpeech}
+                                                        </small>
+                                                    </div>
+
+                                                    <div className="vocab-meaning-column">
+                                                        <strong>
+                                                            {word.meaning}
+                                                        </strong>
+
+                                                        {word.example && (
+                                                            <span>
+                                                                {word.example}
+                                                            </span>
+                                                        )}
+                                                    </div>
+
+                                                    <LevelBadge
+                                                        level={
+                                                            word.cefrLevel
+                                                        }
+                                                    />
+
+                                                    {word.note && (
+                                                        <p className="vocab-note">
+                                                            {word.note}
+                                                        </p>
+                                                    )}
+                                                </article>
+                                            )
+                                        )}
+
+                                        {!(
+                                            analysis
+                                                .englishVocabulary ??
+                                            []
+                                        ).length && (
+                                            <div className="empty-inline">
+                                                Không có vocabulary cần tách.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+
+                                {activeTab === "collocations" &&
+                                    isEnglish && (
+                                    <div className="grammar-grid">
+                                        {(
+                                            analysis
+                                                .collocations ??
+                                            []
+                                        ).map(
+                                            (
+                                                item,
+                                                index
+                                            ) => (
+                                                <article
+                                                    className="grammar-card"
+                                                    key={`${item.phrase}-${index}`}
+                                                >
+                                                    <div className="grammar-card-top">
+                                                        <strong>
+                                                            {item.phrase}
+                                                        </strong>
+                                                    </div>
+
+                                                    <div className="grammar-meaning">
+                                                        {item.meaning}
+                                                    </div>
+
+                                                    {item.example && (
+                                                        <p>
+                                                            Ví dụ:
+                                                            {" "}
+                                                            {item.example}
+                                                        </p>
+                                                    )}
+                                                </article>
+                                            )
+                                        )}
+
+                                        {!(
+                                            analysis
+                                                .collocations ??
+                                            []
+                                        ).length && (
+                                            <div className="empty-inline">
+                                                Không có collocation nổi bật.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+
+                                {activeTab === "mistakes" &&
+                                    isEnglish && (
+                                    <div className="grammar-grid">
+                                        {(
+                                            analysis
+                                                .commonMistakes ??
+                                            []
+                                        ).map(
+                                            (
+                                                item,
+                                                index
+                                            ) => (
+                                                <article
+                                                    className="grammar-card"
+                                                    key={`${item.incorrect}-${index}`}
+                                                >
+                                                    <div className="grammar-meaning">
+                                                        ❌
+                                                        {" "}
+                                                        {item.incorrect}
+                                                    </div>
+
+                                                    <p>
+                                                        ✅
+                                                        {" "}
+                                                        <strong>
+                                                            {item.correct}
+                                                        </strong>
+                                                    </p>
+
+                                                    <p>
+                                                        {item.explanation}
+                                                    </p>
+                                                </article>
+                                            )
+                                        )}
+
+                                        {!(
+                                            analysis
+                                                .commonMistakes ??
+                                            []
+                                        ).length && (
+                                            <div className="empty-inline">
+                                                Không có lỗi phổ biến cần lưu ý.
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </section>
                     )}
 
+
                     {analysis &&
-                        analysis.notes.length > 0 && (
+                        analysis.notes.length >
+                        0 && (
                         <section className="study-notes-card">
                             <span className="eyebrow">
                                 STUDY NOTES
@@ -1099,6 +1479,7 @@ export function StudyPage({
                     )}
                 </>
             )}
+
 
             <div className="page-status">
                 <span
