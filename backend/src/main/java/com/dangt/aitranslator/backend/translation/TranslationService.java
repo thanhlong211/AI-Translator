@@ -213,6 +213,15 @@ public class TranslationService {
                 );
             }
 
+            translatedText =
+                    TranslationOutputQualityGuard
+                            .validateAndNormalize(
+                                    cleanText,
+                                    translatedText,
+                                    request.sourceLanguage(),
+                                    request.targetLanguage()
+                            );
+
             long ledgerStartedAt =
                     System.nanoTime();
 
