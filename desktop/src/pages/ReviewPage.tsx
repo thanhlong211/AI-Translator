@@ -190,6 +190,35 @@ function itemKey(
     return `${item.itemType}:${item.itemId}`;
 }
 
+
+function formatSessionTime(
+    valueMs: number
+) {
+    const totalSeconds =
+        Math.max(
+            0,
+            Math.round(
+                valueMs / 1000
+            )
+        );
+
+    if (totalSeconds < 60) {
+        return `${totalSeconds}s`;
+    }
+
+    const minutes =
+        Math.floor(
+            totalSeconds / 60
+        );
+
+    const seconds =
+        totalSeconds % 60;
+
+    return seconds
+        ? `${minutes}m ${seconds}s`
+        : `${minutes}m`;
+}
+
 function shuffled<T>(
     input: T[]
 ) {
@@ -292,6 +321,43 @@ export function ReviewPage({
     );
 
     const [
+        dueSessionWrongItems,
+        setDueSessionWrongItems
+    ] = useState<ReviewItem[]>(
+        []
+    );
+
+    const [
+        dueSessionCorrectCount,
+        setDueSessionCorrectCount
+    ] = useState(0);
+
+    const [
+        dueSessionResponseTimeMs,
+        setDueSessionResponseTimeMs
+    ] = useState(0);
+
+    const [
+        dueSessionInitialTotal,
+        setDueSessionInitialTotal
+    ] = useState(0);
+
+    const [
+        dueSessionSkippedCount,
+        setDueSessionSkippedCount
+    ] = useState(0);
+
+    /*
+     * Guard để cùng một card không bị cộng
+     * hai lần vào Session Summary nếu renderer
+     * hoặc queue refresh lặp lại.
+     */
+    const dueSessionKeysRef =
+        useRef<Set<string>>(
+            new Set()
+        );
+
+    const [
         practiceLoading,
         setPracticeLoading
     ] = useState(false);
@@ -346,7 +412,17 @@ export function ReviewPage({
 
         setPracticeItems([]);
         setPracticeSeed([]);
+
         setDueSessionItems([]);
+        setDueSessionWrongItems([]);
+        setDueSessionCorrectCount(0);
+        setDueSessionResponseTimeMs(0);
+        setDueSessionInitialTotal(0);
+        setDueSessionSkippedCount(0);
+
+        dueSessionKeysRef
+            .current
+            .clear();
 
         setPracticeMessage("");
 
@@ -359,6 +435,41 @@ export function ReviewPage({
     }, [
         language
     ]);
+
+    useEffect(() => {
+        /*
+         * Chốt tổng số card ở đầu phiên.
+         *
+         * queue.totalDue sẽ giảm sau mỗi lần
+         * backend refresh nên không thể dùng nó
+         * trực tiếp làm mẫu số của progress.
+         */
+        if (
+            mode !== "DUE"
+            ||
+            dueSessionInitialTotal > 0
+            ||
+            dueSessionItems.length > 0
+            ||
+            dueSessionSkippedCount > 0
+            ||
+            queue.totalDue <= 0
+        ) {
+            return;
+        }
+
+        setDueSessionInitialTotal(
+            queue.totalDue
+        );
+    }, [
+        mode,
+        language,
+        queue.totalDue,
+        dueSessionInitialTotal,
+        dueSessionItems.length,
+        dueSessionSkippedCount
+    ]);
+
 
     const currentOptionSignature =
         current?.options
@@ -429,42 +540,63 @@ export function ReviewPage({
             const isPractice =
                 mode === "PRACTICE";
 
+            const responseTimeMs =
+                Math.max(
+                    0,
+                    Date.now() -
+                        startedAtRef.current
+                );
+
             const response =
                 await onAnswer(
                     current,
                     optionId,
-                    Math.max(
-                        0,
-                        Date.now() -
-                            startedAtRef.current
-                    ),
+                    responseTimeMs,
                     isPractice
                 );
 
             if (!isPractice) {
-                setDueSessionItems(
-                    (existing) => {
-                        const key =
-                            itemKey(
-                                current
-                            );
+                const key =
+                    itemKey(
+                        current
+                    );
 
-                        if (
-                            existing.some(
-                                (item) =>
-                                    itemKey(item) ===
-                                    key
-                            )
-                        ) {
-                            return existing;
-                        }
+                if (
+                    !dueSessionKeysRef
+                        .current
+                        .has(key)
+                ) {
+                    dueSessionKeysRef
+                        .current
+                        .add(key);
 
-                        return [
+                    setDueSessionItems(
+                        (existing) => [
                             ...existing,
                             current
-                        ];
+                        ]
+                    );
+
+                    if (response.correct) {
+                        setDueSessionCorrectCount(
+                            (value) =>
+                                value + 1
+                        );
+                    } else {
+                        setDueSessionWrongItems(
+                            (existing) => [
+                                ...existing,
+                                current
+                            ]
+                        );
                     }
-                );
+
+                    setDueSessionResponseTimeMs(
+                        (value) =>
+                            value +
+                            responseTimeMs
+                    );
+                }
             }
 
             setFeedback(
@@ -574,13 +706,13 @@ export function ReviewPage({
     }
 
     function startSessionReplay() {
-        if (!dueSessionItems.length) {
+        if (!dueSessionWrongItems.length) {
             return;
         }
 
         const items =
             reshuffleBatch(
-                dueSessionItems
+                dueSessionWrongItems
             );
 
         setPracticeSource(
@@ -628,6 +760,35 @@ export function ReviewPage({
         onRefresh();
     }
 
+
+    function startNewDueSession() {
+        setMode(
+            "DUE"
+        );
+
+        setPracticeItems([]);
+        setPracticeSeed([]);
+
+        setDueSessionItems([]);
+        setDueSessionWrongItems([]);
+        setDueSessionCorrectCount(0);
+        setDueSessionResponseTimeMs(0);
+
+        dueSessionKeysRef
+            .current
+            .clear();
+
+        setPracticeMessage("");
+        setSelectedOptionId("");
+        setFeedback(null);
+        setAnswering(false);
+
+        startedAtRef.current =
+            Date.now();
+
+        onRefresh();
+    }
+
     function skipCurrent() {
         if (!current) {
             return;
@@ -640,6 +801,11 @@ export function ReviewPage({
             );
             return;
         }
+
+        setDueSessionSkippedCount(
+            (value) =>
+                value + 1
+        );
 
         onSkip(current);
     }
@@ -770,6 +936,78 @@ export function ReviewPage({
             ? practiceItems.length
             : queue.totalDue;
 
+    const dueSessionTotal =
+        dueSessionItems.length;
+
+    const dueSessionWrongCount =
+        dueSessionWrongItems.length;
+
+    const dueSessionAccuracy =
+        dueSessionTotal > 0
+            ? Math.round(
+                (
+                    dueSessionCorrectCount /
+                    dueSessionTotal
+                ) * 100
+            )
+            : 0;
+
+    const dueSessionVocabularyCount =
+        dueSessionItems.filter(
+            (item) =>
+                item.itemType ===
+                "VOCABULARY"
+        ).length;
+
+    const dueSessionGrammarCount =
+        dueSessionItems.filter(
+            (item) =>
+                item.itemType ===
+                "GRAMMAR"
+        ).length;
+
+    const dueSessionProcessedCount =
+        dueSessionTotal +
+        dueSessionSkippedCount;
+
+    /*
+     * initialTotal là mẫu số ổn định.
+     * queue.totalDue chỉ dùng làm fallback
+     * trước khi effect kịp chốt total.
+     */
+    const dueSessionDisplayTotal =
+        Math.max(
+            dueSessionInitialTotal,
+            queue.totalDue,
+            dueSessionProcessedCount
+        );
+
+    const dueSessionProgressPercent =
+        dueSessionDisplayTotal > 0
+            ? Math.min(
+                100,
+                Math.round(
+                    (
+                        dueSessionProcessedCount /
+                        dueSessionDisplayTotal
+                    ) * 100
+                )
+            )
+            : 0;
+
+    const dueSessionCurrentNumber =
+        dueSessionDisplayTotal > 0
+            ? Math.min(
+                dueSessionDisplayTotal,
+                Math.max(
+                    1,
+                    feedback
+                        ? dueSessionProcessedCount
+                        : dueSessionProcessedCount + 1
+                )
+            )
+            : 0;
+
     return (
         <div className="page-stack review-page">
             <LearningLanguageTabs
@@ -842,7 +1080,7 @@ export function ReviewPage({
 
                         <span>
                             {practiceSource === "SESSION"
-                                ? "Đang làm lại các thẻ của phiên ôn vừa rồi."
+                                ? "Đang ôn lại các câu sai của phiên vừa rồi."
                                 : "Đang luyện các mục trong thư viện, ưu tiên mục cần ôn thêm."}
                         </span>
                     </div>
@@ -911,23 +1149,146 @@ export function ReviewPage({
                     <h3>
                         {mode === "PRACTICE"
                             ? "Đã xong bộ ôn lại"
-                            : "Không còn card đến hạn"}
+                            : dueSessionTotal > 0
+                                ? "Hoàn thành ôn tập"
+                                : "Không còn card đến hạn"}
                     </h3>
 
                     <p>
                         {mode === "PRACTICE"
-                            ? "Bạn có thể làm lại bộ này hoặc quay về lịch ôn."
-                            : "Thẻ đã học sẽ quay lại khi đến hạn. Nếu muốn luyện thêm, dùng Ôn tự do."}
+                            ? practiceSource === "SESSION"
+                                ? "Bạn đã hoàn thành bộ ôn lại các câu sai. Practice không làm thay đổi lịch SRS."
+                                : "Bạn có thể làm lại bộ này hoặc quay về lịch ôn."
+                            : dueSessionTotal > 0
+                                ? dueSessionWrongCount > 0
+                                    ? `Bạn còn ${dueSessionWrongCount} câu cần củng cố.`
+                                    : "Xuất sắc — không có câu sai trong phiên này."
+                                : "Thẻ đã học sẽ quay lại khi đến hạn. Nếu muốn luyện thêm, dùng Ôn tự do."}
                     </p>
+
+                    {mode === "DUE" &&
+                    dueSessionTotal > 0 && (
+                        <>
+                            <div className="review-stats-grid review-stats-v662">
+                                <div className="review-stat-card primary">
+                                    <span>
+                                        Tổng câu
+                                    </span>
+
+                                    <strong>
+                                        {dueSessionTotal}
+                                    </strong>
+
+                                    <small>
+                                        đã trả lời
+                                    </small>
+                                </div>
+
+                                <div className="review-stat-card">
+                                    <span>
+                                        Đúng
+                                    </span>
+
+                                    <strong>
+                                        {dueSessionCorrectCount}
+                                    </strong>
+
+                                    <small>
+                                        câu chính xác
+                                    </small>
+                                </div>
+
+                                <div className="review-stat-card">
+                                    <span>
+                                        Sai
+                                    </span>
+
+                                    <strong>
+                                        {dueSessionWrongCount}
+                                    </strong>
+
+                                    <small>
+                                        cần ôn lại
+                                    </small>
+                                </div>
+
+                                <div className="review-stat-card">
+                                    <span>
+                                        Chính xác
+                                    </span>
+
+                                    <strong>
+                                        {dueSessionAccuracy}%
+                                    </strong>
+
+                                    <small>
+                                        trong phiên
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div className="review-behavior-metrics">
+                                <span>
+                                    Từ vựng:
+                                    {" "}
+                                    <strong>
+                                        {dueSessionVocabularyCount}
+                                    </strong>
+                                </span>
+
+                                <span>
+                                    Ngữ pháp:
+                                    {" "}
+                                    <strong>
+                                        {dueSessionGrammarCount}
+                                    </strong>
+                                </span>
+
+                                <span>
+                                    Thời gian trả lời:
+                                    {" "}
+                                    <strong>
+                                        {formatSessionTime(
+                                            dueSessionResponseTimeMs
+                                        )}
+                                    </strong>
+                                </span>
+
+                                {dueSessionSkippedCount > 0 && (
+                                    <span>
+                                        Bỏ qua:
+                                        {" "}
+                                        <strong>
+                                            {
+                                                dueSessionSkippedCount
+                                            }
+                                        </strong>
+                                    </span>
+                                )}
+
+                                <span>
+                                    Ngôn ngữ:
+                                    {" "}
+                                    <strong>
+                                        {language}
+                                    </strong>
+                                </span>
+                            </div>
+                        </>
+                    )}
 
                     <div className="review-complete-actions">
                         {mode === "DUE" &&
-                        dueSessionItems.length > 0 && (
+                        dueSessionWrongCount > 0 && (
                             <button
                                 className="primary-action"
-                                onClick={startSessionReplay}
+                                onClick={
+                                    startSessionReplay
+                                }
                             >
-                                Ôn lại phiên vừa rồi
+                                Ôn lại{" "}
+                                {dueSessionWrongCount}
+                                {" "}câu sai
                             </button>
                         )}
 
@@ -935,7 +1296,9 @@ export function ReviewPage({
                         practiceSeed.length > 0 && (
                             <button
                                 className="primary-action"
-                                onClick={replayPracticeBatch}
+                                onClick={
+                                    replayPracticeBatch
+                                }
                             >
                                 Làm lại bộ này
                             </button>
@@ -946,17 +1309,30 @@ export function ReviewPage({
                             onClick={() => {
                                 void startFreePractice();
                             }}
-                            disabled={practiceLoading}
+                            disabled={
+                                practiceLoading
+                            }
                         >
-                            Ôn tự do
+                            {mode === "DUE" &&
+                            dueSessionTotal > 0
+                                ? "Phiên luyện mới"
+                                : "Ôn tự do"}
                         </button>
 
                         <button
                             className="secondary-action"
-                            onClick={backToDue}
+                            onClick={
+                                mode === "DUE" &&
+                                dueSessionTotal > 0
+                                    ? startNewDueSession
+                                    : backToDue
+                            }
                             disabled={loading}
                         >
-                            Kiểm tra card đến hạn
+                            {mode === "DUE" &&
+                            dueSessionTotal > 0
+                                ? "Bắt đầu phiên mới"
+                                : "Kiểm tra card đến hạn"}
                         </button>
                     </div>
                 </section>
@@ -1014,6 +1390,88 @@ export function ReviewPage({
                             {" "}card còn trong phiên
                         </span>
                     </div>
+
+                    {mode === "DUE" &&
+                    dueSessionDisplayTotal > 0 && (
+                        <div
+                            className="review-session-progress-panel"
+                            style={{
+                                display: "grid",
+                                gap: "8px",
+                                marginBottom: "12px"
+                            }}
+                        >
+                            <div className="review-behavior-metrics">
+                                <span>
+                                    Câu:
+                                    {" "}
+                                    <strong>
+                                        {
+                                            dueSessionCurrentNumber
+                                        }
+                                        {" / "}
+                                        {
+                                            dueSessionDisplayTotal
+                                        }
+                                    </strong>
+                                </span>
+
+                                <span>
+                                    Đúng:
+                                    {" "}
+                                    <strong>
+                                        {
+                                            dueSessionCorrectCount
+                                        }
+                                    </strong>
+                                </span>
+
+                                <span>
+                                    Sai:
+                                    {" "}
+                                    <strong>
+                                        {
+                                            dueSessionWrongCount
+                                        }
+                                    </strong>
+                                </span>
+
+                                {dueSessionSkippedCount > 0 && (
+                                    <span>
+                                        Bỏ qua:
+                                        {" "}
+                                        <strong>
+                                            {
+                                                dueSessionSkippedCount
+                                            }
+                                        </strong>
+                                    </span>
+                                )}
+
+                                <span>
+                                    Tiến độ:
+                                    {" "}
+                                    <strong>
+                                        {
+                                            dueSessionProgressPercent
+                                        }%
+                                    </strong>
+                                </span>
+                            </div>
+
+                            <progress
+                                max={100}
+                                value={
+                                    dueSessionProgressPercent
+                                }
+                                style={{
+                                    width: "100%",
+                                    height: "10px"
+                                }}
+                                aria-label="Tiến độ phiên ôn tập"
+                            />
+                        </div>
+                    )}
 
                     <article className="review-card quiz-card">
                         <div className="review-card-front">
