@@ -1065,8 +1065,8 @@ export function ReviewPage({
                         }
                     >
                         {practiceLoading
-                            ? "Đang tạo..."
-                            : "Ôn tự do"}
+                            ? "Đang chọn phần yếu..."
+                            : "Luyện phần yếu"}
                     </button>
                 </div>
             </section>
@@ -1075,13 +1075,15 @@ export function ReviewPage({
                 <section className="practice-mode-banner">
                     <div>
                         <strong>
-                            Chế độ ôn lại
+                            {practiceSource === "SESSION"
+                                ? "Ôn lại câu sai"
+                                : "Luyện phần yếu"}
                         </strong>
 
                         <span>
                             {practiceSource === "SESSION"
                                 ? "Đang ôn lại các câu sai của phiên vừa rồi."
-                                : "Đang luyện các mục trong thư viện, ưu tiên mục cần ôn thêm."}
+                                : "Đang ưu tiên các mục còn yếu: mastery thấp, độ chính xác thấp hoặc đã sai nhiều lần."}
                         </span>
                     </div>
 
@@ -1092,6 +1094,12 @@ export function ReviewPage({
                         <span>
                             Sai → gặp lại cuối phiên
                         </span>
+
+                        {practiceSource === "FREE" && (
+                            <span>
+                                Ưu tiên: Yếu → Đang học → Mới
+                            </span>
+                        )}
                     </div>
                 </section>
             )}
@@ -1163,7 +1171,7 @@ export function ReviewPage({
                                 ? dueSessionWrongCount > 0
                                     ? `Bạn còn ${dueSessionWrongCount} câu cần củng cố.`
                                     : "Xuất sắc — không có câu sai trong phiên này."
-                                : "Thẻ đã học sẽ quay lại khi đến hạn. Nếu muốn luyện thêm, dùng Ôn tự do."}
+                                : "Thẻ đã học sẽ quay lại khi đến hạn. Nếu muốn củng cố các mục còn yếu, dùng Luyện phần yếu."}
                     </p>
 
                     {mode === "DUE" &&
@@ -1316,7 +1324,7 @@ export function ReviewPage({
                             {mode === "DUE" &&
                             dueSessionTotal > 0
                                 ? "Phiên luyện mới"
-                                : "Ôn tự do"}
+                                : "Luyện phần yếu"}
                         </button>
 
                         <button
