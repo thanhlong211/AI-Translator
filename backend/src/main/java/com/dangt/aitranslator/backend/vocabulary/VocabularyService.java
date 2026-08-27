@@ -591,6 +591,7 @@ public class VocabularyService {
                 normalizeJlpt(
                         item.jlptLevel()
                 ),
+                clean(item.example()),
                 clean(item.note())
         );
     }

@@ -14,8 +14,8 @@ if ([string]::IsNullOrWhiteSpace($RuntimeDir)) {
 $RuntimeDir = [IO.Path]::GetFullPath($RuntimeDir)
 $WorkerExe = Join-Path (Join-Path $RuntimeDir "worker") "ai-translator-ocr-worker.exe"
 $ModelRoot = Join-Path $RuntimeDir "models"
-$DetectionModel = Join-Path $ModelRoot "PP-OCRv6_medium_det"
-$RecognitionModel = Join-Path $ModelRoot "PP-OCRv6_medium_rec"
+$DetectionModel = Join-Path $ModelRoot "PP-OCRv6_small_det"
+$RecognitionModel = Join-Path $ModelRoot "PP-OCRv6_small_rec"
 $Marker = "__OCR_JSON__"
 
 foreach ($required in @($WorkerExe, $DetectionModel, $RecognitionModel)) {

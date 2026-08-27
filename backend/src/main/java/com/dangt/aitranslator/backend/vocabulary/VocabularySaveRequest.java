@@ -106,6 +106,7 @@ public record VocabularySaveRequest(
                 meaning,
                 partOfSpeech,
                 jlptLevel,
+                example,
                 ""
         );
     }

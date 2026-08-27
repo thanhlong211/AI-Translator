@@ -228,8 +228,8 @@ def production_model_dirs() -> tuple[Path, Path] | None:
     if root is None:
         return None
 
-    detection = root / "PP-OCRv6_medium_det"
-    recognition = root / "PP-OCRv6_medium_rec"
+    detection = root / "PP-OCRv6_small_det"
+    recognition = root / "PP-OCRv6_small_rec"
 
     if detection.is_dir() and recognition.is_dir():
         return detection, recognition
@@ -263,7 +263,9 @@ def create_ocr() -> Any:
         detection, recognition = model_dirs
         MODEL_SOURCE = "bundled"
         return PaddleOCR(
+            text_detection_model_name='PP-OCRv6_small_det',
             text_detection_model_dir=str(detection),
+            text_recognition_model_name='PP-OCRv6_small_rec',
             text_recognition_model_dir=str(recognition),
             **common_options,
         )
@@ -271,6 +273,8 @@ def create_ocr() -> Any:
     MODEL_SOURCE = "development-cache"
     return PaddleOCR(
         lang="japan",
+        text_detection_model_name="PP-OCRv6_small_det",
+        text_recognition_model_name="PP-OCRv6_small_rec",
         **common_options,
     )
 

@@ -3426,6 +3426,9 @@ function changeVocabularyLanguage(
                     jlptLevel:
                         item.jlptLevel,
 
+                    example:
+                        item.example,
+
                     /*
                      * Click + Lưu không phải là
                      * một lần gặp mới.
@@ -3746,6 +3749,12 @@ function changeVocabularyLanguage(
 
                     explanation:
                         item.explanation,
+                        matchedText:
+                            item.matchedText,
+
+                        example:
+                            item.example,
+
 
                     /*
                      * Click + Lưu là thao tác chủ động,
@@ -4181,6 +4190,9 @@ function changeVocabularyLanguage(
 
                         itemId:
                             item.itemId,
+
+                        questionType:
+                            item.questionType,
 
                         selectedOptionId,
 

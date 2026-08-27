@@ -82,8 +82,9 @@ public record GrammarSaveRequest(
                 pattern,
                 jlptLevel,
                 meaning,
-                "",
-                explanation
+                matchedText,
+                explanation,
+                example
         );
     }
 

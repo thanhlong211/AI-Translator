@@ -17,6 +17,18 @@ public record ReviewAnswerRequest(
         @Schema(example = "1")
         Long itemId,
 
+        /*
+         * Additive / backward compatible.
+         * Client cũ có thể không gửi -> backend dùng MEANING.
+         */
+        @Schema(
+                description =
+                        "Kiểu câu hỏi quiz đang hiển thị.",
+                example =
+                        "WORD_TO_MEANING"
+        )
+        ReviewQuestionType questionType,
+
         @NotBlank
         @Size(max = 64)
         @Schema(

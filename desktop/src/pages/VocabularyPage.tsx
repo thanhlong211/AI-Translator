@@ -492,6 +492,19 @@ export function VocabularyPage({
                                         </span>
                                     </div>
 
+                                    {language === "JA" &&
+                                        item.example && (
+                                        <div className="library-reading">
+                                            <strong>
+                                                Ví dụ
+                                            </strong>
+
+                                            <span>
+                                                {item.example}
+                                            </span>
+                                        </div>
+                                    )}
+
                                     <label className="library-status">
                                         <select
                                             value={

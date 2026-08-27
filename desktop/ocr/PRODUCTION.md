@@ -13,8 +13,8 @@ ocr/runtime/
 │  ├─ ai-translator-ocr-worker.exe
 │  └─ _internal/...
 └─ models/
-   ├─ PP-OCRv6_medium_det/
-   └─ PP-OCRv6_medium_rec/
+   ├─ PP-OCRv6_small_det/
+   └─ PP-OCRv6_small_rec/
 ```
 
 The worker is intentionally built with PyInstaller `onedir`, not `onefile`. Paddle/PaddleOCR/PaddleX include native libraries and package data; keeping the one-folder bundle avoids extracting a large Python runtime on every worker start and gives the installer a deterministic resource tree.
@@ -46,7 +46,7 @@ The build performs these steps:
 2. Installs the build-only PyInstaller dependency.
 3. Downloads/warmups the Japanese OCR models into an isolated `.build` cache.
 4. Builds `ai-translator-ocr-worker.exe` as a PyInstaller `onedir` application.
-5. Copies the exact OCR models used by the current `lang="japan"` pipeline (`PP-OCRv6_medium_det` and `PP-OCRv6_medium_rec`) into `ocr/runtime/models`.
+5. Copies the exact OCR models used by the current `lang="japan"` pipeline (`PP-OCRv6_small_det` and `PP-OCRv6_small_rec`) into `ocr/runtime/models`.
 6. Writes `ocr/runtime/manifest.json` with runtime versions.
 7. Runs diagnostics and a protocol/startup smoke test.
 

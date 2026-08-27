@@ -520,8 +520,9 @@ public class GrammarService {
                         item.jlptLevel()
                 ),
                 clean(item.meaning()),
-                "",
-                clean(item.explanation())
+                clean(item.matchedText()),
+                clean(item.explanation()),
+                clean(item.example())
         );
     }
 

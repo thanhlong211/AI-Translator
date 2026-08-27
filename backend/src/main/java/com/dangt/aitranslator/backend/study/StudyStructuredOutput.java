@@ -52,6 +52,8 @@ public class StudyStructuredOutput {
         public String meaning;
         public String matchedText;
         public String explanation;
+
+        public String example;
     }
 
     public static class VocabularyItem {
@@ -62,6 +64,7 @@ public class StudyStructuredOutput {
         public String meaning;
         public String partOfSpeech;
         public String jlptLevel;
+        public String example;
         public String note;
     }
 }

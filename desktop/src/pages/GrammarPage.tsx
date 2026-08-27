@@ -1,3 +1,4 @@
+import { GrammarStudyDetails } from "../components/GrammarStudyDetails";
 import {
     useState
 } from "react";
@@ -387,11 +388,17 @@ export function GrammarPage({
                                     </div>
                                 </div>
 
-                                {item.explanation && (
-                                    <p className="grammar-library-explanation">
-                                        {item.explanation}
-                                    </p>
-                                )}
+                                <GrammarStudyDetails
+                                    matchedText={
+                                        item.matchedText
+                                    }
+                                    explanation={
+                                        item.explanation
+                                    }
+                                    example={
+                                        item.example
+                                    }
+                                />
 
                                 <div className="grammar-library-meta">
                                     <label>

@@ -193,7 +193,10 @@ public class UserVocabulary {
         this.lemma = null;
         this.ipa = null;
         this.cefrLevel = null;
-        this.example = null;
+        this.example =
+                nullIfBlank(
+                        item.example()
+                );
         this.surface =
                 cleanRequired(
                         item.surface(),
@@ -544,6 +547,16 @@ public class UserVocabulary {
         ) {
             this.jlptLevel =
                     nextJlpt;
+        }
+
+        String nextExample =
+                clean(
+                        item.example()
+                );
+
+        if (!nextExample.isBlank()) {
+            this.example =
+                    nextExample;
         }
     }
 

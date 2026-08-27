@@ -20,7 +20,34 @@ public record StudyGrammarPoint(
                 example =
                         "Mẫu bắt buộc: động từ thể ない bỏ い + ければならない."
         )
-        String explanation
+        String explanation,
+
+        @Schema(
+                example =
+                        "明日は早く起きなければならない。"
+        )
+        String example
 
 ) {
+
+    /*
+     * Backward compatibility cho code/test cũ
+     * vẫn dùng constructor 5 tham số.
+     */
+    public StudyGrammarPoint(
+            String pattern,
+            String jlptLevel,
+            String meaning,
+            String matchedText,
+            String explanation
+    ) {
+        this(
+                pattern,
+                jlptLevel,
+                meaning,
+                matchedText,
+                explanation,
+                ""
+        );
+    }
 }

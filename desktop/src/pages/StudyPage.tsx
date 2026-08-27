@@ -1,3 +1,4 @@
+import { GrammarStudyDetails } from "../components/GrammarStudyDetails";
 import {
     useEffect,
     useState
@@ -1027,9 +1028,13 @@ export function StudyPage({
                                                                     {grammar.pattern}
                                                                 </strong>
 
-                                                                <span>
-                                                                    {grammar.matchedText}
-                                                                </span>
+                                                                {grammar.matchedText && (
+                                                                    <span>
+                                                                        Dấu hiệu trong câu:
+                                                                        {" "}
+                                                                        {grammar.matchedText}
+                                                                    </span>
+                                                                )}
                                                             </div>
 
                                                             <div className="grammar-card-actions">
@@ -1069,9 +1074,16 @@ export function StudyPage({
                                                             {grammar.meaning}
                                                         </div>
 
-                                                        <p>
-                                                            {grammar.explanation}
-                                                        </p>
+                                                        <GrammarStudyDetails
+                                                            explanation={
+                                                                grammar.explanation
+                                                            }
+                                                            example={
+                                                                grammar.example
+                                                            }
+                                                        />
+
+                                                        
                                                     </article>
                                                 );
                                             }
@@ -1110,9 +1122,13 @@ export function StudyPage({
                                                                 {grammar.pattern}
                                                             </strong>
 
-                                                            <span>
-                                                                {grammar.matchedText}
-                                                            </span>
+                                                            {grammar.matchedText && (
+                                                                    <span>
+                                                                        Dấu hiệu trong câu:
+                                                                        {" "}
+                                                                        {grammar.matchedText}
+                                                                    </span>
+                                                                )}
                                                         </div>
 
                                                         <LevelBadge
@@ -1126,17 +1142,14 @@ export function StudyPage({
                                                         {grammar.meaning}
                                                     </div>
 
-                                                    <p>
-                                                        {grammar.explanation}
-                                                    </p>
-
-                                                    {grammar.example && (
-                                                        <p className="vocab-note">
-                                                            Ví dụ:
-                                                            {" "}
-                                                            {grammar.example}
-                                                        </p>
-                                                    )}
+                                                    <GrammarStudyDetails
+                                                            explanation={
+                                                                grammar.explanation
+                                                            }
+                                                            example={
+                                                                grammar.example
+                                                            }
+                                                        />
                                                 </article>
                                             )
                                         )}
@@ -1243,6 +1256,16 @@ export function StudyPage({
                                                                     ? "✓ Đã lưu"
                                                                     : "+ Lưu"}
                                                         </button>
+
+                                                        {word.example && (
+                                                            <p className="vocab-note">
+                                                                <strong>
+                                                                    Ví dụ:
+                                                                </strong>
+                                                                {" "}
+                                                                {word.example}
+                                                            </p>
+                                                        )}
 
                                                         {word.note && (
                                                             <p className="vocab-note">

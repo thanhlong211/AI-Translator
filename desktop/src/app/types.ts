@@ -226,6 +226,7 @@ export interface StudyGrammarPoint {
     meaning: string;
     matchedText: string;
     explanation: string;
+    example: string;
 }
 
 export interface StudyVocabularyItem {
@@ -236,6 +237,7 @@ export interface StudyVocabularyItem {
     meaning: string;
     partOfSpeech: string;
     jlptLevel: string;
+    example: string;
     note: string;
 }
 
@@ -500,7 +502,14 @@ export type ReviewMasteryLevel =
     | "MASTERED";
 
 export type ReviewQuestionType =
-    | "MEANING";
+    | "MEANING"
+    | "WORD_TO_MEANING"
+    | "MEANING_TO_WORD"
+    | "READING_TO_WORD"
+    | "IPA_TO_WORD"
+    | "PATTERN_TO_MEANING"
+    | "MEANING_TO_PATTERN"
+    | "EXAMPLE_TO_PATTERN";
 
 export interface ReviewOption {
     optionId: string;

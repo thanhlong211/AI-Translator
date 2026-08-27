@@ -491,6 +491,12 @@ public class ReviewService {
                                 )
                         );
 
+        ReviewQuestionType questionType =
+                normalizeVocabularyQuestionType(
+                        request.questionType(),
+                        item
+                );
+
         long selectedId =
                 selectedItemId(
                         request.selectedOptionId(),
@@ -537,11 +543,13 @@ public class ReviewService {
                 informationalGrade,
                 mastery,
                 accuracy,
-                safe(
-                        item.getMeaning()
+                vocabularyOptionText(
+                        item,
+                        questionType
                 ),
                 ReviewItemResponse.from(
                         item,
+                        questionType,
                         List.of(),
                         mastery,
                         accuracy
@@ -564,6 +572,12 @@ public class ReviewService {
                                         "Không tìm thấy ngữ pháp để ôn."
                                 )
                         );
+
+        ReviewQuestionType questionType =
+                normalizeGrammarQuestionType(
+                        request.questionType(),
+                        item
+                );
 
         long selectedId =
                 selectedItemId(
@@ -611,11 +625,13 @@ public class ReviewService {
                 informationalGrade,
                 mastery,
                 accuracy,
-                safe(
-                        item.getMeaning()
+                grammarOptionText(
+                        item,
+                        questionType
                 ),
                 ReviewItemResponse.from(
                         item,
+                        questionType,
                         List.of(),
                         mastery,
                         accuracy
@@ -639,6 +655,12 @@ public class ReviewService {
                                         "Không tìm thấy từ vựng để ôn."
                                 )
                         );
+
+        ReviewQuestionType questionType =
+                normalizeVocabularyQuestionType(
+                        request.questionType(),
+                        item
+                );
 
         long selectedId =
                 selectedItemId(
@@ -728,7 +750,7 @@ public class ReviewService {
                         ReviewItemType.VOCABULARY,
                         item.getId(),
                         automaticGrade,
-                        ReviewQuestionType.MEANING,
+                        questionType,
                         correct,
                         request.responseTimeMs(),
                         previousInterval,
@@ -746,11 +768,13 @@ public class ReviewService {
                 automaticGrade,
                 mastery,
                 accuracy,
-                safe(
-                        saved.getMeaning()
+                vocabularyOptionText(
+                        saved,
+                        questionType
                 ),
                 ReviewItemResponse.from(
                         saved,
+                        questionType,
                         List.of(),
                         mastery,
                         accuracy
@@ -774,6 +798,12 @@ public class ReviewService {
                                         "Không tìm thấy ngữ pháp để ôn."
                                 )
                         );
+
+        ReviewQuestionType questionType =
+                normalizeGrammarQuestionType(
+                        request.questionType(),
+                        item
+                );
 
         long selectedId =
                 selectedItemId(
@@ -863,7 +893,7 @@ public class ReviewService {
                         ReviewItemType.GRAMMAR,
                         item.getId(),
                         automaticGrade,
-                        ReviewQuestionType.MEANING,
+                        questionType,
                         correct,
                         request.responseTimeMs(),
                         previousInterval,
@@ -881,11 +911,13 @@ public class ReviewService {
                 automaticGrade,
                 mastery,
                 accuracy,
-                safe(
-                        saved.getMeaning()
+                grammarOptionText(
+                        saved,
+                        questionType
                 ),
                 ReviewItemResponse.from(
                         saved,
+                        questionType,
                         List.of(),
                         mastery,
                         accuracy
@@ -911,12 +943,16 @@ public class ReviewService {
                                 item.getReviewWrongCount()
                         );
 
-        return ReviewItemResponse.from(
-                item,
-                vocabularyOptions(
+        VocabularyQuiz quiz =
+                vocabularyQuiz(
                         item,
                         pool
-                ),
+                );
+
+        return ReviewItemResponse.from(
+                item,
+                quiz.questionType(),
+                quiz.options(),
                 mastery,
                 accuracy
         );
@@ -940,27 +976,152 @@ public class ReviewService {
                                 item.getReviewWrongCount()
                         );
 
-        return ReviewItemResponse.from(
-                item,
-                grammarOptions(
+        GrammarQuiz quiz =
+                grammarQuiz(
                         item,
                         pool
-                ),
+                );
+
+        return ReviewItemResponse.from(
+                item,
+                quiz.questionType(),
+                quiz.options(),
                 mastery,
                 accuracy
         );
     }
 
-    private List<ReviewOptionResponse> vocabularyOptions(
+    private record VocabularyQuiz(
+            ReviewQuestionType questionType,
+            List<ReviewOptionResponse> options
+    ) {
+    }
+
+    private VocabularyQuiz vocabularyQuiz(
             UserVocabulary current,
             List<UserVocabulary> pool
     ) {
-        String correctText =
-                safe(
-                        current.getMeaning()
+        List<ReviewQuestionType> questionTypes =
+                new ArrayList<>();
+
+        /*
+         * Hai mode nền tảng có cho cả JA và EN.
+         */
+        questionTypes.add(
+                ReviewQuestionType.WORD_TO_MEANING
+        );
+
+        questionTypes.add(
+                ReviewQuestionType.MEANING_TO_WORD
+        );
+
+        /*
+         * Japanese:
+         * reading -> word/kanji
+         */
+        if (
+                current.getLanguage()
+                ==
+                StudyLanguage.JA
+                &&
+                !safe(
+                        current.getReading()
+                ).isBlank()
+        ) {
+            questionTypes.add(
+                    ReviewQuestionType.READING_TO_WORD
+            );
+        }
+
+        /*
+         * English:
+         * IPA -> word
+         */
+        if (
+                current.getLanguage()
+                ==
+                StudyLanguage.EN
+                &&
+                !safe(
+                        current.getIpa()
+                ).isBlank()
+        ) {
+            questionTypes.add(
+                    ReviewQuestionType.IPA_TO_WORD
+            );
+        }
+
+        /*
+         * Mode chỉ random trong session response.
+         * Không ảnh hưởng SRS.
+         */
+        Collections.shuffle(
+                questionTypes
+        );
+
+        for (
+                ReviewQuestionType questionType
+                : questionTypes
+        ) {
+            if (
+                    vocabularyPromptText(
+                            current,
+                            questionType
+                    ).isBlank()
+            ) {
+                continue;
+            }
+
+            List<ReviewOptionResponse> options =
+                    vocabularyOptions(
+                            current,
+                            pool,
+                            questionType
+                    );
+
+            if (options.size() == 4) {
+                return new VocabularyQuiz(
+                        questionType,
+                        options
+                );
+            }
+        }
+
+        /*
+         * Không đủ 4 đáp án duy nhất.
+         * Card giữ quizReady=false như behavior cũ.
+         */
+        return new VocabularyQuiz(
+                ReviewQuestionType.WORD_TO_MEANING,
+                List.of()
+        );
+    }
+
+    private List<ReviewOptionResponse> vocabularyOptions(
+            UserVocabulary current,
+            List<UserVocabulary> pool,
+            ReviewQuestionType questionType
+    ) {
+        ReviewQuestionType safeQuestionType =
+                normalizeVocabularyQuestionType(
+                        questionType,
+                        current
                 );
 
-        if (correctText.isBlank()) {
+        String correctText =
+                vocabularyOptionText(
+                        current,
+                        safeQuestionType
+                );
+
+        if (
+                correctText.isBlank()
+                ||
+                vocabularyPromptText(
+                        current,
+                        safeQuestionType
+                ).isBlank()
+        ) {
             return List.of();
         }
 
@@ -980,11 +1141,16 @@ public class ReviewService {
                                     current.getId()
                             )
                     ||
+                    /*
+                     * QUAN TRỌNG:
+                     * tuyệt đối không trộn JA / EN.
+                     */
                     candidate.getLanguage()
                             != current.getLanguage()
                     ||
-                    safe(
-                            candidate.getMeaning()
+                    vocabularyOptionText(
+                            candidate,
+                            safeQuestionType
                     ).isBlank()
             ) {
                 continue;
@@ -1016,6 +1182,7 @@ public class ReviewService {
         shuffle(
                 sameLevel
         );
+
         shuffle(
                 others
         );
@@ -1037,13 +1204,15 @@ public class ReviewService {
         appendVocabularyDistractors(
                 options,
                 answerTexts,
-                sameLevel
+                sameLevel,
+                safeQuestionType
         );
 
         appendVocabularyDistractors(
                 options,
                 answerTexts,
-                others
+                others,
+                safeQuestionType
         );
 
         if (options.size() != 4) {
@@ -1062,7 +1231,8 @@ public class ReviewService {
     private void appendVocabularyDistractors(
             List<ReviewOptionResponse> options,
             Set<String> answerTexts,
-            List<UserVocabulary> candidates
+            List<UserVocabulary> candidates,
+            ReviewQuestionType questionType
     ) {
         for (
                 UserVocabulary candidate
@@ -1077,21 +1247,299 @@ public class ReviewService {
                     answerTexts,
                     ReviewItemType.VOCABULARY,
                     candidate.getId(),
-                    candidate.getMeaning()
+                    vocabularyOptionText(
+                            candidate,
+                            questionType
+                    )
             );
         }
     }
 
-    private List<ReviewOptionResponse> grammarOptions(
+    private ReviewQuestionType normalizeVocabularyQuestionType(
+            ReviewQuestionType questionType,
+            UserVocabulary item
+    ) {
+        ReviewQuestionType safeQuestionType =
+                questionType == null
+                        ? ReviewQuestionType.MEANING
+                        : questionType;
+
+        return switch (
+                safeQuestionType
+        ) {
+            /*
+             * MEANING là alias legacy của WORD_TO_MEANING.
+             */
+            case MEANING,
+                 WORD_TO_MEANING,
+                 MEANING_TO_WORD ->
+                    safeQuestionType;
+
+            case READING_TO_WORD -> {
+                if (
+                        item.getLanguage()
+                        !=
+                        StudyLanguage.JA
+                        ||
+                        safe(
+                                item.getReading()
+                        ).isBlank()
+                ) {
+                    throw new IllegalArgumentException(
+                            "READING_TO_WORD chỉ dùng cho từ tiếng Nhật có reading."
+                    );
+                }
+
+                yield safeQuestionType;
+            }
+
+            case IPA_TO_WORD -> {
+                if (
+                        item.getLanguage()
+                        !=
+                        StudyLanguage.EN
+                        ||
+                        safe(
+                                item.getIpa()
+                        ).isBlank()
+                ) {
+                    throw new IllegalArgumentException(
+                            "IPA_TO_WORD chỉ dùng cho từ tiếng Anh có IPA."
+                    );
+                }
+
+                yield safeQuestionType;
+            }
+            case PATTERN_TO_MEANING,
+                 MEANING_TO_PATTERN,
+                 EXAMPLE_TO_PATTERN ->
+                    throw new IllegalArgumentException(
+                            "Question type không phù hợp với Vocabulary."
+                    );
+
+        };
+    }
+
+    private String vocabularyPromptText(
+            UserVocabulary item,
+            ReviewQuestionType questionType
+    ) {
+        ReviewQuestionType safeQuestionType =
+                normalizeVocabularyQuestionType(
+                        questionType,
+                        item
+                );
+
+        return switch (
+                safeQuestionType
+        ) {
+            case MEANING,
+                 WORD_TO_MEANING ->
+                    vocabularyWord(
+                            item
+                    );
+
+            case MEANING_TO_WORD ->
+                    safe(
+                            item.getMeaning()
+                    );
+
+            case READING_TO_WORD ->
+                    safe(
+                            item.getReading()
+                    );
+
+            case IPA_TO_WORD ->
+                    safe(
+                            item.getIpa()
+                    );
+            case PATTERN_TO_MEANING,
+                 MEANING_TO_PATTERN,
+                 EXAMPLE_TO_PATTERN ->
+                    throw new IllegalArgumentException(
+                            "Question type không phù hợp với Vocabulary."
+                    );
+        };
+    }
+
+    private String vocabularyOptionText(
+            UserVocabulary item,
+            ReviewQuestionType questionType
+    ) {
+        /*
+         * Không validate READING/IPA trên distractor.
+         *
+         * Ví dụ IPA_TO_WORD:
+         * prompt của current phải có IPA,
+         * nhưng các đáp án nhiễu chỉ cần có WORD.
+         */
+        ReviewQuestionType safeQuestionType =
+                questionType == null
+                        ? ReviewQuestionType.MEANING
+                        : questionType;
+
+        return switch (
+                safeQuestionType
+        ) {
+            case MEANING,
+                 WORD_TO_MEANING ->
+                    safe(
+                            item.getMeaning()
+                    );
+
+            case MEANING_TO_WORD,
+                 READING_TO_WORD,
+                 IPA_TO_WORD ->
+                    vocabularyWord(
+                            item
+                    );
+            case PATTERN_TO_MEANING,
+                 MEANING_TO_PATTERN,
+                 EXAMPLE_TO_PATTERN ->
+                    throw new IllegalArgumentException(
+                            "Question type không phù hợp với Vocabulary."
+                    );
+        };
+    }
+
+    private String vocabularyWord(
+            UserVocabulary item
+    ) {
+        if (
+                item.getLanguage()
+                ==
+                StudyLanguage.EN
+        ) {
+            String lemma =
+                    safe(
+                            item.getLemma()
+                    );
+
+            if (!lemma.isBlank()) {
+                return lemma;
+            }
+        }
+
+        String dictionaryForm =
+                safe(
+                        item.getDictionaryForm()
+                );
+
+        if (!dictionaryForm.isBlank()) {
+            return dictionaryForm;
+        }
+
+        return safe(
+                item.getSurface()
+        );
+    }
+
+
+    private record GrammarQuiz(
+            ReviewQuestionType questionType,
+            List<ReviewOptionResponse> options
+    ) {
+    }
+
+    private GrammarQuiz grammarQuiz(
             UserGrammar current,
             List<UserGrammar> pool
     ) {
-        String correctText =
-                safe(
-                        current.getMeaning()
+        List<ReviewQuestionType> questionTypes =
+                new ArrayList<>();
+
+        questionTypes.add(
+                ReviewQuestionType.PATTERN_TO_MEANING
+        );
+
+        questionTypes.add(
+                ReviewQuestionType.MEANING_TO_PATTERN
+        );
+
+        /*
+         * EXAMPLE_TO_PATTERN chỉ khả dụng khi
+         * grammar hiện tại thực sự có example.
+         */
+        if (
+                !safe(
+                        current.getExample()
+                ).isBlank()
+        ) {
+            questionTypes.add(
+                    ReviewQuestionType.EXAMPLE_TO_PATTERN
+            );
+        }
+
+        /*
+         * Random mode chỉ ảnh hưởng cách hỏi.
+         * Không ảnh hưởng SRS.
+         */
+        Collections.shuffle(
+                questionTypes
+        );
+
+        for (
+                ReviewQuestionType questionType
+                : questionTypes
+        ) {
+            if (
+                    grammarPromptText(
+                            current,
+                            questionType
+                    ).isBlank()
+            ) {
+                continue;
+            }
+
+            List<ReviewOptionResponse> options =
+                    grammarOptions(
+                            current,
+                            pool,
+                            questionType
+                    );
+
+            if (options.size() == 4) {
+                return new GrammarQuiz(
+                        questionType,
+                        options
+                );
+            }
+        }
+
+        return new GrammarQuiz(
+                ReviewQuestionType.PATTERN_TO_MEANING,
+                List.of()
+        );
+    }
+
+    private List<ReviewOptionResponse> grammarOptions(
+            UserGrammar current,
+            List<UserGrammar> pool,
+            ReviewQuestionType questionType
+    ) {
+        ReviewQuestionType safeQuestionType =
+                normalizeGrammarQuestionType(
+                        questionType,
+                        current
                 );
 
-        if (correctText.isBlank()) {
+        String correctText =
+                grammarOptionText(
+                        current,
+                        safeQuestionType
+                );
+
+        String promptText =
+                grammarPromptText(
+                        current,
+                        safeQuestionType
+                );
+
+        if (
+                correctText.isBlank()
+                ||
+                promptText.isBlank()
+        ) {
             return List.of();
         }
 
@@ -1111,11 +1559,15 @@ public class ReviewService {
                                     current.getId()
                             )
                     ||
+                    /*
+                     * Tuyệt đối không trộn JA / EN.
+                     */
                     candidate.getLanguage()
                             != current.getLanguage()
                     ||
-                    safe(
-                            candidate.getMeaning()
+                    grammarOptionText(
+                            candidate,
+                            safeQuestionType
                     ).isBlank()
             ) {
                 continue;
@@ -1147,6 +1599,7 @@ public class ReviewService {
         shuffle(
                 sameLevel
         );
+
         shuffle(
                 others
         );
@@ -1168,13 +1621,15 @@ public class ReviewService {
         appendGrammarDistractors(
                 options,
                 answerTexts,
-                sameLevel
+                sameLevel,
+                safeQuestionType
         );
 
         appendGrammarDistractors(
                 options,
                 answerTexts,
-                others
+                others,
+                safeQuestionType
         );
 
         if (options.size() != 4) {
@@ -1193,7 +1648,8 @@ public class ReviewService {
     private void appendGrammarDistractors(
             List<ReviewOptionResponse> options,
             Set<String> answerTexts,
-            List<UserGrammar> candidates
+            List<UserGrammar> candidates,
+            ReviewQuestionType questionType
     ) {
         for (
                 UserGrammar candidate
@@ -1208,10 +1664,137 @@ public class ReviewService {
                     answerTexts,
                     ReviewItemType.GRAMMAR,
                     candidate.getId(),
-                    candidate.getMeaning()
+                    grammarOptionText(
+                            candidate,
+                            questionType
+                    )
             );
         }
     }
+
+    private ReviewQuestionType normalizeGrammarQuestionType(
+            ReviewQuestionType questionType,
+            UserGrammar item
+    ) {
+        ReviewQuestionType safeQuestionType =
+                questionType == null
+                        ? ReviewQuestionType.MEANING
+                        : questionType;
+
+        return switch (
+                safeQuestionType
+        ) {
+            /*
+             * MEANING là legacy alias
+             * của PATTERN_TO_MEANING.
+             */
+            case MEANING,
+                 PATTERN_TO_MEANING,
+                 MEANING_TO_PATTERN ->
+                    safeQuestionType;
+
+            case EXAMPLE_TO_PATTERN -> {
+                if (
+                        safe(
+                                item.getExample()
+                        ).isBlank()
+                ) {
+                    throw new IllegalArgumentException(
+                            "EXAMPLE_TO_PATTERN cần grammar có example."
+                    );
+                }
+
+                yield safeQuestionType;
+            }
+
+            case WORD_TO_MEANING,
+                 MEANING_TO_WORD,
+                 READING_TO_WORD,
+                 IPA_TO_WORD ->
+                    throw new IllegalArgumentException(
+                            "Question type không phù hợp với Grammar."
+                    );
+        };
+    }
+
+    private String grammarPromptText(
+            UserGrammar item,
+            ReviewQuestionType questionType
+    ) {
+        ReviewQuestionType safeQuestionType =
+                normalizeGrammarQuestionType(
+                        questionType,
+                        item
+                );
+
+        return switch (
+                safeQuestionType
+        ) {
+            case MEANING,
+                 PATTERN_TO_MEANING ->
+                    safe(
+                            item.getPattern()
+                    );
+
+            case MEANING_TO_PATTERN ->
+                    safe(
+                            item.getMeaning()
+                    );
+
+            case EXAMPLE_TO_PATTERN ->
+                    safe(
+                            item.getExample()
+                    );
+
+            case WORD_TO_MEANING,
+                 MEANING_TO_WORD,
+                 READING_TO_WORD,
+                 IPA_TO_WORD ->
+                    throw new IllegalArgumentException(
+                            "Question type không phù hợp với Grammar."
+                    );
+        };
+    }
+
+    private String grammarOptionText(
+            UserGrammar item,
+            ReviewQuestionType questionType
+    ) {
+        /*
+         * EXAMPLE_TO_PATTERN:
+         * distractor KHÔNG cần có example.
+         * Chỉ current prompt cần example.
+         */
+        ReviewQuestionType safeQuestionType =
+                questionType == null
+                        ? ReviewQuestionType.MEANING
+                        : questionType;
+
+        return switch (
+                safeQuestionType
+        ) {
+            case MEANING,
+                 PATTERN_TO_MEANING ->
+                    safe(
+                            item.getMeaning()
+                    );
+
+            case MEANING_TO_PATTERN,
+                 EXAMPLE_TO_PATTERN ->
+                    safe(
+                            item.getPattern()
+                    );
+
+            case WORD_TO_MEANING,
+                 MEANING_TO_WORD,
+                 READING_TO_WORD,
+                 IPA_TO_WORD ->
+                    throw new IllegalArgumentException(
+                            "Question type không phù hợp với Grammar."
+                    );
+        };
+    }
+
 
     private void addOption(
             List<ReviewOptionResponse> options,

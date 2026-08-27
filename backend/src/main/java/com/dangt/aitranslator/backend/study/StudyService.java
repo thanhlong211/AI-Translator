@@ -760,7 +760,8 @@ public class StudyService {
                                                 item.jlptLevel,
                                                 item.meaning,
                                                 item.matchedText,
-                                                item.explanation
+                                                item.explanation,
+                                                item.example
                                         )
                                 )
                                 .toList();
@@ -782,6 +783,7 @@ public class StudyService {
                                                 item.meaning,
                                                 item.partOfSpeech,
                                                 item.jlptLevel,
+                                                item.example,
                                                 item.note
                                         )
                                 )

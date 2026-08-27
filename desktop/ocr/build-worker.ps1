@@ -23,8 +23,8 @@ $ModelsRuntimeDir = Join-Path $RuntimeDir "models"
 $WorkerExe = Join-Path $WorkerRuntimeDir "ai-translator-ocr-worker.exe"
 $TestScript = Join-Path $OcrDir "test-worker.ps1"
 
-$DetectionModelName = "PP-OCRv6_medium_det"
-$RecognitionModelName = "PP-OCRv6_medium_rec"
+$DetectionModelName = "PP-OCRv6_small_det"
+$RecognitionModelName = "PP-OCRv6_small_rec"
 
 function Assert-LastExitCode {
     param([string]$Message)
@@ -100,6 +100,8 @@ if (-not $SkipModelDownload) {
 from paddleocr import PaddleOCR
 ocr = PaddleOCR(
     lang='japan',
+    text_detection_model_name='PP-OCRv6_small_det',
+    text_recognition_model_name='PP-OCRv6_small_rec',
     use_doc_orientation_classify=False,
     use_doc_unwarping=False,
     use_textline_orientation=False,
@@ -122,7 +124,9 @@ $env:AI_TRANSLATOR_OCR_MODEL_ROOT = Join-Path $BuildDir "paddlex-cache\official_
 $localModelProbe = @"
 from paddleocr import PaddleOCR
 ocr = PaddleOCR(
+    text_detection_model_name='PP-OCRv6_small_det',
     text_detection_model_dir=r'$DetectionCacheDir',
+    text_recognition_model_name='PP-OCRv6_small_rec',
     text_recognition_model_dir=r'$RecognitionCacheDir',
     use_doc_orientation_classify=False,
     use_doc_unwarping=False,

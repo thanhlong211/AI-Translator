@@ -156,8 +156,16 @@ public class UserGrammar {
         this.userId = userId;
         this.language = StudyLanguage.JA;
         this.cefrLevel = null;
-        this.matchedText = nullIfBlank(point.matchedText());
-        this.example = null;
+        this.matchedText =
+                nullIfBlank(
+                        point.matchedText()
+                );
+
+        this.example =
+                nullIfBlank(
+                        point.example()
+                );
+
         this.pattern = required(point.pattern());
         this.jlptLevel = normalizeJlpt(point.jlptLevel());
         this.meaning = nullIfBlank(point.meaning());
@@ -346,6 +354,26 @@ public class UserGrammar {
 
         if (!nextExplanation.isBlank()) {
             explanation = nextExplanation;
+        }
+
+        String nextMatchedText =
+                clean(
+                        point.matchedText()
+                );
+
+        if (!nextMatchedText.isBlank()) {
+            matchedText =
+                    nextMatchedText;
+        }
+
+        String nextExample =
+                clean(
+                        point.example()
+                );
+
+        if (!nextExample.isBlank()) {
+            example =
+                    nextExample;
         }
 
         String nextJlpt =

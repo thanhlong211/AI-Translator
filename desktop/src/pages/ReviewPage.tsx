@@ -78,6 +78,96 @@ function typeName(
             : "Ngữ pháp";
 }
 
+function questionInstruction(
+    item: ReviewItem
+) {
+    switch (
+        item.questionType
+    ) {
+        /*
+         * Legacy question type.
+         */
+        case "MEANING":
+            return item.itemType ===
+                "GRAMMAR"
+                ? "Chọn nghĩa đúng"
+                : "Chọn nghĩa đúng";
+
+        case "WORD_TO_MEANING":
+            return "Chọn nghĩa đúng";
+
+        case "MEANING_TO_WORD":
+            return item.language === "EN"
+                ? "Chọn từ tiếng Anh đúng"
+                : "Chọn từ tiếng Nhật đúng";
+
+        case "READING_TO_WORD":
+            return "Chọn từ / kanji đúng";
+
+        case "IPA_TO_WORD":
+            return "Chọn từ tiếng Anh đúng";
+
+        case "PATTERN_TO_MEANING":
+            return "Chọn nghĩa của mẫu ngữ pháp";
+
+        case "MEANING_TO_PATTERN":
+            return "Chọn mẫu ngữ pháp đúng";
+
+        case "EXAMPLE_TO_PATTERN":
+            return "Chọn mẫu ngữ pháp phù hợp";
+    }
+}
+
+
+function questionPrompt(
+    item: ReviewItem
+) {
+    const text =
+        String(
+            item.primaryText ||
+            ""
+        ).trim();
+
+    if (
+        item.questionType ===
+        "IPA_TO_WORD"
+    ) {
+        const clean =
+            text
+                .replace(
+                    /^[/]+/,
+                    ""
+                )
+                .replace(
+                    /[/]+$/,
+                    ""
+                );
+
+        return `/${clean}/`;
+    }
+
+    return text;
+}
+
+
+function showVocabularyContext(
+    item: ReviewItem
+) {
+    return (
+        item.itemType ===
+            "VOCABULARY"
+        &&
+        (
+            item.questionType ===
+                "MEANING"
+            ||
+            item.questionType ===
+                "WORD_TO_MEANING"
+        )
+    );
+}
+
+
 function gradeLabel(
     value:
         ReviewAnswerResponse["automaticGrade"]
@@ -928,16 +1018,24 @@ export function ReviewPage({
                     <article className="review-card quiz-card">
                         <div className="review-card-front">
                             <span className="eyebrow">
-                                {typeName(current)}
-                                {" "}· Chọn nghĩa đúng
+                                {typeName(
+                                    current
+                                )}
+                                {" "}·{" "}
+                                {questionInstruction(
+                                    current
+                                )}
                             </span>
 
                             <div className="review-prompt">
-                                {current.primaryText}
+                                {questionPrompt(
+                                    current
+                                )}
                             </div>
 
-                            {current.itemType ===
-                                "VOCABULARY" &&
+                            {showVocabularyContext(
+                                current
+                            ) &&
                             current.secondaryText &&
                             current.secondaryText !==
                                 current.primaryText && (
@@ -1059,6 +1157,44 @@ export function ReviewPage({
                                         </span>
                                     )}
                                 </div>
+
+                                {current.itemType ===
+                                    "GRAMMAR" && (
+                                    <div className="review-grammar-details">
+                                        {feedback.item.secondaryText && (
+                                            <div className="review-surface">
+                                                <strong>
+                                                    Dấu hiệu trong câu:
+                                                </strong>
+                                                {" "}
+                                                {
+                                                    feedback.item
+                                                        .secondaryText
+                                                }
+                                            </div>
+                                        )}
+
+                                        {feedback.item.detail && (
+                                            <div className="review-surface">
+                                                <strong>
+                                                    Cách dùng / Giải thích:
+                                                </strong>
+                                                {" "}
+                                                {feedback.item.detail}
+                                            </div>
+                                        )}
+
+                                        {feedback.item.example && (
+                                            <div className="review-surface">
+                                                <strong>
+                                                    Ví dụ:
+                                                </strong>
+                                                {" "}
+                                                {feedback.item.example}
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
 
                                 <div className="review-feedback-mastery">
                                     {mode === "PRACTICE" ? (
