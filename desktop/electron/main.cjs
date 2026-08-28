@@ -9221,6 +9221,25 @@ async function translateText(
       payload.profile ||
       null,
 
+    /*
+     * Translation provenance:
+     * preserve backend provider/model metadata so it survives
+     * translateWithCache() and reaches renderer/overlay.
+     */
+    ai:
+      payload.ai ||
+      null,
+
+    provenance:
+      buildTranslationProvenance(
+        {
+          ai:
+            payload.ai ||
+            null,
+        },
+        false
+      ),
+
     performance:
       payload.performance ||
       null,
@@ -10106,6 +10125,86 @@ async function submitOverlayTranslationCorrection(
   };
 }
 
+function inferTranslationOriginSource(
+  result
+) {
+  const explicit =
+    String(
+      result?.provenance?.originSource ||
+      result?.provenance?.source ||
+      ""
+    )
+      .trim()
+      .toUpperCase();
+
+  if (
+    explicit === "PERSONAL_MEMORY"
+  ) {
+    return "PERSONAL_MEMORY";
+  }
+
+  if (explicit === "AI") {
+    return "AI";
+  }
+
+  return result?.ai?.provider ===
+    "personal-memory"
+      ? "PERSONAL_MEMORY"
+      : "AI";
+}
+
+
+function buildTranslationProvenance(
+  result,
+  cacheHit = false
+) {
+  const originSource =
+    inferTranslationOriginSource(
+      result
+    );
+
+  const createdAt =
+    Number(
+      result?.createdAt ||
+      0
+    );
+
+  const cacheAgeMs =
+    cacheHit &&
+    Number.isFinite(createdAt) &&
+    createdAt > 0
+      ? Math.max(
+          0,
+          Date.now() - createdAt
+        )
+      : 0;
+
+  return {
+    source:
+      cacheHit
+        ? "LOCAL_CACHE"
+        : originSource,
+
+    originSource,
+
+    cacheHit:
+      Boolean(cacheHit),
+
+    provider:
+      result?.ai?.provider ||
+      result?.provenance?.provider ||
+      null,
+
+    model:
+      result?.ai?.model ||
+      result?.provenance?.model ||
+      null,
+
+    cacheAgeMs,
+  };
+}
+
+
 async function translateWithCache(
   originalText,
   options = {}
@@ -10165,23 +10264,38 @@ async function translateWithCache(
       cacheKey
     );
 
+    /*
+     * Keep canonical cached value untouched.
+     * Only the result returned for THIS request is marked LOCAL_CACHE.
+     */
     translationCache.set(
       cacheKey,
       cached
     );
 
+    const cachedResult = {
+      ...cached,
+
+      provenance:
+        buildTranslationProvenance(
+          cached,
+          true
+        ),
+    };
+
     console.log(
-      "TRANSLATION CACHE HIT"
+      "TRANSLATION CACHE HIT",
+      cachedResult.provenance
     );
 
     rememberTranslationContext(
       profile,
-      cached,
+      cachedResult,
       sourceLanguage,
       targetLanguage
     );
 
-    return cached;
+    return cachedResult;
   }
 
   const pending =
@@ -10234,6 +10348,27 @@ async function translateWithCache(
             result.profile ||
             null,
 
+          ai:
+            result.ai ||
+            null,
+
+          performance:
+            result.performance ||
+            null,
+
+          provenance:
+            buildTranslationProvenance(
+              result,
+              false
+            ),
+
+          /*
+           * Persistent cache schema.
+           * v2 = provenance + ai + performance metadata.
+           */
+          cacheSchemaVersion:
+            2,
+
           createdAt:
             Date.now(),
         };
@@ -10241,6 +10376,11 @@ async function translateWithCache(
         translationCache.set(
           cacheKey,
           cacheValue
+        );
+
+        console.log(
+          "TRANSLATION CACHE STORE",
+          cacheValue.provenance
         );
 
         limitTranslationCache();
@@ -13181,15 +13321,47 @@ async function loadTranslationCache() {
       return;
     }
 
+    let skippedLegacyEntries = 0;
+
     for (const entry of entries) {
-      if (!entry || typeof entry.key !== "string" || !entry.value) {
+      if (
+        !entry ||
+        typeof entry.key !== "string" ||
+        !entry.value
+      ) {
         continue;
       }
 
-      translationCache.set(entry.key, entry.value);
+      /*
+       * Cache entries created before provenance v2 do not contain
+       * provider/model/performance metadata. Ignore them rather than
+       * returning an ambiguous translation result.
+       */
+      if (
+        Number(
+          entry.value
+            ?.cacheSchemaVersion ||
+          0
+        ) !== 2
+      ) {
+        skippedLegacyEntries++;
+        continue;
+      }
+
+      translationCache.set(
+        entry.key,
+        entry.value
+      );
     }
 
-    console.log("TRANSLATION CACHE LOADED:", translationCache.size);
+    console.log(
+      "TRANSLATION CACHE LOADED:",
+      translationCache.size,
+      {
+        skippedLegacyEntries,
+        cacheSchemaVersion: 2,
+      }
+    );
   } catch (error) {
     if (error && error.code !== "ENOENT") {
       console.error("LOAD TRANSLATION CACHE ERROR:", error);
