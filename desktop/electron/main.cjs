@@ -10190,6 +10190,20 @@ async function applyOverlayCorrectionLocally(
     activeTranslationProfile?.id ??
     null;
 
+  /*
+   * Patch 6.1
+   *
+   * Manga correction must target the concrete overlay block.
+   * sourceText alone is not unique: short manga dialogue such as
+   * はい / うん / え？ can appear on many pages.
+   */
+  const correctionItemId =
+    String(
+      correction?.itemId ||
+      correction?.blockId ||
+      ""
+    ).trim();
+
   let cacheChanged = false;
 
   for (
@@ -10302,6 +10316,20 @@ async function applyOverlayCorrectionLocally(
 
     const nextSessionItems =
       sessionItems.map((item) => {
+        const isCurrentMangaPage =
+          Number(
+            item?.chapterNumber
+          ) ===
+            Number(
+              mangaPanelSession.chapterNumber
+            ) &&
+          Number(
+            item?.pageNumber
+          ) ===
+            Number(
+              mangaPanelSession.pageNumber
+            );
+
         if (
           Array.isArray(
             item?.blocks
@@ -10313,10 +10341,28 @@ async function applyOverlayCorrectionLocally(
           const nextBlocks =
             item.blocks.map(
               (block) => {
+                const blockId =
+                  String(
+                    block?.id ||
+                    ""
+                  ).trim();
+
+                const matchesCorrectionTarget =
+                  correctionItemId
+                    ? (
+                        isCurrentMangaPage &&
+                        blockId ===
+                          correctionItemId
+                      )
+                    : (
+                        isCurrentMangaPage &&
+                        normalizeTranslationText(
+                          block?.original
+                        ) === sourceText
+                      );
+
                 if (
-                  normalizeTranslationText(
-                    block?.original
-                  ) !== sourceText
+                  !matchesCorrectionTarget
                 ) {
                   return block;
                 }
@@ -10361,6 +10407,8 @@ async function applyOverlayCorrectionLocally(
         }
 
         if (
+          correctionItemId ||
+          !isCurrentMangaPage ||
           normalizeTranslationText(
             item?.original
           ) !== sourceText
