@@ -463,6 +463,17 @@ const translationContextByProfile =
  * Session giữ riêng vùng quét + context 10 câu gần nhất cho manga.
  * Nó không dùng chung context của Quick Translate/Study để tránh nhiễu hội thoại.
  */
+const {
+  createEmptyMangaContinuityState:
+    createEmptyMangaContinuityStateCore,
+  isMangaContinuityCandidate:
+    isMangaContinuityCandidateCore,
+  upsertMangaContinuityTerm,
+  buildMangaContinuityContextItem:
+    buildMangaContinuityContextItemCore,
+  mergeMangaTranslationContext,
+} = require("./mangaContinuity.cjs");
+
 let mangaPanelSession = null;
 
 
@@ -2615,11 +2626,9 @@ const MANGA_CONTINUITY_CONTEXT_MAX_CHARS =
   1750;
 
 function createEmptyMangaContinuityState() {
-  return {
-    version: 1,
-    terms: [],
-    updatedAt: null,
-  };
+  return (
+    createEmptyMangaContinuityStateCore()
+  );
 }
 
 function getMangaContinuityTerms() {
@@ -2659,75 +2668,12 @@ function isMangaContinuityCandidate(
   original,
   translatedText
 ) {
-  const source =
-    normalizeTranslationText(
-      original
-    );
-
-  const target =
-    String(
-      translatedText ||
-      ""
-    ).trim();
-
-  if (
-    !source ||
-    !target ||
-    source.length > 32 ||
-    target.length > 80
-  ) {
-    return false;
-  }
-
-  /*
-   * Multi-line dialogue is scene context, not a stable term.
-   */
-  if (
-    source.includes("\n") ||
-    target.includes("\n")
-  ) {
-    return false;
-  }
-
-  /*
-   * Phase 1:
-   * Japanese Hiragana usually indicates grammatical/dialogue
-   * content rather than a stable name/term.
-   *
-   * Kanji and Katakana names/terms remain eligible.
-   */
-  if (
-    /[\u3040-\u309f]/u.test(
-      source
+  return (
+    isMangaContinuityCandidateCore(
+      original,
+      translatedText
     )
-  ) {
-    return false;
-  }
-
-  /*
-   * Avoid obvious full-sentence corrections.
-   */
-  if (
-    /[。！？!?…]/u.test(
-      source
-    )
-  ) {
-    return false;
-  }
-
-  const latinWords =
-    source
-      .trim()
-      .split(/\s+/u)
-      .filter(Boolean);
-
-  if (
-    latinWords.length > 4
-  ) {
-    return false;
-  }
-
-  return true;
+  );
 }
 
 function rememberMangaContinuityCorrection(
@@ -2758,61 +2704,31 @@ function rememberMangaContinuityCorrection(
     return false;
   }
 
-  const current =
-    getMangaContinuityTerms();
-
-  const next =
-    current.filter(
-      (term) =>
-        normalizeTranslationText(
-          term?.original
-        ) !== source
-    );
-
   const now =
     Date.now();
 
-  next.push({
-    original:
-      source,
-    translatedText:
-      target,
-    vietnamese:
-      target,
+  const next =
+    upsertMangaContinuityTerm(
+      getMangaContinuityTerms(),
+      {
+        original:
+          source,
+        translatedText:
+          target,
 
-    evidence:
-      "USER_CORRECTION",
-
-    chapterNumber:
-      Math.max(
-        1,
-        Number(
+        chapterNumber:
           mangaPanelSession
-            .chapterNumber ||
-          1
-        )
-      ),
+            .chapterNumber,
 
-    pageNumber:
-      Math.max(
-        1,
-        Number(
+        pageNumber:
           mangaPanelSession
-            .pageNumber ||
-          1
-        )
-      ),
+            .pageNumber,
 
-    updatedAt:
-      now,
-  });
-
-  while (
-    next.length >
-    MANGA_CONTINUITY_MAX_TERMS
-  ) {
-    next.shift();
-  }
+        updatedAt:
+          now,
+      },
+      MANGA_CONTINUITY_MAX_TERMS
+    );
 
   mangaPanelSession.continuity = {
     version: 1,
@@ -2843,99 +2759,27 @@ function rememberMangaContinuityCorrection(
 }
 
 function buildMangaContinuityContextItem() {
-  const terms =
-    getMangaContinuityTerms();
+  return (
+    buildMangaContinuityContextItemCore(
+      getMangaContinuityTerms(),
+      {
+        maxChars:
+          MANGA_CONTINUITY_CONTEXT_MAX_CHARS,
 
-  if (!terms.length) {
-    return null;
-  }
-
-  const originalLines = [
-    "[MANGA_CONTINUITY USER_CONFIRMED]",
-  ];
-
-  const translatedLines = [
-    "[MANGA_CONTINUITY USER_CONFIRMED]",
-  ];
-
-  terms.forEach(
-    (term, index) => {
-      const number =
-        index + 1;
-
-      originalLines.push(
-        `${number}. ${term.original}`
-      );
-
-      translatedLines.push(
-        `${number}. ${term.translatedText}`
-      );
-    }
+        maxTerms:
+          MANGA_CONTINUITY_MAX_TERMS,
+      }
+    )
   );
-
-  const original =
-    compactMangaContextText(
-      originalLines.join("\n"),
-      MANGA_CONTINUITY_CONTEXT_MAX_CHARS
-    );
-
-  const translatedText =
-    compactMangaContextText(
-      translatedLines.join("\n"),
-      MANGA_CONTINUITY_CONTEXT_MAX_CHARS
-    );
-
-  if (
-    !original ||
-    !translatedText
-  ) {
-    return null;
-  }
-
-  return {
-    scope:
-      "CONTINUITY",
-
-    blockCount:
-      terms.length,
-
-    original,
-    translatedText,
-    vietnamese:
-      translatedText,
-  };
 }
 
 function getMangaTranslationContext() {
-  const contextLimit =
-    getDesktopContextItemLimit();
-
-  if (contextLimit <= 0) {
-    return [];
-  }
-
-  const recent =
-    getMangaPanelSessionContext();
-
-  const continuity =
-    buildMangaContinuityContextItem();
-
-  if (!continuity) {
-    return recent;
-  }
-
-  /*
-   * Continuity is appended last intentionally.
-   *
-   * PromptBuilder keeps the tail of the context list, therefore
-   * this guarantees that stable user-confirmed mappings survive
-   * when older page context is truncated.
-   */
-  return [
-    ...recent,
-    continuity,
-  ].slice(
-    -contextLimit
+  return (
+    mergeMangaTranslationContext(
+      getMangaPanelSessionContext(),
+      buildMangaContinuityContextItem(),
+      getDesktopContextItemLimit()
+    )
   );
 }
 
