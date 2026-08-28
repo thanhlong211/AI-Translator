@@ -8,16 +8,20 @@ import "../styles/v6-overrides.css";
 interface Props {
   title?: string;
   description?: string;
+  noindex?: boolean;
 }
 
 const {
   title = "AitraNova — AI Translator Desktop",
   description =
     "Context-aware AI translation for screens, manga and documents.",
+  noindex = false,
 } = Astro.props;
 
 const pageTitle =
-  title === "AitraNova — AI Translator Desktop"
+  title.includes(
+    "AitraNova"
+  )
     ? title
     : `${title} — AitraNova`;
 import "../styles/v8-polish.css";
@@ -37,7 +41,11 @@ import "../styles/guide-safe-theme.css";
   data-language="vi"
 >
   <head>
-    <SiteSeo title={title} description={description} />
+    <SiteSeo
+      title={pageTitle}
+      description={description}
+      noindex={noindex}
+    />
 
     <meta charset="UTF-8" />
 
@@ -46,23 +54,11 @@ import "../styles/guide-safe-theme.css";
       content="width=device-width"
     />
 
-    <meta
-      name="description"
-      content={description}
-    />
-
-    <meta
-      name="theme-color"
-      content="#f6f7fb"
-    />
-
     <link
       rel="icon"
       type="image/svg+xml"
       href="/favicon.svg"
     />
-
-    <title>{pageTitle}</title>
 
     <script is:inline>
       (() => {

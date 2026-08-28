@@ -3,21 +3,27 @@ import {
   siteConfig,
 } from "../data/site";
 
+
 interface Props {
   title: string;
   description: string;
+  noindex?: boolean;
 }
+
 
 const {
   title,
   description,
+  noindex = false,
 } = Astro.props;
+
 
 const canonicalUrl =
   new URL(
     Astro.url.pathname,
     `${siteConfig.url}/`
   ).toString();
+
 
 const ogImageUrl =
   siteConfig.ogImage
@@ -27,59 +33,123 @@ const ogImageUrl =
       ).toString()
     : "";
 
-const structuredData = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: siteConfig.name,
-  url: siteConfig.url,
-  description,
-};
+
+const isHome =
+  Astro.url.pathname === "/";
+
+
+const structuredData =
+  isHome
+    ? {
+        "@context":
+          "https://schema.org",
+
+        "@type":
+          "WebSite",
+
+        name:
+          siteConfig.name,
+
+        url:
+          siteConfig.url,
+
+        description,
+      }
+    : {
+        "@context":
+          "https://schema.org",
+
+        "@type":
+          "WebPage",
+
+        name:
+          title,
+
+        url:
+          canonicalUrl,
+
+        description,
+
+        isPartOf: {
+          "@type":
+            "WebSite",
+
+          name:
+            siteConfig.name,
+
+          url:
+            siteConfig.url,
+        },
+      };
 ---
+
+
+<title>{title}</title>
+
+
+<meta
+  name="description"
+  content={description}
+/>
+
 
 <link
   rel="canonical"
   href={canonicalUrl}
 />
 
+
 <meta
   name="robots"
-  content="index, follow, max-image-preview:large"
+  content={
+    noindex
+      ? "noindex, nofollow"
+      : "index, follow, max-image-preview:large"
+  }
 />
+
 
 <meta
   name="theme-color"
   content={siteConfig.themeColor}
 />
 
+
 <meta
   property="og:type"
   content="website"
 />
+
 
 <meta
   property="og:site_name"
   content={siteConfig.name}
 />
 
+
 <meta
   property="og:title"
   content={title}
 />
+
 
 <meta
   property="og:description"
   content={description}
 />
 
+
 <meta
   property="og:url"
   content={canonicalUrl}
 />
 
+
 <meta
   property="og:locale"
   content={siteConfig.locale}
 />
+
 
 {
   ogImageUrl && (
@@ -91,11 +161,12 @@ const structuredData = {
 
       <meta
         property="og:image:alt"
-        content={`${siteConfig.name} preview`}
+        content={`${siteConfig.name} — Contextual AI Translator`}
       />
     </>
   )
 }
+
 
 <meta
   name="twitter:card"
@@ -106,15 +177,18 @@ const structuredData = {
   }
 />
 
+
 <meta
   name="twitter:title"
   content={title}
 />
 
+
 <meta
   name="twitter:description"
   content={description}
 />
+
 
 {
   ogImageUrl && (
@@ -125,8 +199,17 @@ const structuredData = {
   )
 }
 
-<script
-  type="application/ld+json"
-  is:inline
-  set:html={JSON.stringify(structuredData)}
-/>
+
+{
+  !noindex && (
+    <script
+      type="application/ld+json"
+      is:inline
+      set:html={
+        JSON.stringify(
+          structuredData
+        )
+      }
+    />
+  )
+}
