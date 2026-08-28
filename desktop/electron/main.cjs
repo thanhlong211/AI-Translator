@@ -3392,6 +3392,7 @@ function getMangaPanelSessionDetails() {
       maxContextItems:
         getDesktopContextItemLimit(),
       context: [],
+      continuity: [],
       profileName: "",
     };
   }
@@ -3407,6 +3408,54 @@ function getMangaPanelSessionDetails() {
     maxContextItems:
       getDesktopContextItemLimit(),
     profileName,
+
+    /*
+     * Patch 7.3
+     *
+     * Expose a read-only continuity snapshot to Manga Session
+     * Inspector so lifecycle behavior can be verified without
+     * exposing mutable session state.
+     */
+    continuity:
+      getMangaContinuityTerms()
+        .map((term, index) => ({
+          index:
+            index + 1,
+
+          original:
+            normalizeTranslationText(
+              term?.original
+            ),
+
+          translatedText:
+            String(
+              term?.translatedText ||
+              term?.vietnamese ||
+              ""
+            ).trim(),
+
+          evidence:
+            String(
+              term?.evidence ||
+              ""
+            ).trim(),
+
+          chapterNumber:
+            Number(
+              term?.chapterNumber
+            ) || null,
+
+          pageNumber:
+            Number(
+              term?.pageNumber
+            ) || null,
+
+          updatedAt:
+            Number(
+              term?.updatedAt
+            ) || null,
+        })),
+
     context:
       getMangaPanelSessionContext()
         .map((item, index) => ({
