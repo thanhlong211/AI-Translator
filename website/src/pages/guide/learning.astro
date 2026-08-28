@@ -1,0 +1,2517 @@
+---
+import GuideArticleLayout from "../../components/GuideArticleLayout.astro";
+---
+
+<GuideArticleLayout
+  title="Learning"
+  section="Learning System"
+  description="Biến nội dung bạn đang đọc thành Vocabulary, Grammar và Review để học trực tiếp từ manga, tài liệu và bản dịch thực tế."
+>
+
+  <section
+    id="learning"
+    class="article-section-block learning-guide-main"
+    data-guide-search-item="learning vocabulary grammar review SRS study"
+  >
+
+    <span class="section-number">01</span>
+
+    <h2
+      data-i18n
+      data-vi="Đừng chỉ dịch. Học từ nội dung bạn đang đọc."
+      data-en="Don't just translate. Learn from what you read."
+    >
+      Đừng chỉ dịch. Học từ nội dung bạn đang đọc.
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Learning giúp bạn biến từ vựng, cấu trúc và ví dụ gặp trong nội dung thật thành dữ liệu học thay vì phải ghi chép thủ công ở một ứng dụng khác."
+      data-en="Learning turns vocabulary, grammar and examples from real content into study material without requiring manual notes in another application."
+    >
+      Learning biến nội dung thật thành dữ liệu học
+      mà không cần ghi chú thủ công ở ứng dụng khác.
+    </p>
+
+
+    <!-- TABS -->
+
+    <div
+      class="learning-tabs"
+      data-learning-tabs
+      role="tablist"
+    >
+
+      <button
+        type="button"
+        class="active"
+        data-learning-tab="dashboard"
+        aria-selected="true"
+      >
+        <span>⌂</span>
+        Dashboard
+      </button>
+
+      <button
+        type="button"
+        data-learning-tab="vocabulary"
+        aria-selected="false"
+      >
+        <span>単</span>
+        Vocabulary
+      </button>
+
+      <button
+        type="button"
+        data-learning-tab="grammar"
+        aria-selected="false"
+      >
+        <span>文</span>
+        Grammar
+      </button>
+
+      <button
+        type="button"
+        data-learning-tab="review"
+        aria-selected="false"
+      >
+        <span>↻</span>
+        Review / SRS
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         DASHBOARD
+         ===================================================== -->
+
+    <article
+      class="learning-panel active"
+      data-learning-panel="dashboard"
+    >
+
+      <div class="learning-panel-head">
+
+        <span class="learning-panel-icon purple">
+          学
+        </span>
+
+        <div>
+          <small>LEARNING DASHBOARD</small>
+
+          <h3
+            data-i18n
+            data-vi="Theo dõi những gì bạn đang học"
+            data-en="Track what you're learning"
+          >
+            Theo dõi những gì bạn đang học
+          </h3>
+
+          <p
+            data-i18n
+            data-vi="Dashboard tổng hợp Vocabulary, Grammar và những mục cần Review."
+            data-en="The Dashboard summarizes Vocabulary, Grammar and items due for Review."
+          >
+            Dashboard tổng hợp dữ liệu học của bạn.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="learning-stats">
+
+        <div>
+          <span class="stat-icon purple">単</span>
+
+          <div>
+            <small>VOCABULARY</small>
+            <strong>128</strong>
+            <p
+              data-i18n
+              data-vi="từ đã lưu"
+              data-en="saved words"
+            >
+              từ đã lưu
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <span class="stat-icon blue">文</span>
+
+          <div>
+            <small>GRAMMAR</small>
+            <strong>24</strong>
+            <p
+              data-i18n
+              data-vi="mẫu ngữ pháp"
+              data-en="grammar items"
+            >
+              mẫu ngữ pháp
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <span class="stat-icon orange">↻</span>
+
+          <div>
+            <small>REVIEW</small>
+            <strong>18</strong>
+            <p
+              data-i18n
+              data-vi="cần ôn hôm nay"
+              data-en="due today"
+            >
+              cần ôn hôm nay
+            </p>
+          </div>
+        </div>
+
+        <div>
+          <span class="stat-icon green">✦</span>
+
+          <div>
+            <small>STREAK</small>
+            <strong>7</strong>
+            <p
+              data-i18n
+              data-vi="ngày"
+              data-en="days"
+            >
+              ngày
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+
+      <h3
+        data-i18n
+        data-vi="Từ gần đây"
+        data-en="Recent vocabulary"
+      >
+        Từ gần đây
+      </h3>
+
+
+      <div class="recent-vocabulary">
+
+        <div>
+          <span class="word-level">N4</span>
+
+          <div>
+            <strong>約束</strong>
+            <small>やくそく</small>
+          </div>
+
+          <p
+            data-i18n
+            data-vi="lời hứa"
+            data-en="promise"
+          >
+            lời hứa
+          </p>
+        </div>
+
+
+        <div>
+          <span class="word-level">N2</span>
+
+          <div>
+            <strong>決意</strong>
+            <small>けつい</small>
+          </div>
+
+          <p
+            data-i18n
+            data-vi="quyết tâm"
+            data-en="determination"
+          >
+            quyết tâm
+          </p>
+        </div>
+
+
+        <div>
+          <span class="word-level">N4</span>
+
+          <div>
+            <strong>守る</strong>
+            <small>まもる</small>
+          </div>
+
+          <p
+            data-i18n
+            data-vi="bảo vệ / giữ"
+            data-en="protect / keep"
+          >
+            bảo vệ / giữ
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="guide-callout info">
+        <span>i</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Dashboard là nơi tổng quan"
+            data-en="Dashboard is the overview"
+          >
+            Dashboard là nơi tổng quan
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Việc thêm, chỉnh sửa hoặc review nội dung được thực hiện trong từng khu vực tương ứng."
+            data-en="Adding, editing or reviewing content happens in the corresponding sections."
+          >
+            Mỗi loại dữ liệu có khu vực riêng để quản lý.
+          </p>
+        </div>
+      </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         VOCABULARY
+         ===================================================== -->
+
+    <article
+      id="vocabulary"
+      class="learning-panel"
+      data-learning-panel="vocabulary"
+      hidden
+    >
+
+      <div class="learning-panel-head">
+
+        <span class="learning-panel-icon purple">
+          単
+        </span>
+
+        <div>
+          <small>VOCABULARY</small>
+
+          <h3
+            data-i18n
+            data-vi="Lưu từ ngay trong ngữ cảnh thật"
+            data-en="Save words from real context"
+          >
+            Lưu từ ngay trong ngữ cảnh thật
+          </h3>
+
+          <p
+            data-i18n
+            data-vi="Thay vì học một danh sách từ rời rạc, Vocabulary có thể lưu từ cùng cách đọc, nghĩa và context bạn thực sự gặp."
+            data-en="Instead of studying isolated word lists, Vocabulary can preserve the word, reading, meaning and the context where you encountered it."
+          >
+            Vocabulary lưu từ cùng thông tin
+            bạn gặp trong nội dung thật.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="vocabulary-card-demo">
+
+        <div class="vocabulary-word">
+          <small>VOCABULARY</small>
+          <strong>約束</strong>
+          <span>やくそく</span>
+        </div>
+
+        <div class="vocabulary-definition">
+          <small>MEANING</small>
+
+          <strong
+            data-i18n
+            data-vi="lời hứa; sự hẹn ước"
+            data-en="promise; commitment"
+          >
+            lời hứa; sự hẹn ước
+          </strong>
+        </div>
+
+        <div class="vocabulary-example">
+          <small>CONTEXT</small>
+
+          <strong>
+            約束を守る。
+          </strong>
+
+          <span
+            data-i18n
+            data-vi="Giữ lời hứa."
+            data-en="Keep a promise."
+          >
+            Giữ lời hứa.
+          </span>
+        </div>
+
+      </div>
+
+
+      <h3
+        data-i18n
+        data-vi="Workflow lưu từ"
+        data-en="Saving workflow"
+      >
+        Workflow lưu từ
+      </h3>
+
+
+      <div class="guide-steps">
+
+        <div class="guide-step">
+          <span class="guide-step-number">1</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Gặp một từ đáng học"
+              data-en="Encounter a useful word"
+            >
+              Gặp một từ đáng học
+            </strong>
+
+            <p>
+              Manga / Documents / Translation
+            </p>
+          </div>
+        </div>
+
+
+        <div class="guide-step">
+          <span class="guide-step-number">2</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Chọn từ"
+              data-en="Select the word"
+            >
+              Chọn từ
+            </strong>
+          </div>
+        </div>
+
+
+        <div class="guide-step">
+          <span class="guide-step-number">3</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Lưu vào Vocabulary"
+              data-en="Save to Vocabulary"
+            >
+              Lưu vào Vocabulary
+            </strong>
+          </div>
+        </div>
+
+
+        <div class="guide-step">
+          <span class="guide-step-number">4</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Ôn lại trong Review"
+              data-en="Review it later"
+            >
+              Ôn lại trong Review
+            </strong>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="guide-callout tip">
+        <span>✦</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Context quan trọng hơn một nghĩa rời rạc"
+            data-en="Context is more useful than an isolated definition"
+          >
+            Context quan trọng hơn một nghĩa rời rạc
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Giữ câu ví dụ nơi bạn gặp từ sẽ giúp việc nhớ lại cách sử dụng dễ hơn."
+            data-en="Keeping the sentence where you encountered the word makes it easier to remember how it was actually used."
+          >
+            Nên giữ câu ví dụ thực tế khi có thể.
+          </p>
+        </div>
+      </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         GRAMMAR
+         ===================================================== -->
+
+    <article
+      id="grammar"
+      class="learning-panel"
+      data-learning-panel="grammar"
+      hidden
+    >
+
+      <div class="learning-panel-head">
+
+        <span class="learning-panel-icon blue">
+          文
+        </span>
+
+        <div>
+          <small>GRAMMAR</small>
+
+          <h3
+            data-i18n
+            data-vi="Học cấu trúc từ câu bạn thực sự đọc"
+            data-en="Learn grammar from sentences you actually read"
+          >
+            Học cấu trúc từ câu bạn thực sự đọc
+          </h3>
+
+          <p
+            data-i18n
+            data-vi="Grammar giúp lưu lại những cấu trúc xuất hiện trong manga, light novel hoặc tài liệu thay vì chỉ học ví dụ nhân tạo."
+            data-en="Grammar helps preserve structures encountered in manga, light novels or documents instead of relying only on artificial examples."
+          >
+            Grammar tập trung vào cấu trúc
+            xuất hiện trong nội dung thực tế.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="grammar-demo">
+
+        <span class="grammar-level">N4</span>
+
+        <div>
+          <small>PATTERN</small>
+          <strong>〜ことになる</strong>
+        </div>
+
+        <div>
+          <small>MEANING</small>
+
+          <strong
+            data-i18n
+            data-vi="được quyết định là / trở thành"
+            data-en="it is decided that / come to"
+          >
+            được quyết định là / trở thành
+          </strong>
+        </div>
+
+        <div>
+          <small>EXAMPLE</small>
+          <strong>日本へ行くことになった。</strong>
+
+          <span
+            data-i18n
+            data-vi="Tôi đã được quyết định sẽ đi Nhật."
+            data-en="It was decided that I would go to Japan."
+          >
+            Tôi đã được quyết định sẽ đi Nhật.
+          </span>
+        </div>
+
+      </div>
+
+
+      <div class="guide-checklist">
+
+        <div>
+          <span>✓</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Mẫu ngữ pháp"
+              data-en="Grammar pattern"
+            >
+              Mẫu ngữ pháp
+            </strong>
+          </div>
+        </div>
+
+
+        <div>
+          <span>✓</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Ý nghĩa"
+              data-en="Meaning"
+            >
+              Ý nghĩa
+            </strong>
+          </div>
+        </div>
+
+
+        <div>
+          <span>✓</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Ví dụ thực tế"
+              data-en="Real example"
+            >
+              Ví dụ thực tế
+            </strong>
+          </div>
+        </div>
+
+
+        <div>
+          <span>✓</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Nguồn context"
+              data-en="Source context"
+            >
+              Nguồn context
+            </strong>
+          </div>
+        </div>
+
+      </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         REVIEW
+         ===================================================== -->
+
+    <article
+      id="review"
+      class="learning-panel"
+      data-learning-panel="review"
+      hidden
+    >
+
+      <div class="learning-panel-head">
+
+        <span class="learning-panel-icon orange">
+          ↻
+        </span>
+
+        <div>
+          <small>REVIEW / SRS</small>
+
+          <h3
+            data-i18n
+            data-vi="Ôn lại theo lịch thay vì ngẫu nhiên"
+            data-en="Review on a schedule instead of randomly"
+          >
+            Ôn lại theo lịch thay vì ngẫu nhiên
+          </h3>
+
+          <p
+            data-i18n
+            data-vi="Review giúp đưa các mục học trở lại đúng lúc thay vì yêu cầu bạn tự nhớ khi nào cần ôn."
+            data-en="Review brings study items back at appropriate times instead of requiring you to remember when to study them."
+          >
+            Review quản lý những mục
+            cần ôn lại theo thời gian.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="review-card-demo">
+
+        <div class="review-top">
+
+          <span>
+            REVIEW
+          </span>
+
+          <strong>
+            12 / 18
+          </strong>
+
+        </div>
+
+
+        <div class="review-word">
+
+          <small>VOCABULARY</small>
+
+          <strong>約束</strong>
+
+          <span>やくそく</span>
+
+        </div>
+
+
+        <div class="review-answer">
+
+          <small>ANSWER</small>
+
+          <strong
+            data-i18n
+            data-vi="Lời hứa; sự hẹn ước"
+            data-en="Promise; commitment"
+          >
+            Lời hứa; sự hẹn ước
+          </strong>
+
+          <p>
+            約束を守る。
+          </p>
+
+        </div>
+
+
+        <div class="review-actions">
+
+          <button
+            type="button"
+            data-review-demo="again"
+          >
+            <span>Again</span>
+            <small>1m</small>
+          </button>
+
+          <button
+            type="button"
+            data-review-demo="hard"
+          >
+            <span>Hard</span>
+            <small>6h</small>
+          </button>
+
+          <button
+            type="button"
+            class="good"
+            data-review-demo="good"
+          >
+            <span>Good</span>
+            <small>1d</small>
+          </button>
+
+        </div>
+
+
+        <div
+          class="review-feedback"
+          data-review-feedback
+        >
+          <span>i</span>
+
+          <p
+            data-i18n
+            data-vi="Đây là mô phỏng giao diện để giải thích cách đánh giá độ nhớ."
+            data-en="This is an interface mock used to explain how recall ratings work."
+          >
+            Đây là mô phỏng cách đánh giá độ nhớ.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="review-meaning-grid">
+
+        <div>
+          <span class="rating-dot again"></span>
+
+          <strong>Again</strong>
+
+          <p
+            data-i18n
+            data-vi="Bạn chưa nhớ được mục này."
+            data-en="You could not recall this item."
+          >
+            Chưa nhớ.
+          </p>
+        </div>
+
+
+        <div>
+          <span class="rating-dot hard"></span>
+
+          <strong>Hard</strong>
+
+          <p
+            data-i18n
+            data-vi="Nhớ được nhưng khá khó."
+            data-en="You remembered it, but with difficulty."
+          >
+            Nhớ nhưng còn khó.
+          </p>
+        </div>
+
+
+        <div>
+          <span class="rating-dot good"></span>
+
+          <strong>Good</strong>
+
+          <p
+            data-i18n
+            data-vi="Bạn nhớ được bình thường."
+            data-en="You recalled it normally."
+          >
+            Nhớ tốt.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="guide-callout info">
+        <span>i</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Không cần cố đoán lịch ôn"
+            data-en="You do not need to manually guess the review schedule"
+          >
+            Không cần cố đoán lịch ôn
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Hãy đánh giá mức độ nhớ của bạn một cách thực tế. Hệ thống Review sử dụng kết quả đó để hỗ trợ lịch ôn."
+            data-en="Rate your recall realistically. Review uses that feedback to help determine when an item should return."
+          >
+            Hãy đánh giá đúng mức độ bạn thực sự nhớ.
+          </p>
+        </div>
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- =======================================================
+       LEARNING WORKFLOW
+       ======================================================= -->
+
+  <section
+    id="learning-workflow"
+    class="article-section-block"
+    data-guide-search-item="learning workflow manga document vocabulary review"
+  >
+
+    <span class="section-number">02</span>
+
+    <h2
+      data-i18n
+      data-vi="Từ bản dịch đến Review"
+      data-en="From translation to Review"
+    >
+      Từ bản dịch đến Review
+    </h2>
+
+
+    <div class="learning-flow">
+
+      <div>
+        <span>01</span>
+        <small>SOURCE</small>
+
+        <strong
+          data-i18n
+          data-vi="Manga / Tài liệu"
+          data-en="Manga / Document"
+        >
+          Manga / Tài liệu
+        </strong>
+      </div>
+
+      <i>→</i>
+
+      <div>
+        <span>02</span>
+        <small>TRANSLATION</small>
+        <strong>約束</strong>
+      </div>
+
+      <i>→</i>
+
+      <div>
+        <span>03</span>
+        <small>LEARNING</small>
+        <strong>Vocabulary</strong>
+      </div>
+
+      <i>→</i>
+
+      <div>
+        <span>04</span>
+        <small>SRS</small>
+        <strong>Review</strong>
+      </div>
+
+    </div>
+
+
+    <div class="guide-callout tip">
+
+      <span>✦</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Học từ nội dung bạn quan tâm"
+          data-en="Learn from content you care about"
+        >
+          Học từ nội dung bạn quan tâm
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Những từ xuất hiện trong manga hoặc tài liệu bạn thực sự đang đọc thường có context dễ nhớ hơn một danh sách từ ngẫu nhiên."
+          data-en="Words encountered in manga or documents you are actually reading often provide more memorable context than a random word list."
+        >
+          Context thật giúp bạn nhớ vì sao
+          từ đó xuất hiện và được sử dụng thế nào.
+        </p>
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- =======================================================
+       TROUBLESHOOTING
+       ======================================================= -->
+
+  <section
+    id="learning-troubleshooting"
+    class="article-section-block"
+    data-guide-search-item="learning vocabulary review troubleshooting duplicate wrong meaning"
+  >
+
+    <span class="section-number">03</span>
+
+    <h2
+      data-i18n
+      data-vi="Lỗi và tình huống thường gặp"
+      data-en="Common issues"
+    >
+      Lỗi và tình huống thường gặp
+    </h2>
+
+
+    <div class="trouble-list">
+
+      <details class="trouble-item">
+        <summary>
+
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Từ đã lưu nhưng nghĩa chưa phù hợp context"
+            data-en="The saved meaning does not match the context"
+          >
+            Từ đã lưu nhưng nghĩa chưa phù hợp context
+          </span>
+
+          <span>+</span>
+
+        </summary>
+
+        <div class="trouble-body">
+
+          <p
+            data-i18n
+            data-vi="Một từ có thể có nhiều nghĩa. Hãy ưu tiên nghĩa phù hợp với câu nơi bạn gặp từ đó."
+            data-en="A word may have several meanings. Prefer the meaning that matches the sentence where you encountered it."
+          >
+            Ưu tiên nghĩa phù hợp với context gốc.
+          </p>
+
+        </div>
+
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Đã có quá nhiều từ cần Review"
+            data-en="Too many items are due for Review"
+          >
+            Đã có quá nhiều từ cần Review
+          </span>
+
+          <span>+</span>
+
+        </summary>
+
+        <div class="trouble-body">
+
+          <p
+            data-i18n
+            data-vi="Không cần cố hoàn thành mọi thứ trong một lần. Ưu tiên duy trì nhịp review đều đặn."
+            data-en="You do not need to complete everything in one session. Prioritize a sustainable review routine."
+          >
+            Review đều đặn quan trọng hơn
+            cố hoàn thành tất cả cùng lúc.
+          </p>
+
+        </div>
+
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Không nhớ từ dù đã review nhiều lần"
+            data-en="A word remains difficult after repeated reviews"
+          >
+            Không nhớ từ dù đã review nhiều lần
+          </span>
+
+          <span>+</span>
+
+        </summary>
+
+        <div class="trouble-body">
+
+          <p
+            data-i18n
+            data-vi="Quay lại câu context ban đầu và xem cách từ được sử dụng thay vì chỉ cố nhớ nghĩa tiếng Việt."
+            data-en="Return to the original context sentence and examine how the word was used instead of memorizing only its translated meaning."
+          >
+            Quay lại context và câu ví dụ ban đầu.
+          </p>
+
+        </div>
+
+      </details>
+
+    </div>
+
+  </section>
+
+
+  <!-- NEXT -->
+
+  <div class="next-guide">
+
+    <div>
+      <small>NEXT GUIDE</small>
+
+      <strong>Troubleshooting</strong>
+
+      <p
+        data-i18n
+        data-vi="Xử lý các vấn đề thường gặp với OCR, Translation, Context và ứng dụng."
+        data-en="Resolve common OCR, Translation, Context and application issues."
+      >
+        Tổng hợp cách xử lý các lỗi thường gặp.
+      </p>
+    </div>
+
+    <a
+      href="/guide/troubleshooting"
+      aria-label="Troubleshooting guide"
+    >
+      →
+    </a>
+
+  </div>
+
+</GuideArticleLayout>
+
+
+<script>
+  function initLearningGuide() {
+
+    const root =
+      document.querySelector(
+        "[data-learning-tabs]"
+      );
+
+    if (!root) {
+      return;
+    }
+
+
+    const buttons =
+      Array.from(
+        root.querySelectorAll(
+          "[data-learning-tab]"
+        )
+      );
+
+
+    const panels =
+      Array.from(
+        document.querySelectorAll(
+          "[data-learning-panel]"
+        )
+      );
+
+
+    const valid =
+      buttons
+        .map(
+          button =>
+            button.dataset.learningTab
+        )
+        .filter(Boolean);
+
+
+    const storageKey =
+      "aitranova-learning-guide-tab";
+
+
+    function showTab(
+      tab,
+      updateUrl = true
+    ) {
+
+      if (!valid.includes(tab)) {
+        tab = "dashboard";
+      }
+
+
+      buttons.forEach(
+        button => {
+
+          const active =
+            button.dataset.learningTab
+            === tab;
+
+          button.classList.toggle(
+            "active",
+            active
+          );
+
+          button.setAttribute(
+            "aria-selected",
+            String(active)
+          );
+
+        }
+      );
+
+
+      panels.forEach(
+        panel => {
+
+          const active =
+            panel.dataset.learningPanel
+            === tab;
+
+          panel.hidden =
+            !active;
+
+          panel.classList.toggle(
+            "active",
+            active
+          );
+
+
+          if (
+            active
+            && typeof panel.animate
+            === "function"
+          ) {
+
+            panel.animate(
+              [
+                {
+                  opacity: 0,
+                  transform:
+                    "translateY(8px)",
+                },
+                {
+                  opacity: 1,
+                  transform:
+                    "translateY(0)",
+                },
+              ],
+              {
+                duration: 190,
+                easing: "ease-out",
+              }
+            );
+
+          }
+
+        }
+      );
+
+
+      try {
+        localStorage.setItem(
+          storageKey,
+          tab
+        );
+      } catch {}
+
+
+      if (updateUrl) {
+
+        const url =
+          new URL(
+            window.location.href
+          );
+
+        url.searchParams.set(
+          "tab",
+          tab
+        );
+
+        url.hash = "";
+
+        history.replaceState(
+          null,
+          "",
+          url
+        );
+
+      }
+
+    }
+
+
+    buttons.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const tab =
+              button.dataset.learningTab;
+
+            if (tab) {
+              showTab(tab);
+            }
+
+          }
+        );
+
+
+        button.addEventListener(
+          "keydown",
+          event => {
+
+            if (
+              event.key !== "ArrowLeft"
+              && event.key !== "ArrowRight"
+            ) {
+              return;
+            }
+
+
+            event.preventDefault();
+
+
+            const index =
+              buttons.indexOf(button);
+
+
+            const delta =
+              event.key === "ArrowRight"
+                ? 1
+                : -1;
+
+
+            const next =
+              buttons[
+                (
+                  index
+                  + delta
+                  + buttons.length
+                )
+                % buttons.length
+              ];
+
+
+            next.focus();
+
+
+            const tab =
+              next.dataset.learningTab;
+
+            if (tab) {
+              showTab(tab);
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+    /*
+      Allow sidebar / overview links to change
+      tabs without reloading when already here.
+    */
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        const target =
+          event.target;
+
+        if (
+          !(target instanceof Element)
+        ) {
+          return;
+        }
+
+
+        const link =
+          target.closest(
+            'a[href*="/guide/learning?tab="]'
+          );
+
+        if (!link) {
+          return;
+        }
+
+
+        const url =
+          new URL(
+            link.href,
+            window.location.href
+          );
+
+
+        if (
+          url.pathname
+          !== window.location.pathname
+        ) {
+          return;
+        }
+
+
+        const tab =
+          url.searchParams.get(
+            "tab"
+          );
+
+
+        if (
+          !tab
+          || !valid.includes(tab)
+        ) {
+          return;
+        }
+
+
+        event.preventDefault();
+
+        showTab(tab);
+
+      }
+    );
+
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const requested =
+      params.get("tab");
+
+
+    let stored = null;
+
+    try {
+      stored =
+        localStorage.getItem(
+          storageKey
+        );
+    } catch {}
+
+
+    showTab(
+      requested
+      || stored
+      || "dashboard",
+      Boolean(requested)
+    );
+
+
+    /* -----------------------------------------
+       REVIEW DEMO
+       ----------------------------------------- */
+
+    const feedback =
+      document.querySelector(
+        "[data-review-feedback] p"
+      );
+
+
+    document.querySelectorAll(
+      "[data-review-demo]"
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            if (!feedback) {
+              return;
+            }
+
+
+            const language =
+              document.documentElement
+                .dataset.language
+              || "vi";
+
+
+            const value =
+              button.dataset.reviewDemo;
+
+
+            const messages = {
+
+              again: {
+                vi:
+                  "Again: mục này sẽ cần được ôn lại sớm hơn.",
+                en:
+                  "Again: this item should return sooner.",
+              },
+
+              hard: {
+                vi:
+                  "Hard: bạn nhớ được nhưng vẫn còn khó.",
+                en:
+                  "Hard: you recalled it, but with difficulty.",
+              },
+
+              good: {
+                vi:
+                  "Good: bạn nhớ được mục này khá ổn.",
+                en:
+                  "Good: you recalled this item successfully.",
+              },
+
+            };
+
+
+            const message =
+              messages[value];
+
+
+            if (!message) {
+              return;
+            }
+
+
+            feedback.textContent =
+              language === "en"
+                ? message.en
+                : message.vi;
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initLearningGuide,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initLearningGuide();
+
+  }
+</script>
+
+
+<style>
+
+  .learning-tabs {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+
+    gap: 5px;
+
+    margin-top: 22px;
+
+    padding: 6px;
+
+    border:
+      1px solid #c9c0d4;
+
+    border-radius: 14px;
+
+    background:
+      #ded7e7;
+  }
+
+
+  .learning-tabs button {
+    display: flex;
+
+    min-height: 44px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    border: 0;
+
+    border-radius: 9px;
+
+    background:
+      transparent;
+
+    color:
+      #716879;
+
+    cursor: pointer;
+
+    font-size: 7px;
+
+    font-weight: 750;
+
+    transition:
+      transform 150ms ease,
+      background 150ms ease,
+      color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+
+  .learning-tabs button:hover {
+    transform:
+      translateY(-1px);
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.4
+      );
+  }
+
+
+  .learning-tabs button.active {
+    background:
+      #6952ee;
+
+    color: white;
+
+    box-shadow:
+      0 8px 20px
+      rgba(
+        105,
+        82,
+        238,
+        0.22
+      );
+  }
+
+
+  .learning-tabs
+  button > span {
+    font-size: 10px;
+  }
+
+
+  .learning-panel {
+    margin-top: 15px;
+
+    padding: 21px;
+
+    border:
+      1px solid #c9c0d4;
+
+    border-radius: 14px;
+
+    background:
+      rgba(
+        236,
+        230,
+        242,
+        0.72
+      );
+  }
+
+
+  .learning-panel[hidden] {
+    display: none !important;
+  }
+
+
+  .learning-panel-head {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 13px;
+
+    margin-bottom: 19px;
+  }
+
+
+  .learning-panel-icon {
+    display: grid;
+
+    width: 52px;
+    height: 52px;
+
+    place-items: center;
+
+    border-radius: 13px;
+
+    font-size: 15px;
+
+    font-weight: 850;
+  }
+
+
+  .learning-panel-icon.purple {
+    background: #e3dcff;
+    color: #6952ee;
+  }
+
+
+  .learning-panel-icon.blue {
+    background: #dce6f7;
+    color: #557fdc;
+  }
+
+
+  .learning-panel-icon.orange {
+    background: #f2e3d0;
+    color: #c47f3d;
+  }
+
+
+  .learning-panel-head small {
+    color: #948a9f;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.09em;
+  }
+
+
+  .learning-panel-head h3 {
+    margin:
+      3px 0 2px;
+
+    font-size: 18px;
+  }
+
+
+  .learning-panel-head p {
+    margin: 0;
+
+    font-size: 8px;
+  }
+
+
+  /* STATS */
+
+  .learning-stats {
+    display: grid;
+
+    grid-template-columns:
+      repeat(4, 1fr);
+
+    gap: 8px;
+  }
+
+
+  .learning-stats > div {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 12px;
+
+    border:
+      1px solid #cbc3d5;
+
+    border-radius: 11px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.36
+      );
+  }
+
+
+  .stat-icon {
+    display: grid;
+
+    width: 33px;
+    height: 33px;
+
+    place-items: center;
+
+    border-radius: 9px;
+
+    font-size: 9px;
+
+    font-weight: 850;
+  }
+
+
+  .stat-icon.purple {
+    background: #e3dcff;
+    color: #6952ee;
+  }
+
+
+  .stat-icon.blue {
+    background: #dce6f7;
+    color: #557fdc;
+  }
+
+
+  .stat-icon.orange {
+    background: #f2e3d0;
+    color: #c47f3d;
+  }
+
+
+  .stat-icon.green {
+    background: #dcece4;
+    color: #3b9b72;
+  }
+
+
+  .learning-stats small {
+    display: block;
+
+    color: #978da1;
+
+    font-size: 5px;
+  }
+
+
+  .learning-stats strong {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 16px;
+  }
+
+
+  .learning-stats p {
+    margin: 1px 0 0;
+
+    font-size: 6px;
+  }
+
+
+  /* RECENT VOCAB */
+
+  .recent-vocabulary {
+    display: grid;
+
+    gap: 6px;
+
+    margin-top: 10px;
+  }
+
+
+  .recent-vocabulary > div {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr 1fr;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-height: 52px;
+
+    padding:
+      0 11px;
+
+    border:
+      1px solid #cbc3d5;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.35
+      );
+  }
+
+
+  .word-level {
+    display: grid;
+
+    width: 29px;
+    height: 29px;
+
+    place-items: center;
+
+    border-radius: 8px;
+
+    background: #e4ddfb;
+
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+  }
+
+
+  .recent-vocabulary strong {
+    display: block;
+
+    font-size: 10px;
+  }
+
+
+  .recent-vocabulary small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #8f8599;
+
+    font-size: 6px;
+  }
+
+
+  .recent-vocabulary p {
+    margin: 0;
+
+    text-align: right;
+
+    font-size: 7px;
+  }
+
+
+  /* VOCABULARY */
+
+  .vocabulary-card-demo {
+    display: grid;
+
+    grid-template-columns:
+      0.7fr 1fr 1.3fr;
+
+    overflow: hidden;
+
+    border:
+      1px solid #c9c0d4;
+
+    border-radius: 12px;
+  }
+
+
+  .vocabulary-card-demo
+  > div {
+    min-height: 105px;
+
+    display: flex;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    padding: 14px;
+
+    border-right:
+      1px solid #cfc6d9;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.36
+      );
+  }
+
+
+  .vocabulary-card-demo
+  > div:last-child {
+    border-right: 0;
+  }
+
+
+  .vocabulary-card-demo small {
+    color: #958b9f;
+
+    font-size: 5px;
+  }
+
+
+  .vocabulary-word strong {
+    margin-top: 5px;
+
+    font-size: 24px;
+  }
+
+
+  .vocabulary-word > span {
+    margin-top: 2px;
+
+    color: #7e7489;
+
+    font-size: 7px;
+  }
+
+
+  .vocabulary-definition strong,
+  .vocabulary-example strong {
+    margin-top: 6px;
+
+    font-size: 10px;
+  }
+
+
+  .vocabulary-example > span {
+    margin-top: 3px;
+
+    color: #756c80;
+
+    font-size: 7px;
+  }
+
+
+  /* GRAMMAR */
+
+  .grammar-demo {
+    display: grid;
+
+    grid-template-columns:
+      auto 0.8fr 1fr 1.35fr;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 15px;
+
+    border:
+      1px solid #c9c0d4;
+
+    border-radius: 12px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.35
+      );
+  }
+
+
+  .grammar-level {
+    display: grid;
+
+    width: 38px;
+    height: 38px;
+
+    place-items: center;
+
+    border-radius: 10px;
+
+    background: #dce6f7;
+
+    color: #557fdc;
+
+    font-size: 7px;
+
+    font-weight: 850;
+  }
+
+
+  .grammar-demo small {
+    display: block;
+
+    color: #978da1;
+
+    font-size: 5px;
+  }
+
+
+  .grammar-demo strong {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 8px;
+  }
+
+
+  .grammar-demo
+  > div:last-child span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #7a7185;
+
+    font-size: 6px;
+  }
+
+
+  /* REVIEW */
+
+  .review-card-demo {
+    max-width: 600px;
+
+    margin:
+      0 auto;
+
+    overflow: hidden;
+
+    border:
+      1px solid #c8bfd3;
+
+    border-radius: 14px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.4
+      );
+
+    box-shadow:
+      0 12px 30px
+      rgba(
+        47,
+        34,
+        66,
+        0.07
+      );
+  }
+
+
+  .review-top {
+    display: flex;
+
+    min-height: 42px;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding:
+      0 15px;
+
+    border-bottom:
+      1px solid #cec5d8;
+  }
+
+
+  .review-top span {
+    color: #958b9f;
+
+    font-size: 6px;
+
+    font-weight: 850;
+  }
+
+
+  .review-top strong {
+    font-size: 7px;
+  }
+
+
+  .review-word {
+    padding:
+      30px 20px 18px;
+
+    text-align: center;
+  }
+
+
+  .review-word small {
+    color: #978da1;
+
+    font-size: 5px;
+  }
+
+
+  .review-word strong {
+    display: block;
+
+    margin-top: 7px;
+
+    font-size: 38px;
+  }
+
+
+  .review-word > span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #7b7286;
+
+    font-size: 8px;
+  }
+
+
+  .review-answer {
+    margin:
+      0 17px;
+
+    padding: 13px;
+
+    border-radius: 10px;
+
+    background: #e5dff0;
+
+    text-align: center;
+  }
+
+
+  .review-answer small {
+    color: #92889c;
+
+    font-size: 5px;
+  }
+
+
+  .review-answer strong {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 10px;
+  }
+
+
+  .review-answer p {
+    margin:
+      5px 0 0;
+
+    font-size: 8px;
+  }
+
+
+  .review-actions {
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+
+    gap: 6px;
+
+    padding: 15px 17px;
+  }
+
+
+  .review-actions button {
+    min-height: 45px;
+
+    border:
+      1px solid #cac1d4;
+
+    border-radius: 9px;
+
+    background: #eee9f4;
+
+    color: #4d4656;
+
+    cursor: pointer;
+  }
+
+
+  .review-actions button.good {
+    border-color:
+      rgba(
+        59,
+        155,
+        114,
+        0.3
+      );
+
+    background: #deece5;
+
+    color: #358c67;
+  }
+
+
+  .review-actions span {
+    display: block;
+
+    font-size: 8px;
+
+    font-weight: 750;
+  }
+
+
+  .review-actions small {
+    display: block;
+
+    margin-top: 2px;
+
+    opacity: 0.6;
+
+    font-size: 5px;
+  }
+
+
+  .review-feedback {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    min-height: 38px;
+
+    padding:
+      0 15px;
+
+    border-top:
+      1px solid #cec5d8;
+
+    background:
+      #e5dff0;
+  }
+
+
+  .review-feedback > span {
+    display: grid;
+
+    width: 19px;
+    height: 19px;
+
+    place-items: center;
+
+    border-radius: 6px;
+
+    background: #6952ee;
+
+    color: white;
+
+    font-size: 6px;
+  }
+
+
+  .review-feedback p {
+    margin: 0;
+
+    font-size: 6px;
+  }
+
+
+  .review-meaning-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+
+    gap: 7px;
+
+    margin-top: 13px;
+  }
+
+
+  .review-meaning-grid > div {
+    padding: 12px;
+
+    border:
+      1px solid #cbc2d5;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.35
+      );
+  }
+
+
+  .rating-dot {
+    display: block;
+
+    width: 7px;
+    height: 7px;
+
+    margin-bottom: 7px;
+
+    border-radius: 50%;
+  }
+
+
+  .rating-dot.again {
+    background: #c86b70;
+  }
+
+
+  .rating-dot.hard {
+    background: #c99549;
+  }
+
+
+  .rating-dot.good {
+    background: #3b9b72;
+  }
+
+
+  .review-meaning-grid strong {
+    font-size: 8px;
+  }
+
+
+  .review-meaning-grid p {
+    margin:
+      3px 0 0;
+
+    font-size: 7px;
+  }
+
+
+  /* FLOW */
+
+  .learning-flow {
+    display: grid;
+
+    grid-template-columns:
+      1fr auto 1fr auto 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 18px;
+  }
+
+
+  .learning-flow > div {
+    min-height: 85px;
+
+    display: flex;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    padding: 12px;
+
+    border:
+      1px solid #cbc2d5;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.36
+      );
+  }
+
+
+  .learning-flow
+  > div > span {
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+  }
+
+
+  .learning-flow small {
+    margin-top: 4px;
+
+    color: #958b9f;
+
+    font-size: 5px;
+  }
+
+
+  .learning-flow strong {
+    margin-top: 3px;
+
+    font-size: 8px;
+  }
+
+
+  .learning-flow > i {
+    color: #6952ee;
+
+    font-style: normal;
+  }
+
+
+  @media (max-width: 760px) {
+
+    .learning-tabs {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+
+    .learning-stats {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+
+    .vocabulary-card-demo {
+      grid-template-columns: 1fr;
+    }
+
+
+    .vocabulary-card-demo
+    > div {
+      min-height: auto;
+
+      border-right: 0;
+
+      border-bottom:
+        1px solid #cfc6d9;
+    }
+
+
+    .vocabulary-card-demo
+    > div:last-child {
+      border-bottom: 0;
+    }
+
+
+    .grammar-demo {
+      grid-template-columns: 1fr;
+    }
+
+
+    .learning-flow {
+      grid-template-columns: 1fr;
+    }
+
+
+    .learning-flow > i {
+      transform:
+        rotate(90deg);
+
+      justify-self: center;
+    }
+
+  }
+
+
+  @media (max-width: 500px) {
+
+    .learning-stats,
+    .review-meaning-grid {
+      grid-template-columns: 1fr;
+    }
+
+
+    .recent-vocabulary > div {
+      grid-template-columns:
+        auto 1fr;
+    }
+
+
+    .recent-vocabulary p {
+      grid-column:
+        1 / -1;
+
+      text-align: left;
+
+      padding-bottom: 8px;
+    }
+
+  }
+
+</style>

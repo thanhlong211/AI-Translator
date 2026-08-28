@@ -1,0 +1,615 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import FaqExplorer from "../components/FaqExplorer.astro";
+import FaqPremiumMotion from "../components/FaqPremiumMotion.astro";
+import "../styles/faq-safe-theme.css";
+---
+
+<BaseLayout
+  title="FAQ — AitraNova"
+  description="Câu hỏi thường gặp về AitraNova, Quick Translate, OCR, Manga, Documents, Translation Profiles và Learning."
+>
+
+  <main class="faq-page">
+
+    <section class="faq-hero">
+
+      <div class="faq-glow glow-a"></div>
+      <div class="faq-glow glow-b"></div>
+
+      <div class="container faq-hero-inner">
+
+        <span class="faq-kicker">
+          AITRANOVA FAQ
+        </span>
+
+
+        <h1>
+          <span
+            data-i18n
+            data-vi="Có câu hỏi?"
+            data-en="Have a question?"
+          >
+            Có câu hỏi?
+          </span>
+
+          <br />
+
+          <em
+            data-i18n
+            data-vi="Tìm câu trả lời."
+            data-en="Find the answer."
+          >
+            Tìm câu trả lời.
+          </em>
+        </h1>
+
+
+        <p
+          data-i18n
+          data-vi="Tìm nhanh câu trả lời về Quick Translate, OCR, Manga, Documents, Translation Profiles và Learning."
+          data-en="Quickly find answers about Quick Translate, OCR, Manga, Documents, Translation Profiles and Learning."
+        >
+          Tìm nhanh câu trả lời về các workflow
+          chính của AitraNova.
+        </p>
+
+
+        <div class="faq-hero-links">
+
+          <a href="/guide">
+            <span
+              data-i18n
+              data-vi="Hướng dẫn chi tiết"
+              data-en="Detailed Guide"
+            >
+              Hướng dẫn chi tiết
+            </span>
+
+            →
+          </a>
+
+
+          <a href="/guide/troubleshooting">
+            <span
+              data-i18n
+              data-vi="Khắc phục sự cố"
+              data-en="Troubleshooting"
+            >
+              Khắc phục sự cố
+            </span>
+
+            →
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <section class="faq-content">
+
+      <div class="container">
+
+        <header class="faq-content-head">
+
+          <div>
+            <span>QUESTIONS & ANSWERS</span>
+
+            <h2
+              data-i18n
+              data-vi="Tìm theo vấn đề bạn đang quan tâm."
+              data-en="Find answers by what you're working on."
+            >
+              Tìm theo vấn đề bạn đang quan tâm.
+            </h2>
+          </div>
+
+
+          <p
+            data-i18n
+            data-vi="FAQ trả lời nhanh. Nếu bạn cần workflow từng bước, hãy sử dụng Guide."
+            data-en="FAQ provides quick answers. For step-by-step workflows, use the Guide."
+          >
+            FAQ trả lời nhanh.
+            Guide dành cho hướng dẫn từng bước.
+          </p>
+
+        </header>
+
+
+        <FaqExplorer />
+
+      </div>
+
+    </section>
+
+
+    <section class="faq-support">
+
+      <div class="container faq-support-layout">
+
+        <div>
+
+          <span>STILL STUCK?</span>
+
+          <h2
+            data-i18n
+            data-vi="Không tìm thấy câu trả lời?"
+            data-en="Didn't find the answer?"
+          >
+            Không tìm thấy câu trả lời?
+          </h2>
+
+          <p
+            data-i18n
+            data-vi="Troubleshooting Center tập trung vào những lỗi cụ thể như OCR sai, PDF scan, Manga context hoặc Profile không hoạt động như mong muốn."
+            data-en="Troubleshooting Center focuses on specific issues such as incorrect OCR, scanned PDFs, Manga context or Profiles not behaving as expected."
+          >
+            Troubleshooting Center tập trung
+            vào các lỗi cụ thể.
+          </p>
+
+        </div>
+
+
+        <div class="faq-support-actions">
+
+          <a
+            href="/guide/troubleshooting"
+            class="primary"
+          >
+            <span
+              data-i18n
+              data-vi="Mở Troubleshooting"
+              data-en="Open Troubleshooting"
+            >
+              Mở Troubleshooting
+            </span>
+
+            →
+          </a>
+
+
+          <a href="/guide">
+            <span
+              data-i18n
+              data-vi="Xem tất cả Guide"
+              data-en="View all Guides"
+            >
+              Xem tất cả Guide
+            </span>
+
+            →
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <FaqPremiumMotion />
+
+</BaseLayout>
+
+
+<style>
+
+  .faq-page {
+    overflow: hidden;
+
+    background:
+      linear-gradient(
+        180deg,
+        #dfdae9,
+        #d7d1e1
+      );
+  }
+
+
+  .faq-hero {
+    position: relative;
+
+    overflow: hidden;
+
+    padding:
+      83px 0 66px;
+
+    border-bottom:
+      1px solid #c5bccf;
+  }
+
+
+  .faq-glow {
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+  }
+
+
+  .faq-glow.glow-a {
+    top: -430px;
+    right: -190px;
+
+    width: 800px;
+    height: 800px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          105,
+          82,
+          238,
+          0.2
+        ),
+        transparent 68%
+      );
+  }
+
+
+  .faq-glow.glow-b {
+    bottom: -450px;
+    left: -270px;
+
+    width: 800px;
+    height: 800px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          85,
+          127,
+          220,
+          0.12
+        ),
+        transparent 69%
+      );
+  }
+
+
+  .faq-hero-inner {
+    position: relative;
+
+    z-index: 2;
+
+    max-width: 900px;
+  }
+
+
+  .faq-kicker {
+    color: #6952ee;
+
+    font-size: 7px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.13em;
+  }
+
+
+  .faq-hero h1 {
+    margin:
+      15px 0 18px;
+
+    color: #1d1827;
+
+    font-size:
+      clamp(
+        56px,
+        8vw,
+        92px
+      );
+
+    line-height: 0.87;
+
+    letter-spacing:
+      -0.07em;
+  }
+
+
+  .faq-hero h1 em {
+    color: #6952ee;
+
+    font-style: normal;
+  }
+
+
+  .faq-hero p {
+    max-width: 680px;
+
+    margin: 0;
+
+    color: #706779;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+  }
+
+
+  .faq-hero-links {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-top: 23px;
+  }
+
+
+  .faq-hero-links a {
+    display: inline-flex;
+
+    min-height: 38px;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding:
+      0 12px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 9px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.29
+      );
+
+    color: #443b4c;
+
+    font-size: 7px;
+
+    font-weight: 800;
+  }
+
+
+  .faq-hero-links a:first-child {
+    border-color: #6952ee;
+
+    background: #6952ee;
+
+    color: white;
+  }
+
+
+  .faq-content {
+    padding:
+      69px 0 78px;
+  }
+
+
+  .faq-content-head {
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(280px, 0.55fr);
+
+    align-items: end;
+
+    gap: 45px;
+  }
+
+
+  .faq-content-head span {
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .faq-content-head h2 {
+    max-width: 720px;
+
+    margin:
+      9px 0 0;
+
+    color: #211b2a;
+
+    font-size:
+      clamp(
+        34px,
+        4.5vw,
+        52px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.055em;
+  }
+
+
+  .faq-content-head > p {
+    margin: 0;
+
+    color: #766d80;
+
+    font-size: 8px;
+
+    line-height: 1.65;
+  }
+
+
+  .faq-support {
+    padding:
+      69px 0;
+
+    background: #17131f;
+
+    color: white;
+  }
+
+
+  .faq-support-layout {
+    display: grid;
+
+    grid-template-columns:
+      1fr auto;
+
+    align-items: center;
+
+    gap: 55px;
+  }
+
+
+  .faq-support
+  > .container
+  > div:first-child
+  > span {
+    color: #a294ff;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .faq-support h2 {
+    margin:
+      9px 0 7px;
+
+    color: #f2eef5;
+
+    font-size:
+      clamp(
+        33px,
+        4vw,
+        48px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.05em;
+  }
+
+
+  .faq-support p {
+    max-width: 620px;
+
+    margin: 0;
+
+    color: #8e8797;
+
+    font-size: 8px;
+
+    line-height: 1.65;
+  }
+
+
+  .faq-support-actions {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+  }
+
+
+  .faq-support-actions a {
+    display: flex;
+
+    min-width: 190px;
+    min-height: 39px;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 15px;
+
+    padding:
+      0 12px;
+
+    border:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.1
+      );
+
+    border-radius: 9px;
+
+    color: #d9d3df;
+
+    font-size: 7px;
+
+    font-weight: 800;
+  }
+
+
+  .faq-support-actions a.primary {
+    border-color: #6952ee;
+
+    background: #6952ee;
+
+    color: white;
+  }
+
+
+  @media (max-width: 820px) {
+
+    .faq-content-head,
+    .faq-support-layout {
+      grid-template-columns: 1fr;
+    }
+
+  }
+
+
+  @media (max-width: 560px) {
+
+    .faq-hero {
+      padding-top: 62px;
+    }
+
+
+    .faq-hero h1 {
+      font-size:
+        clamp(
+          48px,
+          15vw,
+          68px
+        );
+    }
+
+
+    .faq-support-actions,
+    .faq-support-actions a {
+      width: 100%;
+    }
+
+  }
+
+</style>

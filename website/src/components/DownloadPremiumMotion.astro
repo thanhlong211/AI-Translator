@@ -1,0 +1,381 @@
+<script>
+  function initDownloadPremium() {
+    const page =
+      document.querySelector(
+        ".download-v8"
+      )
+      || document.querySelector(
+        "main"
+      );
+
+    if (
+      !(page instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    if (
+      page.dataset.downloadPremiumReady
+      === "true"
+    ) {
+      return;
+    }
+
+    page.dataset.downloadPremiumReady =
+      "true";
+
+    page.classList.add(
+      "download-premium"
+    );
+
+
+    /* =====================================================
+       SECTIONS
+       ===================================================== */
+
+    const sections =
+      Array.from(
+        page.children
+      ).filter(
+        element =>
+          element instanceof HTMLElement
+          && element.tagName === "SECTION"
+      );
+
+
+    const hero =
+      sections[0];
+
+
+    if (
+      hero instanceof HTMLElement
+    ) {
+      hero.classList.add(
+        "download-premium-hero"
+      );
+
+
+      const effects =
+        document.createElement(
+          "div"
+        );
+
+      effects.className =
+        "download-premium-effects";
+
+      effects.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      effects.innerHTML = `
+        <div class="download-orb download-orb-a"></div>
+        <div class="download-orb download-orb-b"></div>
+        <div class="download-grid"></div>
+        <div class="download-pointer-light"></div>
+      `;
+
+
+      hero.insertBefore(
+        effects,
+        hero.firstChild
+      );
+
+    }
+
+
+    sections
+      .slice(1)
+      .forEach(
+        section => {
+
+          section.classList.add(
+            "download-premium-section"
+          );
+
+        }
+      );
+
+
+    /* =====================================================
+       RELEASE CARD
+       ===================================================== */
+
+    const releaseCard =
+      page.querySelector(
+        [
+          ".release-card",
+          ".download-release-card",
+          "[class*='release-card']",
+        ].join(",")
+      );
+
+
+    if (
+      releaseCard instanceof HTMLElement
+    ) {
+
+      releaseCard.classList.add(
+        "download-premium-release"
+      );
+
+    }
+
+
+    /* =====================================================
+       REQUIREMENT CARDS
+       ===================================================== */
+
+    page.querySelectorAll(
+      [
+        ".requirements-grid > *",
+        "[class*='requirement-card']",
+      ].join(",")
+    )
+    .forEach(
+      card => {
+
+        card.classList.add(
+          "download-premium-requirement"
+        );
+
+      }
+    );
+
+
+    /* =====================================================
+       PRIMARY DOWNLOAD LINKS
+       ===================================================== */
+
+    const downloadLinks =
+      Array.from(
+        page.querySelectorAll(
+          'a[href="/download"], a[class*="download"]'
+        )
+      );
+
+
+    downloadLinks.forEach(
+      link => {
+
+        if (
+          link.closest(
+            ".site-navbar"
+          )
+          || link.closest(
+            ".site-footer"
+          )
+        ) {
+          return;
+        }
+
+
+        link.classList.add(
+          "download-premium-cta"
+        );
+
+      }
+    );
+
+
+    /* =====================================================
+       REVEAL
+       ===================================================== */
+
+    const revealElements =
+      Array.from(
+        page.querySelectorAll(
+          [
+            ".download-premium-section",
+            ".download-premium-release",
+            ".download-premium-requirement",
+            "[class*='install-step']",
+            "[class*='download-step']",
+          ].join(",")
+        )
+      );
+
+
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
+
+
+    if (
+      reducedMotion.matches
+      || !(
+        "IntersectionObserver"
+        in window
+      )
+    ) {
+
+      revealElements.forEach(
+        element => {
+
+          element.classList.add(
+            "download-premium-visible"
+          );
+
+        }
+      );
+
+    } else {
+
+      const observer =
+        new IntersectionObserver(
+          entries => {
+
+            entries.forEach(
+              entry => {
+
+                if (
+                  !entry.isIntersecting
+                ) {
+                  return;
+                }
+
+
+                entry.target
+                  .classList.add(
+                    "download-premium-visible"
+                  );
+
+
+                observer.unobserve(
+                  entry.target
+                );
+
+              }
+            );
+
+          },
+          {
+            threshold:
+              0.1,
+
+            rootMargin:
+              "0px 0px -6% 0px",
+          }
+        );
+
+
+      revealElements.forEach(
+        element => {
+
+          element.classList.add(
+            "download-premium-reveal"
+          );
+
+          observer.observe(
+            element
+          );
+
+        }
+      );
+
+    }
+
+
+    /* =====================================================
+       POINTER GLOW
+       ===================================================== */
+
+    if (
+      hero instanceof HTMLElement
+      && !reducedMotion.matches
+      && window.matchMedia(
+        "(pointer: fine)"
+      ).matches
+    ) {
+
+      let frame =
+        null;
+
+
+      hero.addEventListener(
+        "pointermove",
+        event => {
+
+          if (frame) {
+            cancelAnimationFrame(
+              frame
+            );
+          }
+
+
+          frame =
+            requestAnimationFrame(
+              () => {
+
+                const rect =
+                  hero.getBoundingClientRect();
+
+
+                const x =
+                  (
+                    (
+                      event.clientX
+                      - rect.left
+                    )
+                    / rect.width
+                  )
+                  * 100;
+
+
+                const y =
+                  (
+                    (
+                      event.clientY
+                      - rect.top
+                    )
+                    / rect.height
+                  )
+                  * 100;
+
+
+                hero.style.setProperty(
+                  "--download-pointer-x",
+                  `${x}%`
+                );
+
+
+                hero.style.setProperty(
+                  "--download-pointer-y",
+                  `${y}%`
+                );
+
+              }
+            );
+
+        },
+        {
+          passive:
+            true,
+        }
+      );
+
+    }
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initDownloadPremium,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initDownloadPremium();
+
+  }
+</script>

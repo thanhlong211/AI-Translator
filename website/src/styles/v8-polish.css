@@ -1,0 +1,191 @@
+/* =========================================================
+   AITRANOVA WEBSITE V8
+   GLOBAL POLISH / RESPONSIVE SAFETY
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   DOCUMENT
+   --------------------------------------------------------- */
+
+html {
+  max-width: 100%;
+
+  overflow-x: clip;
+
+  -webkit-text-size-adjust: 100%;
+
+  text-size-adjust: 100%;
+}
+
+
+body {
+  min-width: 320px;
+
+  max-width: 100%;
+
+  overflow-x: clip;
+}
+
+
+/* ---------------------------------------------------------
+   MEDIA
+   --------------------------------------------------------- */
+
+img,
+video,
+canvas {
+  max-width: 100%;
+}
+
+
+img {
+  height: auto;
+}
+
+
+/* ---------------------------------------------------------
+   FLEX / GRID OVERFLOW SAFETY
+   --------------------------------------------------------- */
+
+main,
+section,
+article,
+header,
+footer,
+nav {
+  min-width: 0;
+}
+
+
+:is(
+  .navbar-inner,
+  .footer-main,
+  .features-v8,
+  .download-v8,
+  .roadmap-v8,
+  .changelog-v8,
+  .guide-page,
+  .article-page
+) * {
+  min-width: 0;
+}
+
+
+/* ---------------------------------------------------------
+   LONG CONTENT
+   --------------------------------------------------------- */
+
+code,
+pre {
+  max-width: 100%;
+}
+
+
+pre {
+  overflow-x: auto;
+}
+
+
+code {
+  overflow-wrap: anywhere;
+}
+
+
+/* ---------------------------------------------------------
+   INTERACTIVE ELEMENTS
+   --------------------------------------------------------- */
+
+button,
+a,
+summary {
+  touch-action: manipulation;
+}
+
+
+button:not(:disabled),
+summary {
+  cursor: pointer;
+}
+
+
+/* ---------------------------------------------------------
+   ACCESSIBILITY
+   --------------------------------------------------------- */
+
+:focus-visible {
+  outline:
+    3px solid
+    rgba(
+      105,
+      82,
+      238,
+      0.36
+    );
+
+  outline-offset: 3px;
+}
+
+
+/* ---------------------------------------------------------
+   TEXT SELECTION
+   --------------------------------------------------------- */
+
+::selection {
+  background:
+    rgba(
+      105,
+      82,
+      238,
+      0.2
+    );
+}
+
+
+/* ---------------------------------------------------------
+   MOBILE
+   --------------------------------------------------------- */
+
+@media (max-width: 640px) {
+
+  body {
+    min-width: 0;
+  }
+
+
+  pre {
+    font-size: 0.9em;
+  }
+
+}
+
+
+/* ---------------------------------------------------------
+   REDUCED MOTION
+   --------------------------------------------------------- */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior:
+      auto !important;
+
+    animation-duration:
+      0.01ms !important;
+
+    animation-delay:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
+  }
+
+}

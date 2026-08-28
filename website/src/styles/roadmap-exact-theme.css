@@ -1,0 +1,1108 @@
+/* =========================================================
+   AITRANOVA V10.6B
+   ROADMAP EXACT PREMIUM THEME
+
+   Visual only.
+   No layout restructuring.
+   No JS/filter/query changes.
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.roadmap-v8 {
+  background:
+    linear-gradient(
+      135deg,
+      #c9c2d5 0%,
+      #d5cedf 50%,
+      #c8c0d4 100%
+    ) !important;
+
+  color:
+    #261e2e;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-hero {
+  border-bottom:
+    1px solid
+    rgba(157,132,255,0.16) !important;
+
+  background:
+    radial-gradient(
+      circle at 82% 18%,
+      rgba(117,79,247,0.28),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 18% 78%,
+      rgba(75,111,214,0.10),
+      transparent 27%
+    ),
+    linear-gradient(
+      132deg,
+      #090610 0%,
+      #0f0919 24%,
+      #171020 54%,
+      #24143d 80%,
+      #100d1b 100%
+    ) !important;
+}
+
+
+.roadmap-v8
+.roadmap-hero-inner,
+
+.roadmap-v8
+.roadmap-hero-copy {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   HERO TYPOGRAPHY
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-kicker {
+  color:
+    #b29eff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.roadmap-v8
+.roadmap-hero-copy h1 {
+  color:
+    #ffffff !important;
+
+  text-shadow:
+    0 10px 34px
+    rgba(0,0,0,0.20);
+}
+
+
+.roadmap-v8
+.roadmap-hero-copy h1 em {
+  background:
+    linear-gradient(
+      110deg,
+      #a187ff 0%,
+      #795cff 34%,
+      #bd72ee 66%,
+      #78a7ff 100%
+    );
+
+  background-clip:
+    text;
+
+  -webkit-background-clip:
+    text;
+
+  color:
+    transparent !important;
+
+  -webkit-text-fill-color:
+    transparent !important;
+
+  font-style:
+    normal;
+}
+
+
+.roadmap-v8
+.roadmap-hero-copy > p {
+  color:
+    rgba(242,236,249,0.86) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   HERO STATUS SUMMARY
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-hero-status {
+  border:
+    1px solid
+    rgba(177,151,255,0.20) !important;
+
+  border-radius:
+    17px !important;
+
+  background:
+    rgba(16,10,26,0.56) !important;
+
+  box-shadow:
+    0 20px 44px
+    rgba(0,0,0,0.18) !important;
+
+  backdrop-filter:
+    blur(13px);
+}
+
+
+.roadmap-v8
+.roadmap-hero-status > div {
+  border-color:
+    rgba(255,255,255,0.07) !important;
+
+  background:
+    rgba(255,255,255,0.035) !important;
+}
+
+
+.roadmap-v8
+.roadmap-hero-status small {
+  color:
+    #9f94aa !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.roadmap-v8
+.roadmap-hero-status strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   STATUS DOTS
+   ========================================================= */
+
+.roadmap-v8
+.status-dot.available {
+  background:
+    #45d39d !important;
+
+  box-shadow:
+    0 0 12px
+    rgba(69,211,157,0.45) !important;
+}
+
+
+.roadmap-v8
+.status-dot.development {
+  background:
+    #b665f3 !important;
+
+  box-shadow:
+    0 0 12px
+    rgba(182,101,243,0.44) !important;
+}
+
+
+.roadmap-v8
+.status-dot.planned {
+  background:
+    #789dff !important;
+
+  box-shadow:
+    0 0 12px
+    rgba(120,157,255,0.42) !important;
+}
+
+
+/* =========================================================
+   ROADMAP CONTENT
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-content {
+  background:
+    radial-gradient(
+      circle at 84% 12%,
+      rgba(109,81,222,0.065),
+      transparent 26%
+    ),
+    linear-gradient(
+      135deg,
+      #cbc4d7,
+      #d7d0e1
+    ) !important;
+}
+
+
+.roadmap-v8
+.roadmap-section-head > div > span {
+  color:
+    #6b4fe0 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.roadmap-v8
+.roadmap-section-head h2 {
+  color:
+    #251d2d !important;
+}
+
+
+.roadmap-v8
+.roadmap-section-head > p {
+  color:
+    #62576c !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   EXPLORER
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-explorer {
+  border-color:
+    rgba(104,84,128,0.16) !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   FILTER
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-filter {
+  border:
+    1px solid
+    rgba(106,87,130,0.18) !important;
+
+  border-radius:
+    15px !important;
+
+  background:
+    rgba(248,245,250,0.74) !important;
+
+  box-shadow:
+    0 11px 26px
+    rgba(44,31,60,0.055) !important;
+}
+
+
+.roadmap-v8
+.roadmap-filter button {
+  border:
+    1px solid
+    transparent !important;
+
+  border-radius:
+    999px !important;
+
+  background:
+    transparent !important;
+
+  color:
+    #685d72 !important;
+
+  opacity:
+    1 !important;
+
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease !important;
+}
+
+
+.roadmap-v8
+.roadmap-filter button:hover {
+  transform:
+    translateY(-1px);
+
+  background:
+    rgba(118,88,255,0.08) !important;
+
+  color:
+    #4d3b65 !important;
+}
+
+
+/* Selected generic */
+
+.roadmap-v8
+.roadmap-filter button.active,
+
+.roadmap-v8
+.roadmap-filter button[aria-pressed="true"] {
+  border-color:
+    rgba(151,126,255,0.26) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #694def,
+      #8163ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 8px 18px
+    rgba(88,58,218,0.26) !important;
+}
+
+
+/* =========================================================
+   RESULT META
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-result-meta {
+  color:
+    #74697e !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.roadmap-v8
+.roadmap-result-meta strong {
+  color:
+    #2b2233 !important;
+}
+
+
+/* =========================================================
+   ROADMAP ITEM
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-item {
+  border:
+    1px solid
+    rgba(105,86,129,0.18) !important;
+
+  border-radius:
+    16px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #faf7fb,
+      #efebf4
+    ) !important;
+
+  box-shadow:
+    0 12px 28px
+    rgba(44,31,60,0.055) !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.roadmap-v8
+.roadmap-item:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(109,82,230,0.30) !important;
+
+  box-shadow:
+    0 18px 38px
+    rgba(44,31,60,0.10) !important;
+}
+
+
+/* =========================================================
+   ITEM COPY
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-item-copy > small {
+  color:
+    #78668c !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.roadmap-v8
+.roadmap-item-copy h3 {
+  color:
+    #292031 !important;
+}
+
+
+.roadmap-v8
+.roadmap-item-copy p {
+  color:
+    #61566b !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   ITEM STATUS
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-item-status {
+  border-radius:
+    999px !important;
+
+  font-weight:
+    850 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* Available */
+
+.roadmap-v8
+.roadmap-item[data-status="available"]
+.roadmap-item-status,
+
+.roadmap-v8
+.roadmap-item-status.available {
+  border-color:
+    rgba(52,170,118,0.24) !important;
+
+  background:
+    #dff4ea !important;
+
+  color:
+    #25875d !important;
+}
+
+
+/* In development */
+
+.roadmap-v8
+.roadmap-item[data-status="development"]
+.roadmap-item-status,
+
+.roadmap-v8
+.roadmap-item-status.development {
+  border-color:
+    rgba(155,78,215,0.24) !important;
+
+  background:
+    #eee2fb !important;
+
+  color:
+    #8b38c1 !important;
+}
+
+
+/* Planned */
+
+.roadmap-v8
+.roadmap-item[data-status="planned"]
+.roadmap-item-status,
+
+.roadmap-v8
+.roadmap-item-status.planned {
+  border-color:
+    rgba(89,126,223,0.22) !important;
+
+  background:
+    #e5ecfb !important;
+
+  color:
+    #4f74d2 !important;
+}
+
+
+/* =========================================================
+   TAGS
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-tags span {
+  border-color:
+    #c8bdd2 !important;
+
+  background:
+    rgba(255,255,255,0.60) !important;
+
+  color:
+    #685c72 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   ITEM FOOTER
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-item-footer a {
+  color:
+    #6247df !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+.roadmap-v8
+.roadmap-item-footer a:hover {
+  color:
+    #4e32c7 !important;
+}
+
+
+.roadmap-v8
+.roadmap-no-date {
+  color:
+    #887d91 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   STATUS MEANING
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-meaning {
+  background:
+    linear-gradient(
+      135deg,
+      #d5cedf,
+      #c8c0d4
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(82,66,102,0.08) !important;
+}
+
+
+.roadmap-v8
+.meaning-head > span {
+  color:
+    #6c50df !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.roadmap-v8
+.meaning-head h2 {
+  color:
+    #251d2d !important;
+}
+
+
+/* =========================================================
+   MEANING CARDS
+   ========================================================= */
+
+.roadmap-v8
+.meaning-card {
+  border-radius:
+    16px !important;
+
+  box-shadow:
+    0 12px 28px
+    rgba(44,31,60,0.055) !important;
+}
+
+
+.roadmap-v8
+.meaning-card strong {
+  color:
+    #292031 !important;
+}
+
+
+.roadmap-v8
+.meaning-card p {
+  color:
+    #62576c !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* AVAILABLE */
+
+.roadmap-v8
+.meaning-card.available {
+  border:
+    1px solid
+    rgba(50,160,111,0.22) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f3faf7,
+      #e5f4ec
+    ) !important;
+}
+
+
+.roadmap-v8
+.meaning-card.available > span {
+  background:
+    #d8efe4 !important;
+
+  color:
+    #279365 !important;
+}
+
+
+.roadmap-v8
+.meaning-card.available > small {
+  color:
+    #27845d !important;
+}
+
+
+/* DEVELOPMENT */
+
+.roadmap-v8
+.meaning-card.development {
+  border:
+    1px solid
+    rgba(153,78,212,0.22) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #faf5fd,
+      #efe4f9
+    ) !important;
+}
+
+
+.roadmap-v8
+.meaning-card.development > span {
+  background:
+    #eadbf7 !important;
+
+  color:
+    #9a43ce !important;
+}
+
+
+.roadmap-v8
+.meaning-card.development > small {
+  color:
+    #903ec0 !important;
+}
+
+
+/* PLANNED */
+
+.roadmap-v8
+.meaning-card.planned {
+  border:
+    1px solid
+    rgba(80,117,212,0.20) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f5f7fc,
+      #e7ecf8
+    ) !important;
+}
+
+
+.roadmap-v8
+.meaning-card.planned > span {
+  background:
+    #dce5f7 !important;
+
+  color:
+    #5378d5 !important;
+}
+
+
+.roadmap-v8
+.meaning-card.planned > small {
+  color:
+    #5474c8 !important;
+}
+
+
+/* =========================================================
+   PRINCIPLES
+   Dark section
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-principles {
+  border-top:
+    1px solid
+    rgba(164,139,255,0.14) !important;
+
+  border-bottom:
+    1px solid
+    rgba(164,139,255,0.14) !important;
+
+  background:
+    radial-gradient(
+      circle at 80% 15%,
+      rgba(118,82,255,0.20),
+      transparent 29%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0713,
+      #151020 54%,
+      #25143b
+    ) !important;
+
+  color:
+    #ffffff;
+}
+
+
+.roadmap-v8
+.roadmap-principles
+.principles-layout > div:first-child > span {
+  color:
+    #ae99ff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.roadmap-v8
+.roadmap-principles h2 {
+  color:
+    #ffffff !important;
+}
+
+
+.roadmap-v8
+.roadmap-principles p {
+  color:
+    rgba(234,227,244,0.80) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   PRINCIPLE LIST
+   ========================================================= */
+
+.roadmap-v8
+.principle-list > div {
+  border:
+    1px solid
+    rgba(169,144,255,0.15) !important;
+
+  border-radius:
+    13px !important;
+
+  background:
+    rgba(255,255,255,0.05) !important;
+}
+
+
+.roadmap-v8
+.principle-list > div > span {
+  background:
+    rgba(118,88,255,0.17) !important;
+
+  color:
+    #b6a3ff !important;
+}
+
+
+.roadmap-v8
+.principle-list small {
+  color:
+    #9f94ac !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.roadmap-v8
+.principle-list strong {
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   FINAL
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-final {
+  background:
+    linear-gradient(
+      135deg,
+      #c9c2d5,
+      #d4cdde
+    ) !important;
+}
+
+
+.roadmap-v8
+.roadmap-final-card {
+  border:
+    1px solid
+    rgba(166,140,255,0.21) !important;
+
+  border-radius:
+    20px !important;
+
+  background:
+    radial-gradient(
+      circle at 82% 10%,
+      rgba(180,67,235,0.17),
+      transparent 31%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0713,
+      #171020 55%,
+      #26143d
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 22px 48px
+    rgba(36,21,52,0.20) !important;
+}
+
+
+.roadmap-v8
+.roadmap-final-card
+:is(
+  h2,
+  h3,
+  strong
+) {
+  color:
+    #ffffff !important;
+}
+
+
+.roadmap-v8
+.roadmap-final-card p {
+  color:
+    rgba(235,228,245,0.82) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   FINAL BUTTONS
+   Pink-purple + white
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-final-primary {
+  border:
+    1px solid
+    rgba(225,170,255,0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8f26cf,
+      #ab2ce1 52%,
+      #c342ef
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 13px 30px
+    rgba(143,38,198,0.30) !important;
+}
+
+
+.roadmap-v8
+.roadmap-final-primary
+:is(
+  span,
+  strong
+) {
+  color:
+    #ffffff !important;
+}
+
+
+/* all other final links */
+
+.roadmap-v8
+.roadmap-final-card
+a:not(.roadmap-final-primary) {
+  border:
+    1px solid
+    rgba(255,255,255,0.74) !important;
+
+  background:
+    #ffffff !important;
+
+  color:
+    #5036b8 !important;
+
+  box-shadow:
+    0 11px 25px
+    rgba(0,0,0,0.16) !important;
+}
+
+
+.roadmap-v8
+.roadmap-final-card
+a:not(.roadmap-final-primary)
+:is(
+  span,
+  strong
+) {
+  color:
+    #5036b8 !important;
+}
+
+
+/* =========================================================
+   INTERACTION
+   ========================================================= */
+
+.roadmap-v8
+.roadmap-final-card a {
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.roadmap-v8
+.roadmap-final-card a:hover {
+  transform:
+    translateY(-2px);
+}
+
+
+.roadmap-v8
+.roadmap-final-primary:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #9d2ddd,
+      #c340ef
+    ) !important;
+
+  box-shadow:
+    0 17px 36px
+    rgba(143,38,198,0.38) !important;
+}
+
+
+.roadmap-v8
+.roadmap-final-card
+a:not(.roadmap-final-primary):hover {
+  background:
+    #f2ebff !important;
+
+  color:
+    #6042d2 !important;
+}
+
+
+/* =========================================================
+   ACCESSIBLE FOCUS
+   ========================================================= */
+
+.roadmap-v8
+:is(
+  button,
+  a
+):focus-visible {
+  outline:
+    2px solid
+    #9d82ff !important;
+
+  outline-offset:
+    3px !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .roadmap-v8
+  :is(
+    .roadmap-item,
+    .roadmap-filter button,
+    .roadmap-final-card a
+  ) {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}

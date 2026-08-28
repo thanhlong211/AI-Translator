@@ -1,0 +1,1191 @@
+/* =========================================================
+   AITRANOVA V10.7B
+   CHANGELOG EXACT PREMIUM THEME
+
+   Visual only.
+   No layout restructuring.
+   No JS/filter/data changes.
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.changelog-v8 {
+  background:
+    linear-gradient(
+      135deg,
+      #c9c2d5 0%,
+      #d5cedf 50%,
+      #c8c0d4 100%
+    ) !important;
+
+  color: #261e2e;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.changelog-v8
+.changelog-hero {
+  border-bottom:
+    1px solid
+    rgba(157,132,255,0.16) !important;
+
+  background:
+    radial-gradient(
+      circle at 82% 18%,
+      rgba(187,72,238,0.20),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 18% 78%,
+      rgba(83,113,218,0.10),
+      transparent 28%
+    ),
+    linear-gradient(
+      132deg,
+      #090610 0%,
+      #0f0919 24%,
+      #171020 54%,
+      #25143d 80%,
+      #100d1b 100%
+    ) !important;
+}
+
+
+.changelog-v8
+.changelog-hero-inner {
+  border: 0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   HERO TEXT
+   ========================================================= */
+
+.changelog-v8
+.changelog-kicker {
+  color:
+    #b39fff !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.changelog-hero h1 {
+  color:
+    #ffffff !important;
+
+  text-shadow:
+    0 10px 34px
+    rgba(0,0,0,0.20);
+}
+
+
+.changelog-v8
+.changelog-hero h1 em {
+  background:
+    linear-gradient(
+      110deg,
+      #a88bff 0%,
+      #805fff 34%,
+      #c34cea 66%,
+      #74a5ff 100%
+    );
+
+  background-clip:
+    text;
+
+  -webkit-background-clip:
+    text;
+
+  color:
+    transparent !important;
+
+  -webkit-text-fill-color:
+    transparent !important;
+
+  font-style:
+    normal;
+}
+
+
+.changelog-v8
+.changelog-hero p {
+  color:
+    rgba(242,236,249,0.86) !important;
+
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   HERO STATS
+   ========================================================= */
+
+.changelog-v8
+.changelog-hero-stats {
+  border:
+    1px solid
+    rgba(177,151,255,0.21) !important;
+
+  border-radius:
+    17px !important;
+
+  background:
+    rgba(16,10,26,0.58) !important;
+
+  box-shadow:
+    0 20px 44px
+    rgba(0,0,0,0.19) !important;
+
+  backdrop-filter:
+    blur(13px);
+}
+
+
+.changelog-v8
+.changelog-hero-stats > div {
+  border-color:
+    rgba(255,255,255,0.07) !important;
+
+  background:
+    rgba(255,255,255,0.035) !important;
+}
+
+
+.changelog-v8
+.changelog-hero-stats small {
+  color:
+    #a89bb4 !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.changelog-hero-stats strong {
+  color:
+    #ffffff !important;
+
+  opacity: 1 !important;
+}
+
+
+/* Release groups */
+
+.changelog-v8
+.changelog-hero-stats
+> div:nth-child(1) {
+  border-color:
+    rgba(168,144,255,0.15) !important;
+}
+
+
+/* NEW */
+
+.changelog-v8
+.changelog-hero-stats
+> div:nth-child(2) small {
+  color:
+    #db78ff !important;
+}
+
+
+.changelog-v8
+.changelog-hero-stats
+> div:nth-child(2) strong {
+  color:
+    #e3a0ff !important;
+}
+
+
+/* IMPROVED */
+
+.changelog-v8
+.changelog-hero-stats
+> div:nth-child(3) small {
+  color:
+    #82aaff !important;
+}
+
+
+.changelog-v8
+.changelog-hero-stats
+> div:nth-child(3) strong {
+  color:
+    #a3bdff !important;
+}
+
+
+/* FIXED */
+
+.changelog-v8
+.changelog-hero-stats
+> div:nth-child(4) small {
+  color:
+    #65d6ad !important;
+}
+
+
+.changelog-v8
+.changelog-hero-stats
+> div:nth-child(4) strong {
+  color:
+    #91e3c4 !important;
+}
+
+
+/* =========================================================
+   RELEASE HISTORY
+   ========================================================= */
+
+.changelog-v8
+.changelog-content {
+  background:
+    radial-gradient(
+      circle at 84% 12%,
+      rgba(111,82,225,0.065),
+      transparent 27%
+    ),
+    linear-gradient(
+      135deg,
+      #cbc4d7,
+      #d7d0e1
+    ) !important;
+}
+
+
+.changelog-v8
+.changelog-section-head
+> div > span {
+  color:
+    #6c50df !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.changelog-section-head h2 {
+  color:
+    #251d2d !important;
+}
+
+
+.changelog-v8
+.changelog-section-head > p {
+  color:
+    #62576c !important;
+
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   EXPLORER
+   ========================================================= */
+
+.changelog-v8
+.changelog-explorer {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.changelog-v8
+.changelog-filters {
+  border:
+    1px solid
+    rgba(106,87,130,0.18) !important;
+
+  border-radius:
+    15px !important;
+
+  background:
+    rgba(249,246,251,0.76) !important;
+
+  box-shadow:
+    0 11px 27px
+    rgba(44,31,60,0.055) !important;
+}
+
+
+.changelog-v8
+.changelog-filters button {
+  border:
+    1px solid
+    transparent !important;
+
+  border-radius:
+    999px !important;
+
+  background:
+    transparent !important;
+
+  color:
+    #675c71 !important;
+
+  opacity: 1 !important;
+
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    border-color 160ms ease !important;
+}
+
+
+.changelog-v8
+.changelog-filters button:hover {
+  transform:
+    translateY(-1px);
+
+  background:
+    rgba(118,88,255,0.08) !important;
+
+  color:
+    #4c3b64 !important;
+}
+
+
+.changelog-v8
+.changelog-filters button.active,
+
+.changelog-v8
+.changelog-filters button[aria-pressed="true"] {
+  border-color:
+    rgba(172,146,255,0.26) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #684cef,
+      #8163ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 8px 19px
+    rgba(88,58,218,0.26) !important;
+}
+
+
+/* =========================================================
+   TOOLBAR ACTIONS
+   ========================================================= */
+
+.changelog-v8
+.changelog-toolbar-actions button {
+  border:
+    1px solid
+    rgba(106,87,130,0.18) !important;
+
+  background:
+    rgba(250,247,251,0.72) !important;
+
+  color:
+    #63586d !important;
+}
+
+
+.changelog-v8
+.changelog-toolbar-actions button:hover {
+  border-color:
+    rgba(110,83,230,0.28) !important;
+
+  background:
+    #faf7fc !important;
+
+  color:
+    #523c78 !important;
+}
+
+
+/* =========================================================
+   RESULT META
+   ========================================================= */
+
+.changelog-v8
+.changelog-result-meta {
+  color:
+    #74697e !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.changelog-result-meta strong {
+  color:
+    #2b2233 !important;
+}
+
+
+/* =========================================================
+   RELEASE CARD
+   ========================================================= */
+
+.changelog-v8
+.release-card {
+  border:
+    1px solid
+    rgba(105,86,129,0.19) !important;
+
+  border-radius:
+    18px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #faf7fb,
+      #efebf4
+    ) !important;
+
+  box-shadow:
+    0 14px 32px
+    rgba(44,31,60,0.065) !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.changelog-v8
+.release-card:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(110,83,230,0.28) !important;
+
+  box-shadow:
+    0 20px 42px
+    rgba(44,31,60,0.10) !important;
+}
+
+
+/* =========================================================
+   RELEASE HEADING
+   ========================================================= */
+
+.changelog-v8
+.release-channel {
+  border:
+    1px solid
+    rgba(114,89,225,0.18) !important;
+
+  background:
+    #eae2fb !important;
+
+  color:
+    #684bd7 !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.release-heading h2 {
+  color:
+    #292031 !important;
+}
+
+
+.changelog-v8
+.release-heading p {
+  color:
+    #63586d !important;
+
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   RELEASE META
+   ========================================================= */
+
+.changelog-v8
+.release-meta {
+  color:
+    #756a80 !important;
+}
+
+
+.changelog-v8
+.release-summary-meta > span {
+  border-color:
+    #c7bdd1 !important;
+
+  background:
+    rgba(255,255,255,0.60) !important;
+
+  color:
+    #685c72 !important;
+}
+
+
+.changelog-v8
+.release-summary-meta small {
+  color:
+    #75697f !important;
+
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   RELEASE DETAILS
+   ========================================================= */
+
+.changelog-v8
+.release-details {
+  border-color:
+    rgba(106,87,129,0.12) !important;
+}
+
+
+/* =========================================================
+   CHANGE TYPE
+   Neutral base — individual type color can override.
+   ========================================================= */
+
+.changelog-v8
+.change-type {
+  border:
+    1px solid
+    rgba(112,89,137,0.16) !important;
+
+  border-radius:
+    10px !important;
+
+  background:
+    #eae4f1 !important;
+
+  color:
+    #604f70 !important;
+}
+
+
+.changelog-v8
+.change-type strong {
+  color:
+    #604f70 !important;
+
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   CHANGE CONTENT
+   ========================================================= */
+
+.changelog-v8
+.change-content > small {
+  color:
+    #705b86 !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.change-content h3 {
+  color:
+    #292031 !important;
+}
+
+
+.changelog-v8
+.change-content p {
+  color:
+    #61566b !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.change-content a {
+  color:
+    #6247df !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+.changelog-v8
+.change-content a:hover {
+  color:
+    #4e32c7 !important;
+}
+
+
+/* =========================================================
+   ROADMAP VS CHANGELOG
+   ========================================================= */
+
+.changelog-v8
+.changelog-difference {
+  background:
+    linear-gradient(
+      135deg,
+      #d5cedf,
+      #c9c1d5
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(82,66,102,0.08) !important;
+}
+
+
+.changelog-v8
+.changelog-difference
+> .container
+> header
+> span {
+  color:
+    #6c50df !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.changelog-difference h2 {
+  color:
+    #251d2d !important;
+}
+
+
+/* =========================================================
+   DIFFERENCE CARDS
+   ========================================================= */
+
+.changelog-v8
+.difference-grid > div {
+  border:
+    1px solid
+    rgba(106,87,130,0.18) !important;
+
+  border-radius:
+    16px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #faf7fb,
+      #efeaf4
+    ) !important;
+
+  box-shadow:
+    0 12px 28px
+    rgba(44,31,60,0.055) !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.changelog-v8
+.difference-grid > div:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(109,82,230,0.30) !important;
+
+  box-shadow:
+    0 18px 36px
+    rgba(44,31,60,0.10) !important;
+}
+
+
+.changelog-v8
+.difference-grid small {
+  color:
+    #7054dd !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.difference-grid strong {
+  color:
+    #292031 !important;
+}
+
+
+.changelog-v8
+.difference-grid p {
+  color:
+    #62576c !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.difference-grid a {
+  color:
+    #6044dc !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+/* Roadmap icon */
+
+.changelog-v8
+.difference-icon.roadmap {
+  border-color:
+    rgba(91,126,225,0.20) !important;
+
+  background:
+    #e3eafc !important;
+
+  color:
+    #5478d5 !important;
+}
+
+
+/* Changelog icon */
+
+.changelog-v8
+.difference-icon.changelog {
+  border-color:
+    rgba(151,73,211,0.20) !important;
+
+  background:
+    #eee0f8 !important;
+
+  color:
+    #9b40ce !important;
+}
+
+
+/* =========================================================
+   PUBLIC NOTES
+   Dark section
+   ========================================================= */
+
+.changelog-v8
+.changelog-principles {
+  border-top:
+    1px solid
+    rgba(164,139,255,0.14) !important;
+
+  border-bottom:
+    1px solid
+    rgba(164,139,255,0.14) !important;
+
+  background:
+    radial-gradient(
+      circle at 80% 15%,
+      rgba(185,68,235,0.17),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0713,
+      #151020 54%,
+      #25143b
+    ) !important;
+
+  color:
+    #ffffff;
+}
+
+
+.changelog-v8
+.changelog-principles-layout
+> div:first-child
+> span {
+  color:
+    #b19cff !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.changelog-principles h2 {
+  color:
+    #ffffff !important;
+}
+
+
+.changelog-v8
+.changelog-principles p {
+  color:
+    rgba(235,228,245,0.81) !important;
+
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   PUBLIC NOTE LIST
+   ========================================================= */
+
+.changelog-v8
+.changelog-principle-list > div {
+  border:
+    1px solid
+    rgba(169,144,255,0.15) !important;
+
+  border-radius:
+    13px !important;
+
+  background:
+    rgba(255,255,255,0.05) !important;
+}
+
+
+.changelog-v8
+.changelog-principle-list
+> div
+> span {
+  background:
+    rgba(118,88,255,0.17) !important;
+
+  color:
+    #b7a5ff !important;
+}
+
+
+.changelog-v8
+.changelog-principle-list small {
+  color:
+    #a79bb3 !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.changelog-principle-list strong {
+  color:
+    #ffffff !important;
+}
+
+
+/* First = NEW */
+
+.changelog-v8
+.changelog-principle-list
+> div:nth-child(1)
+> span {
+  background:
+    rgba(194,71,238,0.17) !important;
+
+  color:
+    #dc8cff !important;
+}
+
+
+.changelog-v8
+.changelog-principle-list
+> div:nth-child(1)
+small {
+  color:
+    #d688f7 !important;
+}
+
+
+/* Second = IMPROVED */
+
+.changelog-v8
+.changelog-principle-list
+> div:nth-child(2)
+> span {
+  background:
+    rgba(91,126,230,0.16) !important;
+
+  color:
+    #96b2ff !important;
+}
+
+
+.changelog-v8
+.changelog-principle-list
+> div:nth-child(2)
+small {
+  color:
+    #94aff8 !important;
+}
+
+
+/* Third = FIXED */
+
+.changelog-v8
+.changelog-principle-list
+> div:nth-child(3)
+> span {
+  background:
+    rgba(55,169,119,0.15) !important;
+
+  color:
+    #79ddb7 !important;
+}
+
+
+.changelog-v8
+.changelog-principle-list
+> div:nth-child(3)
+small {
+  color:
+    #7dd8b5 !important;
+}
+
+
+/* =========================================================
+   FINAL SECTION
+   ========================================================= */
+
+.changelog-v8
+.changelog-final {
+  background:
+    linear-gradient(
+      135deg,
+      #c9c2d5,
+      #d4cdde
+    ) !important;
+}
+
+
+.changelog-v8
+.changelog-final-card {
+  border:
+    1px solid
+    rgba(166,140,255,0.21) !important;
+
+  border-radius:
+    20px !important;
+
+  background:
+    radial-gradient(
+      circle at 82% 10%,
+      rgba(184,64,236,0.17),
+      transparent 31%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0713,
+      #171020 55%,
+      #26143d
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 22px 48px
+    rgba(36,21,52,0.20) !important;
+}
+
+
+.changelog-v8
+.changelog-final-card
+> div:first-child
+> span {
+  color:
+    #b39fff !important;
+
+  opacity: 1 !important;
+}
+
+
+.changelog-v8
+.changelog-final-card h2 {
+  color:
+    #ffffff !important;
+}
+
+
+.changelog-v8
+.changelog-final-card p {
+  color:
+    rgba(235,228,245,0.82) !important;
+
+  opacity: 1 !important;
+}
+
+
+/* =========================================================
+   FINAL PRIMARY — MAGENTA PURPLE
+   ========================================================= */
+
+.changelog-v8
+.changelog-final-primary {
+  border:
+    1px solid
+    rgba(225,170,255,0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8f26cf,
+      #ab2ce1 52%,
+      #c342ef
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 13px 30px
+    rgba(143,38,198,0.30) !important;
+}
+
+
+.changelog-v8
+.changelog-final-primary span {
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   FINAL SECONDARY — WHITE
+   ========================================================= */
+
+.changelog-v8
+.changelog-final-card
+a[href="/features"] {
+  border:
+    1px solid
+    rgba(255,255,255,0.74) !important;
+
+  background:
+    #ffffff !important;
+
+  color:
+    #5036b8 !important;
+
+  box-shadow:
+    0 11px 25px
+    rgba(0,0,0,0.16) !important;
+}
+
+
+/* =========================================================
+   FINAL HOVER
+   ========================================================= */
+
+.changelog-v8
+.changelog-final-card a {
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.changelog-v8
+.changelog-final-card a:hover {
+  transform:
+    translateY(-2px);
+}
+
+
+.changelog-v8
+.changelog-final-primary:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #9d2ddd,
+      #c340ef
+    ) !important;
+
+  box-shadow:
+    0 17px 36px
+    rgba(143,38,198,0.38) !important;
+}
+
+
+.changelog-v8
+.changelog-final-card
+a[href="/features"]:hover {
+  background:
+    #f2ebff !important;
+
+  color:
+    #6042d2 !important;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.changelog-v8
+:is(
+  button,
+  a
+):focus-visible {
+  outline:
+    2px solid
+    #9d82ff !important;
+
+  outline-offset:
+    3px !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .changelog-v8
+  :is(
+    .release-card,
+    .difference-grid > div,
+    .changelog-filters button,
+    .changelog-final-card a
+  ) {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}

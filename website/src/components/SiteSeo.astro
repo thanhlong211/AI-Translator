@@ -1,0 +1,132 @@
+---
+import {
+  siteConfig,
+} from "../data/site";
+
+interface Props {
+  title: string;
+  description: string;
+}
+
+const {
+  title,
+  description,
+} = Astro.props;
+
+const canonicalUrl =
+  new URL(
+    Astro.url.pathname,
+    `${siteConfig.url}/`
+  ).toString();
+
+const ogImageUrl =
+  siteConfig.ogImage
+    ? new URL(
+        siteConfig.ogImage,
+        `${siteConfig.url}/`
+      ).toString()
+    : "";
+
+const structuredData = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  description,
+};
+---
+
+<link
+  rel="canonical"
+  href={canonicalUrl}
+/>
+
+<meta
+  name="robots"
+  content="index, follow, max-image-preview:large"
+/>
+
+<meta
+  name="theme-color"
+  content={siteConfig.themeColor}
+/>
+
+<meta
+  property="og:type"
+  content="website"
+/>
+
+<meta
+  property="og:site_name"
+  content={siteConfig.name}
+/>
+
+<meta
+  property="og:title"
+  content={title}
+/>
+
+<meta
+  property="og:description"
+  content={description}
+/>
+
+<meta
+  property="og:url"
+  content={canonicalUrl}
+/>
+
+<meta
+  property="og:locale"
+  content={siteConfig.locale}
+/>
+
+{
+  ogImageUrl && (
+    <>
+      <meta
+        property="og:image"
+        content={ogImageUrl}
+      />
+
+      <meta
+        property="og:image:alt"
+        content={`${siteConfig.name} preview`}
+      />
+    </>
+  )
+}
+
+<meta
+  name="twitter:card"
+  content={
+    ogImageUrl
+      ? "summary_large_image"
+      : "summary"
+  }
+/>
+
+<meta
+  name="twitter:title"
+  content={title}
+/>
+
+<meta
+  name="twitter:description"
+  content={description}
+/>
+
+{
+  ogImageUrl && (
+    <meta
+      name="twitter:image"
+      content={ogImageUrl}
+    />
+  )
+}
+
+<script
+  type="application/ld+json"
+  is:inline
+  set:html={JSON.stringify(structuredData)}
+/>

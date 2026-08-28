@@ -1,0 +1,1058 @@
+/* =========================================================
+   AITRANOVA V9.4D
+   PREMIUM NIGHT SKY HERO
+   ========================================================= */
+
+.home-hero-premium {
+  position: relative !important;
+
+  isolation: isolate;
+
+  overflow: hidden !important;
+
+  padding-bottom:
+    clamp(
+      38px,
+      3.6vw,
+      52px
+    ) !important;
+
+  background:
+    radial-gradient(
+      circle at 78% 23%,
+      rgba(
+        117,
+        83,
+        255,
+        0.24
+      ),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 21% 8%,
+      rgba(
+        84,
+        57,
+        186,
+        0.14
+      ),
+      transparent 23%
+    ),
+    radial-gradient(
+      circle at 70% 88%,
+      rgba(
+        52,
+        111,
+        199,
+        0.14
+      ),
+      transparent 25%
+    ),
+    linear-gradient(
+      132deg,
+      #0d0916 0%,
+      #120c20 20%,
+      #191027 42%,
+      #211335 68%,
+      #131126 100%
+    ) !important;
+
+  color: #f8f5ff;
+}
+
+
+/* =========================================================
+   SKY LAYER
+   ========================================================= */
+
+.hero-night-sky {
+  position: absolute;
+
+  inset: 0;
+
+  z-index: 0;
+
+  overflow: hidden;
+
+  pointer-events: none;
+}
+
+
+.home-hero-premium
+> :not(
+  .hero-night-sky
+) {
+  position: relative;
+
+  z-index: 2;
+}
+
+
+/* =========================================================
+   STARS
+   ========================================================= */
+
+.hero-night-star {
+  position: absolute;
+
+  top:
+    var(
+      --star-y
+    );
+
+  left:
+    var(
+      --star-x
+    );
+
+  width:
+    var(
+      --star-size
+    );
+
+  height:
+    var(
+      --star-size
+    );
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      239,
+      234,
+      255,
+      0.88
+    );
+
+  box-shadow:
+    0 0 6px
+    rgba(
+      170,
+      149,
+      255,
+      0.48
+    );
+
+  opacity: 0.36;
+
+  animation:
+    heroStarTwinkle
+    4.4s
+    ease-in-out
+    infinite;
+
+  animation-delay:
+    var(
+      --star-delay
+    );
+}
+
+
+@keyframes heroStarTwinkle {
+
+  0%,
+  100% {
+    opacity: 0.22;
+
+    transform:
+      scale(0.8);
+  }
+
+  50% {
+    opacity: 0.92;
+
+    transform:
+      scale(1.35);
+  }
+
+}
+
+
+/* =========================================================
+   AURORA
+   ========================================================= */
+
+.hero-night-aurora {
+  position: absolute;
+
+  top: -35%;
+  right: -18%;
+
+  width: 78%;
+  height: 110%;
+
+  border-radius: 50%;
+
+  background:
+    conic-gradient(
+      from 190deg,
+      transparent 0deg,
+      rgba(
+        90,
+        60,
+        205,
+        0.04
+      ) 48deg,
+      rgba(
+        120,
+        86,
+        255,
+        0.2
+      ) 87deg,
+      rgba(
+        75,
+        132,
+        228,
+        0.12
+      ) 118deg,
+      transparent 170deg,
+      transparent 360deg
+    );
+
+  filter:
+    blur(52px);
+
+  opacity: 0.88;
+
+  transform:
+    rotate(-11deg);
+
+  animation:
+    heroAuroraDrift
+    12s
+    ease-in-out
+    infinite;
+
+  will-change:
+    transform;
+}
+
+
+@keyframes heroAuroraDrift {
+
+  0%,
+  100% {
+    transform:
+      rotate(-11deg)
+      translate3d(
+        0,
+        0,
+        0
+      )
+      scale(1);
+  }
+
+  50% {
+    transform:
+      rotate(-5deg)
+      translate3d(
+        -28px,
+        20px,
+        0
+      )
+      scale(1.08);
+  }
+
+}
+
+
+/* =========================================================
+   HORIZON GLOW
+   ========================================================= */
+
+.hero-night-horizon {
+  position: absolute;
+
+  right: 6%;
+  bottom: -28%;
+  left: 32%;
+
+  height: 58%;
+
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      ellipse,
+      rgba(
+        100,
+        76,
+        231,
+        0.24
+      ),
+      rgba(
+        58,
+        91,
+        173,
+        0.08
+      ) 42%,
+      transparent 70%
+    );
+
+  filter:
+    blur(34px);
+
+  animation:
+    heroHorizonPulse
+    6.4s
+    ease-in-out
+    infinite;
+}
+
+
+@keyframes heroHorizonPulse {
+
+  0%,
+  100% {
+    opacity: 0.55;
+
+    transform:
+      scale(0.97);
+  }
+
+  50% {
+    opacity: 0.95;
+
+    transform:
+      scale(1.04);
+  }
+
+}
+
+
+/* =========================================================
+   TOP LIGHT LINE
+   ========================================================= */
+
+.home-hero-premium::before {
+  position: absolute;
+
+  top: 0;
+  right: 0;
+  left: 0;
+
+  z-index: 4;
+
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 6%,
+      rgba(
+        151,
+        125,
+        255,
+        0.22
+      ),
+      rgba(
+        173,
+        154,
+        255,
+        0.55
+      ),
+      rgba(
+        100,
+        153,
+        236,
+        0.22
+      ),
+      transparent 94%
+    );
+
+  content: "";
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   HERO TEXT
+   ========================================================= */
+
+.home-hero-premium
+.hero-premium-title {
+  color:
+    #f8f5ff !important;
+
+  text-shadow:
+    0 2px 26px
+    rgba(
+      0,
+      0,
+      0,
+      0.16
+    );
+}
+
+
+.home-hero-premium
+.hero-premium-title em,
+.home-hero-premium
+.hero-premium-title
+[class*="accent"] {
+  background:
+    linear-gradient(
+      108deg,
+      #a790ff 0%,
+      #8067ff 40%,
+      #709af2 72%,
+      #81b2ff 100%
+    ) !important;
+
+  background-clip:
+    text !important;
+
+  -webkit-background-clip:
+    text !important;
+
+  color:
+    transparent !important;
+
+  -webkit-text-fill-color:
+    transparent !important;
+
+  filter:
+    drop-shadow(
+      0 8px 24px
+      rgba(
+        105,
+        77,
+        238,
+        0.16
+      )
+    );
+}
+
+
+.home-hero-premium
+:is(
+  .hero-copy,
+  .home-hero-copy,
+  .hero-content
+) > p {
+  color:
+    #bbb0cf !important;
+
+  font-size:
+    15px !important;
+
+  line-height:
+    1.72 !important;
+}
+
+
+/* =========================================================
+   BADGE ABOVE HERO
+   ========================================================= */
+
+.home-hero-premium
+:is(
+  [class*="hero-badge"],
+  [class*="status-badge"]
+) {
+  border-color:
+    rgba(
+      166,
+      144,
+      255,
+      0.2
+    ) !important;
+
+  background:
+    rgba(
+      29,
+      22,
+      45,
+      0.72
+    ) !important;
+
+  color:
+    #d4cae8 !important;
+
+  box-shadow:
+    0 12px 27px
+    rgba(
+      0,
+      0,
+      0,
+      0.15
+    );
+
+  backdrop-filter:
+    blur(13px);
+}
+
+
+/* =========================================================
+   PRODUCT PREVIEW
+   ========================================================= */
+
+.hero-premium-preview {
+  position: relative;
+
+  isolation: isolate;
+
+  filter:
+    drop-shadow(
+      0 35px 48px
+      rgba(
+        0,
+        0,
+        0,
+        0.24
+      )
+    );
+}
+
+
+.hero-preview-halo {
+  position: absolute;
+
+  top: 8%;
+  right: 2%;
+  bottom: -4%;
+  left: 7%;
+
+  z-index: -3;
+
+  border-radius:
+    38px;
+
+  background:
+    radial-gradient(
+      circle at 48% 42%,
+      rgba(
+        119,
+        91,
+        255,
+        0.38
+      ),
+      rgba(
+        95,
+        67,
+        206,
+        0.16
+      ) 39%,
+      rgba(
+        62,
+        97,
+        189,
+        0.08
+      ) 58%,
+      transparent 75%
+    );
+
+  filter:
+    blur(43px);
+
+  opacity: 0.9;
+
+  animation:
+    heroPreviewHalo
+    5.5s
+    ease-in-out
+    infinite;
+}
+
+
+@keyframes heroPreviewHalo {
+
+  0%,
+  100% {
+    opacity: 0.66;
+
+    transform:
+      scale(0.95);
+  }
+
+  50% {
+    opacity: 1;
+
+    transform:
+      scale(1.04);
+  }
+
+}
+
+
+/*
+  White desktop mock gets a premium edge.
+*/
+
+.hero-premium-preview
+:is(
+  [class*="window"],
+  [class*="desktop"],
+  [class*="mock"]
+) {
+  border-color:
+    rgba(
+      185,
+      169,
+      231,
+      0.34
+    ) !important;
+
+  box-shadow:
+    0 25px 65px
+    rgba(
+      2,
+      1,
+      10,
+      0.28
+    );
+}
+
+
+/* =========================================================
+   FLOATING CARDS
+   ========================================================= */
+
+.home-hero-premium
+.hero-motion-floating {
+  filter:
+    drop-shadow(
+      0 15px 22px
+      rgba(
+        0,
+        0,
+        0,
+        0.2
+      )
+    );
+
+  transition:
+    filter 180ms ease;
+}
+
+
+.home-hero-premium
+.hero-motion-floating:hover {
+  filter:
+    drop-shadow(
+      0 18px 28px
+      rgba(
+        46,
+        24,
+        103,
+        0.3
+      )
+    );
+}
+
+
+/* =========================================================
+   PRIMARY CTA
+   ========================================================= */
+
+.hero-premium-primary-cta {
+  position: relative;
+
+  isolation: isolate;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(
+      186,
+      167,
+      255,
+      0.23
+    ) !important;
+
+  background:
+    linear-gradient(
+      128deg,
+      #684cf1 0%,
+      #7658ff 45%,
+      #8b68ff 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 15px 37px
+    rgba(
+      84,
+      53,
+      211,
+      0.36
+    ),
+    inset 0 1px 0
+    rgba(
+      255,
+      255,
+      255,
+      0.22
+    ) !important;
+}
+
+
+.hero-premium-primary-cta::after {
+  position: absolute;
+
+  inset: -7px;
+
+  z-index: -2;
+
+  border:
+    1px solid
+    rgba(
+      134,
+      104,
+      255,
+      0.22
+    );
+
+  border-radius:
+    inherit;
+
+  content: "";
+
+  opacity: 0;
+
+  pointer-events: none;
+
+  animation:
+    heroCtaPulse
+    2.8s
+    ease-out
+    infinite;
+}
+
+
+@keyframes heroCtaPulse {
+
+  0% {
+    opacity: 0.52;
+
+    transform:
+      scale(0.96);
+  }
+
+  65% {
+    opacity: 0;
+
+    transform:
+      scale(1.11);
+  }
+
+  100% {
+    opacity: 0;
+
+    transform:
+      scale(1.11);
+  }
+
+}
+
+
+.hero-premium-primary-cta:hover {
+  transform:
+    translateY(-3px)
+    scale(1.015) !important;
+
+  box-shadow:
+    0 21px 43px
+    rgba(
+      85,
+      54,
+      216,
+      0.43
+    ) !important;
+}
+
+
+/* =========================================================
+   SECONDARY CTA
+   ========================================================= */
+
+.home-hero-premium
+.hero-motion-cta:not(
+  .hero-premium-primary-cta
+) {
+  border:
+    1px solid
+    rgba(
+      184,
+      168,
+      213,
+      0.2
+    ) !important;
+
+  background:
+    rgba(
+      247,
+      243,
+      252,
+      0.92
+    ) !important;
+
+  color:
+    #2e2638 !important;
+
+  box-shadow:
+    0 13px 30px
+    rgba(
+      0,
+      0,
+      0,
+      0.14
+    );
+}
+
+
+/* =========================================================
+   FEATURE CHIPS
+   ========================================================= */
+
+.hero-premium-chip {
+  border:
+    1px solid
+    rgba(
+      159,
+      138,
+      226,
+      0.12
+    ) !important;
+
+  border-radius:
+    12px;
+
+  background:
+    rgba(
+      27,
+      21,
+      41,
+      0.42
+    ) !important;
+
+  color:
+    #d0c6de !important;
+
+  backdrop-filter:
+    blur(10px);
+
+  transition:
+    transform 180ms ease,
+    background 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+
+.hero-premium-chip:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(
+      149,
+      123,
+      255,
+      0.3
+    ) !important;
+
+  background:
+    rgba(
+      48,
+      36,
+      72,
+      0.7
+    ) !important;
+
+  box-shadow:
+    0 14px 29px
+    rgba(
+      0,
+      0,
+      0,
+      0.14
+    );
+}
+
+
+/* =========================================================
+   BOTTOM PRODUCT NAV
+   ========================================================= */
+
+.home-hero-premium
+:is(
+  .hero-bottom-links,
+  .hero-mini-nav,
+  .home-hero-bottom
+) {
+  margin-top:
+    25px !important;
+
+  padding-top:
+    17px !important;
+
+  border-top:
+    1px solid
+    rgba(
+      177,
+      160,
+      209,
+      0.14
+    ) !important;
+
+  color:
+    #a99db9 !important;
+}
+
+
+/* =========================================================
+   REMOVE EXCESS HEIGHT
+   ========================================================= */
+
+.home-hero-premium
+:is(
+  .hero-actions,
+  .home-hero-actions,
+  .hero-cta
+) {
+  margin-top:
+    21px !important;
+}
+
+
+.home-hero-premium
+:is(
+  .hero-capabilities,
+  .home-capabilities,
+  .hero-features
+) {
+  margin-top:
+    18px !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 820px) {
+
+  .home-hero-premium {
+    padding-top:
+      34px !important;
+
+    padding-bottom:
+      35px !important;
+  }
+
+
+  .hero-night-aurora {
+    top: -14%;
+    right: -68%;
+
+    width: 140%;
+    height: 85%;
+  }
+
+
+  .hero-night-horizon {
+    right: -30%;
+    bottom: -10%;
+    left: 15%;
+  }
+
+
+  .hero-night-star:nth-child(n + 15) {
+    display: none;
+  }
+
+
+  .hero-premium-preview {
+    margin-top:
+      26px;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .hero-night-star,
+  .hero-night-aurora,
+  .hero-night-horizon,
+  .hero-preview-halo,
+  .hero-premium-primary-cta::after {
+    animation:
+      none !important;
+  }
+
+}
+
+
+/* =========================================================
+   V9.6.1 NIGHT DEPTH TUNING
+   ========================================================= */
+
+.home-hero-premium {
+  background:
+    radial-gradient(
+      circle at 84% 14%,
+      rgba(
+        113,
+        78,
+        255,
+        0.34
+      ),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 55% 85%,
+      rgba(
+        60,
+        83,
+        181,
+        0.12
+      ),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 18% 18%,
+      rgba(
+        92,
+        62,
+        183,
+        0.11
+      ),
+      transparent 28%
+    ),
+    linear-gradient(
+      128deg,
+      #090611 0%,
+      #0e0918 20%,
+      #150c24 43%,
+      #21103a 70%,
+      #10101f 100%
+    ) !important;
+}
+
+
+.hero-night-aurora {
+  opacity:
+    1;
+
+  filter:
+    blur(
+      42px
+    )
+    saturate(
+      1.2
+    );
+}

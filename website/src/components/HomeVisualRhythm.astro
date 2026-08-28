@@ -1,0 +1,403 @@
+<script>
+  function initHomeVisualRhythm() {
+    const main =
+      document.querySelector(
+        "main"
+      );
+
+    if (
+      !(main instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    if (
+      main.dataset.homeRhythmReady
+      === "true"
+    ) {
+      return;
+    }
+
+    main.dataset.homeRhythmReady =
+      "true";
+
+    main.classList.add(
+      "home-visual-rhythm"
+    );
+
+
+    const sections =
+      Array.from(
+        main.children
+      )
+      .filter(
+        element =>
+          element instanceof HTMLElement
+          && element.tagName === "SECTION"
+      );
+
+
+    if (!sections.length) {
+      return;
+    }
+
+
+    const hero =
+      sections[0];
+
+
+    hero.classList.add(
+      "home-rhythm-hero"
+    );
+
+
+    /* =====================================================
+       HERO -> CONTENT BRIDGE
+       ===================================================== */
+
+    if (
+      !document.querySelector(
+        "[data-home-rhythm-bridge]"
+      )
+    ) {
+
+      const bridge =
+        document.createElement(
+          "div"
+        );
+
+      bridge.className =
+        "home-rhythm-bridge";
+
+      bridge.dataset.homeRhythmBridge =
+        "true";
+
+      bridge.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+
+      hero.insertAdjacentElement(
+        "afterend",
+        bridge
+      );
+
+    }
+
+
+    /* =====================================================
+       SECTION CLASSIFICATION
+       ===================================================== */
+
+    const contentSections =
+      sections.slice(1);
+
+
+    contentSections.forEach(
+      (
+        section,
+        index
+      ) => {
+
+        section.classList.add(
+          "home-rhythm-section"
+        );
+
+
+        /*
+          Detect existing dark sections.
+        */
+
+        const style =
+          window.getComputedStyle(
+            section
+          );
+
+
+        const rgbMatch =
+          style.backgroundColor
+            .match(
+              /rgba?\((\d+),\s*(\d+),\s*(\d+)/
+            );
+
+
+        let dark =
+          false;
+
+
+        if (rgbMatch) {
+
+          const r =
+            Number(
+              rgbMatch[1]
+            );
+
+          const g =
+            Number(
+              rgbMatch[2]
+            );
+
+          const b =
+            Number(
+              rgbMatch[3]
+            );
+
+
+          const luminance =
+            (
+              r * 0.299
+              + g * 0.587
+              + b * 0.114
+            );
+
+
+          dark =
+            luminance < 90;
+
+        }
+
+
+        if (
+          dark
+          || section.className
+            .toLowerCase()
+            .includes(
+              "dark"
+            )
+        ) {
+
+          section.classList.add(
+            "home-rhythm-dark"
+          );
+
+        } else {
+
+          section.classList.add(
+            index % 2 === 0
+              ? "home-rhythm-light-a"
+              : "home-rhythm-light-b"
+          );
+
+        }
+
+
+        /* =================================================
+           SECTION REVEAL
+           ================================================= */
+
+        section.classList.add(
+          "home-rhythm-reveal"
+        );
+
+
+        /* =================================================
+           CARD / PANEL REVEAL
+           ================================================= */
+
+        const candidates =
+          Array.from(
+            section.querySelectorAll(
+              [
+                "article",
+                "[class*='card']",
+                "[class*='panel']",
+                "[class*='preview']",
+                "[class*='feature']",
+              ].join(",")
+            )
+          );
+
+
+        let cardIndex =
+          0;
+
+
+        candidates.forEach(
+          candidate => {
+
+            if (
+              !(candidate instanceof HTMLElement)
+            ) {
+              return;
+            }
+
+
+            /*
+              Only animate elements whose nearest section
+              is the current homepage section.
+            */
+
+            if (
+              candidate.closest(
+                "section"
+              )
+              !== section
+            ) {
+              return;
+            }
+
+
+            if (
+              candidate.classList.contains(
+                "home-rhythm-card"
+              )
+            ) {
+              return;
+            }
+
+
+            const rect =
+              candidate.getBoundingClientRect();
+
+
+            if (
+              rect.width < 120
+              || rect.height < 55
+            ) {
+              return;
+            }
+
+
+            candidate.classList.add(
+              "home-rhythm-card"
+            );
+
+
+            candidate.style.setProperty(
+              "--rhythm-card-delay",
+              `${Math.min(
+                cardIndex * 55,
+                280
+              )}ms`
+            );
+
+
+            cardIndex++;
+
+
+            if (
+              cardIndex >= 14
+            ) {
+              return;
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+    /* =====================================================
+       INTERSECTION OBSERVER
+       ===================================================== */
+
+    const revealElements =
+      Array.from(
+        main.querySelectorAll(
+          [
+            ".home-rhythm-reveal",
+            ".home-rhythm-card",
+          ].join(",")
+        )
+      );
+
+
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
+
+
+    if (
+      reducedMotion.matches
+      || !(
+        "IntersectionObserver"
+        in window
+      )
+    ) {
+
+      revealElements.forEach(
+        element => {
+
+          element.classList.add(
+            "home-rhythm-visible"
+          );
+
+        }
+      );
+
+      return;
+    }
+
+
+    const observer =
+      new IntersectionObserver(
+        entries => {
+
+          entries.forEach(
+            entry => {
+
+              if (
+                !entry.isIntersecting
+              ) {
+                return;
+              }
+
+
+              entry.target
+                .classList.add(
+                  "home-rhythm-visible"
+                );
+
+
+              observer.unobserve(
+                entry.target
+              );
+
+            }
+          );
+
+        },
+        {
+          threshold: 0.11,
+
+          rootMargin:
+            "0px 0px -7% 0px",
+        }
+      );
+
+
+    revealElements.forEach(
+      element => {
+
+        observer.observe(
+          element
+        );
+
+      }
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initHomeVisualRhythm,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initHomeVisualRhythm();
+
+  }
+</script>

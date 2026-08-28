@@ -1,0 +1,624 @@
+<script>
+  function initHomeHeroMotion() {
+    const hero =
+      document.querySelector(
+        "main > section:first-of-type"
+      );
+
+    if (
+      !(hero instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    if (
+      hero.dataset.heroMotionReady
+      === "true"
+    ) {
+      return;
+    }
+
+    hero.dataset.heroMotionReady =
+      "true";
+
+    hero.classList.add(
+      "home-hero-motion-ready"
+    );
+
+
+    /* =====================================================
+       FIND CURRENT HERO STRUCTURE
+       ===================================================== */
+
+    const inner =
+      hero.querySelector(
+        ":scope > .container"
+      )
+      || hero.querySelector(
+        ".container"
+      );
+
+
+    const children =
+      inner instanceof HTMLElement
+        ? Array.from(
+            inner.children
+          )
+        : [];
+
+
+    const copy =
+      hero.querySelector(
+        [
+          ".hero-copy",
+          ".home-hero-copy",
+          ".hero-content",
+          ".hero-left",
+          "[class*='hero-copy']",
+        ].join(",")
+      )
+      || children[0]
+      || null;
+
+
+    let preview =
+      hero.querySelector(
+        [
+          "[data-home-hero-preview]",
+          ".hero-product-preview",
+          ".hero-preview",
+          ".product-preview",
+          ".hero-visual",
+          "[class*='product-preview']",
+          "[class*='hero-preview']",
+        ].join(",")
+      );
+
+
+    if (
+      !preview
+      && children.length >= 2
+    ) {
+      preview =
+        children[
+          children.length - 1
+        ];
+    }
+
+
+    const actions =
+      hero.querySelector(
+        [
+          ".hero-actions",
+          ".home-hero-actions",
+          ".hero-cta",
+          "[class*='hero-action']",
+        ].join(",")
+      );
+
+
+    const capabilities =
+      hero.querySelector(
+        [
+          ".hero-capabilities",
+          ".home-capabilities",
+          ".hero-features",
+          ".hero-meta",
+          "[class*='capabilit']",
+        ].join(",")
+      );
+
+
+    /* =====================================================
+       MOTION LAYERS
+       ===================================================== */
+
+    const motionLayer =
+      document.createElement(
+        "div"
+      );
+
+    motionLayer.className =
+      "hero-motion-layer";
+
+    motionLayer.setAttribute(
+      "aria-hidden",
+      "true"
+    );
+
+
+    motionLayer.innerHTML = `
+      <div class="hero-motion-orb hero-motion-orb-a"></div>
+      <div class="hero-motion-orb hero-motion-orb-b"></div>
+      <div class="hero-motion-orb hero-motion-orb-c"></div>
+      <div class="hero-motion-grid"></div>
+      <div class="hero-motion-spotlight"></div>
+    `;
+
+
+    hero.insertBefore(
+      motionLayer,
+      hero.firstChild
+    );
+
+
+    /* =====================================================
+       ENTRANCE REVEAL
+       ===================================================== */
+
+    const revealTargets =
+      [
+        copy,
+        actions,
+        capabilities,
+        preview,
+      ]
+      .filter(
+        (
+          value,
+          index,
+          array
+        ) =>
+          value instanceof Element
+          && array.indexOf(value)
+            === index
+      );
+
+
+    revealTargets.forEach(
+      (
+        element,
+        index
+      ) => {
+
+        element.classList.add(
+          "hero-motion-reveal"
+        );
+
+
+        if (
+          element === preview
+        ) {
+          element.classList.add(
+            "hero-motion-preview"
+          );
+        }
+
+
+        element.style.setProperty(
+          "--hero-reveal-delay",
+          `${80 + index * 105}ms`
+        );
+
+      }
+    );
+
+
+    requestAnimationFrame(
+      () => {
+
+        requestAnimationFrame(
+          () => {
+
+            hero.classList.add(
+              "hero-motion-entered"
+            );
+
+          }
+        );
+
+      }
+    );
+
+
+    /* =====================================================
+       DETECT FLOATING CARDS INSIDE PREVIEW
+       ===================================================== */
+
+    if (
+      preview instanceof HTMLElement
+    ) {
+
+      preview.setAttribute(
+        "data-home-hero-preview",
+        ""
+      );
+
+
+      const previewRect =
+        preview.getBoundingClientRect();
+
+
+      const candidates =
+        Array.from(
+          preview.querySelectorAll(
+            "*"
+          )
+        );
+
+
+      let floatingIndex =
+        0;
+
+
+      for (
+        const candidate
+        of candidates
+      ) {
+
+        if (
+          !(candidate instanceof HTMLElement)
+        ) {
+          continue;
+        }
+
+
+        const style =
+          window.getComputedStyle(
+            candidate
+          );
+
+
+        if (
+          style.position
+          !== "absolute"
+        ) {
+          continue;
+        }
+
+
+        const rect =
+          candidate.getBoundingClientRect();
+
+
+        if (
+          rect.width < 45
+          || rect.height < 20
+          || rect.width
+            > previewRect.width * 0.72
+          || rect.height
+            > previewRect.height * 0.5
+        ) {
+          continue;
+        }
+
+
+        candidate.classList.add(
+          "hero-motion-floating"
+        );
+
+
+        candidate.style.setProperty(
+          "--hero-float-delay",
+          `${-floatingIndex * 0.9}s`
+        );
+
+
+        candidate.style.setProperty(
+          "--hero-float-distance",
+          `${5 + (
+            floatingIndex % 3
+          ) * 2}px`
+        );
+
+
+        floatingIndex++;
+
+
+        if (
+          floatingIndex >= 6
+        ) {
+          break;
+        }
+
+      }
+
+    }
+
+
+    /* =====================================================
+       POINTER SPOTLIGHT
+       ===================================================== */
+
+    const finePointer =
+      window.matchMedia(
+        "(pointer: fine)"
+      );
+
+
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
+
+
+    let pointerFrame =
+      null;
+
+
+    function updatePointer(
+      event
+    ) {
+
+      if (
+        reducedMotion.matches
+        || !finePointer.matches
+      ) {
+        return;
+      }
+
+
+      if (pointerFrame) {
+        cancelAnimationFrame(
+          pointerFrame
+        );
+      }
+
+
+      pointerFrame =
+        requestAnimationFrame(
+          () => {
+
+            const rect =
+              hero.getBoundingClientRect();
+
+
+            const x =
+              (
+                (
+                  event.clientX
+                  - rect.left
+                )
+                / rect.width
+              )
+              * 100;
+
+
+            const y =
+              (
+                (
+                  event.clientY
+                  - rect.top
+                )
+                / rect.height
+              )
+              * 100;
+
+
+            hero.style.setProperty(
+              "--hero-pointer-x",
+              `${x}%`
+            );
+
+
+            hero.style.setProperty(
+              "--hero-pointer-y",
+              `${y}%`
+            );
+
+          }
+        );
+
+    }
+
+
+    hero.addEventListener(
+      "pointermove",
+      updatePointer,
+      {
+        passive: true,
+      }
+    );
+
+
+    /* =====================================================
+       PRODUCT PREVIEW PARALLAX
+       ===================================================== */
+
+    let previewFrame =
+      null;
+
+
+    if (
+      preview instanceof HTMLElement
+    ) {
+
+      hero.addEventListener(
+        "pointermove",
+        event => {
+
+          if (
+            reducedMotion.matches
+            || !finePointer.matches
+          ) {
+            return;
+          }
+
+
+          if (previewFrame) {
+            cancelAnimationFrame(
+              previewFrame
+            );
+          }
+
+
+          previewFrame =
+            requestAnimationFrame(
+              () => {
+
+                const rect =
+                  hero.getBoundingClientRect();
+
+
+                const x =
+                  (
+                    event.clientX
+                    - rect.left
+                  )
+                  / rect.width;
+
+
+                const y =
+                  (
+                    event.clientY
+                    - rect.top
+                  )
+                  / rect.height;
+
+
+                const rotateY =
+                  (
+                    x - 0.5
+                  )
+                  * 5.5;
+
+
+                const rotateX =
+                  (
+                    0.5 - y
+                  )
+                  * 4.5;
+
+
+                const moveX =
+                  (
+                    x - 0.5
+                  )
+                  * 5;
+
+
+                const moveY =
+                  (
+                    y - 0.5
+                  )
+                  * 4;
+
+
+                preview.style.setProperty(
+                  "--hero-rotate-x",
+                  `${rotateX}deg`
+                );
+
+
+                preview.style.setProperty(
+                  "--hero-rotate-y",
+                  `${rotateY}deg`
+                );
+
+
+                preview.style.setProperty(
+                  "--hero-move-x",
+                  `${moveX}px`
+                );
+
+
+                preview.style.setProperty(
+                  "--hero-move-y",
+                  `${moveY}px`
+                );
+
+              }
+            );
+
+        },
+        {
+          passive: true,
+        }
+      );
+
+
+      hero.addEventListener(
+        "pointerleave",
+        () => {
+
+          preview.style.setProperty(
+            "--hero-rotate-x",
+            "0deg"
+          );
+
+
+          preview.style.setProperty(
+            "--hero-rotate-y",
+            "0deg"
+          );
+
+
+          preview.style.setProperty(
+            "--hero-move-x",
+            "0px"
+          );
+
+
+          preview.style.setProperty(
+            "--hero-move-y",
+            "0px"
+          );
+
+        }
+      );
+
+    }
+
+
+    /* =====================================================
+       CTA MICRO INTERACTION
+       ===================================================== */
+
+    if (
+      actions instanceof Element
+    ) {
+
+      const links =
+        Array.from(
+          actions.querySelectorAll(
+            "a"
+          )
+        );
+
+
+      links.forEach(
+        (
+          link,
+          index
+        ) => {
+
+          link.classList.add(
+            "hero-motion-cta"
+          );
+
+
+          if (
+            index === 0
+          ) {
+            link.classList.add(
+              "hero-motion-cta-primary"
+            );
+          }
+
+        }
+      );
+
+    }
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initHomeHeroMotion,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initHomeHeroMotion();
+
+  }
+</script>

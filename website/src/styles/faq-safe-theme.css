@@ -1,0 +1,971 @@
+/* =========================================================
+   AITRANOVA V10.4
+   FAQ SAFE PREMIUM THEME
+
+   No layout restructuring
+   No search logic changes
+   No query/hash changes
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.faq-page,
+.faq-v8,
+main:has(.faq-search) {
+  background:
+    linear-gradient(
+      135deg,
+      #cbc4d7 0%,
+      #d5cedf 48%,
+      #c9c1d5 100%
+    ) !important;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-hero {
+  border-bottom:
+    1px solid
+    rgba(156, 130, 255, 0.16) !important;
+
+  background:
+    radial-gradient(
+      circle at 80% 18%,
+      rgba(120, 82, 255, 0.27),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 18% 75%,
+      rgba(184, 100, 235, 0.10),
+      transparent 28%
+    ),
+    linear-gradient(
+      132deg,
+      #090610 0%,
+      #0f0919 25%,
+      #171020 54%,
+      #24143d 80%,
+      #100d1b 100%
+    ) !important;
+}
+
+
+/* HERO TITLE */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-hero h1 {
+  color:
+    #ffffff !important;
+
+  text-shadow:
+    0 9px 32px
+    rgba(0, 0, 0, 0.20);
+}
+
+
+/* HERO ACCENT */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-hero h1 em {
+  background:
+    linear-gradient(
+      110deg,
+      #a38aff 0%,
+      #7d61ff 38%,
+      #c079ef 70%,
+      #78a9ff 100%
+    );
+
+  background-clip:
+    text;
+
+  -webkit-background-clip:
+    text;
+
+  color:
+    transparent !important;
+
+  -webkit-text-fill-color:
+    transparent !important;
+}
+
+
+/* HERO DESCRIPTION */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-hero p {
+  color:
+    rgba(241, 235, 249, 0.86) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* KICKER */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+:is(
+  .faq-kicker,
+  [class*="faq-kicker"],
+  [class*="faq-eyebrow"]
+) {
+  color:
+    #ae9aff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   CONTENT HEAD
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-content-head h2 {
+  color:
+    #251d2d !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-content-head p {
+  color:
+    #62576d !important;
+
+  opacity:
+    1 !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-content-head
+:is(
+  span,
+  small
+) {
+  color:
+    #684dde !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-search {
+  border:
+    1px solid
+    rgba(109, 89, 132, 0.24) !important;
+
+  border-radius:
+    15px !important;
+
+  background:
+    rgba(249, 246, 251, 0.91) !important;
+
+  box-shadow:
+    0 13px 30px
+    rgba(44, 31, 61, 0.075) !important;
+
+  transition:
+    border-color 170ms ease,
+    box-shadow 170ms ease,
+    transform 170ms ease;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-search:focus-within {
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(105, 79, 225, 0.52) !important;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(105, 79, 225, 0.09),
+    0 16px 34px
+    rgba(44, 31, 61, 0.10) !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-search input {
+  color:
+    #2b2233 !important;
+
+  font-size:
+    14px !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-search input::placeholder {
+  color:
+    #887d92 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-search kbd {
+  border-color:
+    #c5bad0 !important;
+
+  background:
+    #e8e1ee !important;
+
+  color:
+    #54485e !important;
+}
+
+
+/* =========================================================
+   CATEGORY FILTERS
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-categories button {
+  border:
+    1px solid
+    rgba(106, 87, 130, 0.22) !important;
+
+  border-radius:
+    999px !important;
+
+  background:
+    rgba(245, 241, 248, 0.82) !important;
+
+  color:
+    #62576c !important;
+
+  opacity:
+    1 !important;
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-categories button:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(107, 81, 229, 0.34) !important;
+
+  background:
+    #faf7fc !important;
+
+  color:
+    #4f3d68 !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-categories button.active,
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-categories button[aria-pressed="true"] {
+  border-color:
+    transparent !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #654bef,
+      #8265ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 9px 20px
+    rgba(88, 59, 220, 0.28) !important;
+}
+
+
+/* =========================================================
+   RESULT META
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-result-meta {
+  color:
+    #74697f !important;
+
+  opacity:
+    1 !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-result-meta strong {
+  color:
+    #292131 !important;
+}
+
+
+/* =========================================================
+   FAQ CARD
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-item {
+  overflow:
+    hidden;
+
+  border:
+    1px solid
+    rgba(106, 87, 129, 0.20) !important;
+
+  border-radius:
+    15px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(250, 247, 251, 0.96),
+      rgba(239, 234, 245, 0.94)
+    ) !important;
+
+  box-shadow:
+    0 11px 26px
+    rgba(44, 31, 60, 0.05) !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease,
+    background 170ms ease;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-item:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(105, 79, 225, 0.30) !important;
+
+  box-shadow:
+    0 16px 32px
+    rgba(44, 31, 60, 0.085) !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-item[open] {
+  border-color:
+    rgba(105, 79, 225, 0.44) !important;
+
+  background:
+    #faf7fc !important;
+
+  box-shadow:
+    0 18px 38px
+    rgba(44, 31, 60, 0.10) !important;
+}
+
+
+/* =========================================================
+   QUESTION
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-item summary strong {
+  color:
+    #292131 !important;
+
+  font-size:
+    15px !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   NUMBER
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-number {
+  border-radius:
+    10px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #e2dafe,
+      #d8e1ff
+    ) !important;
+
+  color:
+    #684bed !important;
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255,255,255,0.55);
+}
+
+
+/* =========================================================
+   TOGGLE
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-toggle {
+  border-radius:
+    8px !important;
+
+  background:
+    rgba(105, 79, 225, 0.09) !important;
+
+  color:
+    #6c50df !important;
+
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    color 170ms ease;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-item[open]
+.faq-toggle {
+  transform:
+    rotate(45deg);
+
+  background:
+    #654bef !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   ANSWER
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-answer p {
+  color:
+    #5d5367 !important;
+
+  font-size:
+    13px !important;
+
+  line-height:
+    1.75 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-answer a {
+  color:
+    #654bef !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-answer a:hover {
+  color:
+    #4d32ca !important;
+}
+
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-empty {
+  border:
+    1px dashed
+    rgba(105, 80, 223, 0.34) !important;
+
+  border-radius:
+    16px !important;
+
+  background:
+    rgba(247, 243, 250, 0.72) !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-empty strong {
+  color:
+    #2d2435 !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-empty p {
+  color:
+    #72677d !important;
+}
+
+
+/* =========================================================
+   SUPPORT / FINAL SECTION
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-support {
+  border-top:
+    1px solid
+    rgba(163, 138, 255, 0.13) !important;
+
+  background:
+    radial-gradient(
+      circle at 78% 16%,
+      rgba(118, 84, 255, 0.18),
+      transparent 29%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0713,
+      #171020 55%,
+      #25143d
+    ) !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-support h2 {
+  color:
+    #ffffff !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-support p {
+  color:
+    rgba(235, 228, 244, 0.82) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-support a {
+  color:
+    #dcd1ff !important;
+}
+
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+.faq-support a.primary {
+  border-color:
+    transparent !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #654bef,
+      #8062ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   ACCESSIBLE FOCUS
+   ========================================================= */
+
+:is(
+  .faq-page,
+  .faq-v8,
+  main:has(.faq-search)
+)
+:is(
+  button,
+  input,
+  summary,
+  a
+):focus-visible {
+  outline:
+    2px solid
+    #876cff !important;
+
+  outline-offset:
+    3px !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  :is(
+    .faq-page,
+    .faq-v8,
+    main:has(.faq-search)
+  )
+  :is(
+    .faq-item,
+    .faq-categories button,
+    .faq-toggle,
+    .faq-search
+  ) {
+    transition:
+      none !important;
+  }
+
+}
+
+
+/* =========================================================
+   V10.4B
+   EXACT FAQ HERO BUTTON CONTRAST
+   ========================================================= */
+
+
+/* Primary */
+
+.faq-page
+.faq-hero-links
+a:first-child {
+  border:
+    1px solid
+    transparent !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #654bef,
+      #8062ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 12px 27px
+    rgba(85, 56, 213, 0.30) !important;
+}
+
+
+/* Secondary */
+
+.faq-page
+.faq-hero-links
+a:nth-child(2) {
+  border:
+    1px solid
+    rgba(194, 180, 215, 0.30) !important;
+
+  background:
+    rgba(255, 255, 255, 0.11) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255, 255, 255, 0.07) !important;
+
+  backdrop-filter:
+    blur(9px);
+}
+
+
+/* Also force nested text white */
+
+.faq-page
+.faq-hero-links
+a:nth-child(2)
+span {
+  color:
+    #ffffff !important;
+
+  opacity: 1 !important;
+}
+
+
+.faq-page
+.faq-hero-links
+a:nth-child(2):hover {
+  border-color:
+    rgba(186, 165, 255, 0.42) !important;
+
+  background:
+    rgba(118, 88, 255, 0.19) !important;
+
+  color:
+    #ffffff !important;
+
+  transform:
+    translateY(-2px);
+}
+
+
+/* Primary hover */
+
+.faq-page
+.faq-hero-links
+a:first-child:hover {
+  filter:
+    brightness(1.07);
+
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 16px 34px
+    rgba(85, 56, 213, 0.38) !important;
+}
+
+
+
+/* =========================================================
+   FAQ SUPPORT ACTIONS
+   ========================================================= */
+
+.faq-page
+.faq-support-actions
+a.primary {
+  border-color:
+    transparent !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #654bef,
+      #8062ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 12px 27px
+    rgba(85, 56, 213, 0.28) !important;
+}
+
+
+.faq-page
+.faq-support-actions
+a:not(.primary) {
+  border:
+    1px solid
+    rgba(191, 173, 220, 0.27) !important;
+
+  background:
+    rgba(255, 255, 255, 0.09) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+.faq-page
+.faq-support-actions
+a:not(.primary)
+span {
+  color:
+    #ffffff !important;
+}
+
+
+.faq-page
+.faq-support-actions
+a:not(.primary):hover {
+  background:
+    rgba(118, 88, 255, 0.17) !important;
+
+  border-color:
+    rgba(181, 159, 255, 0.40) !important;
+
+  color:
+    #ffffff !important;
+}
+

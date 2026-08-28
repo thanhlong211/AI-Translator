@@ -1,0 +1,1474 @@
+/* =========================================================
+   AITRANOVA V9.6
+   COMPACT NIGHT NAVBAR
+   ========================================================= */
+
+:root {
+  --nav-night:
+    #0d0916;
+
+  --nav-night-2:
+    #151020;
+
+  --nav-surface:
+    rgba(
+      20,
+      15,
+      31,
+      0.9
+    );
+
+  --nav-text:
+    #f5f1ff;
+
+  --nav-muted:
+    #b8adc9;
+
+  --nav-border:
+    rgba(
+      167,
+      143,
+      255,
+      0.16
+    );
+
+  --nav-purple:
+    #7658ff;
+
+  --nav-purple-2:
+    #967cff;
+}
+
+
+/* =========================================================
+   REMOVE OLD UTILITY ROWS
+   ========================================================= */
+
+.site-header-utility,
+.header-utility,
+.top-utility-bar,
+.home-top-actions,
+.nav-utility-row,
+.navbar-utility,
+.site-controls,
+.header-controls-row {
+  display:
+    none !important;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.site-navbar.navbar-v96 {
+  position:
+    sticky !important;
+
+  z-index:
+    200 !important;
+
+  top:
+    0;
+
+  width:
+    100%;
+
+  min-height:
+    64px !important;
+
+  border-bottom:
+    1px solid
+    var(
+      --nav-border
+    ) !important;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(
+        13,
+        9,
+        22,
+        0.96
+      ),
+      rgba(
+        19,
+        14,
+        30,
+        0.94
+      )
+    ) !important;
+
+  box-shadow:
+    0 9px 27px
+    rgba(
+      0,
+      0,
+      0,
+      0.18
+    );
+
+  backdrop-filter:
+    blur(19px)
+    saturate(1.2);
+
+  transition:
+    min-height
+      180ms ease,
+    background
+      180ms ease,
+    box-shadow
+      180ms ease;
+}
+
+
+.site-navbar.navbar-v96.scrolled {
+  background:
+    rgba(
+      12,
+      8,
+      20,
+      0.975
+    ) !important;
+
+  box-shadow:
+    0 12px 35px
+    rgba(
+      0,
+      0,
+      0,
+      0.28
+    );
+}
+
+
+/* =========================================================
+   INNER
+   ========================================================= */
+
+.navbar-v96-inner {
+  display:
+    grid !important;
+
+  grid-template-columns:
+    auto
+    minmax(
+      0,
+      1fr
+    )
+    auto !important;
+
+  align-items:
+    center !important;
+
+  gap:
+    23px !important;
+
+  min-height:
+    64px !important;
+
+  padding-top:
+    0 !important;
+
+  padding-bottom:
+    0 !important;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.navbar-v96-brand {
+  display:
+    inline-flex;
+
+  align-items:
+    center;
+
+  min-width:
+    max-content;
+
+  color:
+    var(
+      --nav-text
+    ) !important;
+
+  text-decoration:
+    none;
+}
+
+
+.navbar-v96-brand img {
+  max-height:
+    36px;
+}
+
+
+/* =========================================================
+   NAV LINKS
+   ========================================================= */
+
+.navbar-v96-nav {
+  display:
+    flex !important;
+
+  align-items:
+    center;
+
+  justify-content:
+    flex-end;
+
+  gap:
+    2px;
+
+  min-width:
+    0;
+}
+
+
+.navbar-v96-link {
+  position:
+    relative;
+
+  display:
+    inline-flex;
+
+  min-height:
+    36px;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  padding:
+    0 10px;
+
+  border:
+    1px solid
+    transparent;
+
+  border-radius:
+    9px;
+
+  color:
+    var(
+      --nav-muted
+    ) !important;
+
+  font-size:
+    12px !important;
+
+  font-weight:
+    720 !important;
+
+  white-space:
+    nowrap;
+
+  transition:
+    color
+      160ms ease,
+    background
+      160ms ease,
+    border-color
+      160ms ease,
+    transform
+      160ms ease;
+}
+
+
+.navbar-v96-link:hover {
+  transform:
+    translateY(-1px);
+
+  border-color:
+    rgba(
+      171,
+      148,
+      255,
+      0.08
+    );
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.045
+    );
+
+  color:
+    #ffffff !important;
+}
+
+
+.navbar-v96-link.active {
+  border-color:
+    rgba(
+      155,
+      128,
+      255,
+      0.16
+    );
+
+  background:
+    rgba(
+      118,
+      88,
+      255,
+      0.13
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+.navbar-v96-link.active::after {
+  position:
+    absolute;
+
+  right:
+    11px;
+
+  bottom:
+    2px;
+
+  left:
+    11px;
+
+  height:
+    2px;
+
+  border-radius:
+    999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #6d52f1,
+      #a089ff
+    );
+
+  content:
+    "";
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.navbar-v96-actions {
+  display:
+    inline-flex !important;
+
+  align-items:
+    center !important;
+
+  justify-content:
+    flex-end;
+
+  gap:
+    8px !important;
+
+  min-width:
+    max-content;
+}
+
+
+/* =========================================================
+   LANGUAGE SWITCHER
+   ========================================================= */
+
+.navbar-v96-language {
+  display:
+    flex !important;
+
+  align-items:
+    center;
+
+  min-height:
+    40px;
+
+  padding:
+    3px;
+
+  border:
+    1px solid
+    rgba(
+      166,
+      142,
+      255,
+      0.16
+    );
+
+  border-radius:
+    11px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.045
+    );
+
+  box-shadow:
+    inset
+    0
+    1px
+    0
+    rgba(
+      255,
+      255,
+      255,
+      0.03
+    );
+}
+
+
+.navbar-v96-language
+[data-lang-choice] {
+  min-width:
+    37px !important;
+
+  min-height:
+    32px !important;
+
+  border:
+    0 !important;
+
+  border-radius:
+    8px !important;
+
+  background:
+    transparent !important;
+
+  color:
+    #aea3bf !important;
+
+  font-size:
+    11px !important;
+
+  font-weight:
+    850 !important;
+
+  transition:
+    color
+      150ms ease,
+    background
+      150ms ease,
+    box-shadow
+      150ms ease;
+}
+
+
+.navbar-v96-language
+[data-lang-choice]:hover {
+  color:
+    white !important;
+}
+
+
+.navbar-v96-language
+[data-lang-choice].active,
+.navbar-v96-language
+[data-lang-choice][aria-pressed="true"] {
+  background:
+    linear-gradient(
+      135deg,
+      #6850ec,
+      #8269ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 7px 15px
+    rgba(
+      92,
+      66,
+      222,
+      0.3
+    );
+}
+
+
+/* =========================================================
+   DOWNLOAD
+   ========================================================= */
+
+.navbar-v96-download {
+  position:
+    relative;
+
+  display:
+    inline-flex;
+
+  min-height:
+    40px;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  gap:
+    9px;
+
+  padding:
+    0 14px;
+
+  overflow:
+    hidden;
+
+  border:
+    1px solid
+    rgba(
+      191,
+      174,
+      255,
+      0.18
+    );
+
+  border-radius:
+    11px;
+
+  background:
+    linear-gradient(
+      130deg,
+      #654bef,
+      #7a5cff 55%,
+      #9479ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  font-size:
+    11px !important;
+
+  font-weight:
+    850;
+
+  white-space:
+    nowrap;
+
+  box-shadow:
+    0 10px 24px
+    rgba(
+      77,
+      53,
+      198,
+      0.3
+    ),
+    inset
+    0
+    1px
+    0
+    rgba(
+      255,
+      255,
+      255,
+      0.18
+    );
+
+  transition:
+    transform
+      170ms ease,
+    box-shadow
+      170ms ease;
+}
+
+
+.navbar-v96-download::before {
+  position:
+    absolute;
+
+  top:
+    -20%;
+
+  bottom:
+    -20%;
+
+  left:
+    -40%;
+
+  width:
+    24%;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(
+        255,
+        255,
+        255,
+        0.32
+      ),
+      transparent
+    );
+
+  content:
+    "";
+
+  pointer-events:
+    none;
+
+  transform:
+    skewX(-18deg);
+
+  animation:
+    navbarDownloadShine
+    4.3s
+    ease-in-out
+    infinite;
+}
+
+
+@keyframes navbarDownloadShine {
+
+  0%,
+  70% {
+    left:
+      -40%;
+  }
+
+  100% {
+    left:
+      130%;
+  }
+
+}
+
+
+.navbar-v96-download:hover {
+  transform:
+    translateY(-2px);
+
+  box-shadow:
+    0 14px 31px
+    rgba(
+      83,
+      56,
+      213,
+      0.4
+    );
+}
+
+
+.navbar-v96-download-icon {
+  font-size:
+    14px;
+}
+
+
+/* =========================================================
+   MOBILE BUTTON
+   ========================================================= */
+
+.navbar-v96-menu-button {
+  display:
+    none;
+
+  width:
+    40px;
+
+  height:
+    40px;
+
+  align-items:
+    center;
+
+  justify-content:
+    center;
+
+  flex-direction:
+    column;
+
+  gap:
+    5px;
+
+  border:
+    1px solid
+    rgba(
+      168,
+      145,
+      255,
+      0.17
+    );
+
+  border-radius:
+    10px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.05
+    );
+
+  cursor:
+    pointer;
+}
+
+
+.navbar-v96-menu-button
+> span {
+  display:
+    block;
+
+  width:
+    15px;
+
+  height:
+    1.5px;
+
+  border-radius:
+    999px;
+
+  background:
+    #ded5eb;
+
+  transition:
+    transform
+      160ms ease;
+}
+
+
+.navbar-v96-menu-button.active
+> span:first-child {
+  transform:
+    translateY(
+      3.25px
+    )
+    rotate(
+      45deg
+    );
+}
+
+
+.navbar-v96-menu-button.active
+> span:last-child {
+  transform:
+    translateY(
+      -3.25px
+    )
+    rotate(
+      -45deg
+    );
+}
+
+
+/* =========================================================
+   MOBILE MENU
+   ========================================================= */
+
+.navbar-v96-mobile {
+  border-top:
+    1px solid
+    rgba(
+      162,
+      138,
+      255,
+      0.13
+    );
+
+  background:
+    rgba(
+      12,
+      8,
+      20,
+      0.985
+    );
+
+  box-shadow:
+    0 24px 45px
+    rgba(
+      0,
+      0,
+      0,
+      0.28
+    );
+
+  backdrop-filter:
+    blur(20px);
+}
+
+
+.navbar-v96-mobile[hidden] {
+  display:
+    none !important;
+}
+
+
+.navbar-v96-mobile-inner {
+  padding-top:
+    12px;
+
+  padding-bottom:
+    17px;
+}
+
+
+.navbar-v96-mobile nav {
+  display:
+    grid;
+
+  gap:
+    5px;
+}
+
+
+.navbar-v96-mobile nav
+> a {
+  display:
+    flex;
+
+  min-height:
+    46px;
+
+  align-items:
+    center;
+
+  justify-content:
+    space-between;
+
+  padding:
+    0 13px;
+
+  border:
+    1px solid
+    transparent;
+
+  border-radius:
+    10px;
+
+  color:
+    #b9aec9;
+
+  font-size:
+    13px;
+
+  font-weight:
+    760;
+}
+
+
+.navbar-v96-mobile nav
+> a:hover,
+.navbar-v96-mobile nav
+> a.active {
+  border-color:
+    rgba(
+      151,
+      123,
+      255,
+      0.14
+    );
+
+  background:
+    rgba(
+      118,
+      88,
+      255,
+      0.1
+    );
+
+  color:
+    white;
+}
+
+
+.navbar-v96-mobile
+.navbar-v96-mobile-download {
+  margin-top:
+    5px;
+
+  border-color:
+    rgba(
+      174,
+      153,
+      255,
+      0.2
+    );
+
+  background:
+    linear-gradient(
+      130deg,
+      #654bef,
+      #8165ff
+    );
+
+  color:
+    white;
+}
+
+
+.navbar-v96-mobile-language {
+  display:
+    grid;
+
+  grid-template-columns:
+    auto
+    1fr;
+
+  align-items:
+    center;
+
+  gap:
+    15px;
+
+  margin-top:
+    13px;
+
+  padding-top:
+    13px;
+
+  border-top:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.06
+    );
+}
+
+
+.navbar-v96-mobile-language
+> span {
+  color:
+    #71677d;
+
+  font-size:
+    9px;
+
+  font-weight:
+    850;
+
+  letter-spacing:
+    0.1em;
+}
+
+
+/* =========================================================
+   HERO STARTS IMMEDIATELY
+   ========================================================= */
+
+.site-navbar.navbar-v96
++ main
+> section:first-child,
+.site-navbar.navbar-v96
+~ main
+> section:first-child {
+  margin-top:
+    0 !important;
+}
+
+
+.home-hero-premium,
+.home-hero-motion-ready {
+  padding-top:
+    clamp(
+      35px,
+      3.5vw,
+      52px
+    ) !important;
+}
+
+
+/* =========================================================
+   BREAKPOINT
+   ========================================================= */
+
+@media (
+  max-width: 1040px
+) {
+
+  .navbar-v96-nav {
+    display:
+      none !important;
+  }
+
+
+  .navbar-v96-menu-button {
+    display:
+      flex;
+  }
+
+}
+
+
+@media (
+  max-width: 680px
+) {
+
+  .navbar-v96-inner {
+    gap:
+      10px !important;
+  }
+
+
+  .navbar-v96-language {
+    display:
+      none !important;
+  }
+
+
+  .navbar-v96-download {
+    min-height:
+      38px;
+
+    padding:
+      0 11px;
+
+    font-size:
+      10px !important;
+  }
+
+}
+
+
+@media (
+  max-width: 430px
+) {
+
+  .navbar-v96-download {
+    display:
+      none;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .navbar-v96-download::before {
+    animation:
+      none !important;
+  }
+
+}
+
+
+/* =========================================================
+   V9.6.1
+   HARD SINGLE-ROW NAVBAR FIX
+   ========================================================= */
+
+.site-navbar.navbar-v96 {
+  min-height: 60px !important;
+  height: auto !important;
+  padding: 0 !important;
+}
+
+
+.navbar-v96-inner {
+  display: flex !important;
+
+  width:
+    min(
+      calc(100% - 40px),
+      1320px
+    ) !important;
+
+  min-height: 60px !important;
+  height: 60px !important;
+
+  align-items: center !important;
+
+  flex-wrap: nowrap !important;
+
+  gap: 18px !important;
+
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+
+  margin-right: auto !important;
+  margin-left: auto !important;
+}
+
+
+/* BRAND */
+
+.navbar-v96-brand {
+  display: inline-flex !important;
+
+  flex:
+    0 0 auto !important;
+
+  align-items: center !important;
+
+  min-width: max-content !important;
+
+  margin: 0 !important;
+
+  padding: 0 !important;
+
+  color: #f7f3ff !important;
+}
+
+
+.navbar-v96-brand img {
+  width: auto !important;
+
+  max-width: none !important;
+
+  max-height: 37px !important;
+}
+
+
+.navbar-v96-brand
+:is(
+  span,
+  strong,
+  b,
+  p
+) {
+  color: #f7f3ff !important;
+
+  opacity: 1 !important;
+}
+
+
+/* NAVIGATION */
+
+.navbar-v96-nav {
+  display: flex !important;
+
+  flex:
+    1 1 auto !important;
+
+  min-width: 0 !important;
+
+  align-items: center !important;
+
+  justify-content: flex-end !important;
+
+  flex-wrap: nowrap !important;
+
+  gap: 2px !important;
+
+  margin: 0 !important;
+
+  padding: 0 !important;
+}
+
+
+.navbar-v96-link {
+  flex:
+    0 0 auto !important;
+
+  min-height: 36px !important;
+
+  padding:
+    0 10px !important;
+
+  color:
+    #c7bdd5 !important;
+
+  font-size:
+    12px !important;
+}
+
+
+.navbar-v96-link:hover {
+  color:
+    #ffffff !important;
+}
+
+
+.navbar-v96-link.active {
+  color:
+    #ffffff !important;
+}
+
+
+/* ACTIONS
+   Important: explicitly reset legacy positioning / grid rules.
+*/
+
+.navbar-v96-actions {
+  position: static !important;
+
+  display: flex !important;
+
+  flex:
+    0 0 auto !important;
+
+  width: auto !important;
+
+  min-width: max-content !important;
+  height: auto !important;
+
+  align-items: center !important;
+
+  justify-content: flex-end !important;
+
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+
+  gap: 8px !important;
+
+  grid-column: auto !important;
+  grid-row: auto !important;
+
+  margin: 0 0 0 auto !important;
+
+  padding: 0 !important;
+
+  transform: none !important;
+}
+
+
+/* LANGUAGE */
+
+.navbar-v96-language {
+  position: static !important;
+
+  display: flex !important;
+
+  flex:
+    0 0 auto !important;
+
+  width: auto !important;
+  min-width: auto !important;
+
+  height: 40px !important;
+  min-height: 40px !important;
+
+  align-items: center !important;
+
+  margin: 0 !important;
+
+  padding: 3px !important;
+
+  border:
+    1px solid
+    rgba(
+      167,
+      143,
+      255,
+      0.2
+    ) !important;
+
+  border-radius:
+    11px !important;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.055
+    ) !important;
+}
+
+
+.navbar-v96-language > * {
+  width: auto !important;
+
+  max-width: max-content !important;
+
+  margin: 0 !important;
+}
+
+
+.navbar-v96-language
+[data-lang-choice] {
+  width: 36px !important;
+
+  min-width: 36px !important;
+
+  height: 32px !important;
+
+  min-height: 32px !important;
+
+  padding: 0 !important;
+
+  color:
+    #beb3ce !important;
+}
+
+
+.navbar-v96-language
+[data-lang-choice].active,
+.navbar-v96-language
+[data-lang-choice][aria-pressed="true"] {
+  background:
+    linear-gradient(
+      135deg,
+      #7658ff,
+      #9278ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* DOWNLOAD */
+
+.navbar-v96-download {
+  position: relative !important;
+
+  display: inline-flex !important;
+
+  flex:
+    0 0 auto !important;
+
+  width: auto !important;
+
+  min-width: max-content !important;
+
+  min-height: 40px !important;
+
+  align-items: center !important;
+
+  justify-content: center !important;
+
+  margin: 0 !important;
+
+  padding:
+    0 14px !important;
+
+  transform: none;
+}
+
+
+/* No mysterious secondary header row */
+
+.navbar-v96-inner
++ .navbar-v96-actions,
+
+.site-navbar
+> .navbar-v96-actions {
+  display: none !important;
+}
+
+
+/* HERO START */
+
+.home-hero-premium,
+.home-hero-motion-ready {
+  margin-top: 0 !important;
+
+  padding-top:
+    clamp(
+      26px,
+      2.6vw,
+      38px
+    ) !important;
+}
+
+
+/* =========================================================
+   MID-SIZE DESKTOP
+   ========================================================= */
+
+@media (
+  min-width: 1041px
+)
+and (
+  max-width: 1250px
+) {
+
+  .navbar-v96-inner {
+    gap: 11px !important;
+  }
+
+
+  .navbar-v96-link {
+    padding:
+      0 7px !important;
+
+    font-size:
+      11px !important;
+  }
+
+
+  .navbar-v96-download {
+    padding:
+      0 11px !important;
+  }
+
+}
+
+
+/* =========================================================
+   TABLET / MOBILE
+   ========================================================= */
+
+@media (
+  max-width: 1040px
+) {
+
+  .navbar-v96-inner {
+    width:
+      min(
+        calc(100% - 30px),
+        1320px
+      ) !important;
+
+    height: 60px !important;
+  }
+
+
+  .navbar-v96-nav {
+    display:
+      none !important;
+  }
+
+
+  .navbar-v96-actions {
+    margin-left:
+      auto !important;
+  }
+
+
+  .navbar-v96-menu-button {
+    display:
+      flex !important;
+  }
+
+}
+
+
+@media (
+  max-width: 680px
+) {
+
+  .navbar-v96-language {
+    display:
+      none !important;
+  }
+
+}
+
+
+@media (
+  max-width: 430px
+) {
+
+  .navbar-v96-download {
+    display:
+      none !important;
+  }
+
+}

@@ -1,0 +1,1895 @@
+---
+import GuideArticleLayout from "../../components/GuideArticleLayout.astro";
+---
+
+<GuideArticleLayout
+  title="Translation Profile"
+  section="Translation Control"
+  description="Kiểm soát cách AitraNova dịch bằng Glossary, Character Rules, context và các quy tắc dành riêng cho từng loại nội dung."
+>
+
+  <!-- PROFILE CONTROL CENTER -->
+
+  <section
+    id="profile"
+    class="article-section-block profile-guide-main"
+    data-guide-search-item="translation profile glossary character rules context priority"
+  >
+
+    <span class="section-number">01</span>
+
+    <h2
+      data-i18n
+      data-vi="Kiểm soát cách AitraNova dịch"
+      data-en="Control how AitraNova translates"
+    >
+      Kiểm soát cách AitraNova dịch
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Translation Profile giúp bạn tạo quy tắc riêng cho manga, light novel, tài liệu kỹ thuật hoặc những loại nội dung khác."
+      data-en="Translation Profiles let you create different rules for manga, light novels, technical documents or other kinds of content."
+    >
+      Translation Profile giúp bạn tạo quy tắc
+      riêng cho từng loại nội dung.
+    </p>
+
+
+    <!-- TABS -->
+
+    <div
+      class="profile-guide-tabs"
+      data-profile-tabs
+      role="tablist"
+    >
+
+      <button
+        type="button"
+        class="active"
+        data-profile-tab="overview"
+        aria-selected="true"
+      >
+        <span>✦</span>
+        Overview
+      </button>
+
+      <button
+        type="button"
+        data-profile-tab="glossary"
+        aria-selected="false"
+      >
+        <span>語</span>
+        Glossary
+      </button>
+
+      <button
+        type="button"
+        data-profile-tab="characters"
+        aria-selected="false"
+      >
+        <span>名</span>
+        Characters
+      </button>
+
+      <button
+        type="button"
+        data-profile-tab="context"
+        aria-selected="false"
+      >
+        <span>↺</span>
+        Context
+      </button>
+
+      <button
+        type="button"
+        data-profile-tab="priority"
+        aria-selected="false"
+      >
+        <span>⇅</span>
+        Priority
+      </button>
+
+    </div>
+
+
+    <!-- =====================================================
+         OVERVIEW
+         ===================================================== -->
+
+    <article
+      class="profile-guide-panel active"
+      data-profile-panel="overview"
+    >
+
+      <div class="profile-panel-head">
+
+        <span class="profile-panel-icon purple">
+          ✦
+        </span>
+
+        <div>
+          <small>OVERVIEW</small>
+
+          <h3>Translation Profile</h3>
+
+          <p
+            data-i18n
+            data-vi="Một profile gom những quy tắc cần thiết để AitraNova biết bạn muốn nội dung được dịch như thế nào."
+            data-en="A profile groups the rules AitraNova needs to understand how you want content translated."
+          >
+            Một profile gom các quy tắc
+            dành cho một kiểu dịch cụ thể.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="guide-steps">
+
+        <div class="guide-step">
+          <span class="guide-step-number">1</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Tạo hoặc chọn Profile"
+              data-en="Create or choose a Profile"
+            >
+              Tạo hoặc chọn Profile
+            </strong>
+          </div>
+        </div>
+
+
+        <div class="guide-step">
+          <span class="guide-step-number">2</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Chọn Source / Target Language"
+              data-en="Choose Source / Target Language"
+            >
+              Chọn Source / Target Language
+            </strong>
+          </div>
+        </div>
+
+
+        <div class="guide-step">
+          <span class="guide-step-number">3</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Thêm Glossary khi có thuật ngữ cố định"
+              data-en="Add Glossary entries for fixed terminology"
+            >
+              Thêm Glossary khi cần
+            </strong>
+          </div>
+        </div>
+
+
+        <div class="guide-step">
+          <span class="guide-step-number">4</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Thêm Character Rules cho tên nhân vật"
+              data-en="Add Character Rules for names"
+            >
+              Thêm Character Rules
+            </strong>
+          </div>
+        </div>
+
+
+        <div class="guide-step">
+          <span class="guide-step-number">5</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Sử dụng Profile trong workflow dịch"
+              data-en="Use the Profile during translation"
+            >
+              Sử dụng Profile khi dịch
+            </strong>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="profile-use-cases">
+
+        <div>
+          <small>MANGA</small>
+          <strong>Manga Natural</strong>
+        </div>
+
+        <div>
+          <small>LIGHT NOVEL</small>
+          <strong>Novel Natural</strong>
+        </div>
+
+        <div>
+          <small>DOCUMENT</small>
+          <strong>Technical</strong>
+        </div>
+
+      </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         GLOSSARY
+         ===================================================== -->
+
+    <article
+      id="glossary"
+      class="profile-guide-panel"
+      data-profile-panel="glossary"
+      hidden
+    >
+
+      <div class="profile-panel-head">
+
+        <span class="profile-panel-icon blue">
+          語
+        </span>
+
+        <div>
+          <small>GLOSSARY</small>
+
+          <h3
+            data-i18n
+            data-vi="Khóa cách dịch của thuật ngữ"
+            data-en="Control terminology translations"
+          >
+            Khóa cách dịch của thuật ngữ
+          </h3>
+
+          <p
+            data-i18n
+            data-vi="Glossary phù hợp với thuật ngữ, kỹ năng, địa danh hoặc tên gọi phải giữ cách dịch ổn định."
+            data-en="Glossary is useful for terminology, skills, locations or names that need consistent translations."
+          >
+            Glossary dùng cho thuật ngữ
+            cần được dịch ổn định.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="profile-table">
+
+        <div class="profile-table-header">
+          <span>SOURCE</span>
+          <span>TRANSLATION</span>
+          <span>RULE</span>
+        </div>
+
+        <div>
+          <strong>魔王</strong>
+          <strong>Ma Vương</strong>
+          <span class="rule-required">MANDATORY</span>
+        </div>
+
+        <div>
+          <strong>勇者</strong>
+          <strong>Dũng Sĩ</strong>
+          <span class="rule-required">MANDATORY</span>
+        </div>
+
+        <div>
+          <strong>魔法学院</strong>
+          <strong>Học Viện Ma Pháp</strong>
+          <span class="rule-preferred">PREFERRED</span>
+        </div>
+
+      </div>
+
+
+      <div class="guide-callout tip">
+        <span>✦</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Nên thêm gì vào Glossary?"
+            data-en="What belongs in the Glossary?"
+          >
+            Nên thêm gì vào Glossary?
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Chỉ thêm những từ bạn thực sự muốn kiểm soát. Không cần biến Glossary thành một từ điển khổng lồ."
+            data-en="Only add terms you genuinely need to control. The Glossary does not need to become a huge dictionary."
+          >
+            Chỉ thêm những thuật ngữ
+            bạn thực sự cần kiểm soát.
+          </p>
+        </div>
+      </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         CHARACTERS
+         ===================================================== -->
+
+    <article
+      id="characters"
+      class="profile-guide-panel"
+      data-profile-panel="characters"
+      hidden
+    >
+
+      <div class="profile-panel-head">
+
+        <span class="profile-panel-icon pink">
+          名
+        </span>
+
+        <div>
+          <small>CHARACTER RULES</small>
+
+          <h3
+            data-i18n
+            data-vi="Giữ tên nhân vật nhất quán"
+            data-en="Keep character names consistent"
+          >
+            Giữ tên nhân vật nhất quán
+          </h3>
+
+          <p
+            data-i18n
+            data-vi="Nếu bạn đã biết tên nhân vật nên được dịch hoặc romanize như thế nào, Character Rule là nơi phù hợp để khai báo."
+            data-en="If you already know how a character name should be translated or romanized, Character Rules are the appropriate place to define it."
+          >
+            Character Rule dành cho những
+            mapping nhân vật bạn đã biết rõ.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="character-rule-demo">
+
+        <div class="character-avatar">
+          美
+        </div>
+
+        <div>
+          <small>SOURCE NAME</small>
+          <strong>美咲</strong>
+        </div>
+
+        <span>→</span>
+
+        <div>
+          <small>DISPLAY NAME</small>
+          <strong>Misaki</strong>
+        </div>
+
+      </div>
+
+
+      <h3
+        data-i18n
+        data-vi="Alias"
+        data-en="Aliases"
+      >
+        Alias
+      </h3>
+
+      <p
+        data-i18n
+        data-vi="Một nhân vật có thể được gọi bằng nhiều cách khác nhau trong nội dung. Alias giúp liên kết những cách gọi này với cùng một nhân vật."
+        data-en="A character may be referred to in several different ways. Aliases help connect these references to the same character."
+      >
+        Một nhân vật có thể xuất hiện
+        dưới nhiều cách gọi khác nhau.
+      </p>
+
+
+      <div class="character-aliases">
+
+        <span>美咲</span>
+        <span>ミサキ</span>
+        <span>Misaki</span>
+
+        <i>→</i>
+
+        <strong>Misaki</strong>
+
+      </div>
+
+
+      <div class="guide-callout info">
+        <span>i</span>
+
+        <div>
+          <strong>
+            Character Rule vs Continuity
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Character Rule là quy tắc bạn chủ động cấu hình. Continuity có thể hỗ trợ các mapping đáng tin cậy được hình thành trong quá trình dịch."
+            data-en="Character Rules are explicitly configured by you. Continuity can help with trusted mappings formed during translation."
+          >
+            Character Rule là cấu hình chủ động;
+            continuity hỗ trợ quá trình dịch.
+          </p>
+        </div>
+      </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         CONTEXT
+         ===================================================== -->
+
+    <article
+      id="context"
+      class="profile-guide-panel"
+      data-profile-panel="context"
+      hidden
+    >
+
+      <div class="profile-panel-head">
+
+        <span class="profile-panel-icon green">
+          ↺
+        </span>
+
+        <div>
+          <small>CONTEXT</small>
+
+          <h3
+            data-i18n
+            data-vi="Giúp AI hiểu điều đang diễn ra"
+            data-en="Help AI understand what is happening"
+          >
+            Giúp AI hiểu điều đang diễn ra
+          </h3>
+
+          <p
+            data-i18n
+            data-vi="Context cung cấp thông tin hỗ trợ cho câu hiện tại, chẳng hạn hội thoại gần đây hoặc nội dung liên quan."
+            data-en="Context provides supporting information for the current source, such as recent dialogue or related content."
+          >
+            Context cung cấp thông tin hỗ trợ
+            cho source hiện tại.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="context-flow">
+
+        <div>
+          <small>PREVIOUS</small>
+
+          <strong
+            data-i18n
+            data-vi="Misaki đang chuẩn bị rời đi."
+            data-en="Misaki is preparing to leave."
+          >
+            Misaki đang chuẩn bị rời đi.
+          </strong>
+        </div>
+
+        <span>+</span>
+
+        <div class="context-current">
+          <small>CURRENT SOURCE</small>
+          <strong>どこへ行くの？</strong>
+        </div>
+
+        <span>→</span>
+
+        <div>
+          <small>TRANSLATION</small>
+
+          <strong
+            data-i18n
+            data-vi="Cậu định đi đâu vậy?"
+            data-en="Where are you going?"
+          >
+            Cậu định đi đâu vậy?
+          </strong>
+        </div>
+
+      </div>
+
+
+      <div class="guide-callout warning">
+        <span>!</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Context không được phép thay thế source"
+            data-en="Context must not replace the source"
+          >
+            Context không được phép thay thế source
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Nội dung đang dịch luôn là thông tin chính. Context chỉ hỗ trợ giải nghĩa khi phù hợp."
+            data-en="The content currently being translated remains the primary information. Context only helps interpretation when relevant."
+          >
+            Source hiện tại luôn là thông tin chính.
+          </p>
+        </div>
+      </div>
+
+    </article>
+
+
+    <!-- =====================================================
+         PRIORITY
+         ===================================================== -->
+
+    <article
+      id="priority"
+      class="profile-guide-panel"
+      data-profile-panel="priority"
+      hidden
+    >
+
+      <div class="profile-panel-head">
+
+        <span class="profile-panel-icon orange">
+          ⇅
+        </span>
+
+        <div>
+          <small>TRANSLATION PRIORITY</small>
+
+          <h3
+            data-i18n
+            data-vi="AitraNova xử lý nhiều tín hiệu như thế nào?"
+            data-en="How does AitraNova handle multiple signals?"
+          >
+            AitraNova xử lý nhiều tín hiệu như thế nào?
+          </h3>
+
+          <p
+            data-i18n
+            data-vi="Khi nhiều nguồn thông tin cùng xuất hiện, AitraNova ưu tiên source và các quy tắc rõ ràng hơn trước những context hỗ trợ."
+            data-en="When multiple signals are available, AitraNova prioritizes the source and explicit rules over supporting context."
+          >
+            Những quy tắc rõ ràng có trọng lượng
+            cao hơn context hỗ trợ.
+          </p>
+        </div>
+
+      </div>
+
+
+      <div class="priority-stack">
+
+        <div class="priority-layer primary">
+          <span>01</span>
+
+          <div>
+            <small>PRIMARY</small>
+
+            <strong
+              data-i18n
+              data-vi="Source hiện tại"
+              data-en="Current source"
+            >
+              Source hiện tại
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Nội dung đang được dịch."
+              data-en="The content currently being translated."
+            >
+              Nội dung đang được dịch.
+            </p>
+          </div>
+        </div>
+
+
+        <div class="priority-layer explicit">
+          <span>02</span>
+
+          <div>
+            <small>EXPLICIT RULES</small>
+
+            <strong>
+              Glossary + Character Rules
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Những quy tắc bạn đã chủ động xác định."
+              data-en="Rules that you explicitly configured."
+            >
+              Quy tắc được cấu hình chủ động.
+            </p>
+          </div>
+        </div>
+
+
+        <div class="priority-layer correction">
+          <span>03</span>
+
+          <div>
+            <small>TRUSTED SIGNALS</small>
+
+            <strong>
+              Correction + Continuity
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Những mapping đã được xác nhận hoặc đủ đáng tin cậy khi phù hợp."
+              data-en="Confirmed or sufficiently trusted mappings when applicable."
+            >
+              Mapping đáng tin cậy khi phù hợp.
+            </p>
+          </div>
+        </div>
+
+
+        <div class="priority-layer context">
+          <span>04</span>
+
+          <div>
+            <small>SUPPORTING CONTEXT</small>
+
+            <strong>
+              Recent Context + Memory
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Thông tin hỗ trợ để AI hiểu tốt hơn câu đang dịch."
+              data-en="Supporting information that helps interpret the current source."
+            >
+              Thông tin hỗ trợ cho bản dịch.
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+
+      <div class="guide-callout info">
+        <span>i</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Đây là mô hình khái quát"
+            data-en="This is a conceptual model"
+          >
+            Đây là mô hình khái quát
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Mục tiêu là giúp bạn hiểu vì sao một Glossary hoặc Character Rule thường có tính quyết định cao hơn recent context."
+            data-en="Its purpose is to explain why a Glossary or Character Rule generally has stronger authority than recent context."
+          >
+            Nó giúp giải thích cách các loại thông tin
+            ảnh hưởng tới translation.
+          </p>
+        </div>
+      </div>
+
+    </article>
+
+  </section>
+
+
+  <!-- TROUBLESHOOTING -->
+
+  <section
+    id="profile-troubleshooting"
+    class="article-section-block"
+    data-guide-search-item="profile troubleshooting glossary character rule context wrong translation"
+  >
+
+    <span class="section-number">02</span>
+
+    <h2
+      data-i18n
+      data-vi="Khi Profile không cho kết quả mong muốn"
+      data-en="When the Profile does not produce the expected result"
+    >
+      Khi Profile không cho kết quả mong muốn
+    </h2>
+
+
+    <div class="trouble-list">
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Thuật ngữ vẫn bị dịch khác"
+            data-en="A term is still translated differently"
+          >
+            Thuật ngữ vẫn bị dịch khác
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Kiểm tra Glossary có nằm trong đúng Translation Profile đang được sử dụng hay không."
+            data-en="Check whether the Glossary entry belongs to the Translation Profile currently in use."
+          >
+            Kiểm tra đúng Profile và Glossary.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Tên nhân vật không nhất quán"
+            data-en="A character name is inconsistent"
+          >
+            Tên nhân vật không nhất quán
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Nếu bạn đã biết mapping chính xác, hãy thêm Character Rule thay vì chỉ chờ continuity tự động."
+            data-en="If you already know the correct mapping, add a Character Rule instead of relying only on automatic continuity."
+          >
+            Thêm Character Rule cho mapping chắc chắn.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Bản dịch đúng nghĩa nhưng sai phong cách"
+            data-en="The meaning is correct but the style is wrong"
+          >
+            Bản dịch đúng nghĩa nhưng sai phong cách
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Kiểm tra Profile đang kích hoạt và các chỉ dẫn dành cho style dịch."
+            data-en="Check the active Profile and translation-style instructions."
+          >
+            Kiểm tra Profile và style dịch.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Context cũ làm bản dịch khó hiểu"
+            data-en="Old context makes the translation confusing"
+          >
+            Context cũ làm bản dịch khó hiểu
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Trong workflow dài như manga, hãy kiểm tra session hoặc chapter hiện tại để tránh mang context không còn liên quan sang nội dung mới."
+            data-en="In long workflows such as manga, check the current session or chapter to avoid carrying irrelevant context into new content."
+          >
+            Kiểm tra session và chapter hiện tại.
+          </p>
+        </div>
+      </details>
+
+    </div>
+
+  </section>
+
+
+  <!-- NEXT -->
+
+  <div class="next-guide">
+
+    <div>
+      <small>NEXT GUIDE</small>
+
+      <strong>Learning</strong>
+
+      <p
+        data-i18n
+        data-vi="Biến nội dung đang dịch thành Vocabulary, Grammar và Review."
+        data-en="Turn translated content into Vocabulary, Grammar and Review."
+      >
+        Học trực tiếp từ nội dung bạn đang đọc.
+      </p>
+    </div>
+
+    <a
+      href="/guide/learning"
+      aria-label="Learning guide"
+    >
+      →
+    </a>
+
+  </div>
+
+</GuideArticleLayout>
+
+
+<script>
+  function initProfileGuideTabs() {
+
+    const root =
+      document.querySelector(
+        "[data-profile-tabs]"
+      );
+
+    if (!root) {
+      return;
+    }
+
+
+    const buttons =
+      Array.from(
+        root.querySelectorAll(
+          "[data-profile-tab]"
+        )
+      );
+
+
+    const panels =
+      Array.from(
+        document.querySelectorAll(
+          "[data-profile-panel]"
+        )
+      );
+
+
+    const valid =
+      buttons
+        .map(
+          button =>
+            button.dataset.profileTab
+        )
+        .filter(Boolean);
+
+
+    const storageKey =
+      "aitranova-profile-guide-tab";
+
+
+    function showTab(
+      tab,
+      updateUrl = true
+    ) {
+
+      if (!valid.includes(tab)) {
+        tab = "overview";
+      }
+
+
+      buttons.forEach(
+        button => {
+
+          const active =
+            button.dataset.profileTab
+            === tab;
+
+          button.classList.toggle(
+            "active",
+            active
+          );
+
+          button.setAttribute(
+            "aria-selected",
+            String(active)
+          );
+
+        }
+      );
+
+
+      panels.forEach(
+        panel => {
+
+          const active =
+            panel.dataset.profilePanel
+            === tab;
+
+          panel.hidden =
+            !active;
+
+          panel.classList.toggle(
+            "active",
+            active
+          );
+
+
+          if (
+            active
+            && typeof panel.animate
+            === "function"
+          ) {
+
+            panel.animate(
+              [
+                {
+                  opacity: 0,
+                  transform:
+                    "translateY(8px)",
+                },
+                {
+                  opacity: 1,
+                  transform:
+                    "translateY(0)",
+                },
+              ],
+              {
+                duration: 200,
+                easing: "ease-out",
+              }
+            );
+
+          }
+
+        }
+      );
+
+
+      try {
+        localStorage.setItem(
+          storageKey,
+          tab
+        );
+      } catch {}
+
+
+      if (updateUrl) {
+
+        const url =
+          new URL(
+            window.location.href
+          );
+
+        url.searchParams.set(
+          "tab",
+          tab
+        );
+
+        url.hash = "";
+
+        history.replaceState(
+          null,
+          "",
+          url
+        );
+
+      }
+
+    }
+
+
+    buttons.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const tab =
+              button.dataset.profileTab;
+
+            if (tab) {
+              showTab(tab);
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+    /*
+      Sidebar / Guide overview can link directly to:
+      /guide/profile?tab=glossary
+      /guide/profile?tab=characters
+
+      Intercept those links when already on this page
+      to prevent a full page reload.
+    */
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        const target =
+          event.target;
+
+        if (
+          !(target instanceof Element)
+        ) {
+          return;
+        }
+
+
+        const link =
+          target.closest(
+            'a[href*="/guide/profile?tab="]'
+          );
+
+        if (!link) {
+          return;
+        }
+
+
+        const url =
+          new URL(
+            link.href,
+            window.location.href
+          );
+
+
+        if (
+          url.pathname
+          !== window.location.pathname
+        ) {
+          return;
+        }
+
+
+        const tab =
+          url.searchParams.get(
+            "tab"
+          );
+
+
+        if (
+          !tab
+          || !valid.includes(tab)
+        ) {
+          return;
+        }
+
+
+        event.preventDefault();
+
+        showTab(tab);
+
+      }
+    );
+
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const requested =
+      params.get("tab");
+
+
+    let stored = null;
+
+    try {
+      stored =
+        localStorage.getItem(
+          storageKey
+        );
+    } catch {}
+
+
+    showTab(
+      requested
+      || stored
+      || "overview",
+      Boolean(requested)
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initProfileGuideTabs,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initProfileGuideTabs();
+
+  }
+</script>
+
+
+<style>
+
+  .profile-guide-tabs {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        5,
+        minmax(0, 1fr)
+      );
+
+    gap: 5px;
+
+    margin-top: 22px;
+
+    padding: 6px;
+
+    border:
+      1px solid #c9c0d4;
+
+    border-radius: 14px;
+
+    background:
+      #ded7e7;
+  }
+
+
+  .profile-guide-tabs button {
+    display: flex;
+
+    min-height: 43px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 6px;
+
+    border: 0;
+
+    border-radius: 9px;
+
+    background: transparent;
+
+    color: #716879;
+
+    cursor: pointer;
+
+    font-size: 7px;
+
+    font-weight: 750;
+
+    transition:
+      background 150ms ease,
+      color 150ms ease,
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+
+  .profile-guide-tabs
+  button:hover {
+    transform:
+      translateY(-1px);
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.4
+      );
+  }
+
+
+  .profile-guide-tabs
+  button.active {
+    background:
+      #6952ee;
+
+    color: white;
+
+    box-shadow:
+      0 8px 20px
+      rgba(
+        105,
+        82,
+        238,
+        0.22
+      );
+  }
+
+
+  .profile-guide-tabs
+  button > span {
+    font-size: 9px;
+  }
+
+
+  .profile-guide-panel {
+    margin-top: 15px;
+
+    padding: 21px;
+
+    border:
+      1px solid #c9c0d4;
+
+    border-radius: 14px;
+
+    background:
+      rgba(
+        236,
+        230,
+        242,
+        0.72
+      );
+  }
+
+
+  .profile-guide-panel[hidden] {
+    display: none !important;
+  }
+
+
+  .profile-panel-head {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 13px;
+
+    margin-bottom: 19px;
+  }
+
+
+  .profile-panel-icon {
+    display: grid;
+
+    width: 52px;
+    height: 52px;
+
+    place-items: center;
+
+    border-radius: 13px;
+
+    font-size: 15px;
+
+    font-weight: 850;
+  }
+
+
+  .profile-panel-icon.purple {
+    background: #e2dbff;
+    color: #6952ee;
+  }
+
+
+  .profile-panel-icon.blue {
+    background: #dce6f7;
+    color: #557fdc;
+  }
+
+
+  .profile-panel-icon.pink {
+    background: #f3ddea;
+    color: #c75d91;
+  }
+
+
+  .profile-panel-icon.green {
+    background: #dcece4;
+    color: #3b9b72;
+  }
+
+
+  .profile-panel-icon.orange {
+    background: #f2e3d0;
+    color: #c47f3d;
+  }
+
+
+  .profile-panel-head small {
+    color: #948a9f;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.09em;
+  }
+
+
+  .profile-panel-head h3 {
+    margin:
+      3px 0 2px;
+
+    font-size: 18px;
+  }
+
+
+  .profile-panel-head p {
+    margin: 0;
+
+    font-size: 8px;
+  }
+
+
+  /* USE CASES */
+
+  .profile-use-cases {
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-top: 17px;
+  }
+
+
+  .profile-use-cases > div {
+    padding: 13px;
+
+    border:
+      1px solid #cbc3d5;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.36
+      );
+  }
+
+
+  .profile-use-cases small {
+    display: block;
+
+    color: #978da1;
+
+    font-size: 5px;
+  }
+
+
+  .profile-use-cases strong {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 8px;
+  }
+
+
+  /* GLOSSARY TABLE */
+
+  .profile-table {
+    overflow: hidden;
+
+    margin-top: 8px;
+
+    border:
+      1px solid #c9c0d4;
+
+    border-radius: 11px;
+  }
+
+
+  .profile-table > div {
+    display: grid;
+
+    grid-template-columns:
+      1fr 1fr 0.7fr;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-height: 45px;
+
+    padding:
+      0 12px;
+
+    border-bottom:
+      1px solid #d2cadb;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.35
+      );
+  }
+
+
+  .profile-table > div:last-child {
+    border-bottom: 0;
+  }
+
+
+  .profile-table-header {
+    min-height: 34px !important;
+
+    background:
+      #ddd6e6 !important;
+  }
+
+
+  .profile-table-header span {
+    color: #8e8499;
+
+    font-size: 5px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.08em;
+  }
+
+
+  .profile-table strong {
+    font-size: 8px;
+  }
+
+
+  .rule-required,
+  .rule-preferred {
+    width: fit-content;
+
+    padding: 4px 6px;
+
+    border-radius: 999px;
+
+    font-size: 5px;
+
+    font-weight: 850;
+  }
+
+
+  .rule-required {
+    background: #e3dcfb;
+    color: #6952ee;
+  }
+
+
+  .rule-preferred {
+    background: #dce9f4;
+    color: #557fdc;
+  }
+
+
+  /* CHARACTERS */
+
+  .character-rule-demo {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 15px;
+
+    border:
+      1px solid #cbc2d5;
+
+    border-radius: 11px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.37
+      );
+  }
+
+
+  .character-avatar {
+    display: grid;
+
+    width: 44px;
+    height: 44px;
+
+    place-items: center;
+
+    border-radius: 12px;
+
+    background:
+      #f0dce8;
+
+    color:
+      #c75d91;
+
+    font-size: 14px;
+
+    font-weight: 850;
+  }
+
+
+  .character-rule-demo small {
+    display: block;
+
+    color: #948a9f;
+
+    font-size: 5px;
+  }
+
+
+  .character-rule-demo strong {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 10px;
+  }
+
+
+  .character-rule-demo > span {
+    color: #6952ee;
+  }
+
+
+  .character-aliases {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    margin-top: 12px;
+  }
+
+
+  .character-aliases span {
+    padding:
+      6px 8px;
+
+    border:
+      1px solid #ccc3d6;
+
+    border-radius: 8px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.38
+      );
+
+    font-size: 7px;
+  }
+
+
+  .character-aliases i {
+    color: #8a8094;
+
+    font-style: normal;
+  }
+
+
+  .character-aliases strong {
+    padding:
+      6px 9px;
+
+    border-radius: 8px;
+
+    background: #6952ee;
+
+    color: white;
+
+    font-size: 7px;
+  }
+
+
+  /* CONTEXT */
+
+  .context-flow {
+    display: grid;
+
+    grid-template-columns:
+      1fr auto 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 8px;
+  }
+
+
+  .context-flow > div {
+    min-height: 86px;
+
+    display: flex;
+
+    justify-content: center;
+
+    flex-direction: column;
+
+    padding: 12px;
+
+    border:
+      1px solid #cbc2d5;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.38
+      );
+  }
+
+
+  .context-flow
+  .context-current {
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.35
+      );
+
+    background:
+      #e6e0f7;
+  }
+
+
+  .context-flow small {
+    color: #93899e;
+
+    font-size: 5px;
+  }
+
+
+  .context-flow strong {
+    margin-top: 4px;
+
+    font-size: 8px;
+  }
+
+
+  .context-flow > span {
+    color: #6952ee;
+
+    font-weight: 850;
+  }
+
+
+  /* PRIORITY */
+
+  .priority-stack {
+    display: grid;
+
+    gap: 7px;
+  }
+
+
+  .priority-layer {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 13px;
+
+    border:
+      1px solid #cbc2d5;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.35
+      );
+  }
+
+
+  .priority-layer > span {
+    display: grid;
+
+    width: 34px;
+    height: 34px;
+
+    place-items: center;
+
+    border-radius: 9px;
+
+    font-size: 7px;
+
+    font-weight: 850;
+  }
+
+
+  .priority-layer.primary > span {
+    background: #6952ee;
+    color: white;
+  }
+
+
+  .priority-layer.explicit > span {
+    background: #ddd7fb;
+    color: #6952ee;
+  }
+
+
+  .priority-layer.correction > span {
+    background: #dcece4;
+    color: #3b9b72;
+  }
+
+
+  .priority-layer.context > span {
+    background: #dce6f7;
+    color: #557fdc;
+  }
+
+
+  .priority-layer small {
+    display: block;
+
+    color: #958b9f;
+
+    font-size: 5px;
+  }
+
+
+  .priority-layer strong {
+    display: block;
+
+    margin-top: 2px;
+
+    font-size: 9px;
+  }
+
+
+  .priority-layer p {
+    margin:
+      2px 0 0;
+
+    font-size: 7px;
+  }
+
+
+  @media (max-width: 720px) {
+
+    .profile-guide-tabs {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+
+    .profile-guide-tabs
+    button:last-child {
+      grid-column:
+        1 / -1;
+    }
+
+
+    .profile-use-cases {
+      grid-template-columns: 1fr;
+    }
+
+
+    .context-flow {
+      grid-template-columns: 1fr;
+    }
+
+
+    .context-flow > span {
+      transform:
+        rotate(90deg);
+
+      justify-self: center;
+    }
+
+  }
+
+
+  @media (max-width: 520px) {
+
+    .character-rule-demo {
+      grid-template-columns:
+        1fr;
+    }
+
+
+    .character-rule-demo
+    > span {
+      transform:
+        rotate(90deg);
+
+      justify-self: center;
+    }
+
+
+    .profile-table > div {
+      grid-template-columns:
+        1fr;
+      
+      padding:
+        10px 12px;
+    }
+
+
+    .profile-table-header {
+      display: none !important;
+    }
+
+  }
+
+</style>

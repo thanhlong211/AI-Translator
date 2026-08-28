@@ -1,0 +1,840 @@
+---
+import GuideArticleLayout from "../../components/GuideArticleLayout.astro";
+---
+
+<GuideArticleLayout
+  title="Cài đặt AitraNova"
+  section="Getting Started"
+  description="Chuẩn bị AitraNova trên Windows và thực hiện bản dịch đầu tiên."
+>
+
+  <!-- 01 -->
+
+  <section
+    id="installation"
+    class="article-section-block"
+    data-guide-search-item="installation cài đặt install windows download"
+  >
+    <span class="section-number">01</span>
+
+    <h2
+      data-i18n
+      data-vi="Trước khi cài đặt"
+      data-en="Before installation"
+    >
+      Trước khi cài đặt
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="AitraNova Desktop được thiết kế cho Windows. Hãy tải bản cài đặt từ trang Download chính thức của dự án."
+      data-en="AitraNova Desktop is designed for Windows. Download the installer from the project's official Download page."
+    >
+      AitraNova Desktop được thiết kế cho Windows.
+      Hãy tải bản cài đặt từ trang Download.
+    </p>
+
+    <div class="guide-checklist">
+
+      <div>
+        <span>✓</span>
+
+        <div>
+          <strong>Windows</strong>
+
+          <p
+            data-i18n
+            data-vi="Sử dụng máy Windows để chạy phiên bản Desktop."
+            data-en="Use a Windows computer to run the Desktop version."
+          >
+            Sử dụng máy Windows.
+          </p>
+        </div>
+      </div>
+
+      <div>
+        <span>✓</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Kết nối Internet"
+            data-en="Internet connection"
+          >
+            Kết nối Internet
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Một số chức năng AI cần kết nối tới dịch vụ của AitraNova."
+            data-en="Some AI features require a connection to AitraNova services."
+          >
+            Một số chức năng AI cần kết nối mạng.
+          </p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="guide-callout info">
+      <span>i</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Phiên bản Beta"
+          data-en="Beta version"
+        >
+          Phiên bản Beta
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Giao diện hoặc vị trí một số chức năng có thể thay đổi giữa các bản Beta. Guide tập trung vào workflow thay vì phụ thuộc vào vị trí nút cụ thể."
+          data-en="Some interface elements may move between Beta versions. This guide focuses on workflows rather than exact button positions."
+        >
+          Một số vị trí trong giao diện có thể thay đổi
+          giữa các bản Beta.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 02 -->
+
+  <section
+    id="download"
+    class="article-section-block"
+    data-guide-search-item="download tải xuống installer windows"
+  >
+    <span class="section-number">02</span>
+
+    <h2
+      data-i18n
+      data-vi="Tải AitraNova"
+      data-en="Download AitraNova"
+    >
+      Tải AitraNova
+    </h2>
+
+    <div class="guide-steps">
+
+      <div class="guide-step">
+        <span class="guide-step-number">1</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Mở trang Download"
+            data-en="Open the Download page"
+          >
+            Mở trang Download
+          </strong>
+
+          <p>
+            aitranova.com/download
+          </p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">2</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Chọn phiên bản Windows"
+            data-en="Choose the Windows version"
+          >
+            Chọn phiên bản Windows
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">3</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Chờ file tải xuống hoàn tất"
+            data-en="Wait for the download to finish"
+          >
+            Chờ file tải xuống hoàn tất
+          </strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="guide-callout tip">
+      <span>✦</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Nên tải từ trang chính thức"
+          data-en="Use the official download"
+        >
+          Nên tải từ trang chính thức
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Điều này giúp bạn tránh sử dụng nhầm build cũ hoặc file không thuộc dự án."
+          data-en="This helps avoid outdated builds or files that do not belong to the project."
+        >
+          Tránh sử dụng nhầm build cũ hoặc file không thuộc dự án.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 03 -->
+
+  <section
+    id="install"
+    class="article-section-block"
+    data-guide-search-item="install setup cài đặt windows installer"
+  >
+    <span class="section-number">03</span>
+
+    <h2
+      data-i18n
+      data-vi="Cài đặt trên Windows"
+      data-en="Install on Windows"
+    >
+      Cài đặt trên Windows
+    </h2>
+
+    <div class="guide-steps">
+
+      <div class="guide-step">
+        <span class="guide-step-number">1</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Mở file vừa tải"
+            data-en="Open the downloaded file"
+          >
+            Mở file vừa tải
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">2</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Thực hiện các bước cài đặt được hiển thị"
+            data-en="Follow the displayed installation steps"
+          >
+            Thực hiện các bước cài đặt được hiển thị
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">3</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Hoàn tất cài đặt"
+            data-en="Finish installation"
+          >
+            Hoàn tất cài đặt
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">4</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Khởi động AitraNova"
+            data-en="Launch AitraNova"
+          >
+            Khởi động AitraNova
+          </strong>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- 04 -->
+
+  <section
+    id="first-launch"
+    class="article-section-block"
+    data-guide-search-item="first launch lần đầu mở app language profile"
+  >
+    <span class="section-number">04</span>
+
+    <h2
+      data-i18n
+      data-vi="Lần mở đầu tiên"
+      data-en="First launch"
+    >
+      Lần mở đầu tiên
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Sau khi AitraNova chạy, hãy kiểm tra cặp ngôn ngữ và Translation Profile trước khi thử dịch."
+      data-en="After AitraNova starts, check the language pair and Translation Profile before testing a translation."
+    >
+      Kiểm tra cặp ngôn ngữ và Translation Profile
+      trước khi thử dịch.
+    </p>
+
+    <div class="guide-checklist">
+
+      <div>
+        <span>✓</span>
+
+        <div>
+          <strong>Source Language</strong>
+
+          <p>Japanese</p>
+        </div>
+      </div>
+
+      <div>
+        <span>✓</span>
+
+        <div>
+          <strong>Target Language</strong>
+
+          <p>Vietnamese</p>
+        </div>
+      </div>
+
+      <div>
+        <span>✓</span>
+
+        <div>
+          <strong>Translation Profile</strong>
+
+          <p
+            data-i18n
+            data-vi="Chọn profile phù hợp hoặc sử dụng cấu hình mặc định."
+            data-en="Choose an appropriate profile or use the default configuration."
+          >
+            Chọn profile phù hợp hoặc dùng cấu hình mặc định.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- 05 -->
+
+  <section
+    id="language"
+    class="article-section-block"
+    data-guide-search-item="source target language Japanese Vietnamese ngôn ngữ"
+  >
+    <span class="section-number">05</span>
+
+    <h2
+      data-i18n
+      data-vi="Chọn cặp ngôn ngữ"
+      data-en="Choose the language pair"
+    >
+      Chọn cặp ngôn ngữ
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Ví dụ nếu bạn đang đọc manga tiếng Nhật và muốn dịch sang tiếng Việt:"
+      data-en="For example, if you are reading Japanese manga and want a Vietnamese translation:"
+    >
+      Ví dụ với manga Nhật → Việt:
+    </p>
+
+    <div class="guide-example">
+
+      <div>
+        <small>SOURCE</small>
+        <strong>Japanese</strong>
+      </div>
+
+      <span>→</span>
+
+      <div>
+        <small>TARGET</small>
+        <strong>Vietnamese</strong>
+      </div>
+
+    </div>
+
+    <div class="guide-callout warning">
+      <span>!</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Nếu chọn sai Source Language"
+          data-en="If the Source Language is incorrect"
+        >
+          Nếu chọn sai Source Language
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="OCR hoặc quá trình dịch có thể không cho kết quả như mong đợi. Hãy kiểm tra lại ngôn ngữ trước khi xử lý lỗi sâu hơn."
+          data-en="OCR or translation may not behave as expected. Verify the selected language before deeper troubleshooting."
+        >
+          Hãy kiểm tra cặp ngôn ngữ trước khi xử lý lỗi sâu hơn.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 06 -->
+
+  <section
+    id="profile"
+    class="article-section-block"
+    data-guide-search-item="translation profile default manga glossary character rules"
+  >
+    <span class="section-number">06</span>
+
+    <h2
+      data-i18n
+      data-vi="Chọn Translation Profile"
+      data-en="Choose a Translation Profile"
+    >
+      Chọn Translation Profile
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Profile kiểm soát cách AitraNova xây dựng bản dịch. Profile có thể chứa Glossary, Character Rules và các cấu hình dịch khác."
+      data-en="Profiles control how AitraNova builds translations. A profile can contain Glossary entries, Character Rules and other translation settings."
+    >
+      Profile có thể chứa Glossary,
+      Character Rules và các cấu hình dịch khác.
+    </p>
+
+    <div class="guide-example">
+
+      <div>
+        <small>PROFILE</small>
+        <strong>Manga Natural</strong>
+      </div>
+
+      <span>→</span>
+
+      <div>
+        <small>WORKFLOW</small>
+        <strong>Manga / Quick Translate</strong>
+      </div>
+
+    </div>
+
+    <div class="guide-callout info">
+      <span>i</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Người mới có thể bắt đầu đơn giản"
+          data-en="Beginners can start simple"
+        >
+          Người mới có thể bắt đầu đơn giản
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Bạn không cần tạo Glossary hoặc Character Rules ngay. Hãy thử bản dịch đầu tiên trước rồi cấu hình thêm khi cần."
+          data-en="You do not need to create Glossary entries or Character Rules immediately. Try your first translation, then configure them when needed."
+        >
+          Chưa cần cấu hình mọi thứ ngay từ đầu.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 07 -->
+
+  <section
+    id="ocr-check"
+    class="article-section-block"
+    data-guide-search-item="ocr test kiểm tra nhận dạng text"
+  >
+    <span class="section-number">07</span>
+
+    <h2
+      data-i18n
+      data-vi="Kiểm tra OCR"
+      data-en="Test OCR"
+    >
+      Kiểm tra OCR
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Cách đơn giản nhất để kiểm tra hệ thống là dùng một dòng chữ rõ ràng trên màn hình và thử Quick Translate."
+      data-en="The easiest way to verify the system is to use a clear line of text on screen and test Quick Translate."
+    >
+      Dùng một dòng chữ rõ ràng trên màn hình
+      để kiểm tra.
+    </p>
+
+    <div class="guide-steps">
+
+      <div class="guide-step">
+        <span class="guide-step-number">1</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Mở nội dung có chữ rõ"
+            data-en="Open content with clear text"
+          >
+            Mở nội dung có chữ rõ
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">2</span>
+
+        <div>
+          <strong>Ctrl + Shift + Q</strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">3</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Chọn sát quanh dòng chữ"
+            data-en="Select closely around the text"
+          >
+            Chọn sát quanh dòng chữ
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">4</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Kiểm tra source text được nhận dạng"
+            data-en="Check the recognized source text"
+          >
+            Kiểm tra source text được nhận dạng
+          </strong>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- 08 -->
+
+  <section
+    id="first-translation"
+    class="article-section-block"
+    data-guide-search-item="first translation quick ctrl shift q overlay"
+  >
+    <span class="section-number">08</span>
+
+    <h2
+      data-i18n
+      data-vi="Thực hiện bản dịch đầu tiên"
+      data-en="Perform your first translation"
+    >
+      Thực hiện bản dịch đầu tiên
+    </h2>
+
+    <div class="guide-steps">
+
+      <div class="guide-step">
+        <span class="guide-step-number">1</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Đảm bảo AitraNova đang chạy"
+            data-en="Make sure AitraNova is running"
+          >
+            Đảm bảo AitraNova đang chạy
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">2</span>
+
+        <div>
+          <strong>Ctrl + Shift + Q</strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">3</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Kéo chuột quanh vùng text"
+            data-en="Drag around the text area"
+          >
+            Kéo chuột quanh vùng text
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">4</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Chờ OCR và AI xử lý"
+            data-en="Wait for OCR and AI processing"
+          >
+            Chờ OCR và AI xử lý
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">5</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Đọc kết quả"
+            data-en="Read the result"
+          >
+            Đọc kết quả
+          </strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="guide-callout tip">
+      <span>✓</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Nếu bước này hoạt động"
+          data-en="If this step works"
+        >
+          Nếu bước này hoạt động
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="AitraNova đã sẵn sàng cho Quick Translate. Sau đó bạn có thể chuyển sang Manga Session, Documents hoặc tạo Translation Profile riêng."
+          data-en="AitraNova is ready for Quick Translate. You can then move on to Manga Session, Documents or create your own Translation Profile."
+        >
+          Bạn đã sẵn sàng sử dụng các workflow tiếp theo.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 09 -->
+
+  <section
+    id="troubleshooting"
+    class="article-section-block"
+    data-guide-search-item="installation troubleshooting startup OCR shortcut error"
+  >
+    <span class="section-number">09</span>
+
+    <h2
+      data-i18n
+      data-vi="Lỗi thường gặp khi bắt đầu"
+      data-en="Common first-run problems"
+    >
+      Lỗi thường gặp khi bắt đầu
+    </h2>
+
+    <div class="trouble-list">
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Nhấn phím tắt nhưng không thấy chế độ chọn vùng"
+            data-en="The shortcut does not open area selection"
+          >
+            Nhấn phím tắt nhưng không thấy chế độ chọn vùng
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Kiểm tra AitraNova có đang chạy hay không, sau đó thử lại Quick Translate."
+            data-en="Check whether AitraNova is currently running, then try Quick Translate again."
+          >
+            Kiểm tra AitraNova có đang chạy hay không.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="OCR nhận sai nhiều ký tự"
+            data-en="OCR recognizes many characters incorrectly"
+          >
+            OCR nhận sai nhiều ký tự
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Thử với chữ lớn và rõ hơn, đồng thời chọn vùng sát text hơn để xác định đây có phải vấn đề từ hình ảnh hay không."
+            data-en="Try larger, clearer text and select more closely around it to determine whether the issue comes from the image."
+          >
+            Thử chữ rõ hơn và chọn vùng sát text hơn.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="OCR đúng nhưng bản dịch chưa phù hợp"
+            data-en="OCR is correct but the translation is not suitable"
+          >
+            OCR đúng nhưng bản dịch chưa phù hợp
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Kiểm tra Translation Profile, Glossary và Character Rules đang được sử dụng."
+            data-en="Check the active Translation Profile, Glossary and Character Rules."
+          >
+            Kiểm tra Translation Profile,
+            Glossary và Character Rules.
+          </p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+
+  <!-- SUMMARY -->
+
+  <section
+    class="article-section-block"
+    data-guide-search-item="installation summary ready"
+  >
+    <span class="section-number">10</span>
+
+    <h2
+      data-i18n
+      data-vi="Bạn đã sẵn sàng"
+      data-en="You're ready"
+    >
+      Bạn đã sẵn sàng
+    </h2>
+
+    <div class="guide-checklist">
+
+      <div>
+        <span>✓</span>
+        <strong>AitraNova installed</strong>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <strong>Language pair selected</strong>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <strong>Translation Profile ready</strong>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <strong>OCR tested</strong>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <strong>Quick Translate tested</strong>
+      </div>
+
+    </div>
+  </section>
+
+
+  <div class="next-guide">
+
+    <div>
+      <small>NEXT GUIDE</small>
+
+      <strong>Quick Translate</strong>
+
+      <p
+        data-i18n
+        data-vi="Tìm hiểu chi tiết cách chọn vùng, OCR, Profile và Overlay."
+        data-en="Learn area selection, OCR, Profiles and Overlay in detail."
+      >
+        Tìm hiểu chi tiết workflow Quick Translate.
+      </p>
+    </div>
+
+    <a
+      href="/guide/quick"
+      aria-label="Quick Translate guide"
+    >
+      →
+    </a>
+
+  </div>
+
+</GuideArticleLayout>

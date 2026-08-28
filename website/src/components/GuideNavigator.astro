@@ -1,0 +1,1980 @@
+---
+import { guideRoutes, getGuideHref } from "../data/guideRoutes";
+const groups = [
+  {
+    vi: "Bắt đầu",
+    en: "Getting started",
+    items: [
+      {
+        id: "getting-started",
+        vi: "Bắt đầu sử dụng",
+        en: "Getting started",
+        icon: "⌂",
+      },
+      {
+        id: "installation",
+        vi: "Cài đặt",
+        en: "Installation",
+        icon: "↓",
+      },
+    ],
+  },
+  {
+    vi: "Dịch",
+    en: "Translation",
+    items: [
+      {
+        id: "quick",
+        vi: "Quick Translate",
+        en: "Quick Translate",
+        icon: "⌘",
+      },
+      {
+        id: "fullscreen",
+        vi: "Full Screen",
+        en: "Full Screen",
+        icon: "▣",
+      },
+      {
+        id: "manga",
+        vi: "Manga",
+        en: "Manga",
+        icon: "漫",
+      },
+      {
+        id: "documents",
+        vi: "Tài liệu",
+        en: "Documents",
+        icon: "文",
+      },
+    ],
+  },
+  {
+    vi: "Kiểm soát bản dịch",
+    en: "Translation control",
+    items: [
+      {
+        id: "profile",
+        vi: "Translation Profile",
+        en: "Translation Profile",
+        icon: "✦",
+      },
+      {
+        id: "glossary",
+        vi: "Glossary",
+        en: "Glossary",
+        icon: "語",
+      },
+      {
+        id: "characters",
+        vi: "Character Rules",
+        en: "Character Rules",
+        icon: "名",
+      },
+      {
+        id: "correction",
+        vi: "Correction & Memory",
+        en: "Correction & Memory",
+        icon: "↺",
+      },
+    ],
+  },
+  {
+    vi: "Học tập",
+    en: "Learning",
+    items: [
+      {
+        id: "learning",
+        vi: "Learning",
+        en: "Learning",
+        icon: "学",
+      },
+      {
+        id: "vocabulary",
+        vi: "Vocabulary",
+        en: "Vocabulary",
+        icon: "単",
+      },
+      {
+        id: "review",
+        vi: "Review / SRS",
+        en: "Review / SRS",
+        icon: "↻",
+      },
+    ],
+  },
+  {
+    vi: "Trợ giúp",
+    en: "Help",
+    items: [
+      {
+        id: "shortcuts",
+        vi: "Phím tắt",
+        en: "Keyboard shortcuts",
+        icon: "⌨",
+      },
+      {
+        id: "troubleshooting",
+        vi: "Xử lý lỗi",
+        en: "Troubleshooting",
+        icon: "!",
+      },
+    ],
+  },
+];
+
+
+
+
+
+---
+
+<aside
+  class="guide-sidebar"
+  data-guide-sidebar
+>
+
+  <div class="guide-sidebar-inner">
+
+    <div class="guide-sidebar-top">
+
+      <span class="guide-sidebar-kicker">
+        DOCUMENTATION
+      </span>
+
+      <strong
+        data-i18n
+        data-vi="Hướng dẫn AitraNova"
+        data-en="AitraNova Guide"
+      >
+        Hướng dẫn AitraNova
+      </strong>
+
+    </div>
+
+
+    <div class="guide-search">
+
+      <span>
+        ⌕
+      </span>
+
+      <input
+        type="search"
+        placeholder="Tìm kiếm / Search"
+        aria-label="Search guide"
+        data-guide-search
+      />
+
+      <kbd>/</kbd>
+
+    </div>
+
+
+    <nav
+      class="guide-navigation"
+      aria-label="Guide navigation"
+    >
+
+      {
+        groups.map((group) => (
+          <div class="guide-nav-group">
+
+            <span
+              class="guide-nav-title"
+              data-i18n
+              data-vi={group.vi}
+              data-en={group.en}
+            >
+              {group.vi}
+            </span>
+
+            <div class="guide-nav-items">
+
+              {
+                group.items.map((item) => (
+                  <a
+                    href={getGuideHref(item.id)}
+                    data-guide-nav={item.id}
+                    data-search-label={`${item.vi} ${item.en}`}
+                  >
+
+                    <span class="guide-nav-icon">
+                      {item.icon}
+                    </span>
+
+                    <span
+                      data-i18n
+                      data-vi={item.vi}
+                      data-en={item.en}
+                    >
+                      {item.vi}
+                    </span>
+
+                  </a>
+                ))
+              }
+
+            </div>
+
+          </div>
+        ))
+      }
+
+    </nav>
+
+
+    <div class="guide-sidebar-bottom">
+
+      <a href="/download">
+
+        <span>
+          ↓
+        </span>
+
+        <div>
+
+          <small
+            data-i18n
+            data-vi="Chưa cài AitraNova?"
+            data-en="Haven't installed AitraNova?"
+          >
+            Chưa cài AitraNova?
+          </small>
+
+          <strong
+            data-i18n
+            data-vi="Tải xuống"
+            data-en="Download"
+          >
+            Tải xuống
+          </strong>
+
+        </div>
+
+      </a>
+
+    </div>
+
+  </div>
+
+</aside>
+
+
+<button
+  type="button"
+  class="guide-mobile-toggle"
+  data-guide-mobile-toggle
+  aria-label="Open guide navigation"
+>
+  ☰
+  <span
+    data-i18n
+    data-vi="Danh mục"
+    data-en="Contents"
+  >
+    Danh mục
+  </span>
+</button>
+
+
+<div
+  class="guide-mobile-backdrop"
+  data-guide-backdrop
+></div>
+
+
+<script>
+  function initGuideNavigation() {
+
+    const sidebar =
+      document.querySelector(
+        "[data-guide-sidebar]"
+      );
+
+    const toggle =
+      document.querySelector(
+        "[data-guide-mobile-toggle]"
+      );
+
+    const backdrop =
+      document.querySelector(
+        "[data-guide-backdrop]"
+      );
+
+    const search =
+      document.querySelector(
+        "[data-guide-search]"
+      );
+
+    const navLinks =
+      Array.from(
+        document.querySelectorAll(
+          "[data-guide-nav]"
+        )
+      );
+
+    const searchable =
+      Array.from(
+        document.querySelectorAll(
+          "[data-guide-search-item]"
+        )
+      );
+
+
+    /* -----------------------------------------
+       MOBILE NAV
+       ----------------------------------------- */
+
+    function closeSidebar() {
+
+      sidebar?.classList.remove(
+        "open"
+      );
+
+      backdrop?.classList.remove(
+        "visible"
+      );
+
+      document.body.classList.remove(
+        "guide-menu-open"
+      );
+
+    }
+
+
+    function openSidebar() {
+
+      sidebar?.classList.add(
+        "open"
+      );
+
+      backdrop?.classList.add(
+        "visible"
+      );
+
+      document.body.classList.add(
+        "guide-menu-open"
+      );
+
+    }
+
+
+    toggle?.addEventListener(
+      "click",
+      () => {
+
+        if (
+          sidebar?.classList.contains(
+            "open"
+          )
+        ) {
+          closeSidebar();
+        } else {
+          openSidebar();
+        }
+
+      }
+    );
+
+
+    backdrop?.addEventListener(
+      "click",
+      closeSidebar
+    );
+
+
+    navLinks.forEach(
+      link => {
+
+        link.addEventListener(
+          "click",
+          () => {
+
+            if (
+              window.innerWidth
+              < 1000
+            ) {
+              closeSidebar();
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+    /* -----------------------------------------
+       SEARCH
+       ----------------------------------------- */
+
+    function normalize(value) {
+
+      return value
+        .toLocaleLowerCase()
+        .normalize("NFD")
+        .replace(
+          /[\u0300-\u036f]/g,
+          ""
+        )
+        .trim();
+
+    }
+
+
+    function runSearch() {
+
+      const query =
+        normalize(
+          search?.value || ""
+        );
+
+
+      searchable.forEach(
+        item => {
+
+          const haystack =
+            normalize(
+              item.getAttribute(
+                "data-guide-search-item"
+              ) || ""
+            );
+
+          item.hidden =
+            query.length > 0
+            && !haystack.includes(
+              query
+            );
+
+        }
+      );
+
+
+      navLinks.forEach(
+        link => {
+
+          const label =
+            normalize(
+              link.getAttribute(
+                "data-search-label"
+              ) || ""
+            );
+
+          link.hidden =
+            query.length > 0
+            && !label.includes(
+              query
+            );
+
+        }
+      );
+
+    }
+
+
+    search?.addEventListener(
+      "input",
+      runSearch
+    );
+
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        const target =
+          event.target;
+
+        const typing =
+          target instanceof
+          HTMLInputElement
+          || target instanceof
+          HTMLTextAreaElement
+          || target?.isContentEditable;
+
+
+        if (
+          event.key === "/"
+          && !typing
+        ) {
+
+          event.preventDefault();
+
+          search?.focus();
+
+        }
+
+
+        if (
+          event.key === "Escape"
+          && document.activeElement
+          === search
+        ) {
+
+          search.value = "";
+
+          runSearch();
+
+          search.blur();
+
+        }
+
+      }
+    );
+
+
+    /* -----------------------------------------
+       ACTIVE SECTION
+       ----------------------------------------- */
+
+    const sections =
+      navLinks
+        .map(
+          link => {
+
+            const id =
+              link.dataset
+                .guideNav;
+
+            return id
+              ? document.getElementById(
+                  id
+                )
+              : null;
+
+          }
+        )
+        .filter(Boolean);
+
+
+    function activate(id) {
+
+      navLinks.forEach(
+        link => {
+
+          const active =
+            link.dataset
+              .guideNav === id;
+
+          link.classList.toggle(
+            "active",
+            active
+          );
+
+        }
+      );
+
+    }
+
+
+    if (
+      "IntersectionObserver"
+      in window
+    ) {
+
+      const observer =
+        new IntersectionObserver(
+          entries => {
+
+            const visible =
+              entries
+                .filter(
+                  entry =>
+                    entry.isIntersecting
+                )
+                .sort(
+                  (a, b) =>
+                    b.intersectionRatio
+                    - a.intersectionRatio
+                );
+
+            if (
+              visible.length === 0
+            ) {
+              return;
+            }
+
+            activate(
+              visible[0]
+                .target
+                .id
+            );
+
+          },
+          {
+            rootMargin:
+              "-20% 0px -63% 0px",
+
+            threshold: [
+              0,
+              0.05,
+              0.15,
+            ],
+          }
+        );
+
+
+      sections.forEach(
+        section =>
+          observer.observe(
+            section
+          )
+      );
+
+    }
+
+
+    /* -----------------------------------------
+       LANGUAGE-AWARE PLACEHOLDER
+       ----------------------------------------- */
+
+    function updateSearchLanguage() {
+
+      if (!search) {
+        return;
+      }
+
+      const language =
+        document.documentElement
+          .dataset.language
+        || "vi";
+
+      search.placeholder =
+        language === "en"
+          ? "Search the guide..."
+          : "Tìm trong hướng dẫn...";
+
+    }
+
+
+    updateSearchLanguage();
+
+
+    const languageObserver =
+      new MutationObserver(
+        updateSearchLanguage
+      );
+
+
+    languageObserver.observe(
+      document.documentElement,
+      {
+        attributes: true,
+        attributeFilter: [
+          "data-language",
+        ],
+      }
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initGuideNavigation,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initGuideNavigation();
+
+  }
+</script>
+
+
+
+
+
+
+
+<script>
+  function initStableGuideNavigation() {
+
+    const TARGET_KEY =
+      "aitranova-guide-target";
+
+    const ROUTE_KEY =
+      "aitranova-guide-route";
+
+
+    const overviewPath = pathname =>
+      /^\/guide\/?$/.test(
+        pathname
+      );
+
+
+    const guidePath = pathname =>
+      /^\/guide(?:\/|$)/.test(
+        pathname
+      );
+
+
+    function getTopOffset() {
+
+      const header =
+        document.querySelector(
+          "header"
+        );
+
+      const navbarHeight =
+        header
+          ? header.getBoundingClientRect()
+              .height
+          : 70;
+
+      return (
+        navbarHeight
+        + 24
+      );
+
+    }
+
+
+    function flashSection(
+      element
+    ) {
+
+      element.classList.remove(
+        "guide-focus"
+      );
+
+      void element.offsetWidth;
+
+      element.classList.add(
+        "guide-focus"
+      );
+
+
+      window.setTimeout(
+        () => {
+
+          element.classList.remove(
+            "guide-focus"
+          );
+
+        },
+        1000
+      );
+
+    }
+
+
+    function scrollToSection(
+      id,
+      behavior = "smooth"
+    ) {
+
+      const element =
+        document.getElementById(
+          id
+        );
+
+      if (!element) {
+        return false;
+      }
+
+
+      const top =
+        element
+          .getBoundingClientRect()
+          .top
+        + window.scrollY
+        - getTopOffset();
+
+
+      window.scrollTo({
+        top: Math.max(
+          0,
+          top
+        ),
+        behavior,
+      });
+
+
+      flashSection(
+        element
+      );
+
+      return true;
+
+    }
+
+
+    function afterLayout(
+      callback
+    ) {
+
+      requestAnimationFrame(
+        () => {
+
+          requestAnimationFrame(
+            callback
+          );
+
+        }
+      );
+
+    }
+
+
+    /* -----------------------------------------------------
+       Disable browser scroll restoration for Guide
+       navigation that we control ourselves.
+       ----------------------------------------------------- */
+
+    if (
+      "scrollRestoration"
+      in history
+    ) {
+      history.scrollRestoration =
+        "manual";
+    }
+
+
+    /* -----------------------------------------------------
+       HANDLE CLICKS
+       ----------------------------------------------------- */
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        const target =
+          event.target;
+
+        if (
+          !(target instanceof Element)
+        ) {
+          return;
+        }
+
+
+        const anchor =
+          target.closest(
+            "a[href]"
+          );
+
+        if (!anchor) {
+          return;
+        }
+
+
+        const url =
+          new URL(
+            anchor.href,
+            window.location.href
+          );
+
+
+        if (
+          url.origin
+          !== window.location.origin
+        ) {
+          return;
+        }
+
+
+        if (
+          !guidePath(
+            url.pathname
+          )
+        ) {
+          return;
+        }
+
+
+        const currentIsOverview =
+          overviewPath(
+            window.location.pathname
+          );
+
+        const targetIsOverview =
+          overviewPath(
+            url.pathname
+          );
+
+
+        /* -----------------------------------------------
+           /guide#something
+
+           Do not allow browser native hash jumping.
+           ----------------------------------------------- */
+
+        if (
+          targetIsOverview
+          && url.hash
+        ) {
+
+          const id =
+            decodeURIComponent(
+              url.hash.slice(1)
+            );
+
+          event.preventDefault();
+          event.stopPropagation();
+
+
+          if (currentIsOverview) {
+
+            history.pushState(
+              null,
+              "",
+              `/guide#${encodeURIComponent(id)}`
+            );
+
+
+            scrollToSection(
+              id,
+              "smooth"
+            );
+
+          } else {
+
+            sessionStorage.setItem(
+              TARGET_KEY,
+              id
+            );
+
+
+            window.location.assign(
+              "/guide"
+            );
+
+          }
+
+          return;
+        }
+
+
+        /* -----------------------------------------------
+           Real guide route:
+           /guide/quick
+           /guide/installation
+
+           Remember that the user explicitly navigated
+           there so the next page starts at top.
+           ----------------------------------------------- */
+
+        if (
+          url.pathname
+          !== window.location.pathname
+        ) {
+
+          sessionStorage.setItem(
+            ROUTE_KEY,
+            url.pathname
+          );
+
+        }
+
+      },
+      true
+    );
+
+
+
+    /* -----------------------------------------------------
+       BROWSER BACK / FORWARD
+       ----------------------------------------------------- */
+
+    const guideHistoryScroll = () => {
+
+      if (
+        !overviewPath(
+          window.location.pathname
+        )
+      ) {
+        return;
+      }
+
+
+      const id =
+        decodeURIComponent(
+          window.location.hash
+            .replace(/^#/, "")
+        )
+        || "getting-started";
+
+
+      afterLayout(
+        () => {
+
+          scrollToSection(
+            id,
+            "auto"
+          );
+
+        }
+      );
+
+    };
+
+
+    window.addEventListener(
+      "popstate",
+      guideHistoryScroll
+    );
+
+
+    /* -----------------------------------------------------
+       PAGE ARRIVAL
+       ----------------------------------------------------- */
+
+    const pendingRoute =
+      sessionStorage.getItem(
+        ROUTE_KEY
+      );
+
+
+    if (
+      pendingRoute
+      === window.location.pathname
+    ) {
+
+      sessionStorage.removeItem(
+        ROUTE_KEY
+      );
+
+
+      afterLayout(
+        () => {
+
+          window.scrollTo({
+            top: 0,
+            behavior: "auto",
+          });
+
+        }
+      );
+
+    }
+
+
+    /* -----------------------------------------------------
+       ARRIVING AT GUIDE OVERVIEW
+       FROM AN ARTICLE
+       ----------------------------------------------------- */
+
+    if (
+      overviewPath(
+        window.location.pathname
+      )
+    ) {
+
+      const pendingTarget =
+        sessionStorage.getItem(
+          TARGET_KEY
+        );
+
+
+      if (pendingTarget) {
+
+        sessionStorage.removeItem(
+          TARGET_KEY
+        );
+
+
+        history.replaceState(
+          null,
+          "",
+          `/guide#${encodeURIComponent(
+            pendingTarget
+          )}`
+        );
+
+
+        afterLayout(
+          () => {
+
+            scrollToSection(
+              pendingTarget,
+              "auto"
+            );
+
+          }
+        );
+
+
+        return;
+      }
+
+
+      /* -------------------------------------------------
+         Direct visit:
+         /guide#fullscreen
+
+         Correct browser's initial native hash position
+         after layout.
+         ------------------------------------------------- */
+
+      if (
+        window.location.hash
+      ) {
+
+        const id =
+          decodeURIComponent(
+            window.location.hash
+              .slice(1)
+          );
+
+
+        afterLayout(
+          () => {
+
+            scrollToSection(
+              id,
+              "auto"
+            );
+
+          }
+        );
+
+      }
+
+    }
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initStableGuideNavigation,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initStableGuideNavigation();
+
+  }
+</script>
+
+
+
+<script>
+  function initGuideRouteState() {
+
+    const links =
+      Array.from(
+        document.querySelectorAll(
+          "[data-guide-nav]"
+        )
+      );
+
+
+    if (!links.length) {
+      return;
+    }
+
+
+    function normalizePath(
+      value
+    ) {
+
+      if (
+        value.length > 1
+        && value.endsWith("/")
+      ) {
+        return value.slice(
+          0,
+          -1
+        );
+      }
+
+      return value;
+    }
+
+
+    function resolveActiveKey() {
+
+      const path =
+        normalizePath(
+          window.location.pathname
+        );
+
+
+      const params =
+        new URLSearchParams(
+          window.location.search
+        );
+
+
+      const tab =
+        params.get("tab");
+
+
+      const hash =
+        decodeURIComponent(
+          window.location.hash
+            .replace(/^#/, "")
+        );
+
+
+      if (
+        path === "/guide"
+      ) {
+
+        return (
+          hash === "getting-started"
+            ? "getting-started"
+            : hash || "getting-started"
+        );
+
+      }
+
+
+      if (
+        path === "/guide/installation"
+      ) {
+        return "installation";
+      }
+
+
+      if (
+        path === "/guide/quick"
+      ) {
+
+        if (
+          hash === "shortcuts"
+        ) {
+          return "shortcuts";
+        }
+
+        return "quick";
+
+      }
+
+
+      if (
+        path === "/guide/manga"
+      ) {
+        return "manga";
+      }
+
+
+      if (
+        path === "/guide/documents"
+      ) {
+        return "documents";
+      }
+
+
+      if (
+        path === "/guide/profile"
+      ) {
+
+        if (
+          tab === "glossary"
+        ) {
+          return "glossary";
+        }
+
+
+        if (
+          tab === "characters"
+        ) {
+          return "characters";
+        }
+
+
+        return "profile";
+
+      }
+
+
+      if (
+        path === "/guide/learning"
+      ) {
+
+        if (
+          tab === "vocabulary"
+        ) {
+          return "vocabulary";
+        }
+
+
+        if (
+          tab === "review"
+        ) {
+          return "review";
+        }
+
+
+        return "learning";
+
+      }
+
+
+      if (
+        path === "/guide/troubleshooting"
+      ) {
+        return "troubleshooting";
+      }
+
+
+      return "";
+    }
+
+
+    function sync() {
+
+      const activeKey =
+        resolveActiveKey();
+
+
+      links.forEach(
+        link => {
+
+          const key =
+            link.getAttribute(
+              "data-guide-nav"
+            );
+
+
+          const active =
+            key === activeKey;
+
+
+          link.classList.toggle(
+            "is-route-active",
+            active
+          );
+
+
+          if (active) {
+
+            link.setAttribute(
+              "aria-current",
+              "page"
+            );
+
+          } else if (
+            link.getAttribute(
+              "aria-current"
+            )
+            === "page"
+          ) {
+
+            link.removeAttribute(
+              "aria-current"
+            );
+
+          }
+
+        }
+      );
+
+    }
+
+
+    sync();
+
+
+    window.addEventListener(
+      "popstate",
+      sync
+    );
+
+
+    window.addEventListener(
+      "hashchange",
+      sync
+    );
+
+
+    /*
+      Profile and Learning change query string
+      with history.replaceState(), so no popstate
+      event is fired. Sync after their tabs are clicked.
+    */
+
+    document.addEventListener(
+      "click",
+      event => {
+
+        const target =
+          event.target;
+
+
+        if (
+          !(target instanceof Element)
+        ) {
+          return;
+        }
+
+
+        const tab =
+          target.closest(
+            [
+              "[data-profile-tab]",
+              "[data-learning-tab]",
+              'a[href^="/guide#"]',
+              'a[href^="#"]',
+            ].join(",")
+          );
+
+
+        if (!tab) {
+          return;
+        }
+
+
+        window.setTimeout(
+          sync,
+          0
+        );
+
+      }
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initGuideRouteState,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initGuideRouteState();
+
+  }
+</script>
+
+
+<style>
+
+  .guide-sidebar {
+    position: sticky;
+
+    top: 92px;
+
+    height:
+      calc(
+        100vh - 112px
+      );
+
+    align-self: start;
+  }
+
+
+  .guide-sidebar-inner {
+    display: flex;
+
+    height: 100%;
+
+    flex-direction: column;
+
+    overflow: hidden;
+
+    border:
+      1px solid
+      #c9c1d4;
+
+    border-radius: 18px;
+
+    background:
+      rgba(
+        238,
+        233,
+        245,
+        0.88
+      );
+
+    box-shadow:
+      0 16px 40px
+      rgba(
+        49,
+        36,
+        70,
+        0.06
+      );
+
+    backdrop-filter:
+      blur(18px);
+  }
+
+
+  .guide-sidebar-top {
+    padding:
+      18px 17px 13px;
+  }
+
+
+  .guide-sidebar-kicker {
+    display: block;
+
+    color:
+      #7365db;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.12em;
+  }
+
+
+  .guide-sidebar-top strong {
+    display: block;
+
+    margin-top: 4px;
+
+    color:
+      #241f30;
+
+    font-size: 12px;
+  }
+
+
+  /* SEARCH */
+
+  .guide-search {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr auto;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin:
+      0 12px 12px;
+
+    padding:
+      0 9px;
+
+    min-height: 39px;
+
+    border:
+      1px solid #c9c1d4;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        248,
+        245,
+        251,
+        0.74
+      );
+  }
+
+
+  .guide-search > span {
+    color:
+      #898094;
+  }
+
+
+  .guide-search input {
+    min-width: 0;
+
+    border: 0;
+
+    outline: 0;
+
+    background:
+      transparent;
+
+    color:
+      #282231;
+
+    font: inherit;
+
+    font-size: 8px;
+  }
+
+
+  .guide-search input::placeholder {
+    color:
+      #9b93a6;
+  }
+
+
+  .guide-search kbd {
+    padding:
+      3px 5px;
+
+    border:
+      1px solid
+      #d2cadc;
+
+    border-radius: 5px;
+
+    background:
+      #eee9f4;
+
+    color:
+      #81788d;
+
+    font-size: 6px;
+  }
+
+
+  /* NAV */
+
+  .guide-navigation {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding:
+      3px 10px 15px;
+
+    scrollbar-width:
+      thin;
+
+    scrollbar-color:
+      #c5bbd2 transparent;
+  }
+
+
+  .guide-nav-group {
+    margin-top:
+      15px;
+  }
+
+
+  .guide-nav-title {
+    display: block;
+
+    padding:
+      0 8px 6px;
+
+    color:
+      #9a91a5;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.08em;
+
+    text-transform:
+      uppercase;
+  }
+
+
+  .guide-nav-items {
+    display: grid;
+
+    gap: 2px;
+  }
+
+
+  .guide-nav-items a {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 8px;
+
+    min-height: 34px;
+
+    padding:
+      0 8px;
+
+    border-radius: 8px;
+
+    color:
+      #655d70;
+
+    font-size: 8px;
+
+    font-weight: 650;
+
+    transition:
+      color 150ms ease,
+      background 150ms ease;
+  }
+
+
+  .guide-nav-items a:hover {
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.44
+      );
+
+    color:
+      #2c2636;
+  }
+
+
+  .guide-nav-items a.active {
+    background:
+      #e2dbfb;
+
+    color:
+      #644be2;
+  }
+
+
+  .guide-nav-icon {
+    display: grid;
+
+    width: 23px;
+    height: 23px;
+
+    place-items: center;
+
+    border-radius: 7px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.5
+      );
+
+    font-size: 7px;
+  }
+
+
+  .guide-nav-items
+  a.active
+  .guide-nav-icon {
+    background:
+      #6952ee;
+
+    color:
+      white;
+  }
+
+
+  /* DOWNLOAD */
+
+  .guide-sidebar-bottom {
+    padding: 10px;
+
+    border-top:
+      1px solid #cec6d9;
+  }
+
+
+  .guide-sidebar-bottom a {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 9px;
+
+    border-radius: 9px;
+
+    background:
+      #16131f;
+
+    color:
+      white;
+  }
+
+
+  .guide-sidebar-bottom
+  > a > span {
+    display: grid;
+
+    width: 28px;
+    height: 28px;
+
+    place-items: center;
+
+    border-radius: 8px;
+
+    background:
+      #6952ee;
+  }
+
+
+  .guide-sidebar-bottom small {
+    display: block;
+
+    color:
+      #817b8d;
+
+    font-size: 5px;
+  }
+
+
+  .guide-sidebar-bottom strong {
+    display: block;
+
+    margin-top: 1px;
+
+    font-size: 8px;
+  }
+
+
+  /* MOBILE */
+
+  .guide-mobile-toggle,
+  .guide-mobile-backdrop {
+    display: none;
+  }
+
+
+  @media (max-width: 1000px) {
+
+    .guide-sidebar {
+      position: fixed;
+
+      z-index: 210;
+
+      top: 0;
+      bottom: 0;
+      left: 0;
+
+      width:
+        min(
+          320px,
+          calc(100vw - 50px)
+        );
+
+      height: 100vh;
+
+      padding: 12px;
+
+      transform:
+        translateX(-105%);
+
+      transition:
+        transform 220ms ease;
+    }
+
+
+    .guide-sidebar.open {
+      transform:
+        translateX(0);
+    }
+
+
+    .guide-sidebar-inner {
+      border-radius: 16px;
+    }
+
+
+    .guide-mobile-toggle {
+      position: fixed;
+
+      z-index: 180;
+
+      right: 16px;
+      bottom: 16px;
+
+      display: flex;
+
+      min-height: 42px;
+
+      align-items: center;
+
+      gap: 7px;
+
+      padding:
+        0 12px;
+
+      border: 0;
+
+      border-radius: 11px;
+
+      background:
+        #6952ee;
+
+      color: white;
+
+      box-shadow:
+        0 15px 35px
+        rgba(
+          68,
+          47,
+          143,
+          0.25
+        );
+
+      font-size: 8px;
+
+      font-weight: 750;
+    }
+
+
+    .guide-mobile-backdrop {
+      position: fixed;
+
+      z-index: 200;
+
+      inset: 0;
+
+      display: block;
+
+      opacity: 0;
+
+      visibility: hidden;
+
+      background:
+        rgba(
+          18,
+          15,
+          26,
+          0.48
+        );
+
+      backdrop-filter:
+        blur(3px);
+
+      transition:
+        opacity 200ms ease,
+        visibility 200ms ease;
+    }
+
+
+    .guide-mobile-backdrop.visible {
+      opacity: 1;
+
+      visibility: visible;
+    }
+
+
+    body.guide-menu-open {
+      overflow: hidden;
+    }
+
+  }
+
+</style>

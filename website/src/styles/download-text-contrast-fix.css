@@ -1,0 +1,287 @@
+/* =========================================================
+   AITRANOVA
+   DOWNLOAD TEXT CONTRAST FIX
+   ========================================================= */
+
+
+/* Không để text bị mờ do opacity/filter */
+
+.download-v8
+:is(
+  p,
+  small,
+  strong,
+  span
+) {
+  text-shadow: none !important;
+  filter: none !important;
+}
+
+
+/* =========================================================
+   CURRENT RELEASE CARD
+   ========================================================= */
+
+.download-v8
+.release-card p {
+  color:
+    #62586d !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    500 !important;
+}
+
+
+.download-v8
+.release-card small {
+  color:
+    #665a72 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.download-v8
+.release-card strong {
+  color:
+    #251d2d !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* Các label tím như CURRENT RELEASE / VERSION */
+
+.download-v8
+.release-card
+:is(
+  [class*="label"],
+  [class*="eyebrow"],
+  [class*="kicker"]
+) {
+  color:
+    #6548dc !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   RELEASE / GITHUB BUTTON
+   ========================================================= */
+
+.download-v8
+.release-card a {
+  opacity:
+    1 !important;
+}
+
+
+.download-v8
+.release-card a
+:is(
+  strong,
+  span
+) {
+  opacity:
+    1 !important;
+}
+
+
+.download-v8
+.release-card a strong {
+  color:
+    #ffffff !important;
+
+  font-weight:
+    850 !important;
+}
+
+
+.download-v8
+.release-card a small,
+.download-v8
+.release-card a p {
+  color:
+    rgba(255,255,255,0.84) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   LIGHT CONTENT AREAS
+   ========================================================= */
+
+.download-v8
+:is(
+  [class*="install"],
+  [class*="release"],
+  [class*="beta"]
+)
+p {
+  opacity:
+    1 !important;
+}
+
+
+.download-v8
+:is(
+  [class*="install"],
+  [class*="release"],
+  [class*="beta"]
+)
+small {
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   SYSTEM / BEFORE INSTALL DARK AREA
+   ========================================================= */
+
+/*
+   Không ép layout.
+   Chỉ tăng độ rõ cho text đang dùng white/transparent.
+*/
+
+.download-v8
+:is(
+  [class*="system"],
+  [class*="requirement"],
+  [class*="requirements"]
+)
+h2 {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.download-v8
+:is(
+  [class*="system"],
+  [class*="requirement"],
+  [class*="requirements"]
+)
+p {
+  color:
+    rgba(255,255,255,0.88) !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    500 !important;
+}
+
+
+.download-v8
+:is(
+  [class*="system"],
+  [class*="requirement"],
+  [class*="requirements"]
+)
+small {
+  color:
+    rgba(255,255,255,0.76) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.download-v8
+:is(
+  [class*="system"],
+  [class*="requirement"],
+  [class*="requirements"]
+)
+strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   BETA NOTICE CARD
+   ========================================================= */
+
+.download-v8
+:is(
+  [class*="beta"],
+  [class*="notice"]
+)
+h3,
+.download-v8
+:is(
+  [class*="beta"],
+  [class*="notice"]
+)
+strong {
+  color:
+    #302638 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.download-v8
+:is(
+  [class*="beta"],
+  [class*="notice"]
+)
+p {
+  color:
+    #675c72 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   BUTTONS IN LIGHT AREA
+   ========================================================= */
+
+.download-v8
+:is(
+  a,
+  button
+) {
+  -webkit-font-smoothing:
+    antialiased;
+
+  text-rendering:
+    optimizeLegibility;
+}
+
+
+/* =========================================================
+   GLOBAL FONT RENDERING — DOWNLOAD ONLY
+   ========================================================= */
+
+.download-v8 {
+  -webkit-font-smoothing:
+    antialiased;
+
+  -moz-osx-font-smoothing:
+    grayscale;
+
+  text-rendering:
+    optimizeLegibility;
+}

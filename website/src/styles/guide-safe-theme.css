@@ -1,0 +1,1293 @@
+/* =========================================================
+   AITRANOVA V10.3D
+   SAFE GUIDE THEME
+
+   IMPORTANT:
+   - No position overrides
+   - No width / height overrides
+   - No min-height overrides
+   - No grid restructuring
+   - No article spacing restructuring
+   - No navigation JS changes
+   ========================================================= */
+
+
+/* =========================================================
+   PAGE BACKGROUND
+   ========================================================= */
+
+.guide-page,
+.article-page {
+  background:
+    linear-gradient(
+      135deg,
+      #cbc4d7 0%,
+      #d5cedf 48%,
+      #c9c1d5 100%
+    ) !important;
+
+  color:
+    #261e2e;
+}
+
+
+/* =========================================================
+   OVERVIEW HERO
+   ========================================================= */
+
+.guide-page .guide-hero {
+  border-bottom:
+    1px solid
+    rgba(154, 128, 255, 0.16) !important;
+
+  background:
+    radial-gradient(
+      circle at 80% 18%,
+      rgba(113, 79, 247, 0.26),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 18% 72%,
+      rgba(76, 108, 207, 0.09),
+      transparent 27%
+    ),
+    linear-gradient(
+      132deg,
+      #090610 0%,
+      #0f0919 25%,
+      #171020 54%,
+      #24143c 80%,
+      #100d1b 100%
+    ) !important;
+}
+
+
+.guide-page
+.guide-hero h1 {
+  color:
+    #ffffff !important;
+}
+
+
+.guide-page
+.guide-hero p {
+  color:
+    rgba(
+      239,
+      233,
+      248,
+      0.82
+    ) !important;
+}
+
+
+.guide-page
+.guide-hero-kicker {
+  color:
+    #a994ff !important;
+}
+
+
+.guide-page
+.guide-hero-index {
+  border-color:
+    rgba(
+      173,
+      149,
+      255,
+      0.23
+    ) !important;
+
+  background:
+    rgba(
+      17,
+      11,
+      27,
+      0.58
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  backdrop-filter:
+    blur(12px);
+}
+
+
+/* =========================================================
+   ARTICLE HERO
+   COLOR ONLY
+   ========================================================= */
+
+.article-page .article-hero {
+  border-bottom:
+    1px solid
+    rgba(154, 128, 255, 0.16) !important;
+
+  background:
+    radial-gradient(
+      circle at 82% 22%,
+      rgba(113, 79, 247, 0.24),
+      transparent 29%
+    ),
+    radial-gradient(
+      circle at 17% 78%,
+      rgba(73, 101, 193, 0.08),
+      transparent 26%
+    ),
+    linear-gradient(
+      132deg,
+      #090610 0%,
+      #0f0919 25%,
+      #171020 56%,
+      #23143a 80%,
+      #100d1b 100%
+    ) !important;
+}
+
+
+.article-page
+.article-hero h1 {
+  color:
+    #ffffff !important;
+}
+
+
+.article-page
+.article-hero p {
+  color:
+    rgba(
+      238,
+      232,
+      247,
+      0.82
+    ) !important;
+}
+
+
+.article-page
+.article-hero a {
+  color:
+    #c1b3ff;
+}
+
+
+/* =========================================================
+   SIDEBAR OUTER CARD
+   VISUAL ONLY
+   ========================================================= */
+
+.guide-sidebar {
+  border-color:
+    rgba(
+      158,
+      132,
+      255,
+      0.22
+    ) !important;
+
+  border-radius:
+    17px !important;
+
+  background:
+    linear-gradient(
+      155deg,
+      #0e0917 0%,
+      #151020 52%,
+      #20132f 100%
+    ) !important;
+
+  box-shadow:
+    0 20px 42px
+    rgba(
+      32,
+      19,
+      48,
+      0.18
+    ) !important;
+}
+
+
+/* =========================================================
+   SIDEBAR INNER ELEMENTS
+   ========================================================= */
+
+.guide-sidebar-inner,
+.guide-sidebar-top,
+.guide-navigation,
+.guide-nav-group,
+.guide-nav-items {
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   SIDEBAR KICKER
+   ========================================================= */
+
+.guide-sidebar-kicker {
+  color:
+    #a28cff !important;
+
+  font-weight:
+    850 !important;
+
+  letter-spacing:
+    0.1em !important;
+}
+
+
+/* =========================================================
+   SEARCH
+   ========================================================= */
+
+.guide-search {
+  border-color:
+    rgba(
+      166,
+      143,
+      255,
+      0.19
+    ) !important;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.055
+    ) !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.guide-search input {
+  color:
+    #ffffff !important;
+}
+
+
+.guide-search input::placeholder {
+  color:
+    #968ba1 !important;
+
+  opacity:
+    1;
+}
+
+
+/* =========================================================
+   NAV GROUP TITLE
+   ========================================================= */
+
+.guide-nav-title {
+  border-color:
+    transparent !important;
+
+  background:
+    transparent !important;
+
+  color:
+    #84788f !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   NAVIGATION LINKS
+   ========================================================= */
+
+[data-guide-nav] {
+  border-radius:
+    8px !important;
+
+  color:
+    #bfb4ca !important;
+
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    transform 160ms ease;
+}
+
+
+[data-guide-nav]:hover {
+  color:
+    #ffffff !important;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.05
+    ) !important;
+}
+
+
+[data-guide-nav].is-route-active,
+[data-guide-nav][aria-current="page"] {
+  color:
+    #ffffff !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(118,88,255,0.27),
+      rgba(118,88,255,0.075)
+    ) !important;
+
+  box-shadow:
+    inset 3px 0 0
+    #8266ff !important;
+}
+
+
+/* =========================================================
+   NAV ICON
+   ========================================================= */
+
+.guide-nav-icon {
+  border-radius:
+    7px !important;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.09
+    ) !important;
+
+  color:
+    #d5cada !important;
+}
+
+
+[data-guide-nav].is-route-active
+.guide-nav-icon,
+
+[data-guide-nav][aria-current="page"]
+.guide-nav-icon {
+  background:
+    #7658ff !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   SIDEBAR BOTTOM
+   ========================================================= */
+
+.guide-sidebar-bottom {
+  border-color:
+    rgba(
+      255,
+      255,
+      255,
+      0.07
+    ) !important;
+}
+
+
+/* =========================================================
+   OVERVIEW CARDS
+   ========================================================= */
+
+.guide-category {
+  border-color:
+    rgba(
+      108,
+      89,
+      131,
+      0.19
+    ) !important;
+
+  border-radius:
+    15px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f8f5fa,
+      #f0ebf5
+    ) !important;
+
+  box-shadow:
+    0 12px 28px
+    rgba(
+      44,
+      32,
+      59,
+      0.055
+    ) !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease;
+}
+
+
+.guide-category:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(
+      109,
+      82,
+      230,
+      0.32
+    ) !important;
+
+  box-shadow:
+    0 17px 34px
+    rgba(
+      44,
+      32,
+      59,
+      0.09
+    ) !important;
+}
+
+
+.guide-category h2,
+.guide-category h3,
+.guide-category strong {
+  color:
+    #281f31 !important;
+}
+
+
+.guide-category p {
+  color:
+    #64596e !important;
+}
+
+
+.guide-category a {
+  color:
+    #654bef !important;
+}
+
+
+/* =========================================================
+   ARTICLE BLOCKS
+   ========================================================= */
+
+.article-section-block {
+  border-color:
+    rgba(
+      108,
+      89,
+      131,
+      0.18
+    ) !important;
+
+  border-radius:
+    15px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #faf7fb,
+      #f1ecf6
+    ) !important;
+
+  box-shadow:
+    0 12px 28px
+    rgba(
+      44,
+      32,
+      59,
+      0.055
+    ) !important;
+}
+
+
+.article-section-block h2,
+.article-section-block h3,
+.article-section-block strong {
+  color:
+    #292031 !important;
+}
+
+
+.article-section-block p,
+.article-section-block li {
+  color:
+    #61566b !important;
+}
+
+
+/* =========================================================
+   STEPS
+   ========================================================= */
+
+.guide-step {
+  border-color:
+    rgba(
+      111,
+      91,
+      134,
+      0.17
+    ) !important;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.67
+    ) !important;
+}
+
+
+/* =========================================================
+   CALLOUT
+   ========================================================= */
+
+.guide-callout {
+  border-color:
+    rgba(
+      107,
+      82,
+      227,
+      0.20
+    ) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(118,88,255,0.09),
+      rgba(109,156,255,0.05)
+    ) !important;
+}
+
+
+/* =========================================================
+   CODE
+   ========================================================= */
+
+.article-page pre,
+.article-section-block pre {
+  border-color:
+    rgba(
+      156,
+      130,
+      255,
+      0.14
+    ) !important;
+
+  background:
+    #100b18 !important;
+
+  color:
+    #e8e1f3 !important;
+}
+
+
+.article-page pre code,
+.article-section-block pre code {
+  color:
+    #e8e1f3 !important;
+}
+
+
+/* =========================================================
+   NEXT GUIDE
+   ========================================================= */
+
+.guide-next,
+[class*="next-guide"] {
+  border-color:
+    rgba(
+      164,
+      141,
+      255,
+      0.17
+    ) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #15101f,
+      #24143b
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .guide-category,
+  [data-guide-nav] {
+    transition:
+      none !important;
+  }
+
+}
+
+
+/* =========================================================
+   V10.3E
+   GUIDE ARTICLE TEXT CONTRAST
+   COLOR ONLY - NO LAYOUT CHANGES
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   ARTICLE HERO MAIN TITLE
+   --------------------------------------------------------- */
+
+.article-page
+.article-hero h1 {
+  color: #ffffff !important;
+
+  text-shadow:
+    0 8px 28px
+    rgba(0, 0, 0, 0.18);
+}
+
+
+/* ---------------------------------------------------------
+   ARTICLE DESCRIPTION
+   --------------------------------------------------------- */
+
+.article-page
+.article-hero > .container p,
+.article-page
+.article-hero [class*="description"],
+.article-page
+.article-hero [class*="intro"] {
+  color:
+    rgba(
+      245,
+      240,
+      250,
+      0.88
+    ) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* ---------------------------------------------------------
+   BREADCRUMB / BACK LINK
+   --------------------------------------------------------- */
+
+.article-page
+.article-hero
+:is(
+  [class*="back"],
+  [class*="breadcrumb"]
+) {
+  color:
+    rgba(
+      221,
+      211,
+      238,
+      0.82
+    ) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.article-page
+.article-hero
+:is(
+  [class*="back"],
+  [class*="breadcrumb"]
+):hover {
+  color:
+    #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   HERO BADGES
+   DOCUMENTATION / Learning System / etc.
+   --------------------------------------------------------- */
+
+.article-page
+.article-hero
+:is(
+  [class*="badge"],
+  [class*="kicker"],
+  [class*="tag"]
+) {
+  border-color:
+    rgba(
+      177,
+      154,
+      255,
+      0.30
+    ) !important;
+
+  background:
+    rgba(
+      118,
+      88,
+      255,
+      0.16
+    ) !important;
+
+  color:
+    #d7cbff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.article-page
+.article-hero
+:is(
+  [class*="badge"],
+  [class*="kicker"],
+  [class*="tag"]
+)
+:is(
+  span,
+  small,
+  strong
+) {
+  color:
+    #d7cbff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* ---------------------------------------------------------
+   ARTICLE HERO META CARD
+   Example:
+   Muc do      Nen tang
+   Co ban      Windows
+   --------------------------------------------------------- */
+
+.article-page
+.article-hero
+:is(
+  [class*="hero-meta"],
+  [class*="article-meta"],
+  [class*="meta-card"],
+  [class*="hero-info"]
+) {
+  border-color:
+    rgba(
+      188,
+      170,
+      255,
+      0.30
+    ) !important;
+
+  background:
+    rgba(
+      20,
+      14,
+      33,
+      0.72
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 14px 30px
+    rgba(
+      0,
+      0,
+      0,
+      0.18
+    ) !important;
+
+  backdrop-filter:
+    blur(12px);
+}
+
+
+/* Meta labels */
+
+.article-page
+.article-hero
+:is(
+  [class*="hero-meta"],
+  [class*="article-meta"],
+  [class*="meta-card"],
+  [class*="hero-info"]
+)
+:is(
+  small,
+  [class*="label"]
+) {
+  color:
+    #bcaaff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* Meta values */
+
+.article-page
+.article-hero
+:is(
+  [class*="hero-meta"],
+  [class*="article-meta"],
+  [class*="meta-card"],
+  [class*="hero-info"]
+)
+:is(
+  strong,
+  b
+) {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* ---------------------------------------------------------
+   FALLBACK FOR DIRECT META TEXT
+   Only inside article hero.
+   --------------------------------------------------------- */
+
+.article-page
+.article-hero
+[class*="meta"]
+span {
+  color:
+    rgba(
+      239,
+      232,
+      250,
+      0.88
+    ) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* ---------------------------------------------------------
+   ARTICLE CONTENT SMALL TEXT
+   --------------------------------------------------------- */
+
+.article-page
+.article-section-block
+:is(
+  small,
+  [class*="meta"],
+  [class*="label"]
+) {
+  color:
+    #6e58b8 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* ---------------------------------------------------------
+   SIDEBAR SMALL TEXT
+   --------------------------------------------------------- */
+
+.article-page
+.guide-sidebar-kicker {
+  color:
+    #aa95ff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.article-page
+.guide-nav-title {
+  color:
+    #a99eb4 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.article-page
+[data-guide-nav] {
+  color:
+    #c9bfce !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.article-page
+[data-guide-nav].is-route-active,
+.article-page
+[data-guide-nav][aria-current="page"] {
+  color:
+    #ffffff !important;
+}
+
+
+
+/* =========================================================
+   V10.3F
+   GUIDE SIDEBAR HOVER / FOCUS STATE FIX
+   Prevent white pseudo-selection below active item.
+   ========================================================= */
+
+
+/* ---------------------------------------------------------
+   DEFAULT NAV ITEM
+   --------------------------------------------------------- */
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav] {
+  border:
+    1px solid
+    transparent !important;
+
+  background:
+    transparent !important;
+
+  color:
+    #c5bacd !important;
+
+  box-shadow:
+    none !important;
+
+  outline:
+    none;
+}
+
+
+/* ---------------------------------------------------------
+   INACTIVE HOVER
+   Never use white/light background.
+   --------------------------------------------------------- */
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav]:not(.is-route-active):not([aria-current="page"]):hover {
+  border-color:
+    rgba(
+      157,
+      132,
+      255,
+      0.12
+    ) !important;
+
+  background:
+    rgba(
+      118,
+      88,
+      255,
+      0.10
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* ---------------------------------------------------------
+   KEYBOARD FOCUS
+   Use outline instead of white fill.
+   --------------------------------------------------------- */
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav]:not(.is-route-active):not([aria-current="page"]):focus,
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav]:not(.is-route-active):not([aria-current="page"]):focus-visible {
+  border-color:
+    rgba(
+      151,
+      124,
+      255,
+      0.40
+    ) !important;
+
+  background:
+    rgba(
+      118,
+      88,
+      255,
+      0.08
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  outline:
+    2px solid
+    rgba(
+      133,
+      103,
+      255,
+      0.38
+    ) !important;
+
+  outline-offset:
+    1px !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* ---------------------------------------------------------
+   CURRENT ROUTE
+   Only one item receives the strong purple selection.
+   --------------------------------------------------------- */
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav].is-route-active,
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav][aria-current="page"] {
+  border-color:
+    rgba(
+      156,
+      129,
+      255,
+      0.22
+    ) !important;
+
+  background:
+    linear-gradient(
+      90deg,
+      rgba(
+        111,
+        78,
+        245,
+        0.62
+      ),
+      rgba(
+        111,
+        78,
+        245,
+        0.18
+      )
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  outline:
+    none !important;
+
+  box-shadow:
+    inset 3px 0 0
+    #9b83ff !important;
+}
+
+
+/* Current route stays purple even on hover/focus */
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav].is-route-active:hover,
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav].is-route-active:focus,
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav].is-route-active:focus-visible,
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav][aria-current="page"]:hover,
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav][aria-current="page"]:focus,
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav][aria-current="page"]:focus-visible {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(
+        111,
+        78,
+        245,
+        0.68
+      ),
+      rgba(
+        111,
+        78,
+        245,
+        0.22
+      )
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  outline:
+    none !important;
+}
+
+
+/* ---------------------------------------------------------
+   ICON STATES
+   --------------------------------------------------------- */
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav]:not(.is-route-active):not([aria-current="page"])
+.guide-nav-icon {
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.10
+    ) !important;
+
+  color:
+    #d7cedd !important;
+}
+
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav].is-route-active
+.guide-nav-icon,
+
+.guide-sidebar
+.guide-nav-items
+[data-guide-nav][aria-current="page"]
+.guide-nav-icon {
+  background:
+    #7658ff !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+
+/* =========================================================
+   V10.3G
+   GUIDE HERO SEARCH SHORTCUT CONTRAST
+   ========================================================= */
+
+.guide-page
+.guide-hero-actions kbd {
+  display: inline-grid !important;
+
+  width: 30px !important;
+  height: 30px !important;
+
+  place-items: center !important;
+
+  padding: 0 !important;
+
+  border:
+    1px solid
+    rgba(174, 150, 255, 0.34) !important;
+
+  border-radius:
+    8px !important;
+
+  background:
+    rgba(118, 88, 255, 0.18) !important;
+
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  font-size:
+    13px !important;
+
+  font-weight:
+    850 !important;
+
+  line-height:
+    1 !important;
+
+  text-shadow:
+    0 0 8px
+    rgba(151, 124, 255, 0.42);
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255,255,255,0.10);
+}
+
+
+/* Text beside shortcut */
+
+.guide-page
+.guide-hero-actions
+:is(
+  small,
+  span
+) {
+  color:
+    rgba(235, 228, 246, 0.74) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* hover */
+
+.guide-page
+.guide-hero-actions kbd:hover {
+  border-color:
+    rgba(190, 170, 255, 0.52) !important;
+
+  background:
+    rgba(118, 88, 255, 0.28) !important;
+
+  color:
+    #ffffff !important;
+}
+

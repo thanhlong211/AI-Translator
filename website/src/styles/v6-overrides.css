@@ -1,0 +1,914 @@
+:root {
+  --bg: #ded9e9;
+  --bg-soft: #d5cee4;
+
+  --surface: #f3eff9;
+  --surface-soft: #ebe5f3;
+
+  --text: #1c1828;
+  --text-2: #393247;
+
+  --muted: #71697e;
+  --muted-2: #91889e;
+
+  --border: #d2cada;
+  --border-strong: #c4bacf;
+
+  --primary: #6952ee;
+  --primary-hover: #5942dc;
+  --primary-light: #e7e0ff;
+
+  --blue: #557fdc;
+
+  --shadow-xs:
+    0 3px 10px
+    rgba(43, 31, 65, 0.05);
+
+  --shadow-sm:
+    0 15px 38px
+    rgba(43, 31, 65, 0.08);
+
+  --shadow:
+    0 28px 75px
+    rgba(43, 31, 65, 0.12);
+}
+
+
+/* =========================================================
+   PAGE BACKGROUND
+   ========================================================= */
+
+html {
+  background:
+    #ded9e9;
+}
+
+body {
+  background:
+    radial-gradient(
+      circle at 10% 0%,
+      rgba(106, 82, 238, 0.16),
+      transparent 34rem
+    ),
+    radial-gradient(
+      circle at 90% 15%,
+      rgba(96, 119, 203, 0.12),
+      transparent 38rem
+    ),
+    linear-gradient(
+      180deg,
+      #e2ddeb,
+      #d8d3e2
+    ) !important;
+}
+
+
+/* =========================================================
+   REDUCE EMPTY SPACE
+   ========================================================= */
+
+.section {
+  padding:
+    76px 0 !important;
+}
+
+.section-sm {
+  padding:
+    54px 0 !important;
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.header {
+  background:
+    rgba(239, 234, 247, 0.9) !important;
+
+  border-bottom-color:
+    rgba(191, 181, 207, 0.72) !important;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.hero-v5 {
+  padding-top:
+    72px !important;
+
+  background:
+    radial-gradient(
+      circle at 80% 15%,
+      rgba(108, 82, 238, 0.2),
+      transparent 30rem
+    ),
+    linear-gradient(
+      135deg,
+      #e5def4 0%,
+      #dcd8eb 52%,
+      #d6dbea 100%
+    ) !important;
+}
+
+.hero-trust {
+  min-height:
+    64px !important;
+
+  margin-top:
+    45px !important;
+}
+
+
+/* =========================================================
+   HOW IT WORKS
+   ========================================================= */
+
+.how-section {
+  background:
+    linear-gradient(
+      180deg,
+      #eee9f5,
+      #e6e0ed
+    ) !important;
+}
+
+
+/* =========================================================
+   FEATURES
+   ========================================================= */
+
+.feature-v5-section {
+  background:
+    linear-gradient(
+      180deg,
+      #d8d0e6,
+      #e1dbea
+    ) !important;
+}
+
+
+/* =========================================================
+   DOCUMENTS
+   ========================================================= */
+
+.documents-deep {
+  background:
+    linear-gradient(
+      145deg,
+      #ddd6e9,
+      #d6dbea
+    ) !important;
+}
+
+
+/* =========================================================
+   PROFILE
+   ========================================================= */
+
+.profile-deep {
+  background:
+    linear-gradient(
+      145deg,
+      #eee9f5,
+      #e4ddeb
+    ) !important;
+}
+
+
+/* =========================================================
+   LEARNING
+   ========================================================= */
+
+.learning-deep {
+  background:
+    linear-gradient(
+      145deg,
+      #dbd5e7,
+      #e2ddea
+    ) !important;
+}
+
+
+/* =========================================================
+   ROADMAP
+   ========================================================= */
+
+.roadmap-preview-v5 {
+  background:
+    linear-gradient(
+      145deg,
+      #eee9f5,
+      #ded8e8
+    ) !important;
+}
+
+
+/* =========================================================
+   LIGHT SURFACES — NOT PURE WHITE
+   ========================================================= */
+
+.feature-v5-card,
+.workflow-demo,
+.how-step,
+.reader-app,
+.documents-explainer,
+.profile-editor-shell,
+.profile-system-card,
+.learning-app,
+.learning-explainer,
+.roadmap-column,
+.document-decision,
+.learning-workflow,
+.profile-setup-flow {
+  background:
+    #f4f0f8 !important;
+}
+
+
+/* =========================================================
+   MANGA — KEEP DARK
+   ========================================================= */
+
+.manga-showcase {
+  padding:
+    82px 0 !important;
+
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(108, 82, 238, 0.19),
+      transparent 34rem
+    ),
+    #171420 !important;
+}
+
+
+/* =========================================================
+   HIDDEN PANELS USED BY JAVASCRIPT
+   ========================================================= */
+
+section[hidden] {
+  display:
+    none !important;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 800px) {
+  .section {
+    padding:
+      60px 0 !important;
+  }
+}
+
+
+/* =========================================================
+   V6.1 — COMPACT HOME
+   ========================================================= */
+
+.compact-why {
+  padding:
+    29px 0;
+
+  border-top:
+    1px solid #cfc6da;
+
+  border-bottom:
+    1px solid #cfc6da;
+
+  background:
+    linear-gradient(
+      90deg,
+      #e3dced,
+      #d9d3e5
+    );
+}
+
+
+.compact-why-inner {
+  display: grid;
+
+  grid-template-columns:
+    auto minmax(210px, 0.8fr)
+    minmax(300px, 1.2fr)
+    auto;
+
+  align-items: center;
+
+  gap: 20px;
+}
+
+
+.why-symbol {
+  display: grid;
+
+  width: 39px;
+  height: 39px;
+
+  place-items: center;
+
+  border-radius: 11px;
+
+  background:
+    #6952ee;
+
+  color:
+    white;
+
+  font-size: 14px;
+}
+
+
+.compact-why small {
+  display: block;
+
+  color:
+    #7666da;
+
+  font-size: 6px;
+
+  font-weight: 850;
+
+  letter-spacing:
+    0.1em;
+}
+
+
+.compact-why strong {
+  display: block;
+
+  margin-top: 3px;
+
+  color:
+    #272131;
+
+  font-size: 11px;
+}
+
+
+.compact-why p {
+  margin: 0;
+
+  color:
+    #756d80;
+
+  font-size: 9px;
+
+  line-height: 1.6;
+}
+
+
+.compact-why a {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  color:
+    #654ee7;
+
+  font-size: 9px;
+
+  font-weight: 750;
+
+  white-space: nowrap;
+}
+
+
+/* HOW IT WORKS — SMALLER */
+
+.how-section {
+  padding:
+    65px 0 !important;
+}
+
+
+.how-heading {
+  margin-bottom:
+    32px !important;
+}
+
+
+.how-workspace {
+  gap:
+    16px !important;
+}
+
+
+.how-step {
+  min-height:
+    76px !important;
+
+  padding:
+    12px 14px !important;
+}
+
+
+.demo-screen {
+  min-height:
+    380px !important;
+}
+
+
+.source-app {
+  height:
+    235px !important;
+}
+
+
+.how-details {
+  margin-top:
+    15px !important;
+}
+
+
+/* SECTION HEADINGS */
+
+.section-title {
+  font-size:
+    clamp(
+      34px,
+      4.2vw,
+      52px
+    ) !important;
+}
+
+
+/* DEEP SECTIONS */
+
+.documents-deep,
+.profile-deep,
+.learning-deep,
+.roadmap-preview-v5 {
+  padding:
+    72px 0 !important;
+}
+
+
+/* SWITCHER */
+
+.home-switcher {
+  padding:
+    9px 0 !important;
+}
+
+
+.switcher-tabs button {
+  min-height:
+    35px !important;
+}
+
+
+/* FOOTER TEXT A LITTLE LARGER */
+
+.footer-brand p {
+  font-size:
+    12px !important;
+}
+
+
+.footer-links strong {
+  font-size:
+    10px !important;
+}
+
+
+.footer-links a {
+  font-size:
+    9px !important;
+}
+
+
+.footer-bottom {
+  font-size:
+    8px !important;
+}
+
+
+@media (max-width: 760px) {
+
+  .compact-why-inner {
+    grid-template-columns:
+      auto 1fr;
+  }
+
+
+  .compact-why p {
+    grid-column:
+      1 / -1;
+  }
+
+
+  .compact-why a {
+    grid-column:
+      1 / -1;
+  }
+
+}
+
+
+/* =========================================================
+   FINAL HOME CTA — COMPACT
+   ========================================================= */
+
+.final-cta,
+.cta-section {
+  padding:
+    55px 0 !important;
+}
+
+
+.final-cta h2,
+.cta-section h2 {
+  font-size:
+    clamp(
+      35px,
+      5vw,
+      55px
+    ) !important;
+}
+
+
+.final-cta-shell,
+.cta-shell {
+  min-height:
+    320px !important;
+}
+
+
+
+/* =========================================================
+   V6.2 — FEATURE SWITCHER POLISH
+   ========================================================= */
+
+.home-switcher {
+  position: sticky !important;
+
+  top: 70px !important;
+
+  z-index: 75 !important;
+
+  padding:
+    10px 0 !important;
+
+  border-top: 0 !important;
+
+  border-bottom:
+    1px solid
+    rgba(
+      186,
+      176,
+      202,
+      0.65
+    ) !important;
+
+  background:
+    rgba(
+      222,
+      216,
+      233,
+      0.88
+    ) !important;
+
+  box-shadow:
+    0 8px 22px
+    rgba(
+      52,
+      41,
+      70,
+      0.045
+    );
+
+  backdrop-filter:
+    blur(18px);
+}
+
+
+.switcher-inner {
+  min-height:
+    44px;
+}
+
+
+.switcher-title > span {
+  box-shadow:
+    0 9px 22px
+    rgba(
+      105,
+      82,
+      238,
+      0.18
+    );
+}
+
+
+.switcher-tabs {
+  padding:
+    4px;
+
+  border:
+    1px solid
+    rgba(
+      183,
+      173,
+      199,
+      0.7
+    );
+
+  border-radius:
+    13px;
+
+  background:
+    rgba(
+      242,
+      238,
+      247,
+      0.58
+    );
+
+  box-shadow:
+    inset 0 1px
+    rgba(
+      255,
+      255,
+      255,
+      0.46
+    );
+}
+
+
+.switcher-tabs button {
+  min-height:
+    34px !important;
+
+  border-radius:
+    9px !important;
+}
+
+
+.switcher-tabs button.active {
+  border-color:
+    transparent !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #6952ee,
+      #735ff2
+    ) !important;
+
+  box-shadow:
+    0 7px 18px
+    rgba(
+      105,
+      82,
+      238,
+      0.23
+    ) !important;
+}
+
+
+
+/* =========================================================
+   V6.3 — FINAL HOME DENSITY
+   ========================================================= */
+
+.hero-v5 {
+  min-height:
+    auto !important;
+}
+
+
+.hero-v5-grid {
+  gap:
+    58px !important;
+}
+
+
+.hero-v5-copy > p {
+  margin:
+    20px 0 23px !important;
+}
+
+
+.hero-capabilities {
+  margin-top:
+    26px !important;
+}
+
+
+.hero-trust {
+  margin-top:
+    34px !important;
+}
+
+
+.how-section {
+  padding:
+    58px 0 !important;
+}
+
+
+.compact-features {
+  padding:
+    58px 0 !important;
+}
+
+
+.compact-guide {
+  padding:
+    58px 0 !important;
+}
+
+
+/*
+ Deep feature panel:
+ one active tab only, so keep it substantial
+ but avoid giant empty top/bottom spacing.
+*/
+
+.manga-showcase {
+  padding:
+    68px 0 !important;
+}
+
+
+.documents-deep,
+.profile-deep,
+.learning-deep,
+.roadmap-preview-v5 {
+  padding:
+    62px 0 !important;
+}
+
+
+/* Footer immediately follows final content */
+
+.compact-footer {
+  margin-top:
+    0 !important;
+}
+
+
+/* Smaller heading rhythm */
+
+.section-label,
+.eyebrow {
+  margin-bottom:
+    12px !important;
+}
+
+
+.section-description {
+  margin-top:
+    14px !important;
+}
+
+
+
+/* =========================================================
+   GUIDE NAVIGATION STABILITY
+   ========================================================= */
+
+body:has(.guide-page),
+body:has(.article-page) {
+  scroll-behavior:
+    auto !important;
+}
+
+
+.guide-category,
+.article-section-block {
+  scroll-margin-top:
+    100px;
+}
+
+
+/*
+ Feedback when sidebar navigation
+ lands on a Guide category.
+*/
+
+.guide-category.guide-focus {
+  border-color:
+    rgba(
+      105,
+      82,
+      238,
+      0.68
+    ) !important;
+
+  box-shadow:
+    0 0 0 4px
+    rgba(
+      105,
+      82,
+      238,
+      0.09
+    ),
+    0 18px 42px
+    rgba(
+      53,
+      39,
+      75,
+      0.11
+    ) !important;
+}
+
+
+
+/* =========================================================
+   GUIDE SIDEBAR ACTIVE STATE
+   ========================================================= */
+
+[data-guide-nav].is-route-active {
+  background:
+    rgba(
+      105,
+      82,
+      238,
+      0.11
+    ) !important;
+
+  color:
+    #5b43df !important;
+
+  box-shadow:
+    inset 3px 0 0
+    #6952ee;
+
+  border-radius:
+    8px;
+}
+
+
+[data-guide-nav].is-route-active
+strong,
+[data-guide-nav].is-route-active
+span {
+  color:
+    inherit;
+}
+
+
+
+/* =========================================================
+   V8 GLOBAL ACCESSIBILITY POLISH
+   ========================================================= */
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible,
+[tabindex]:focus-visible {
+  outline:
+    3px solid
+    rgba(
+      105,
+      82,
+      238,
+      0.34
+    );
+
+  outline-offset:
+    3px;
+}
+
+
+a,
+button {
+  -webkit-tap-highlight-color:
+    transparent;
+}
+
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior:
+      auto !important;
+
+    animation-duration:
+      0.01ms !important;
+
+    animation-iteration-count:
+      1 !important;
+
+    transition-duration:
+      0.01ms !important;
+  }
+
+}
+

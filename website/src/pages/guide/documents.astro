@@ -1,0 +1,1630 @@
+---
+import GuideArticleLayout from "../../components/GuideArticleLayout.astro";
+---
+
+<GuideArticleLayout
+  title="Documents"
+  section="Document Translation"
+  description="Đọc và dịch TXT, EPUB, PDF có text hoặc tài liệu scan bằng workflow phù hợp."
+>
+
+  <!-- 01 -->
+
+  <section
+    id="documents"
+    class="article-section-block"
+    data-guide-search-item="documents TXT EPUB PDF Text PDF OCR tài liệu"
+  >
+    <span class="section-number">01</span>
+
+    <h2
+      data-i18n
+      data-vi="Chọn đúng loại tài liệu"
+      data-en="Choose the correct document mode"
+    >
+      Chọn đúng loại tài liệu
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Không phải file nào cũng nên được xử lý theo cùng một cách. AitraNova tách workflow tài liệu dựa trên định dạng và khả năng đọc text trực tiếp."
+      data-en="Not every file should be processed the same way. AitraNova separates document workflows based on format and whether text can be read directly."
+    >
+      Không phải file nào cũng nên được xử lý
+      theo cùng một cách.
+    </p>
+
+    <div
+      class="document-mode-selector"
+      data-document-selector
+    >
+
+      <button
+        type="button"
+        class="active"
+        data-document-mode="txt"
+        aria-selected="true"
+      >
+        <span>TXT</span>
+
+        <small
+          data-i18n
+          data-vi="Text thuần"
+          data-en="Plain text"
+        >
+          Text thuần
+        </small>
+      </button>
+
+      <button
+        type="button"
+        data-document-mode="epub"
+        aria-selected="false"
+      >
+        <span>EPUB</span>
+
+        <small
+          data-i18n
+          data-vi="Ebook"
+          data-en="Ebook"
+        >
+          Ebook
+        </small>
+      </button>
+
+      <button
+        type="button"
+        data-document-mode="pdf-text"
+        aria-selected="false"
+      >
+        <span>PDF Text</span>
+
+        <small
+          data-i18n
+          data-vi="Có thể chọn chữ"
+          data-en="Selectable text"
+        >
+          Có thể chọn chữ
+        </small>
+      </button>
+
+      <button
+        type="button"
+        data-document-mode="pdf-ocr"
+        aria-selected="false"
+      >
+        <span>PDF OCR</span>
+
+        <small
+          data-i18n
+          data-vi="Scan / ảnh"
+          data-en="Scan / image"
+        >
+          Scan / ảnh
+        </small>
+      </button>
+
+    </div>
+
+
+    <div class="document-mode-panels">
+
+      <!-- TXT -->
+
+      <article
+        class="document-mode-panel active"
+        data-document-panel="txt"
+      >
+        <div class="document-mode-head">
+
+          <span class="document-mode-icon">
+            TXT
+          </span>
+
+          <div>
+            <small>MODE 01</small>
+
+            <h3>TXT Reader</h3>
+
+            <p
+              data-i18n
+              data-vi="Dùng khi file đã chứa text thuần và không cần OCR."
+              data-en="Use this when the file already contains plain text and OCR is unnecessary."
+            >
+              Dùng khi file đã có text thuần.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="guide-steps">
+
+          <div class="guide-step">
+            <span class="guide-step-number">1</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Mở file TXT"
+                data-en="Open the TXT file"
+              >
+                Mở file TXT
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">2</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Chọn phần nội dung cần đọc"
+                data-en="Choose the content to read"
+              >
+                Chọn phần nội dung cần đọc
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">3</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Dịch text trực tiếp"
+                data-en="Translate the text directly"
+              >
+                Dịch text trực tiếp
+              </strong>
+
+              <p
+                data-i18n
+                data-vi="Không cần bước OCR."
+                data-en="No OCR step is required."
+              >
+                Không cần OCR.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="guide-callout tip">
+          <span>+</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Workflow nhẹ nhất"
+              data-en="The lightest workflow"
+            >
+              Workflow nhẹ nhất
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Nếu tài liệu đã ở dạng TXT, không nên chuyển sang PDF hoặc ảnh chỉ để dịch."
+              data-en="If the document is already TXT, do not convert it to PDF or images just for translation."
+            >
+              Nếu đã là TXT thì không cần OCR.
+            </p>
+          </div>
+        </div>
+      </article>
+
+
+      <!-- EPUB -->
+
+      <article
+        class="document-mode-panel"
+        data-document-panel="epub"
+        hidden
+      >
+        <div class="document-mode-head">
+
+          <span class="document-mode-icon">
+            EPUB
+          </span>
+
+          <div>
+            <small>MODE 02</small>
+
+            <h3>EPUB Reader</h3>
+
+            <p
+              data-i18n
+              data-vi="Phù hợp với ebook, light novel hoặc nội dung chia theo chapter."
+              data-en="Suitable for ebooks, light novels or chapter-based content."
+            >
+              Phù hợp với ebook và light novel.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="guide-steps">
+
+          <div class="guide-step">
+            <span class="guide-step-number">1</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Mở EPUB"
+                data-en="Open the EPUB"
+              >
+                Mở EPUB
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">2</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Chọn chapter"
+                data-en="Choose a chapter"
+              >
+                Chọn chapter
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">3</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Đọc và chọn đoạn"
+                data-en="Read and select a passage"
+              >
+                Đọc và chọn đoạn
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">4</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Dịch với context tài liệu"
+                data-en="Translate with document context"
+              >
+                Dịch với context tài liệu
+              </strong>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="guide-callout info">
+          <span>i</span>
+
+          <div>
+            <strong>Chapter-based reading</strong>
+
+            <p
+              data-i18n
+              data-vi="EPUB phù hợp hơn TXT nếu bạn cần giữ cấu trúc chapter trong quá trình đọc."
+              data-en="EPUB is preferable to TXT when chapter structure is important while reading."
+            >
+              EPUB giữ cấu trúc chapter tốt hơn TXT.
+            </p>
+          </div>
+        </div>
+      </article>
+
+
+      <!-- PDF TEXT -->
+
+      <article
+        class="document-mode-panel"
+        data-document-panel="pdf-text"
+        hidden
+      >
+        <div class="document-mode-head">
+
+          <span class="document-mode-icon">
+            PDF
+          </span>
+
+          <div>
+            <small>MODE 03</small>
+
+            <h3>PDF Text</h3>
+
+            <p
+              data-i18n
+              data-vi="Dùng khi PDF chứa text thật và bạn có thể chọn hoặc copy chữ trong file."
+              data-en="Use this when the PDF contains real text that can be selected or copied."
+            >
+              Dùng khi PDF có text thật.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="document-test">
+
+          <small
+            data-i18n
+            data-vi="KIỂM TRA NHANH"
+            data-en="QUICK TEST"
+          >
+            KIỂM TRA NHANH
+          </small>
+
+          <strong
+            data-i18n
+            data-vi="Bạn có chọn được chữ trong PDF không?"
+            data-en="Can you select text inside the PDF?"
+          >
+            Bạn có chọn được chữ trong PDF không?
+          </strong>
+
+          <div>
+            <span class="yes">
+              YES
+            </span>
+
+            <span>
+              PDF Text
+            </span>
+          </div>
+
+        </div>
+
+        <div class="guide-steps">
+
+          <div class="guide-step">
+            <span class="guide-step-number">1</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Mở PDF"
+                data-en="Open the PDF"
+              >
+                Mở PDF
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">2</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Đọc text trực tiếp từ tài liệu"
+                data-en="Read text directly from the document"
+              >
+                Đọc text trực tiếp từ tài liệu
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">3</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Dịch đoạn cần thiết"
+                data-en="Translate the required passage"
+              >
+                Dịch đoạn cần thiết
+              </strong>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="guide-callout tip">
+          <span>+</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="Ưu tiên PDF Text khi có thể"
+              data-en="Prefer PDF Text when available"
+            >
+              Ưu tiên PDF Text khi có thể
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Nếu PDF đã có text thật, không cần OCR lại toàn bộ trang."
+              data-en="If the PDF already contains real text, there is no need to OCR the entire page again."
+            >
+              Không OCR khi file đã chứa text.
+            </p>
+          </div>
+        </div>
+      </article>
+
+
+      <!-- PDF OCR -->
+
+      <article
+        class="document-mode-panel"
+        data-document-panel="pdf-ocr"
+        hidden
+      >
+        <div class="document-mode-head">
+
+          <span class="document-mode-icon">
+            OCR
+          </span>
+
+          <div>
+            <small>MODE 04</small>
+
+            <h3>PDF OCR</h3>
+
+            <p
+              data-i18n
+              data-vi="Dành cho PDF scan hoặc PDF thực chất chỉ chứa hình ảnh của từng trang."
+              data-en="Designed for scanned PDFs or PDFs that mainly contain page images."
+            >
+              Dành cho PDF scan hoặc PDF dạng ảnh.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="document-test">
+
+          <small
+            data-i18n
+            data-vi="KIỂM TRA NHANH"
+            data-en="QUICK TEST"
+          >
+            KIỂM TRA NHANH
+          </small>
+
+          <strong
+            data-i18n
+            data-vi="Không thể chọn text trong PDF?"
+            data-en="Unable to select text in the PDF?"
+          >
+            Không thể chọn text trong PDF?
+          </strong>
+
+          <div>
+            <span class="no">
+              NO TEXT
+            </span>
+
+            <span>
+              PDF OCR
+            </span>
+          </div>
+
+        </div>
+
+        <div class="guide-steps">
+
+          <div class="guide-step">
+            <span class="guide-step-number">1</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Mở PDF scan"
+                data-en="Open the scanned PDF"
+              >
+                Mở PDF scan
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">2</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="OCR nhận dạng text từ trang"
+                data-en="OCR recognizes text from the page"
+              >
+                OCR nhận dạng text từ trang
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">3</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Kiểm tra source text"
+                data-en="Check the recognized source text"
+              >
+                Kiểm tra source text
+              </strong>
+            </div>
+          </div>
+
+          <div class="guide-step">
+            <span class="guide-step-number">4</span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi="Dịch nội dung"
+                data-en="Translate the content"
+              >
+                Dịch nội dung
+              </strong>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="guide-callout warning">
+          <span>!</span>
+
+          <div>
+            <strong
+              data-i18n
+              data-vi="OCR phụ thuộc chất lượng scan"
+              data-en="OCR depends on scan quality"
+            >
+              OCR phụ thuộc chất lượng scan
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Trang mờ, nghiêng, chữ quá nhỏ hoặc nền phức tạp có thể làm source text nhận dạng sai."
+              data-en="Blurred, tilted, very small text or complex backgrounds may reduce recognition quality."
+            >
+              Scan càng rõ thì OCR càng ổn định.
+            </p>
+          </div>
+        </div>
+      </article>
+
+    </div>
+
+  </section>
+
+
+  <!-- 02 -->
+
+  <section
+    id="document-decision"
+    class="article-section-block"
+    data-guide-search-item="choose document mode TXT EPUB PDF OCR decision"
+  >
+    <span class="section-number">02</span>
+
+    <h2
+      data-i18n
+      data-vi="Chọn mode trong vài giây"
+      data-en="Choose a mode in seconds"
+    >
+      Chọn mode trong vài giây
+    </h2>
+
+    <div class="document-decision-tree">
+
+      <div>
+        <strong>.txt</strong>
+        <span>TXT Reader</span>
+      </div>
+
+      <i></i>
+
+      <div>
+        <strong>.epub</strong>
+        <span>EPUB Reader</span>
+      </div>
+
+      <i></i>
+
+      <div>
+        <strong>PDF + selectable text</strong>
+        <span>PDF Text</span>
+      </div>
+
+      <i></i>
+
+      <div>
+        <strong>PDF scan / image</strong>
+        <span>PDF OCR</span>
+      </div>
+
+    </div>
+
+    <div class="guide-callout info">
+      <span>i</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Nguyên tắc đơn giản"
+          data-en="Simple rule"
+        >
+          Nguyên tắc đơn giản
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Nếu AitraNova có thể đọc text trực tiếp thì không cần OCR. OCR chỉ nên dùng khi source thực chất nằm trong hình ảnh."
+          data-en="If AitraNova can read the text directly, OCR is unnecessary. OCR should be used when the source text exists inside images."
+        >
+          Có text thật thì đọc trực tiếp.
+          Chỉ dùng OCR khi cần.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 03 -->
+
+  <section
+    id="document-context"
+    class="article-section-block"
+    data-guide-search-item="document context profile glossary memory long form"
+  >
+    <span class="section-number">03</span>
+
+    <h2
+      data-i18n
+      data-vi="Profile và context khi đọc tài liệu"
+      data-en="Profiles and context while reading documents"
+    >
+      Profile và context khi đọc tài liệu
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Document Reader không chỉ lấy một đoạn text rồi dịch độc lập. Translation Profile và context phù hợp có thể hỗ trợ thuật ngữ và cách diễn đạt nhất quán hơn."
+      data-en="Document Reader does not have to treat every passage as an isolated translation. Relevant Translation Profile and context information can improve terminology and consistency."
+    >
+      Translation Profile và context có thể hỗ trợ
+      bản dịch dài hạn nhất quán hơn.
+    </p>
+
+    <div class="guide-example">
+
+      <div>
+        <small>PROFILE</small>
+        <strong>Technical</strong>
+      </div>
+
+      <span>+</span>
+
+      <div>
+        <small>DOCUMENT</small>
+        <strong>PDF / EPUB</strong>
+      </div>
+
+    </div>
+
+    <div class="guide-checklist">
+
+      <div>
+        <span>✓</span>
+        <div><strong>Glossary</strong></div>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <div><strong>Translation Profile</strong></div>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <div><strong>Document Context</strong></div>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <div><strong>Translation Memory</strong></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- 04 -->
+
+  <section
+    id="document-learning"
+    class="article-section-block"
+    data-guide-search-item="documents learning vocabulary save word grammar"
+  >
+    <span class="section-number">04</span>
+
+    <h2
+      data-i18n
+      data-vi="Đọc và học cùng lúc"
+      data-en="Read and learn at the same time"
+    >
+      Đọc và học cùng lúc
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Khi gặp từ hoặc cấu trúc đáng học trong tài liệu, nội dung có thể tiếp tục đi vào workflow Learning thay vì phải ghi chú thủ công ở ứng dụng khác."
+      data-en="When you encounter useful vocabulary or grammar in a document, the content can continue into the Learning workflow instead of requiring manual notes elsewhere."
+    >
+      Nội dung đang đọc có thể tiếp tục
+      sang workflow Learning.
+    </p>
+
+    <div class="guide-steps">
+
+      <div class="guide-step">
+        <span class="guide-step-number">1</span>
+        <div><strong>Read</strong></div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">2</span>
+        <div><strong>Translate</strong></div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">3</span>
+        <div>
+          <strong
+            data-i18n
+            data-vi="Lưu từ / nội dung cần học"
+            data-en="Save learning material"
+          >
+            Lưu từ / nội dung cần học
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">4</span>
+        <div><strong>Review</strong></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- 05 -->
+
+  <section
+    id="document-troubleshooting"
+    class="article-section-block"
+    data-guide-search-item="document troubleshooting PDF OCR EPUB TXT error"
+  >
+    <span class="section-number">05</span>
+
+    <h2
+      data-i18n
+      data-vi="Lỗi thường gặp"
+      data-en="Common problems"
+    >
+      Lỗi thường gặp
+    </h2>
+
+    <div class="trouble-list">
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="PDF mở được nhưng không đọc được text"
+            data-en="The PDF opens but text cannot be read"
+          >
+            PDF mở được nhưng không đọc được text
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Thử chọn text trong PDF. Nếu không thể chọn, tài liệu có thể là scan và nên sử dụng PDF OCR."
+            data-en="Try selecting text in the PDF. If text cannot be selected, the document may be scanned and should use PDF OCR."
+          >
+            Nếu không chọn được text,
+            thử PDF OCR.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="PDF OCR nhận sai nhiều chữ"
+            data-en="PDF OCR recognizes too much text incorrectly"
+          >
+            PDF OCR nhận sai nhiều chữ
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Kiểm tra độ phân giải, độ nghiêng, độ tương phản và kích thước chữ của bản scan."
+            data-en="Check scan resolution, rotation, contrast and text size."
+          >
+            Kiểm tra chất lượng bản scan.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Thuật ngữ thay đổi trong tài liệu dài"
+            data-en="Terminology changes in a long document"
+          >
+            Thuật ngữ thay đổi trong tài liệu dài
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Thêm các thuật ngữ quan trọng vào Glossary của Translation Profile phù hợp."
+            data-en="Add important terminology to the Glossary of the appropriate Translation Profile."
+          >
+            Dùng Glossary cho thuật ngữ quan trọng.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Đang dùng PDF OCR dù PDF có text thật"
+            data-en="Using PDF OCR even though the PDF contains real text"
+          >
+            Đang dùng PDF OCR dù PDF có text thật
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Chuyển sang PDF Text để tránh một bước OCR không cần thiết."
+            data-en="Switch to PDF Text to avoid an unnecessary OCR step."
+          >
+            Chuyển sang PDF Text.
+          </p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+
+  <!-- NEXT -->
+
+  <div class="next-guide">
+
+    <div>
+      <small>NEXT GUIDE</small>
+
+      <strong>Translation Profile</strong>
+
+      <p
+        data-i18n
+        data-vi="Kiểm soát style dịch, Glossary, Character Rules và context."
+        data-en="Control translation style, Glossary, Character Rules and context."
+      >
+        Kiểm soát cách AitraNova dịch nội dung.
+      </p>
+    </div>
+
+    <a
+      href="/guide/profile"
+      aria-label="Translation Profile guide"
+    >
+      →
+    </a>
+
+  </div>
+
+</GuideArticleLayout>
+
+
+<script>
+  function initDocumentModes() {
+
+    const selector =
+      document.querySelector(
+        "[data-document-selector]"
+      );
+
+    if (!selector) {
+      return;
+    }
+
+
+    const buttons =
+      Array.from(
+        selector.querySelectorAll(
+          "[data-document-mode]"
+        )
+      );
+
+
+    const panels =
+      Array.from(
+        document.querySelectorAll(
+          "[data-document-panel]"
+        )
+      );
+
+
+    const validModes =
+      buttons
+        .map(
+          button =>
+            button.dataset.documentMode
+        )
+        .filter(Boolean);
+
+
+    const storageKey =
+      "aitranova-document-mode";
+
+
+    function showMode(
+      mode,
+      updateUrl = true
+    ) {
+
+      if (
+        !validModes.includes(
+          mode
+        )
+      ) {
+        mode = "txt";
+      }
+
+
+      buttons.forEach(
+        button => {
+
+          const active =
+            button.dataset.documentMode
+            === mode;
+
+          button.classList.toggle(
+            "active",
+            active
+          );
+
+          button.setAttribute(
+            "aria-selected",
+            String(active)
+          );
+
+        }
+      );
+
+
+      panels.forEach(
+        panel => {
+
+          const active =
+            panel.dataset.documentPanel
+            === mode;
+
+          panel.hidden =
+            !active;
+
+          panel.classList.toggle(
+            "active",
+            active
+          );
+
+
+          if (
+            active
+            && typeof panel.animate
+            === "function"
+          ) {
+
+            panel.animate(
+              [
+                {
+                  opacity: 0,
+                  transform:
+                    "translateY(8px)",
+                },
+                {
+                  opacity: 1,
+                  transform:
+                    "translateY(0)",
+                },
+              ],
+              {
+                duration: 200,
+                easing: "ease-out",
+              }
+            );
+
+          }
+
+        }
+      );
+
+
+      try {
+        localStorage.setItem(
+          storageKey,
+          mode
+        );
+      } catch {}
+
+
+      if (updateUrl) {
+
+        const url =
+          new URL(
+            window.location.href
+          );
+
+        url.searchParams.set(
+          "mode",
+          mode
+        );
+
+        history.replaceState(
+          null,
+          "",
+          url
+        );
+
+      }
+
+    }
+
+
+    buttons.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const mode =
+              button.dataset
+                .documentMode;
+
+            if (mode) {
+              showMode(mode);
+            }
+
+          }
+        );
+
+
+        button.addEventListener(
+          "keydown",
+          event => {
+
+            if (
+              event.key !== "ArrowLeft"
+              && event.key !== "ArrowRight"
+            ) {
+              return;
+            }
+
+            event.preventDefault();
+
+
+            const currentIndex =
+              buttons.indexOf(
+                button
+              );
+
+
+            const direction =
+              event.key === "ArrowRight"
+                ? 1
+                : -1;
+
+
+            const nextIndex =
+              (
+                currentIndex
+                + direction
+                + buttons.length
+              )
+              % buttons.length;
+
+
+            const nextButton =
+              buttons[nextIndex];
+
+
+            nextButton.focus();
+
+
+            const mode =
+              nextButton.dataset
+                .documentMode;
+
+            if (mode) {
+              showMode(mode);
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const requested =
+      params.get("mode");
+
+
+    let stored = null;
+
+    try {
+      stored =
+        localStorage.getItem(
+          storageKey
+        );
+    } catch {}
+
+
+    showMode(
+      requested
+      || stored
+      || "txt",
+      Boolean(requested)
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initDocumentModes,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initDocumentModes();
+
+  }
+</script>
+
+
+<style>
+
+  .document-mode-selector {
+    display: grid;
+
+    grid-template-columns:
+      repeat(4, 1fr);
+
+    gap: 7px;
+
+    margin-top: 22px;
+
+    padding: 6px;
+
+    border:
+      1px solid #c8bfd3;
+
+    border-radius: 14px;
+
+    background:
+      #dfd8e7;
+  }
+
+
+  .document-mode-selector button {
+    display: flex;
+
+    min-width: 0;
+    min-height: 58px;
+
+    align-items: flex-start;
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 3px;
+
+    padding: 9px 11px;
+
+    border: 0;
+
+    border-radius: 10px;
+
+    background: transparent;
+
+    color: #6f6679;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    transition:
+      background 150ms ease,
+      color 150ms ease,
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+
+  .document-mode-selector
+  button:hover {
+    transform:
+      translateY(-1px);
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.38
+      );
+  }
+
+
+  .document-mode-selector
+  button.active {
+    background:
+      #6952ee;
+
+    color: white;
+
+    box-shadow:
+      0 9px 24px
+      rgba(
+        105,
+        82,
+        238,
+        0.22
+      );
+  }
+
+
+  .document-mode-selector
+  button span {
+    font-size: 9px;
+
+    font-weight: 850;
+  }
+
+
+  .document-mode-selector
+  button small {
+    overflow: hidden;
+
+    max-width: 100%;
+
+    opacity: 0.7;
+
+    font-size: 6px;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+
+
+  .document-mode-panels {
+    margin-top: 14px;
+  }
+
+
+  .document-mode-panel {
+    padding: 20px;
+
+    border:
+      1px solid #c9c0d4;
+
+    border-radius: 14px;
+
+    background:
+      rgba(
+        235,
+        229,
+        242,
+        0.72
+      );
+  }
+
+
+  .document-mode-panel[hidden] {
+    display: none !important;
+  }
+
+
+  .document-mode-head {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 13px;
+
+    margin-bottom: 18px;
+  }
+
+
+  .document-mode-icon {
+    display: grid;
+
+    width: 54px;
+    height: 54px;
+
+    place-items: center;
+
+    border-radius: 13px;
+
+    background:
+      linear-gradient(
+        135deg,
+        #6952ee,
+        #5e7dde
+      );
+
+    color: white;
+
+    font-size: 8px;
+
+    font-weight: 850;
+  }
+
+
+  .document-mode-head small {
+    display: block;
+
+    color: #958b9f;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.08em;
+  }
+
+
+  .document-mode-head h3 {
+    margin:
+      3px 0 2px;
+
+    font-size: 17px;
+  }
+
+
+  .document-mode-head p {
+    margin: 0;
+
+    font-size: 8px;
+  }
+
+
+  .document-test {
+    margin:
+      0 0 16px;
+
+    padding: 14px;
+
+    border:
+      1px solid #cbc2d5;
+
+    border-radius: 11px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.36
+      );
+  }
+
+
+  .document-test > small {
+    display: block;
+
+    color: #91879c;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.08em;
+  }
+
+
+  .document-test > strong {
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 10px;
+  }
+
+
+  .document-test > div {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 10px;
+  }
+
+
+  .document-test
+  > div > span {
+    font-size: 7px;
+
+    font-weight: 750;
+  }
+
+
+  .document-test .yes,
+  .document-test .no {
+    padding:
+      4px 6px;
+
+    border-radius: 6px;
+  }
+
+
+  .document-test .yes {
+    background:
+      #dcece4;
+
+    color:
+      #3b9b72;
+  }
+
+
+  .document-test .no {
+    background:
+      #f1e3d2;
+
+    color:
+      #bf7b39;
+  }
+
+
+  .document-decision-tree {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+
+    gap: 8px;
+
+    margin-top: 18px;
+  }
+
+
+  .document-decision-tree > div {
+    padding: 13px;
+
+    border:
+      1px solid #ccc3d6;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.38
+      );
+  }
+
+
+  .document-decision-tree
+  strong {
+    display: block;
+
+    font-size: 8px;
+  }
+
+
+  .document-decision-tree
+  span {
+    display: block;
+
+    margin-top: 4px;
+
+    color: #6952ee;
+
+    font-size: 7px;
+
+    font-weight: 750;
+  }
+
+
+  .document-decision-tree > i {
+    display: none;
+  }
+
+
+  @media (max-width: 720px) {
+
+    .document-mode-selector {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+
+    .document-decision-tree {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+  }
+
+
+  @media (max-width: 480px) {
+
+    .document-mode-selector,
+    .document-decision-tree {
+      grid-template-columns:
+        1fr;
+    }
+
+  }
+
+</style>

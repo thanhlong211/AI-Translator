@@ -1,0 +1,1213 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import RoadmapExplorer from "../components/RoadmapExplorer.astro";
+import "../styles/roadmap-exact-theme.css";
+---
+
+<BaseLayout
+  title="Roadmap — AitraNova"
+  description="Theo dõi những tính năng đã có, đang được phát triển và được lên kế hoạch cho AitraNova."
+>
+
+  <main class="roadmap-v8">
+
+    <!-- =====================================================
+         HERO
+         ===================================================== -->
+
+    <section class="roadmap-hero">
+
+      <div class="roadmap-glow glow-a"></div>
+      <div class="roadmap-glow glow-b"></div>
+
+      <div class="container roadmap-hero-inner">
+
+        <div class="roadmap-hero-copy">
+
+          <span class="roadmap-kicker">
+            PRODUCT ROADMAP
+          </span>
+
+
+          <h1>
+
+            <span
+              data-i18n
+              data-vi="AitraNova đang"
+              data-en="AitraNova is"
+            >
+              AitraNova đang
+            </span>
+
+            <br />
+
+            <em
+              data-i18n
+              data-vi="đi về đâu?"
+              data-en="heading where?"
+            >
+              đi về đâu?
+            </em>
+
+          </h1>
+
+
+          <p
+            data-i18n
+            data-vi="Roadmap công khai cho những khả năng đã có, những phần đang được cải thiện và những hướng phát triển tiếp theo."
+            data-en="A public roadmap for capabilities already available, areas currently being improved and directions planned for the future."
+          >
+            Roadmap công khai cho những khả năng
+            đã có và những hướng phát triển tiếp theo.
+          </p>
+
+        </div>
+
+
+        <div class="roadmap-hero-status">
+
+          <div>
+            <span class="status-dot available"></span>
+
+            <div>
+              <small>AVAILABLE</small>
+
+              <strong>5</strong>
+            </div>
+          </div>
+
+
+          <div>
+            <span class="status-dot development"></span>
+
+            <div>
+              <small>IN DEVELOPMENT</small>
+
+              <strong>3</strong>
+            </div>
+          </div>
+
+
+          <div>
+            <span class="status-dot planned"></span>
+
+            <div>
+              <small>PLANNED</small>
+
+              <strong>4</strong>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ROADMAP EXPLORER
+         ===================================================== -->
+
+    <section class="roadmap-content">
+
+      <div class="container">
+
+        <header class="roadmap-section-head">
+
+          <div>
+
+            <span>ROADMAP STATUS</span>
+
+            <h2
+              data-i18n
+              data-vi="Xem những gì đang thay đổi."
+              data-en="See what's changing."
+            >
+              Xem những gì đang thay đổi.
+            </h2>
+
+          </div>
+
+
+          <p
+            data-i18n
+            data-vi="Thứ tự và phạm vi có thể thay đổi khi sản phẩm phát triển. Roadmap thể hiện hướng đi chứ không phải cam kết ngày phát hành."
+            data-en="Order and scope may change as the product evolves. The roadmap represents direction rather than committed release dates."
+          >
+            Roadmap thể hiện hướng phát triển,
+            không phải cam kết ngày phát hành.
+          </p>
+
+        </header>
+
+
+        <RoadmapExplorer />
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         STATUS MEANING
+         ===================================================== -->
+
+    <section class="roadmap-meaning">
+
+      <div class="container">
+
+        <header class="meaning-head">
+
+          <span>HOW TO READ</span>
+
+          <h2
+            data-i18n
+            data-vi="Các trạng thái có nghĩa gì?"
+            data-en="What do the statuses mean?"
+          >
+            Các trạng thái có nghĩa gì?
+          </h2>
+
+        </header>
+
+
+        <div class="meaning-grid">
+
+          <div class="meaning-card available">
+
+            <span>✓</span>
+
+            <small>AVAILABLE</small>
+
+            <strong
+              data-i18n
+              data-vi="Đã có trong sản phẩm"
+              data-en="Available in the product"
+            >
+              Đã có trong sản phẩm
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Tính năng đã có workflow sử dụng công khai và có thể tiếp tục được cải thiện."
+              data-en="The feature has a public workflow and may continue to receive improvements."
+            >
+              Đã có workflow sử dụng.
+            </p>
+
+          </div>
+
+
+          <div class="meaning-card development">
+
+            <span>●</span>
+
+            <small>IN DEVELOPMENT</small>
+
+            <strong
+              data-i18n
+              data-vi="Đang được phát triển"
+              data-en="Currently being developed"
+            >
+              Đang được phát triển
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Đang được xây dựng hoặc cải thiện nhưng chưa nên coi là chức năng ổn định dành cho mọi người."
+              data-en="Currently being built or improved but should not yet be treated as a stable public capability."
+            >
+              Chưa được coi là chức năng ổn định.
+            </p>
+
+          </div>
+
+
+          <div class="meaning-card planned">
+
+            <span>○</span>
+
+            <small>PLANNED</small>
+
+            <strong
+              data-i18n
+              data-vi="Nằm trong hướng phát triển"
+              data-en="Part of the future direction"
+            >
+              Nằm trong hướng phát triển
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Được xem xét cho tương lai nhưng phạm vi và thời gian có thể thay đổi."
+              data-en="Considered for the future, but scope and timing may change."
+            >
+              Phạm vi và thời gian có thể thay đổi.
+            </p>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PRINCIPLES
+         ===================================================== -->
+
+    <section class="roadmap-principles">
+
+      <div class="container principles-layout">
+
+        <div>
+
+          <span>PRODUCT DIRECTION</span>
+
+          <h2
+            data-i18n
+            data-vi="Context trước. Kiểm soát trước. Tự động hóa sau."
+            data-en="Context first. Control first. Automation second."
+          >
+            Context trước. Kiểm soát trước.
+            Tự động hóa sau.
+          </h2>
+
+          <p
+            data-i18n
+            data-vi="Các tính năng mới của AitraNova tập trung vào việc giúp AI hiểu nội dung tốt hơn nhưng vẫn giữ khả năng kiểm soát terminology, nhân vật và correction cho người dùng."
+            data-en="New AitraNova capabilities focus on helping AI understand content better while preserving user control over terminology, characters and corrections."
+          >
+            AitraNova hướng tới automation nhưng
+            không bỏ khả năng kiểm soát của người dùng.
+          </p>
+
+        </div>
+
+
+        <div class="principle-list">
+
+          <div>
+            <span>01</span>
+
+            <div>
+              <small>CONTEXT</small>
+
+              <strong
+                data-i18n
+                data-vi="Hiểu nhiều hơn một câu"
+                data-en="Understand more than one sentence"
+              >
+                Hiểu nhiều hơn một câu
+              </strong>
+            </div>
+          </div>
+
+
+          <div>
+            <span>02</span>
+
+            <div>
+              <small>CONTROL</small>
+
+              <strong>
+                Glossary · Characters · Correction
+              </strong>
+            </div>
+          </div>
+
+
+          <div>
+            <span>03</span>
+
+            <div>
+              <small>CONSISTENCY</small>
+
+              <strong
+                data-i18n
+                data-vi="Giảm thay đổi không cần thiết"
+                data-en="Reduce unnecessary variation"
+              >
+                Giảm thay đổi không cần thiết
+              </strong>
+            </div>
+          </div>
+
+
+          <div>
+            <span>04</span>
+
+            <div>
+              <small>LEARNING</small>
+
+              <strong
+                data-i18n
+                data-vi="Tận dụng nội dung đã dịch"
+                data-en="Learn from translated content"
+              >
+                Tận dụng nội dung đã dịch
+              </strong>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         CTA
+         ===================================================== -->
+
+    <section class="roadmap-final">
+
+      <div class="container">
+
+        <div class="roadmap-final-card">
+
+          <div>
+
+            <span>FOLLOW THE PRODUCT</span>
+
+            <h2
+              data-i18n
+              data-vi="Muốn biết những gì đã thực sự thay đổi?"
+              data-en="Want to see what actually changed?"
+            >
+              Muốn biết những gì đã thực sự thay đổi?
+            </h2>
+
+            <p
+              data-i18n
+              data-vi="Roadmap cho biết hướng đi. Changelog ghi lại những thay đổi đã được phát hành."
+              data-en="Roadmap shows direction. Changelog records changes that have actually shipped."
+            >
+              Roadmap là hướng đi.
+              Changelog là những gì đã phát hành.
+            </p>
+
+          </div>
+
+
+          <div>
+
+            <a
+              href="/changelog"
+              class="roadmap-final-primary"
+            >
+              Changelog
+              →
+            </a>
+
+            <a href="/features">
+              Features
+              →
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</BaseLayout>
+
+
+<style>
+
+  .roadmap-v8 {
+    overflow: hidden;
+
+    background:
+      linear-gradient(
+        180deg,
+        #dfdae9,
+        #d7d1e1
+      );
+  }
+
+
+  /* =========================================================
+     HERO
+     ========================================================= */
+
+  .roadmap-hero {
+    position: relative;
+
+    overflow: hidden;
+
+    padding:
+      83px 0 62px;
+
+    border-bottom:
+      1px solid #c5bccf;
+  }
+
+
+  .roadmap-glow {
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+  }
+
+
+  .roadmap-glow.glow-a {
+    top: -430px;
+    right: -190px;
+
+    width: 800px;
+    height: 800px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          105,
+          82,
+          238,
+          0.2
+        ),
+        transparent 68%
+      );
+  }
+
+
+  .roadmap-glow.glow-b {
+    bottom: -480px;
+    left: -270px;
+
+    width: 820px;
+    height: 820px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          85,
+          127,
+          220,
+          0.12
+        ),
+        transparent 69%
+      );
+  }
+
+
+  .roadmap-hero-inner {
+    position: relative;
+
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+
+    align-items: end;
+
+    gap: 55px;
+  }
+
+
+  .roadmap-kicker {
+    color: #6952ee;
+
+    font-size: 7px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.13em;
+  }
+
+
+  .roadmap-hero-copy h1 {
+    margin:
+      15px 0 18px;
+
+    color: #1d1827;
+
+    font-size:
+      clamp(
+        56px,
+        8vw,
+        93px
+      );
+
+    line-height: 0.87;
+
+    letter-spacing:
+      -0.07em;
+  }
+
+
+  .roadmap-hero-copy
+  h1 em {
+    color: #6952ee;
+
+    font-style: normal;
+  }
+
+
+  .roadmap-hero-copy > p {
+    max-width: 690px;
+
+    margin: 0;
+
+    color: #706779;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+  }
+
+
+  .roadmap-hero-status {
+    display: grid;
+
+    gap: 7px;
+
+    width: 230px;
+  }
+
+
+  .roadmap-hero-status
+  > div {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 11px;
+
+    min-height: 57px;
+
+    padding:
+      0 13px;
+
+    border:
+      1px solid #c6bdcf;
+
+    border-radius: 11px;
+
+    background:
+      rgba(
+        242,
+        238,
+        246,
+        0.42
+      );
+  }
+
+
+  .status-dot {
+    display: block;
+
+    width: 9px;
+    height: 9px;
+
+    border-radius: 50%;
+  }
+
+
+  .status-dot.available {
+    background: #3b9b72;
+  }
+
+
+  .status-dot.development {
+    background: #6952ee;
+
+    box-shadow:
+      0 0 0 5px
+      rgba(
+        105,
+        82,
+        238,
+        0.1
+      );
+  }
+
+
+  .status-dot.planned {
+    border:
+      2px solid #557fdc;
+
+    background: transparent;
+  }
+
+
+  .roadmap-hero-status small {
+    display: block;
+
+    color: #968ca0;
+
+    font-size: 5px;
+  }
+
+
+  .roadmap-hero-status strong {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #2d2635;
+
+    font-size: 13px;
+  }
+
+
+  /* =========================================================
+     CONTENT
+     ========================================================= */
+
+  .roadmap-content {
+    padding:
+      68px 0 78px;
+  }
+
+
+  .roadmap-section-head {
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(280px, 0.55fr);
+
+    align-items: end;
+
+    gap: 45px;
+  }
+
+
+  .roadmap-section-head span,
+  .meaning-head > span,
+  .roadmap-principles
+  > .container > div:first-child
+  > span {
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .roadmap-section-head h2,
+  .meaning-head h2 {
+    max-width: 700px;
+
+    margin:
+      9px 0 0;
+
+    color: #211b2a;
+
+    font-size:
+      clamp(
+        34px,
+        4.5vw,
+        52px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.055em;
+  }
+
+
+  .roadmap-section-head > p {
+    margin: 0;
+
+    color: #766d80;
+
+    font-size: 8px;
+
+    line-height: 1.65;
+  }
+
+
+  /* =========================================================
+     MEANING
+     ========================================================= */
+
+  .roadmap-meaning {
+    padding:
+      70px 0;
+
+    border-top:
+      1px solid #c5bccf;
+
+    background:
+      rgba(
+        226,
+        220,
+        234,
+        0.52
+      );
+  }
+
+
+  .meaning-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(3, 1fr);
+
+    gap: 9px;
+
+    margin-top: 27px;
+  }
+
+
+  .meaning-card {
+    min-height: 205px;
+
+    padding: 18px;
+
+    border:
+      1px solid #c7bed1;
+
+    border-radius: 14px;
+
+    background:
+      rgba(
+        243,
+        239,
+        247,
+        0.48
+      );
+  }
+
+
+  .meaning-card > span {
+    display: grid;
+
+    width: 34px;
+    height: 34px;
+
+    place-items: center;
+
+    border-radius: 9px;
+
+    font-size: 10px;
+
+    font-weight: 850;
+  }
+
+
+  .meaning-card.available
+  > span {
+    background: #dcece4;
+    color: #3b9b72;
+  }
+
+
+  .meaning-card.development
+  > span {
+    background: #e3dcfb;
+    color: #6952ee;
+  }
+
+
+  .meaning-card.planned
+  > span {
+    background: #dce6f7;
+    color: #557fdc;
+  }
+
+
+  .meaning-card small {
+    display: block;
+
+    margin-top: 17px;
+
+    color: #958b9f;
+
+    font-size: 5px;
+
+    letter-spacing:
+      0.1em;
+  }
+
+
+  .meaning-card strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #312939;
+
+    font-size: 11px;
+  }
+
+
+  .meaning-card p {
+    margin:
+      6px 0 0;
+
+    color: #7c7286;
+
+    font-size: 7px;
+
+    line-height: 1.6;
+  }
+
+
+  /* =========================================================
+     PRINCIPLES
+     ========================================================= */
+
+  .roadmap-principles {
+    padding:
+      72px 0;
+
+    background: #17131f;
+
+    color: white;
+  }
+
+
+  .principles-layout {
+    display: grid;
+
+    grid-template-columns:
+      0.8fr 1.2fr;
+
+    align-items: center;
+
+    gap: 70px;
+  }
+
+
+  .roadmap-principles
+  h2 {
+    max-width: 560px;
+
+    margin:
+      10px 0;
+
+    color: #f2eef5;
+
+    font-size:
+      clamp(
+        34px,
+        4vw,
+        50px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.055em;
+  }
+
+
+  .roadmap-principles p {
+    margin: 0;
+
+    color: #8d8696;
+
+    font-size: 9px;
+
+    line-height: 1.7;
+  }
+
+
+  .principle-list {
+    display: grid;
+
+    gap: 8px;
+  }
+
+
+  .principle-list > div {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-height: 68px;
+
+    padding:
+      0 14px;
+
+    border:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.08
+      );
+
+    border-radius: 11px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.025
+      );
+  }
+
+
+  .principle-list
+  > div > span {
+    display: grid;
+
+    width: 33px;
+    height: 33px;
+
+    place-items: center;
+
+    border-radius: 9px;
+
+    background:
+      rgba(
+        105,
+        82,
+        238,
+        0.18
+      );
+
+    color: #aa9cff;
+
+    font-size: 6px;
+
+    font-weight: 850;
+  }
+
+
+  .principle-list small {
+    display: block;
+
+    color: #706879;
+
+    font-size: 5px;
+  }
+
+
+  .principle-list strong {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #ddd7e3;
+
+    font-size: 8px;
+  }
+
+
+  /* =========================================================
+     FINAL
+     ========================================================= */
+
+  .roadmap-final {
+    padding:
+      67px 0 82px;
+  }
+
+
+  .roadmap-final-card {
+    display: grid;
+
+    grid-template-columns:
+      1fr auto;
+
+    align-items: center;
+
+    gap: 50px;
+
+    padding: 31px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 20px;
+
+    background:
+      linear-gradient(
+        135deg,
+        #e7e1ef,
+        #d8d3e5
+      );
+
+    box-shadow:
+      0 22px 50px
+      rgba(
+        48,
+        36,
+        66,
+        0.08
+      );
+  }
+
+
+  .roadmap-final-card
+  > div:first-child > span {
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .roadmap-final-card h2 {
+    margin:
+      8px 0 6px;
+
+    color: #211b2a;
+
+    font-size:
+      clamp(
+        31px,
+        4vw,
+        45px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.05em;
+  }
+
+
+  .roadmap-final-card p {
+    margin: 0;
+
+    color: #776d81;
+
+    font-size: 8px;
+
+    line-height: 1.6;
+  }
+
+
+  .roadmap-final-card
+  > div:last-child {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+  }
+
+
+  .roadmap-final-card a {
+    display: flex;
+
+    min-width: 150px;
+    min-height: 38px;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 15px;
+
+    padding:
+      0 11px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 9px;
+
+    color: #443b4c;
+
+    font-size: 7px;
+
+    font-weight: 750;
+  }
+
+
+  .roadmap-final-card
+  .roadmap-final-primary {
+    border-color: #6952ee;
+
+    background: #6952ee;
+
+    color: white;
+  }
+
+
+  @media (max-width: 900px) {
+
+    .roadmap-hero-inner,
+    .roadmap-section-head,
+    .principles-layout,
+    .roadmap-final-card {
+      grid-template-columns: 1fr;
+    }
+
+
+    .roadmap-hero-status {
+      width: 100%;
+
+      grid-template-columns:
+        repeat(3, 1fr);
+    }
+
+  }
+
+
+  @media (max-width: 620px) {
+
+    .roadmap-hero {
+      padding-top: 62px;
+    }
+
+
+    .roadmap-hero-copy h1 {
+      font-size:
+        clamp(
+          48px,
+          15vw,
+          68px
+        );
+    }
+
+
+    .roadmap-hero-status,
+    .meaning-grid {
+      grid-template-columns: 1fr;
+    }
+
+
+    .roadmap-final-card
+    > div:last-child,
+    .roadmap-final-card a {
+      width: 100%;
+    }
+
+  }
+
+</style>

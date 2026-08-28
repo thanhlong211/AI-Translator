@@ -1,0 +1,1340 @@
+/* =========================================================
+   AITRANOVA
+   DOWNLOAD — INSTALLATION + SYSTEM NIGHT PURPLE
+   ========================================================= */
+
+
+/* =========================================================
+   INSTALLATION SECTION
+   ========================================================= */
+
+.download-v8
+:is(
+  .download-steps,
+  .installation-section,
+  .download-installation
+) {
+  position: relative;
+
+  border-top:
+    1px solid rgba(154, 112, 255, 0.12) !important;
+
+  border-bottom:
+    1px solid rgba(154, 112, 255, 0.14) !important;
+
+  background:
+    radial-gradient(
+      circle at 0% 25%,
+      rgba(110, 57, 255, 0.28),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 88% 10%,
+      rgba(122, 55, 230, 0.18),
+      transparent 27%
+    ),
+    linear-gradient(
+      135deg,
+      #090617 0%,
+      #100921 40%,
+      #17102d 72%,
+      #0c081a 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* label INSTALLATION */
+
+.download-v8
+:is(
+  .download-steps,
+  .installation-section,
+  .download-installation
+)
+:is(
+  .download-steps-head,
+  .download-steps-copy
+)
+> span {
+  color:
+    #a982ff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    850 !important;
+}
+
+
+/* heading */
+
+.download-v8
+:is(
+  .download-steps,
+  .installation-section,
+  .download-installation
+)
+h2 {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  text-shadow:
+    0 12px 36px rgba(0,0,0,0.28) !important;
+}
+
+
+/* description */
+
+.download-v8
+:is(
+  .download-steps,
+  .installation-section,
+  .download-installation
+)
+p {
+  color:
+    rgba(231, 224, 242, 0.82) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* guide link */
+
+.download-v8
+:is(
+  .download-steps,
+  .installation-section,
+  .download-installation
+)
+a {
+  color:
+    #b38cff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+.download-v8
+:is(
+  .download-steps,
+  .installation-section,
+  .download-installation
+)
+a:hover {
+  color:
+    #d5bdff !important;
+}
+
+
+/* =========================================================
+   INSTALLATION CARDS
+   ========================================================= */
+
+.download-v8
+:is(
+  .download-steps-grid,
+  .download-steps-flow
+)
+> div,
+
+.download-v8
+.download-step-card {
+  border:
+    1px solid
+    rgba(146, 91, 255, 0.48) !important;
+
+  border-radius:
+    16px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(36, 25, 67, 0.88),
+      rgba(22, 16, 46, 0.92)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255,255,255,0.045),
+    0 18px 38px
+      rgba(0,0,0,0.20),
+    0 0 25px
+      rgba(99, 50, 214, 0.07) !important;
+
+  backdrop-filter:
+    blur(12px);
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.download-v8
+:is(
+  .download-steps-grid,
+  .download-steps-flow
+)
+> div:hover,
+
+.download-v8
+.download-step-card:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(180, 117, 255, 0.75) !important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255,255,255,0.06),
+    0 22px 44px
+      rgba(0,0,0,0.25),
+    0 0 28px
+      rgba(118, 65, 238, 0.14) !important;
+}
+
+
+/* step number */
+
+.download-v8
+:is(
+  .download-steps-grid,
+  .download-steps-flow
+)
+> div
+> span:first-child,
+
+.download-v8
+.download-step-card
+> span:first-child {
+  border:
+    1px solid
+    rgba(177, 105, 255, 0.34) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #4720a8,
+      #7431db
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 7px 18px
+    rgba(94, 36, 190, 0.28) !important;
+}
+
+
+/* card small heading */
+
+.download-v8
+:is(
+  .download-steps-grid,
+  .download-steps-flow
+)
+small,
+
+.download-v8
+.download-step-card small {
+  color:
+    #ad7cff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* card title */
+
+.download-v8
+:is(
+  .download-steps-grid,
+  .download-steps-flow
+)
+strong,
+
+.download-v8
+.download-step-card strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* card body */
+
+.download-v8
+:is(
+  .download-steps-grid,
+  .download-steps-flow
+)
+p,
+
+.download-v8
+.download-step-card p {
+  color:
+    rgba(226, 218, 239, 0.82) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* arrows */
+
+.download-v8
+:is(
+  .download-steps-grid,
+  .download-steps-flow
+)
+> i {
+  color:
+    #a96fff !important;
+
+  opacity:
+    1 !important;
+
+  text-shadow:
+    0 0 15px rgba(169,111,255,0.45);
+}
+
+
+
+/* =========================================================
+   SYSTEM / BEFORE INSTALL
+   ========================================================= */
+
+.download-v8
+:is(
+  .download-requirements,
+  .requirements-section,
+  .system-requirements
+) {
+  border-top:
+    1px solid rgba(160, 118, 255, 0.12) !important;
+
+  border-bottom:
+    1px solid rgba(160, 118, 255, 0.12) !important;
+
+  background:
+    radial-gradient(
+      circle at 18% 30%,
+      rgba(76, 43, 181, 0.16),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 82% 55%,
+      rgba(115, 64, 225, 0.13),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0719,
+      #110b24 48%,
+      #17102e
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* SYSTEM label */
+
+.download-v8
+:is(
+  .download-requirements,
+  .requirements-section,
+  .system-requirements
+)
+:is(
+  .requirements-copy,
+  .system-copy
+)
+> span {
+  color:
+    #a982ff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    850 !important;
+}
+
+
+/* heading */
+
+.download-v8
+:is(
+  .download-requirements,
+  .requirements-section,
+  .system-requirements
+)
+h2 {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  text-shadow:
+    0 12px 34px rgba(0,0,0,0.26);
+}
+
+
+/* body */
+
+.download-v8
+:is(
+  .download-requirements,
+  .requirements-section,
+  .system-requirements
+)
+:is(
+  .requirements-copy,
+  .system-copy
+)
+p {
+  color:
+    rgba(231, 224, 242, 0.82) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   SYSTEM CARDS
+   ========================================================= */
+
+.download-v8
+:is(
+  .requirements-grid,
+  .system-grid
+)
+> div {
+  border:
+    1px solid
+    rgba(139, 84, 242, 0.42) !important;
+
+  border-radius:
+    15px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(34, 24, 62, 0.92),
+      rgba(22, 16, 45, 0.94)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255,255,255,0.045),
+    0 13px 30px
+      rgba(0,0,0,0.16) !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.download-v8
+:is(
+  .requirements-grid,
+  .system-grid
+)
+> div:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(178, 113, 255, 0.68) !important;
+
+  box-shadow:
+    0 17px 34px
+    rgba(0,0,0,0.21) !important;
+}
+
+
+/* system icons */
+
+.download-v8
+:is(
+  .requirements-grid,
+  .system-grid
+)
+> div
+> span {
+  border:
+    1px solid
+    rgba(180, 113, 255, 0.28) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #4821aa,
+      #7532de
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 8px 19px
+    rgba(91, 33, 184, 0.28) !important;
+}
+
+
+/* labels */
+
+.download-v8
+:is(
+  .requirements-grid,
+  .system-grid
+)
+small {
+  color:
+    #ac7eff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* values */
+
+.download-v8
+:is(
+  .requirements-grid,
+  .system-grid
+)
+strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .download-v8
+  :is(
+    .download-step-card,
+    .download-steps-grid > div,
+    .download-steps-flow > div,
+    .requirements-grid > div,
+    .system-grid > div
+  ) {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}
+
+
+/* =========================================================
+   V10.10A
+   INSTALLATION — EXACT DOM NIGHT PURPLE
+   Real DOM:
+   .download-install
+   .download-section-head
+   .install-flow
+   ========================================================= */
+
+
+/* =========================================================
+   SECTION
+   ========================================================= */
+
+.download-v8
+.download-install {
+  position: relative;
+
+  border-top:
+    1px solid
+    rgba(165, 112, 255, 0.15) !important;
+
+  border-bottom:
+    1px solid
+    rgba(165, 112, 255, 0.16) !important;
+
+  background:
+    radial-gradient(
+      circle at 0% 30%,
+      rgba(103, 61, 228, 0.34),
+      transparent 27%
+    ),
+    radial-gradient(
+      circle at 92% 15%,
+      rgba(130, 70, 242, 0.18),
+      transparent 30%
+    ),
+    linear-gradient(
+      125deg,
+      #110923 0%,
+      #1a0e36 34%,
+      #291650 68%,
+      #15102f 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   SECTION HEADER
+   ========================================================= */
+
+.download-v8
+.download-install
+.download-section-head {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.download-v8
+.download-install
+.download-section-head
+> div
+> span {
+  color:
+    #b187ff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    900 !important;
+}
+
+
+.download-v8
+.download-install
+.download-section-head h2 {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  text-shadow:
+    0 12px 34px
+    rgba(0, 0, 0, 0.28) !important;
+}
+
+
+/* Full guide link */
+
+.download-v8
+.download-install
+.download-section-head
+> a {
+  color:
+    #c49aff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    850 !important;
+
+  transition:
+    color 160ms ease,
+    transform 160ms ease !important;
+}
+
+
+.download-v8
+.download-install
+.download-section-head
+> a:hover {
+  color:
+    #eadcff !important;
+
+  transform:
+    translateX(2px);
+}
+
+
+/* =========================================================
+   INSTALL FLOW
+   ========================================================= */
+
+.download-v8
+.download-install
+.install-flow {
+  background:
+    transparent !important;
+
+  border:
+    0 !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   STEP CARDS
+   ========================================================= */
+
+.download-v8
+.download-install
+.install-flow
+> div {
+  border:
+    1px solid
+    rgba(169, 104, 255, 0.52) !important;
+
+  border-radius:
+    16px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(51, 34, 89, 0.90),
+      rgba(27, 20, 57, 0.94)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.055),
+    0 18px 38px
+      rgba(0, 0, 0, 0.21),
+    0 0 24px
+      rgba(112, 56, 224, 0.08) !important;
+
+  backdrop-filter:
+    blur(12px);
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    background 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.download-v8
+.download-install
+.install-flow
+> div:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(198, 139, 255, 0.78) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(62, 40, 105, 0.94),
+      rgba(32, 23, 66, 0.96)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.07),
+    0 23px 44px
+      rgba(0, 0, 0, 0.26),
+    0 0 30px
+      rgba(137, 72, 244, 0.15) !important;
+}
+
+
+/* =========================================================
+   STEP NUMBER
+   ========================================================= */
+
+.download-v8
+.download-install
+.install-flow
+> div
+> span:first-child {
+  border:
+    1px solid
+    rgba(207, 157, 255, 0.28) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #5120bb,
+      #8438e6
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  box-shadow:
+    0 8px 19px
+    rgba(90, 31, 190, 0.30) !important;
+}
+
+
+/* =========================================================
+   STEP LABEL
+   ========================================================= */
+
+.download-v8
+.download-install
+.install-flow
+> div
+> small {
+  color:
+    #b787ff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    850 !important;
+}
+
+
+/* =========================================================
+   STEP TITLE
+   ========================================================= */
+
+.download-v8
+.download-install
+.install-flow
+> div
+> strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    850 !important;
+}
+
+
+/* =========================================================
+   STEP DESCRIPTION
+   ========================================================= */
+
+.download-v8
+.download-install
+.install-flow
+> div
+> p {
+  color:
+    rgba(231, 223, 243, 0.84) !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    500 !important;
+}
+
+
+/* =========================================================
+   ARROWS BETWEEN STEPS
+   ========================================================= */
+
+.download-v8
+.download-install
+.install-flow
+> i {
+  color:
+    #b477ff !important;
+
+  opacity:
+    1 !important;
+
+  font-style:
+    normal !important;
+
+  text-shadow:
+    0 0 16px
+    rgba(180, 119, 255, 0.55) !important;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.download-v8
+.download-install
+a:focus-visible {
+  outline:
+    2px solid
+    #c28cff !important;
+
+  outline-offset:
+    3px !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .download-v8
+  .download-install
+  :is(
+    .install-flow > div,
+    .download-section-head > a
+  ) {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}
+
+
+/* =========================================================
+   V10.10B
+   SYSTEM / REQUIREMENTS — EXACT POLISH
+   Real DOM:
+   .download-requirements
+   .requirements-layout
+   .requirements-copy
+   .requirements-grid
+   ========================================================= */
+
+
+/* =========================================================
+   SECTION
+   cooler indigo tone to separate from INSTALLATION
+   ========================================================= */
+
+.download-v8
+.download-requirements {
+  position: relative;
+
+  border-top:
+    1px solid
+    rgba(115, 139, 255, 0.16) !important;
+
+  border-bottom:
+    1px solid
+    rgba(115, 139, 255, 0.14) !important;
+
+  background:
+    radial-gradient(
+      circle at 13% 28%,
+      rgba(69, 83, 206, 0.22),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 85% 58%,
+      rgba(111, 67, 221, 0.16),
+      transparent 34%
+    ),
+    linear-gradient(
+      135deg,
+      #080d1d 0%,
+      #0d1430 36%,
+      #14183d 67%,
+      #18123a 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   LAYOUT WRAPPER
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-layout {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   SYSTEM LABEL
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-copy
+> span {
+  color:
+    #8fa4ff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    900 !important;
+
+  text-shadow:
+    0 0 16px
+    rgba(104, 125, 255, 0.28);
+}
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-copy
+h2 {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  text-shadow:
+    0 12px 32px
+    rgba(0, 0, 0, 0.30) !important;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-copy
+p {
+  color:
+    rgba(221, 226, 243, 0.84) !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    500 !important;
+}
+
+
+/* =========================================================
+   REQUIREMENT GRID
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-grid {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   REQUIREMENT CARDS
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-grid
+> div {
+  border:
+    1px solid
+    rgba(116, 137, 255, 0.38) !important;
+
+  border-radius:
+    16px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(24, 31, 68, 0.92),
+      rgba(17, 20, 51, 0.96)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.045),
+    0 16px 34px
+      rgba(0, 0, 0, 0.20),
+    0 0 24px
+      rgba(74, 90, 214, 0.06) !important;
+
+  backdrop-filter:
+    blur(12px);
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    background 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.download-v8
+.download-requirements
+.requirements-grid
+> div:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(143, 163, 255, 0.66) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(30, 39, 82, 0.96),
+      rgba(20, 24, 60, 0.98)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.06),
+    0 21px 40px
+      rgba(0, 0, 0, 0.25),
+    0 0 28px
+      rgba(89, 108, 236, 0.12) !important;
+}
+
+
+/* =========================================================
+   ICON / BADGE
+   OS / NET / OCR / BETA
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-grid
+> div
+> span {
+  border:
+    1px solid
+    rgba(168, 153, 255, 0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #3f46c8 0%,
+      #5d46db 48%,
+      #793de0 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  box-shadow:
+    0 8px 20px
+      rgba(55, 54, 181, 0.32),
+    inset 0 1px 0
+      rgba(255, 255, 255, 0.15) !important;
+}
+
+
+/* =========================================================
+   LABEL
+   PLATFORM / AI SERVICES / INPUT QUALITY / CHANNEL
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-grid
+small {
+  color:
+    #9eabef !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+/* =========================================================
+   VALUE
+   Windows / Internet / OCR quality / Beta
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-grid
+strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    850 !important;
+}
+
+
+/* =========================================================
+   CARD INNER COPY
+   ========================================================= */
+
+.download-v8
+.download-requirements
+.requirements-grid
+> div
+> div {
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   INDIVIDUAL BADGE TONES
+   subtle differentiation
+   ========================================================= */
+
+/* OS */
+
+.download-v8
+.download-requirements
+.requirements-grid
+> div:nth-child(1)
+> span {
+  background:
+    linear-gradient(
+      135deg,
+      #414ad0,
+      #6844e4
+    ) !important;
+}
+
+
+/* NET */
+
+.download-v8
+.download-requirements
+.requirements-grid
+> div:nth-child(2)
+> span {
+  background:
+    linear-gradient(
+      135deg,
+      #355ecb,
+      #536eea
+    ) !important;
+}
+
+
+/* OCR */
+
+.download-v8
+.download-requirements
+.requirements-grid
+> div:nth-child(3)
+> span {
+  background:
+    linear-gradient(
+      135deg,
+      #4f40ca,
+      #7843df
+    ) !important;
+}
+
+
+/* BETA */
+
+.download-v8
+.download-requirements
+.requirements-grid
+> div:nth-child(4)
+> span {
+  background:
+    linear-gradient(
+      135deg,
+      #6632c7,
+      #8b42df
+    ) !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .download-v8
+  .download-requirements
+  .requirements-grid
+  > div {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}

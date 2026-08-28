@@ -1,0 +1,453 @@
+---
+import BrandLogo from "./BrandLogo.astro";
+import LanguageSwitcher from "./LanguageSwitcher.astro";
+
+const navItems = [
+  {
+    href: "/features",
+    vi: "Tính năng",
+    en: "Features",
+  },
+  {
+    href: "/guide",
+    vi: "Hướng dẫn",
+    en: "Guide",
+  },
+  {
+    href: "/faq",
+    vi: "Hỏi đáp",
+    en: "FAQ",
+  },
+  {
+    href: "/about",
+    vi: "Giới thiệu",
+    en: "About",
+  },
+  {
+    href: "/roadmap",
+    vi: "Lộ trình",
+    en: "Roadmap",
+  },
+  {
+    href: "/changelog",
+    vi: "Thay đổi",
+    en: "Changelog",
+  },
+];
+
+const normalizePath = (
+  path: string
+) => {
+  if (
+    path.length > 1
+    && path.endsWith("/")
+  ) {
+    return path.slice(
+      0,
+      -1
+    );
+  }
+
+  return path;
+};
+
+const currentPath =
+  normalizePath(
+    Astro.url.pathname
+  );
+
+const isActive = (
+  href: string
+) => {
+  const path =
+    normalizePath(
+      href
+    );
+
+  return (
+    currentPath === path
+    || (
+      path !== "/"
+      && currentPath.startsWith(
+        `${path}/`
+      )
+    )
+  );
+};
+---
+
+<header
+  class="site-navbar navbar-v96"
+  data-site-navbar
+>
+
+  <div class="container navbar-v96-inner">
+
+    <!-- BRAND -->
+
+    <a
+      href="/"
+      class="navbar-v96-brand"
+      aria-label="AitraNova Home"
+    >
+      <BrandLogo />
+    </a>
+
+
+    <!-- DESKTOP NAV -->
+
+    <nav
+      class="navbar-v96-nav"
+      aria-label="Main navigation"
+    >
+
+      {
+        navItems.map((item) => (
+
+          <a
+            href={item.href}
+            class:list={[
+              "navbar-v96-link",
+              isActive(item.href)
+                && "active",
+            ]}
+            aria-current={
+              isActive(item.href)
+                ? "page"
+                : undefined
+            }
+          >
+
+            <span
+              data-i18n
+              data-vi={item.vi}
+              data-en={item.en}
+            >
+              {item.vi}
+            </span>
+
+          </a>
+
+        ))
+      }
+
+    </nav>
+
+
+    <!-- ACTIONS -->
+
+    <div class="navbar-v96-actions">
+
+      <div class="navbar-v96-language">
+        <LanguageSwitcher />
+      </div>
+
+
+      <a
+        href="/download"
+        class:list={[
+          "navbar-v96-download",
+          isActive("/download")
+            && "active",
+        ]}
+      >
+
+        <span
+          data-i18n
+          data-vi="Tải xuống"
+          data-en="Download"
+        >
+          Tải xuống
+        </span>
+
+        <span
+          class="navbar-v96-download-icon"
+          aria-hidden="true"
+        >
+          ↓
+        </span>
+
+      </a>
+
+
+      <button
+        type="button"
+        class="navbar-v96-menu-button"
+        data-mobile-menu-button
+        aria-label="Open navigation"
+        aria-expanded="false"
+        aria-controls="navbar-v96-mobile"
+      >
+        <span></span>
+        <span></span>
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- MOBILE -->
+
+  <div
+    class="navbar-v96-mobile"
+    id="navbar-v96-mobile"
+    data-mobile-menu
+    hidden
+  >
+
+    <div class="container navbar-v96-mobile-inner">
+
+      <nav>
+
+        {
+          navItems.map((item) => (
+
+            <a
+              href={item.href}
+              class:list={[
+                isActive(item.href)
+                  && "active",
+              ]}
+            >
+
+              <span
+                data-i18n
+                data-vi={item.vi}
+                data-en={item.en}
+              >
+                {item.vi}
+              </span>
+
+              <span>→</span>
+
+            </a>
+
+          ))
+        }
+
+
+        <a
+          href="/download"
+          class="navbar-v96-mobile-download"
+        >
+
+          <span
+            data-i18n
+            data-vi="Tải AitraNova"
+            data-en="Download AitraNova"
+          >
+            Tải AitraNova
+          </span>
+
+          <span>↓</span>
+
+        </a>
+
+      </nav>
+
+
+      <div class="navbar-v96-mobile-language">
+
+        <span>LANGUAGE</span>
+
+        <LanguageSwitcher />
+
+      </div>
+
+    </div>
+
+  </div>
+
+</header>
+
+
+<script>
+  function initNavbarV96() {
+
+    const navbar =
+      document.querySelector(
+        "[data-site-navbar]"
+      );
+
+
+    const button =
+      navbar?.querySelector(
+        "[data-mobile-menu-button]"
+      );
+
+
+    const menu =
+      navbar?.querySelector(
+        "[data-mobile-menu]"
+      );
+
+
+    if (
+      !(navbar instanceof HTMLElement)
+      || !(
+        button instanceof HTMLButtonElement
+      )
+      || !(
+        menu instanceof HTMLElement
+      )
+    ) {
+      return;
+    }
+
+
+    let opened =
+      false;
+
+
+    function setOpen(
+      value
+    ) {
+
+      opened =
+        Boolean(
+          value
+        );
+
+
+      menu.hidden =
+        !opened;
+
+
+      button.setAttribute(
+        "aria-expanded",
+        String(opened)
+      );
+
+
+      button.classList.toggle(
+        "active",
+        opened
+      );
+
+
+      navbar.classList.toggle(
+        "menu-open",
+        opened
+      );
+
+    }
+
+
+    button.addEventListener(
+      "click",
+      () => {
+        setOpen(
+          !opened
+        );
+      }
+    );
+
+
+    menu.addEventListener(
+      "click",
+      event => {
+
+        const target =
+          event.target;
+
+
+        if (
+          target instanceof Element
+          && target.closest("a")
+        ) {
+
+          setOpen(
+            false
+          );
+
+        }
+
+      }
+    );
+
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        if (
+          event.key === "Escape"
+          && opened
+        ) {
+
+          setOpen(
+            false
+          );
+
+          button.focus();
+
+        }
+
+      }
+    );
+
+
+    window.addEventListener(
+      "resize",
+      () => {
+
+        if (
+          window.innerWidth
+          > 1040
+          && opened
+        ) {
+
+          setOpen(
+            false
+          );
+
+        }
+
+      }
+    );
+
+
+    function updateScrollState() {
+
+      navbar.classList.toggle(
+        "scrolled",
+        window.scrollY > 12
+      );
+
+    }
+
+
+    updateScrollState();
+
+
+    window.addEventListener(
+      "scroll",
+      updateScrollState,
+      {
+        passive: true,
+      }
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initNavbarV96,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initNavbarV96();
+
+  }
+</script>

@@ -1,0 +1,1044 @@
+/* =========================================================
+   AITRANOVA V9
+   VISUAL DENSITY + CONTRAST
+   ========================================================= */
+
+:root {
+  --bg:
+    #cbc4da;
+
+  --bg-soft:
+    #c2b9d1;
+
+  --surface:
+    #f1edf5;
+
+  --surface-soft:
+    #e8e2ef;
+
+  --surface-strong:
+    #faf8fc;
+
+  --text:
+    #1d1827;
+
+  --text-2:
+    #403748;
+
+  --muted:
+    #665d70;
+
+  --muted-2:
+    #82778d;
+
+  --border:
+    #b7acc4;
+
+  --border-strong:
+    #a99db8;
+
+  --primary:
+    #654df0;
+
+  --primary-hover:
+    #543bdc;
+
+  --primary-light:
+    #ddd4ff;
+}
+
+
+/* =========================================================
+   PAGE BACKGROUND
+   ========================================================= */
+
+html,
+body {
+  background:
+    var(--bg);
+}
+
+
+body {
+  color:
+    var(--text);
+}
+
+
+/*
+  Main page backgrounds.
+  Keep dark sections untouched because section-specific
+  backgrounds still render above this.
+*/
+
+main,
+.features-v8,
+.download-v8,
+.roadmap-v8,
+.changelog-v8,
+.faq-page,
+.about-page {
+  background:
+    linear-gradient(
+      180deg,
+      #cec7dc 0%,
+      #c6bed4 100%
+    ) !important;
+}
+
+
+/* =========================================================
+   CONTAINER
+   ========================================================= */
+
+.container {
+  width:
+    min(
+      calc(100% - 48px),
+      1320px
+    );
+}
+
+
+/* =========================================================
+   GLOBAL SECTION DENSITY
+   ========================================================= */
+
+/*
+  The old design frequently used 70-90px vertical spacing.
+  V9 intentionally makes pages denser.
+*/
+
+main > section {
+  padding-top:
+    clamp(
+      46px,
+      4vw,
+      62px
+    ) !important;
+
+  padding-bottom:
+    clamp(
+      46px,
+      4vw,
+      62px
+    ) !important;
+}
+
+
+main > section:first-child {
+  padding-top:
+    clamp(
+      48px,
+      4.5vw,
+      66px
+    ) !important;
+
+  padding-bottom:
+    clamp(
+      43px,
+      4vw,
+      58px
+    ) !important;
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.site-navbar {
+  min-height:
+    66px;
+
+  border-bottom:
+    1px solid
+    rgba(
+      97,
+      82,
+      120,
+      0.28
+    ) !important;
+
+  background:
+    rgba(
+      195,
+      186,
+      211,
+      0.96
+    ) !important;
+
+  box-shadow:
+    0 7px 28px
+    rgba(
+      39,
+      29,
+      53,
+      0.08
+    ) !important;
+
+  backdrop-filter:
+    blur(18px)
+    saturate(1.2);
+}
+
+
+.site-navbar.scrolled {
+  background:
+    rgba(
+      188,
+      178,
+      204,
+      0.98
+    ) !important;
+
+  box-shadow:
+    0 10px 32px
+    rgba(
+      38,
+      28,
+      51,
+      0.12
+    ) !important;
+}
+
+
+.navbar-inner {
+  min-height:
+    66px !important;
+}
+
+
+.navbar-link {
+  min-height:
+    38px !important;
+
+  padding:
+    0 12px !important;
+
+  color:
+    #51475e !important;
+
+  font-size:
+    12px !important;
+
+  font-weight:
+    720 !important;
+}
+
+
+.navbar-link:hover {
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.31
+    ) !important;
+
+  color:
+    #251e2d !important;
+}
+
+
+.navbar-link.active {
+  background:
+    rgba(
+      101,
+      77,
+      240,
+      0.14
+    ) !important;
+
+  color:
+    #4f36cf !important;
+}
+
+
+.navbar-download {
+  min-height:
+    40px !important;
+
+  padding:
+    0 15px !important;
+
+  font-size:
+    12px !important;
+
+  border-radius:
+    10px !important;
+}
+
+
+/* =========================================================
+   LANGUAGE SWITCHER
+   ========================================================= */
+
+[data-lang-choice],
+.language-switcher button {
+  min-width:
+    42px;
+
+  min-height:
+    36px;
+
+  font-size:
+    12px !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+/* =========================================================
+   HERO TEXT
+   ========================================================= */
+
+main > section:first-child p {
+  font-size:
+    clamp(
+      14px,
+      1.08vw,
+      16px
+    ) !important;
+
+  line-height:
+    1.65 !important;
+}
+
+
+main > section:first-child
+[class*="kicker"] {
+  font-size:
+    10px !important;
+
+  letter-spacing:
+    0.12em;
+}
+
+
+/* =========================================================
+   SECTION HEADINGS
+   ========================================================= */
+
+:is(
+  .features-v8-section-head,
+  .download-section-head,
+  .roadmap-section-head,
+  .changelog-section-head,
+  .faq-content-head,
+  .about-section-head
+) > p {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.65 !important;
+}
+
+
+:is(
+  .features-v8-section-head,
+  .download-section-head,
+  .roadmap-section-head,
+  .changelog-section-head,
+  .faq-content-head,
+  .about-section-head
+) span {
+  font-size:
+    10px !important;
+}
+
+
+/* =========================================================
+   CARDS
+   ========================================================= */
+
+:is(
+  .feature-explorer-panel,
+  .release-card,
+  .roadmap-item,
+  .release-details,
+  .faq-item,
+  .about-principle-grid article,
+  .about-product-grid a,
+  .definition-column
+) {
+  border-color:
+    var(--border) !important;
+
+  background:
+    rgba(
+      246,
+      243,
+      249,
+      0.82
+    ) !important;
+
+  box-shadow:
+    0 13px 32px
+    rgba(
+      48,
+      36,
+      65,
+      0.055
+    );
+}
+
+
+/* =========================================================
+   CARD TYPOGRAPHY
+   ========================================================= */
+
+.feature-capabilities strong,
+.roadmap-item-copy h3,
+.change-content h3,
+.faq-item summary strong,
+.about-product-grid strong {
+  color:
+    #292130 !important;
+}
+
+
+.feature-capabilities p,
+.roadmap-item-copy p,
+.change-content p,
+.faq-answer p,
+.about-product-grid p {
+  color:
+    #62596c !important;
+}
+
+
+/*
+  Several V8 components used 5-8px labels.
+  Raise them globally.
+*/
+
+.feature-capabilities p,
+.roadmap-item-copy p,
+.change-content p,
+.faq-answer p {
+  font-size:
+    12px !important;
+
+  line-height:
+    1.6 !important;
+}
+
+
+.feature-capabilities strong,
+.change-content h3 {
+  font-size:
+    14px !important;
+}
+
+
+.roadmap-item-copy h3 {
+  font-size:
+    19px !important;
+}
+
+
+:is(
+  .roadmap-item-copy,
+  .change-content,
+  .feature-capabilities,
+  .release-meta,
+  .requirements-grid,
+  .faq-item
+) small {
+  font-size:
+    9px !important;
+}
+
+
+/* =========================================================
+   FEATURE EXPLORER
+   ========================================================= */
+
+.feature-explorer {
+  margin-top:
+    24px !important;
+}
+
+
+.feature-explorer-tabs {
+  top:
+    76px !important;
+
+  margin-bottom:
+    15px !important;
+
+  background:
+    rgba(
+      194,
+      185,
+      209,
+      0.96
+    ) !important;
+
+  border-color:
+    #aa9db8 !important;
+}
+
+
+.feature-explorer-tabs button {
+  min-height:
+    44px !important;
+
+  font-size:
+    12px !important;
+}
+
+
+.feature-panel-copy > p {
+  color:
+    #62586d !important;
+
+  font-size:
+    14px !important;
+}
+
+
+.feature-panel-actions a {
+  min-height:
+    40px !important;
+
+  font-size:
+    12px !important;
+}
+
+
+/* =========================================================
+   ROADMAP
+   ========================================================= */
+
+.roadmap-filter {
+  background:
+    rgba(
+      190,
+      181,
+      205,
+      0.83
+    ) !important;
+
+  border-color:
+    var(--border-strong) !important;
+}
+
+
+.roadmap-filter button {
+  font-size:
+    12px !important;
+}
+
+
+.roadmap-result-meta {
+  font-size:
+    11px !important;
+}
+
+
+/* =========================================================
+   CHANGELOG
+   ========================================================= */
+
+.changelog-filters {
+  background:
+    rgba(
+      190,
+      181,
+      205,
+      0.83
+    ) !important;
+
+  border-color:
+    var(--border-strong) !important;
+}
+
+
+.changelog-filters button {
+  font-size:
+    12px !important;
+}
+
+
+.changelog-toolbar-actions button {
+  min-height:
+    36px !important;
+
+  font-size:
+    11px !important;
+}
+
+
+.release-heading p {
+  font-size:
+    12px !important;
+}
+
+
+/* =========================================================
+   FAQ
+   ========================================================= */
+
+.faq-search input {
+  font-size:
+    14px !important;
+}
+
+
+.faq-categories button {
+  min-height:
+    35px !important;
+
+  padding:
+    0 13px !important;
+
+  font-size:
+    12px !important;
+}
+
+
+.faq-result-meta {
+  font-size:
+    11px !important;
+}
+
+
+.faq-item summary {
+  min-height:
+    72px !important;
+}
+
+
+.faq-item summary strong {
+  font-size:
+    14px !important;
+}
+
+
+.faq-answer p {
+  font-size:
+    13px !important;
+}
+
+
+.faq-answer a {
+  font-size:
+    12px !important;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.site-footer {
+  padding-top:
+    46px !important;
+
+  background:
+    #17121f !important;
+}
+
+
+.footer-main {
+  gap:
+    34px !important;
+
+  padding-bottom:
+    35px !important;
+}
+
+
+.footer-brand strong {
+  font-size:
+    17px !important;
+}
+
+
+.footer-brand small {
+  font-size:
+    9px !important;
+}
+
+
+.footer-brand-column p {
+  max-width:
+    470px !important;
+
+  margin:
+    15px 0 18px !important;
+
+  color:
+    #a49aaa !important;
+
+  font-size:
+    13px !important;
+
+  line-height:
+    1.65 !important;
+}
+
+
+.footer-download {
+  min-height:
+    40px !important;
+
+  padding:
+    0 13px !important;
+
+  font-size:
+    12px !important;
+}
+
+
+.footer-links-column {
+  gap:
+    10px !important;
+}
+
+
+.footer-links-column > small {
+  margin-bottom:
+    6px !important;
+
+  color:
+    #84798c !important;
+
+  font-size:
+    9px !important;
+}
+
+
+.footer-links-column a {
+  color:
+    #aaa0b1 !important;
+
+  font-size:
+    12px !important;
+
+  line-height:
+    1.35;
+}
+
+
+.footer-links-column a:hover {
+  color:
+    #ffffff !important;
+}
+
+
+.footer-bottom {
+  min-height:
+    58px !important;
+
+  color:
+    #82798a !important;
+
+  font-size:
+    10px !important;
+}
+
+
+.footer-bottom a {
+  color:
+    #9d93a4 !important;
+
+  font-size:
+    10px !important;
+}
+
+
+/* =========================================================
+   DARK SECTIONS
+   ========================================================= */
+
+:is(
+  .features-v8-context,
+  .download-requirements,
+  .roadmap-principles,
+  .changelog-principles,
+  .faq-support,
+  .about-architecture,
+  .about-direction
+) {
+  background:
+    #18131f !important;
+}
+
+
+:is(
+  .features-v8-context,
+  .download-requirements,
+  .roadmap-principles,
+  .changelog-principles,
+  .faq-support,
+  .about-architecture,
+  .about-direction
+) p {
+  color:
+    #aaa1b1 !important;
+
+  font-size:
+    13px !important;
+}
+
+
+/* =========================================================
+   REMOVE EXCESSIVE EMPTY SPACE
+   ========================================================= */
+
+.features-v8-summary {
+  margin-top:
+    32px !important;
+}
+
+
+.download-release {
+  padding-top:
+    45px !important;
+}
+
+
+.roadmap-explorer,
+.changelog-explorer,
+.faq-explorer {
+  margin-top:
+    25px !important;
+}
+
+
+.about-principle-grid,
+.about-product-grid,
+.architecture-list {
+  margin-top:
+    25px !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 820px) {
+
+  .container {
+    width:
+      min(
+        calc(100% - 30px),
+        1320px
+      );
+  }
+
+
+  main > section {
+    padding-top:
+      42px !important;
+
+    padding-bottom:
+      42px !important;
+  }
+
+
+  main > section:first-child {
+    padding-top:
+      44px !important;
+  }
+
+
+  .navbar-mobile nav > a {
+    min-height:
+      48px !important;
+
+    font-size:
+      13px !important;
+  }
+
+
+  .mobile-menu-bottom {
+    font-size:
+      9px !important;
+  }
+
+}
+
+
+@media (max-width: 520px) {
+
+  .footer-main {
+    gap:
+      27px !important;
+  }
+
+
+  main > section {
+    padding-top:
+      36px !important;
+
+    padding-bottom:
+      36px !important;
+  }
+
+}
+
+
+/* =========================================================
+   V9 NAVBAR COMPACT LAYOUT
+   ========================================================= */
+
+.navbar-inner {
+  grid-template-columns:
+    auto 1fr auto !important;
+
+  gap:
+    22px !important;
+}
+
+
+.navbar-desktop {
+  justify-content:
+    flex-end !important;
+
+  gap:
+    2px !important;
+}
+
+
+.navbar-actions {
+  gap:
+    7px !important;
+}
+
+
+@media (min-width: 821px) {
+
+  .navbar-inner {
+    min-height:
+      68px !important;
+  }
+
+}
+
+
+/* =========================================================
+   HOME DENSITY
+   ========================================================= */
+
+/*
+  Reduce old home-page gaps without changing the
+  product mock proportions.
+*/
+
+.hero-actions,
+.hero-cta,
+.home-hero-actions {
+  margin-top:
+    20px !important;
+}
+
+
+.hero-capabilities,
+.home-capabilities,
+.hero-meta {
+  margin-top:
+    20px !important;
+}
+
+
+.hero-copy p,
+.home-hero p {
+  max-width:
+    680px;
+
+  color:
+    #62596d !important;
+
+  font-size:
+    15px !important;
+
+  line-height:
+    1.7 !important;
+}
+
+
+/*
+  Common old home section spacing.
+*/
+
+[class*="home-section"],
+[class*="showcase-section"] {
+  margin-top:
+    0 !important;
+}
+
+
+/* =========================================================
+   GUIDE READABILITY
+   ========================================================= */
+
+.guide-page,
+.article-page {
+  color:
+    #282130;
+}
+
+
+.guide-page p,
+.article-page p,
+.article-section-block p {
+  color:
+    #61586b !important;
+
+  font-size:
+    14px !important;
+
+  line-height:
+    1.72 !important;
+}
+
+
+.guide-page li,
+.article-page li {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.65 !important;
+}
+
+
+[data-guide-nav] {
+  font-size:
+    12px !important;
+}
+
+
+.guide-category {
+  border-color:
+    var(--border) !important;
+
+  background:
+    rgba(
+      246,
+      243,
+      249,
+      0.78
+    ) !important;
+}
+
+
+.article-section-block {
+  border-color:
+    var(--border) !important;
+
+  background:
+    rgba(
+      246,
+      243,
+      249,
+      0.78
+    ) !important;
+}

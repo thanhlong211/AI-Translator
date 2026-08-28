@@ -1,0 +1,1528 @@
+/* =========================================================
+   AITRANOVA V10.2
+   DOWNLOAD PREMIUM
+   ========================================================= */
+
+.download-premium {
+  --download-night:
+    #090711;
+
+  --download-night-2:
+    #11101f;
+
+  --download-night-3:
+    #18243b;
+
+  --download-purple:
+    #7257f5;
+
+  --download-cyan:
+    #57c7ff;
+
+  --download-blue:
+    #6695ff;
+
+  --download-card:
+    #f7f4fb;
+
+  --download-card-soft:
+    #eee9f5;
+
+  --download-border:
+    #b5aac3;
+
+  overflow:
+    hidden;
+
+  background:
+    #c8c0d5;
+}
+
+
+/* =========================================================
+   HERO
+   ========================================================= */
+
+.download-premium-hero {
+  --download-pointer-x:
+    75%;
+
+  --download-pointer-y:
+    30%;
+
+  position:
+    relative;
+
+  isolation:
+    isolate;
+
+  overflow:
+    hidden;
+
+  min-height:
+    420px;
+
+  padding-top:
+    clamp(
+      62px,
+      5.5vw,
+      88px
+    ) !important;
+
+  padding-bottom:
+    clamp(
+      58px,
+      5vw,
+      78px
+    ) !important;
+
+  border-bottom:
+    1px solid
+    rgba(
+      103,
+      185,
+      255,
+      0.15
+    ) !important;
+
+  background:
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(
+        75,
+        195,
+        255,
+        0.22
+      ),
+      transparent 25%
+    ),
+    radial-gradient(
+      circle at 64% 70%,
+      rgba(
+        99,
+        81,
+        235,
+        0.16
+      ),
+      transparent 30%
+    ),
+    linear-gradient(
+      132deg,
+      #080610 0%,
+      #0d0918 24%,
+      #121326 48%,
+      #15233a 74%,
+      #10101f 100%
+    ) !important;
+
+  color:
+    #ffffff;
+}
+
+
+.download-premium-effects {
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  z-index:
+    0;
+
+  overflow:
+    hidden;
+
+  pointer-events:
+    none;
+}
+
+
+.download-premium-hero
+> :not(
+  .download-premium-effects
+) {
+  position:
+    relative;
+
+  z-index:
+    2;
+}
+
+
+/* =========================================================
+   HERO TEXT
+   ========================================================= */
+
+.download-premium-hero
+:is(
+  h1,
+  h2
+) {
+  color:
+    #ffffff !important;
+
+  text-shadow:
+    0 8px 32px
+    rgba(
+      0,
+      0,
+      0,
+      0.2
+    );
+}
+
+
+.download-premium-hero
+:is(
+  h1,
+  h2
+)
+:is(
+  em,
+  [class*="accent"]
+) {
+  background:
+    linear-gradient(
+      110deg,
+      #9a84ff 0%,
+      #7661ff 36%,
+      #62b7ff 70%,
+      #71e3ff 100%
+    ) !important;
+
+  background-clip:
+    text !important;
+
+  -webkit-background-clip:
+    text !important;
+
+  color:
+    transparent !important;
+
+  -webkit-text-fill-color:
+    transparent !important;
+}
+
+
+.download-premium-hero p {
+  color:
+    rgba(
+      236,
+      232,
+      247,
+      0.8
+    ) !important;
+
+  font-size:
+    15px !important;
+
+  line-height:
+    1.72 !important;
+}
+
+
+.download-premium-hero
+:is(
+  [class*="kicker"],
+  [class*="eyebrow"],
+  [class*="overline"]
+) {
+  color:
+    #80d9ff !important;
+}
+
+
+/* =========================================================
+   ORBS
+   ========================================================= */
+
+.download-orb {
+  position:
+    absolute;
+
+  border-radius:
+    50%;
+
+  will-change:
+    transform;
+}
+
+
+.download-orb-a {
+  top:
+    -300px;
+
+  right:
+    -130px;
+
+  width:
+    680px;
+
+  height:
+    680px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(
+        78,
+        200,
+        255,
+        0.26
+      ),
+      rgba(
+        97,
+        99,
+        240,
+        0.08
+      ) 45%,
+      transparent 70%
+    );
+
+  animation:
+    downloadOrbA
+    11s
+    ease-in-out
+    infinite;
+}
+
+
+.download-orb-b {
+  bottom:
+    -350px;
+
+  left:
+    -190px;
+
+  width:
+    620px;
+
+  height:
+    620px;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(
+        111,
+        83,
+        239,
+        0.22
+      ),
+      transparent 69%
+    );
+
+  animation:
+    downloadOrbB
+    13s
+    ease-in-out
+    infinite;
+}
+
+
+@keyframes downloadOrbA {
+
+  0%,
+  100% {
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      )
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate3d(
+        -32px,
+        26px,
+        0
+      )
+      scale(1.08);
+  }
+
+}
+
+
+@keyframes downloadOrbB {
+
+  0%,
+  100% {
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      )
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate3d(
+        36px,
+        -24px,
+        0
+      )
+      scale(1.06);
+  }
+
+}
+
+
+/* =========================================================
+   GRID
+   ========================================================= */
+
+.download-grid {
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  opacity:
+    0.15;
+
+  background-image:
+    linear-gradient(
+      rgba(
+        99,
+        190,
+        255,
+        0.09
+      )
+      1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(
+        99,
+        190,
+        255,
+        0.09
+      )
+      1px,
+      transparent 1px
+    );
+
+  background-size:
+    52px 52px;
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(
+        0,
+        0,
+        0,
+        0.58
+      ),
+      transparent 88%
+    );
+}
+
+
+/* =========================================================
+   POINTER LIGHT
+   ========================================================= */
+
+.download-pointer-light {
+  position:
+    absolute;
+
+  inset:
+    0;
+
+  background:
+    radial-gradient(
+      500px circle
+      at
+      var(
+        --download-pointer-x
+      )
+      var(
+        --download-pointer-y
+      ),
+      rgba(
+        255,
+        255,
+        255,
+        0.14
+      ),
+      rgba(
+        81,
+        195,
+        255,
+        0.055
+      ) 38%,
+      transparent 70%
+    );
+}
+
+
+/* =========================================================
+   SECTIONS
+   ========================================================= */
+
+.download-premium-section {
+  position:
+    relative;
+
+  isolation:
+    isolate;
+
+  padding-top:
+    clamp(
+      52px,
+      4.5vw,
+      70px
+    ) !important;
+
+  padding-bottom:
+    clamp(
+      52px,
+      4.5vw,
+      70px
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(
+      80,
+      66,
+      103,
+      0.1
+    );
+}
+
+
+.download-premium-section:nth-of-type(
+  even
+) {
+  background:
+    radial-gradient(
+      circle at 82% 14%,
+      rgba(
+        74,
+        154,
+        223,
+        0.075
+      ),
+      transparent 27%
+    ),
+    linear-gradient(
+      135deg,
+      #c7bfd4,
+      #d3ccdf
+    ) !important;
+}
+
+
+.download-premium-section:nth-of-type(
+  odd
+) {
+  background:
+    radial-gradient(
+      circle at 15% 20%,
+      rgba(
+        104,
+        78,
+        221,
+        0.075
+      ),
+      transparent 26%
+    ),
+    linear-gradient(
+      135deg,
+      #d2ccdd,
+      #c7bfd4
+    ) !important;
+}
+
+
+/* =========================================================
+   RELEASE AREA
+   ========================================================= */
+
+.download-release {
+  position:
+    relative;
+
+  z-index:
+    3;
+}
+
+
+.download-premium-release,
+.release-card {
+  position:
+    relative;
+
+  overflow:
+    hidden;
+
+  border:
+    1px solid
+    rgba(
+      104,
+      87,
+      128,
+      0.22
+    ) !important;
+
+  border-radius:
+    22px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(
+        250,
+        248,
+        252,
+        0.96
+      ),
+      rgba(
+        238,
+        233,
+        245,
+        0.94
+      )
+    ) !important;
+
+  box-shadow:
+    0 27px 62px
+    rgba(
+      42,
+      30,
+      59,
+      0.13
+    );
+}
+
+
+.download-premium-release::before,
+.release-card::before {
+  position:
+    absolute;
+
+  top:
+    -100px;
+
+  right:
+    -80px;
+
+  width:
+    300px;
+
+  height:
+    300px;
+
+  border-radius:
+    50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(
+        80,
+        195,
+        255,
+        0.18
+      ),
+      transparent 70%
+    );
+
+  content:
+    "";
+
+  pointer-events:
+    none;
+}
+
+
+/* =========================================================
+   RELEASE TYPOGRAPHY
+   ========================================================= */
+
+.download-premium-release
+:is(
+  h2,
+  h3,
+  strong
+),
+.release-card
+:is(
+  h2,
+  h3,
+  strong
+) {
+  color:
+    #251d2e !important;
+}
+
+
+.download-premium-release p,
+.release-card p {
+  color:
+    #655a70 !important;
+
+  font-size:
+    13px !important;
+
+  line-height:
+    1.68 !important;
+}
+
+
+.download-premium-release
+:is(
+  small,
+  [class*="meta"],
+  [class*="label"]
+),
+.release-card
+:is(
+  small,
+  [class*="meta"],
+  [class*="label"]
+) {
+  color:
+    #6752d9 !important;
+}
+
+
+/* =========================================================
+   PRIMARY CTA
+   ========================================================= */
+
+.download-premium-cta,
+.download-premium
+a[class*="primary"] {
+  position:
+    relative;
+
+  overflow:
+    hidden;
+
+  border-color:
+    transparent !important;
+
+  background:
+    linear-gradient(
+      130deg,
+      #6650ed 0%,
+      #705ff4 45%,
+      #568fef 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 14px 32px
+    rgba(
+      75,
+      74,
+      203,
+      0.28
+    );
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+
+.download-premium-cta:hover,
+.download-premium
+a[class*="primary"]:hover {
+  transform:
+    translateY(-3px);
+
+  filter:
+    brightness(1.04);
+
+  box-shadow:
+    0 20px 42px
+    rgba(
+      70,
+      82,
+      210,
+      0.37
+    );
+}
+
+
+/* =========================================================
+   REQUIREMENTS
+   ========================================================= */
+
+.download-requirements {
+  background:
+    radial-gradient(
+      circle at 78% 18%,
+      rgba(
+        72,
+        194,
+        255,
+        0.13
+      ),
+      transparent 27%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0813,
+      #10101e 45%,
+      #15233a 100%
+    ) !important;
+
+  color:
+    #ffffff;
+}
+
+
+.download-requirements
+:is(
+  h2,
+  h3,
+  strong
+) {
+  color:
+    #ffffff !important;
+}
+
+
+.download-requirements p {
+  color:
+    rgba(
+      235,
+      231,
+      244,
+      0.8
+    ) !important;
+}
+
+
+.requirements-grid {
+  display:
+    grid;
+
+  gap:
+    10px;
+}
+
+
+.download-premium-requirement,
+.requirements-grid > * {
+  border:
+    1px solid
+    rgba(
+      94,
+      188,
+      255,
+      0.15
+    ) !important;
+
+  border-radius:
+    14px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(
+        255,
+        255,
+        255,
+        0.055
+      ),
+      rgba(
+        255,
+        255,
+        255,
+        0.025
+      )
+    ) !important;
+
+  box-shadow:
+    inset
+    0
+    1px
+    0
+    rgba(
+      255,
+      255,
+      255,
+      0.035
+    );
+
+  backdrop-filter:
+    blur(11px);
+
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease;
+}
+
+
+.download-premium-requirement:hover,
+.requirements-grid > *:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(
+      90,
+      207,
+      255,
+      0.32
+    ) !important;
+
+  background:
+    rgba(
+      72,
+      166,
+      235,
+      0.07
+    ) !important;
+}
+
+
+.download-premium-requirement
+:is(
+  strong,
+  h3
+),
+.requirements-grid
+> *
+:is(
+  strong,
+  h3
+) {
+  color:
+    #ffffff !important;
+}
+
+
+.download-premium-requirement p,
+.requirements-grid > * p {
+  color:
+    rgba(
+      230,
+      229,
+      244,
+      0.76
+    ) !important;
+}
+
+
+/* =========================================================
+   INSTALL FLOW
+   ========================================================= */
+
+.download-premium
+:is(
+  [class*="install-step"],
+  [class*="download-step"]
+) {
+  position:
+    relative;
+
+  border:
+    1px solid
+    rgba(
+      111,
+      91,
+      135,
+      0.18
+    ) !important;
+
+  border-radius:
+    15px !important;
+
+  background:
+    rgba(
+      248,
+      245,
+      250,
+      0.78
+    ) !important;
+
+  box-shadow:
+    0 12px 28px
+    rgba(
+      44,
+      32,
+      60,
+      0.06
+    );
+
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+
+.download-premium
+:is(
+  [class*="install-step"],
+  [class*="download-step"]
+):hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(
+      87,
+      166,
+      230,
+      0.3
+    ) !important;
+
+  box-shadow:
+    0 17px 34px
+    rgba(
+      44,
+      32,
+      60,
+      0.1
+    );
+}
+
+
+/* =========================================================
+   FINAL CTA DARK SECTION
+   ========================================================= */
+
+.download-premium
+:is(
+  [class*="final"],
+  [class*="cta-section"],
+  [class*="download-cta"]
+) {
+  background:
+    radial-gradient(
+      circle at 50% 0%,
+      rgba(
+        83,
+        191,
+        255,
+        0.14
+      ),
+      transparent 32%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0814,
+      #151023 55%,
+      #172740
+    ) !important;
+}
+
+
+.download-premium
+:is(
+  [class*="final"],
+  [class*="cta-section"]
+)
+:is(
+  h2,
+  h3,
+  p
+) {
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   REVEAL
+   ========================================================= */
+
+.download-premium-reveal {
+  opacity:
+    0;
+
+  transform:
+    translate3d(
+      0,
+      26px,
+      0
+    );
+
+  transition:
+    opacity
+      650ms
+      cubic-bezier(
+        .2,
+        .75,
+        .2,
+        1
+      ),
+    transform
+      650ms
+      cubic-bezier(
+        .2,
+        .75,
+        .2,
+        1
+      );
+}
+
+
+.download-premium-visible {
+  opacity:
+    1 !important;
+
+  transform:
+    none !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (
+  max-width: 820px
+) {
+
+  .download-premium-hero {
+    min-height:
+      auto;
+
+    padding-top:
+      45px !important;
+
+    padding-bottom:
+      55px !important;
+  }
+
+
+  .download-grid {
+    background-size:
+      36px 36px;
+  }
+
+
+  .download-premium-section {
+    padding-top:
+      42px !important;
+
+    padding-bottom:
+      42px !important;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .download-orb {
+    animation:
+      none !important;
+  }
+
+
+  .download-premium-reveal {
+    opacity:
+      1 !important;
+
+    transform:
+      none !important;
+
+    transition:
+      none !important;
+  }
+
+}
+
+
+/* =========================================================
+   V10.2B
+   DOWNLOAD HERO CHIP BAR FIX
+   ========================================================= */
+
+/*
+  Old download styles can leave a light background on the
+  wrapper containing Windows / Quick Translate / Manga /
+  Documents. The wrapper itself should be transparent.
+*/
+
+.download-premium-hero
+:is(
+  .download-hero-tags,
+  .download-hero-chips,
+  .download-hero-meta,
+  .download-platforms,
+  .download-capabilities,
+  .download-hero-features,
+  [class*="hero-tags"],
+  [class*="hero-chips"],
+  [class*="hero-meta"],
+  [class*="platforms"],
+  [class*="capabilities"]
+) {
+  width:
+    fit-content !important;
+
+  max-width:
+    100% !important;
+
+  min-height:
+    0 !important;
+
+  margin-top:
+    20px !important;
+
+  padding:
+    0 !important;
+
+  border:
+    0 !important;
+
+  border-radius:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+
+  backdrop-filter:
+    none !important;
+}
+
+
+/*
+  Fallback for a generic wrapper whose direct children
+  are chip / pill / tag elements.
+*/
+
+.download-premium-hero
+:is(
+  div,
+  nav,
+  ul
+):has(
+  > [class*="chip"]
+):not(
+  [class*="effects"]
+):not(
+  [class*="grid"]
+) {
+  width:
+    fit-content !important;
+
+  max-width:
+    100% !important;
+
+  padding:
+    0 !important;
+
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.download-premium-hero
+:is(
+  div,
+  nav,
+  ul
+):has(
+  > [class*="pill"]
+):not(
+  [class*="effects"]
+) {
+  width:
+    fit-content !important;
+
+  max-width:
+    100% !important;
+
+  padding:
+    0 !important;
+
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* Keep the individual chips styled */
+
+.download-premium-hero
+:is(
+  [class*="chip"],
+  [class*="pill"],
+  [class*="tag"]
+) {
+  border:
+    1px solid
+    rgba(
+      143,
+      197,
+      255,
+      0.30
+    ) !important;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.075
+    ) !important;
+
+  color:
+    #f7f4ff !important;
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(
+      255,
+      255,
+      255,
+      0.06
+    ) !important;
+}
+
+
+
+/* =========================================================
+   V10.2C
+   DOWNLOAD HERO TAG WRAPPER CLEANUP
+   ========================================================= */
+
+.download-premium-hero
+.download-hero-tags {
+  display: flex !important;
+
+  width: fit-content !important;
+  max-width: 100% !important;
+
+  align-items: center !important;
+  flex-wrap: wrap !important;
+
+  gap: 8px !important;
+
+  margin-top: 20px !important;
+
+  padding: 0 !important;
+
+  border: 0 !important;
+  outline: 0 !important;
+
+  border-radius: 0 !important;
+
+  background: transparent !important;
+
+  box-shadow: none !important;
+
+  backdrop-filter: none !important;
+}
+
+
+/* Individual chips */
+
+.download-premium-hero
+.download-hero-tags > span {
+  display: inline-flex !important;
+
+  min-height: 30px !important;
+
+  align-items: center !important;
+  justify-content: center !important;
+
+  padding: 0 12px !important;
+
+  border:
+    1px solid
+    rgba(
+      143,
+      197,
+      255,
+      0.30
+    ) !important;
+
+  border-radius: 999px !important;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.075
+    ) !important;
+
+  color: #f7f4ff !important;
+
+  font-size: 10px !important;
+  font-weight: 760 !important;
+
+  line-height: 1 !important;
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(
+      255,
+      255,
+      255,
+      0.07
+    ) !important;
+
+  backdrop-filter: blur(8px);
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease;
+}
+
+
+.download-premium-hero
+.download-hero-tags > span:hover {
+  transform: translateY(-2px);
+
+  border-color:
+    rgba(
+      100,
+      205,
+      255,
+      0.52
+    ) !important;
+
+  background:
+    rgba(
+      92,
+      136,
+      255,
+      0.14
+    ) !important;
+
+  box-shadow:
+    0 8px 20px
+    rgba(
+      44,
+      96,
+      180,
+      0.15
+    ) !important;
+}
+/* =========================================================
+   V10.5C
+   DOWNLOAD CONTRAST HOTFIX
+   ========================================================= */
+
+.download-requirements,
+.download-steps {
+  background:
+    linear-gradient(
+      180deg,
+      #ece6f6 0%,
+      #e7e0f2 100%
+    ) !important;
+}
+
+/* phần tiêu đề bên trái */
+.requirements-copy span,
+.download-steps-copy span,
+.download-steps-head span,
+.download-requirements .requirements-copy > span {
+  color: #6e56ff !important;
+  opacity: 1 !important;
+}
+
+.requirements-copy h2,
+.download-steps-copy h2,
+.download-steps-head h2 {
+  color: #24172f !important;
+}
+
+.requirements-copy p,
+.download-steps-copy p,
+.download-steps-head p {
+  color: #5a4f68 !important;
+  opacity: 1 !important;
+}
+
+/* card bên phải */
+.requirements-grid > div,
+.download-steps-grid > div,
+.download-step-card {
+  background: rgba(255, 255, 255, 0.68) !important;
+  border: 1px solid rgba(120, 95, 255, 0.18) !important;
+  box-shadow: 0 10px 30px rgba(45, 24, 84, 0.06) !important;
+}
+
+/* icon / số */
+.requirements-grid > div > span,
+.download-steps-grid > div > span,
+.download-step-card > span:first-child {
+  background: rgba(110, 86, 255, 0.12) !important;
+  color: #6e56ff !important;
+}
+
+/* text trong card */
+.requirements-grid small,
+.download-steps-grid small,
+.download-step-card small {
+  color: #7a6f8d !important;
+  opacity: 1 !important;
+}
+
+.requirements-grid strong,
+.download-steps-grid strong,
+.download-step-card strong {
+  color: #21162c !important;
+}
+
+.requirements-grid p,
+.download-steps-grid p,
+.download-step-card p {
+  color: #5f546d !important;
+  opacity: 1 !important;
+}
+
+/* link bên phải */
+.download-steps-head a,
+.download-steps a {
+  color: #6e56ff !important;
+  font-weight: 700 !important;
+}
+
+/* mũi tên nối bước */
+.download-steps-grid > i,
+.download-steps-flow > i {
+  color: #7a5cff !important;
+  opacity: 1 !important;
+}

@@ -1,0 +1,1150 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+import ChangelogExplorer from "../components/ChangelogExplorer.astro";
+
+import {
+  changelogStats,
+} from "../data/changelog";
+import "../styles/changelog-exact-theme.css";
+import "../styles/changelog-type-exact.css";
+---
+
+<BaseLayout
+  title="Changelog — AitraNova"
+  description="Theo dõi những tính năng mới, cải thiện và lỗi đã sửa trong AitraNova."
+>
+
+  <main class="changelog-v8">
+
+    <!-- HERO -->
+
+    <section class="changelog-hero">
+
+      <div class="changelog-glow glow-a"></div>
+      <div class="changelog-glow glow-b"></div>
+
+      <div class="container changelog-hero-inner">
+
+        <div>
+
+          <span class="changelog-kicker">
+            PRODUCT CHANGELOG
+          </span>
+
+
+          <h1>
+
+            <span
+              data-i18n
+              data-vi="Những gì đã"
+              data-en="What actually"
+            >
+              Những gì đã
+            </span>
+
+            <br />
+
+            <em
+              data-i18n
+              data-vi="thực sự thay đổi."
+              data-en="changed."
+            >
+              thực sự thay đổi.
+            </em>
+
+          </h1>
+
+
+          <p
+            data-i18n
+            data-vi="Roadmap nói về hướng đi. Changelog chỉ ghi lại những thay đổi đã xuất hiện trong quá trình phát triển AitraNova."
+            data-en="Roadmap describes direction. Changelog records changes that have actually appeared during AitraNova development."
+          >
+            Roadmap nói về hướng đi.
+            Changelog ghi lại những gì đã thay đổi.
+          </p>
+
+        </div>
+
+
+        <div class="changelog-hero-stats">
+
+          <div>
+            <small>RELEASE GROUPS</small>
+
+            <strong>
+              {changelogStats.releases}
+            </strong>
+          </div>
+
+
+          <div>
+            <small>NEW</small>
+
+            <strong>
+              {changelogStats.new}
+            </strong>
+          </div>
+
+
+          <div>
+            <small>IMPROVED</small>
+
+            <strong>
+              {changelogStats.improved}
+            </strong>
+          </div>
+
+
+          <div>
+            <small>FIXED</small>
+
+            <strong>
+              {changelogStats.fixed}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- HISTORY -->
+
+    <section class="changelog-content">
+
+      <div class="container">
+
+        <header class="changelog-section-head">
+
+          <div>
+
+            <span>RELEASE HISTORY</span>
+
+            <h2
+              data-i18n
+              data-vi="Theo dõi thay đổi theo từng nhóm release."
+              data-en="Follow changes across release groups."
+            >
+              Theo dõi thay đổi theo từng nhóm release.
+            </h2>
+
+          </div>
+
+
+          <p
+            data-i18n
+            data-vi="Changelog tập trung vào thay đổi có ý nghĩa với người dùng. Refactor hoặc thay đổi nội bộ không nhất thiết xuất hiện tại đây."
+            data-en="The changelog focuses on changes meaningful to users. Internal refactors are not necessarily listed here."
+          >
+            Chỉ các thay đổi có ý nghĩa
+            với người dùng được ưu tiên hiển thị.
+          </p>
+
+        </header>
+
+
+        <ChangelogExplorer />
+
+      </div>
+
+    </section>
+
+
+    <!-- DIFFERENCE -->
+
+    <section class="changelog-difference">
+
+      <div class="container">
+
+        <header>
+
+          <span>ROADMAP VS CHANGELOG</span>
+
+          <h2
+            data-i18n
+            data-vi="Hai trang, hai mục đích khác nhau."
+            data-en="Two pages, two different purposes."
+          >
+            Hai trang, hai mục đích khác nhau.
+          </h2>
+
+        </header>
+
+
+        <div class="difference-grid">
+
+          <div>
+
+            <span class="difference-icon roadmap">
+              →
+            </span>
+
+            <small>ROADMAP</small>
+
+            <strong
+              data-i18n
+              data-vi="AitraNova đang đi đâu?"
+              data-en="Where is AitraNova going?"
+            >
+              AitraNova đang đi đâu?
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="Available, In Development và Planned."
+              data-en="Available, In Development and Planned."
+            >
+              Available, In Development và Planned.
+            </p>
+
+            <a href="/roadmap">
+              Roadmap →
+            </a>
+
+          </div>
+
+
+          <div>
+
+            <span class="difference-icon changelog">
+              ✓
+            </span>
+
+            <small>CHANGELOG</small>
+
+            <strong
+              data-i18n
+              data-vi="Điều gì đã thay đổi?"
+              data-en="What has changed?"
+            >
+              Điều gì đã thay đổi?
+            </strong>
+
+            <p
+              data-i18n
+              data-vi="New, Improved và Fixed."
+              data-en="New, Improved and Fixed."
+            >
+              New, Improved và Fixed.
+            </p>
+
+            <a href="/changelog">
+              Changelog →
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- PUBLIC CHANGELOG PRINCIPLE -->
+
+    <section class="changelog-principles">
+
+      <div class="container changelog-principles-layout">
+
+        <div>
+
+          <span>PUBLIC NOTES</span>
+
+          <h2
+            data-i18n
+            data-vi="Không biến Changelog thành Git log."
+            data-en="A changelog should not become a Git log."
+          >
+            Không biến Changelog thành Git log.
+          </h2>
+
+          <p
+            data-i18n
+            data-vi="Người dùng cần biết sản phẩm thay đổi thế nào, không cần biết mọi commit hoặc chi tiết triển khai nội bộ."
+            data-en="Users need to understand how the product changed, not every commit or internal implementation detail."
+          >
+            Changelog tập trung vào
+            tác động đối với sản phẩm.
+          </p>
+
+        </div>
+
+
+        <div class="changelog-principle-list">
+
+          <div>
+            <span>01</span>
+
+            <div>
+              <small>NEW</small>
+
+              <strong
+                data-i18n
+                data-vi="Khả năng mới"
+                data-en="New capabilities"
+              >
+                Khả năng mới
+              </strong>
+            </div>
+          </div>
+
+
+          <div>
+            <span>02</span>
+
+            <div>
+              <small>IMPROVED</small>
+
+              <strong
+                data-i18n
+                data-vi="Workflow tốt hơn"
+                data-en="Better workflows"
+              >
+                Workflow tốt hơn
+              </strong>
+            </div>
+          </div>
+
+
+          <div>
+            <span>03</span>
+
+            <div>
+              <small>FIXED</small>
+
+              <strong
+                data-i18n
+                data-vi="Lỗi ảnh hưởng người dùng"
+                data-en="User-facing fixes"
+              >
+                Lỗi ảnh hưởng người dùng
+              </strong>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- CTA -->
+
+    <section class="changelog-final">
+
+      <div class="container">
+
+        <div class="changelog-final-card">
+
+          <div>
+
+            <span>TRY AITRANOVA</span>
+
+            <h2
+              data-i18n
+              data-vi="Muốn thử những gì đã có?"
+              data-en="Want to try what's available?"
+            >
+              Muốn thử những gì đã có?
+            </h2>
+
+            <p
+              data-i18n
+              data-vi="Tải phiên bản Windows hoặc xem Features để khám phá từng workflow."
+              data-en="Download the Windows version or explore Features to see each workflow."
+            >
+              Tải AitraNova hoặc khám phá Features.
+            </p>
+
+          </div>
+
+
+          <div>
+
+            <a
+              href="/download"
+              class="changelog-final-primary"
+            >
+              <span
+                data-i18n
+                data-vi="Tải AitraNova"
+                data-en="Download AitraNova"
+              >
+                Tải AitraNova
+              </span>
+
+              ↓
+            </a>
+
+
+            <a href="/features">
+              Features
+              →
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</BaseLayout>
+
+
+<style>
+
+  .changelog-v8 {
+    overflow: hidden;
+
+    background:
+      linear-gradient(
+        180deg,
+        #dfdae9,
+        #d7d1e1
+      );
+  }
+
+
+  /* HERO */
+
+  .changelog-hero {
+    position: relative;
+
+    overflow: hidden;
+
+    padding:
+      83px 0 62px;
+
+    border-bottom:
+      1px solid #c5bccf;
+  }
+
+
+  .changelog-glow {
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+  }
+
+
+  .changelog-glow.glow-a {
+    top: -430px;
+    left: -240px;
+
+    width: 810px;
+    height: 810px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          105,
+          82,
+          238,
+          0.18
+        ),
+        transparent 68%
+      );
+  }
+
+
+  .changelog-glow.glow-b {
+    right: -250px;
+    bottom: -470px;
+
+    width: 820px;
+    height: 820px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          85,
+          127,
+          220,
+          0.12
+        ),
+        transparent 69%
+      );
+  }
+
+
+  .changelog-hero-inner {
+    position: relative;
+
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      auto;
+
+    align-items: end;
+
+    gap: 55px;
+  }
+
+
+  .changelog-kicker {
+    color: #6952ee;
+
+    font-size: 7px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.13em;
+  }
+
+
+  .changelog-hero h1 {
+    margin:
+      15px 0 18px;
+
+    color: #1d1827;
+
+    font-size:
+      clamp(
+        56px,
+        8vw,
+        93px
+      );
+
+    line-height: 0.87;
+
+    letter-spacing:
+      -0.07em;
+  }
+
+
+  .changelog-hero h1 em {
+    color: #6952ee;
+
+    font-style: normal;
+  }
+
+
+  .changelog-hero p {
+    max-width: 690px;
+
+    margin: 0;
+
+    color: #706779;
+
+    font-size: 11px;
+
+    line-height: 1.7;
+  }
+
+
+  .changelog-hero-stats {
+    display: grid;
+
+    grid-template-columns:
+      1fr 1fr;
+
+    gap: 7px;
+
+    width: 270px;
+  }
+
+
+  .changelog-hero-stats > div {
+    min-height: 67px;
+
+    padding: 12px;
+
+    border:
+      1px solid #c6bdcf;
+
+    border-radius: 11px;
+
+    background:
+      rgba(
+        242,
+        238,
+        246,
+        0.42
+      );
+  }
+
+
+  .changelog-hero-stats small {
+    display: block;
+
+    color: #958b9f;
+
+    font-size: 5px;
+  }
+
+
+  .changelog-hero-stats strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #2d2635;
+
+    font-size: 18px;
+  }
+
+
+  /* CONTENT */
+
+  .changelog-content {
+    padding:
+      68px 0 78px;
+  }
+
+
+  .changelog-section-head {
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(280px, 0.55fr);
+
+    align-items: end;
+
+    gap: 45px;
+  }
+
+
+  .changelog-section-head span,
+  .changelog-difference
+  header > span,
+  .changelog-principles
+  > .container > div:first-child
+  > span {
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .changelog-section-head h2,
+  .changelog-difference h2 {
+    max-width: 720px;
+
+    margin:
+      9px 0 0;
+
+    color: #211b2a;
+
+    font-size:
+      clamp(
+        34px,
+        4.5vw,
+        52px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.055em;
+  }
+
+
+  .changelog-section-head > p {
+    margin: 0;
+
+    color: #766d80;
+
+    font-size: 8px;
+
+    line-height: 1.65;
+  }
+
+
+  /* ROADMAP VS CHANGELOG */
+
+  .changelog-difference {
+    padding:
+      70px 0;
+
+    border-top:
+      1px solid #c5bccf;
+
+    background:
+      rgba(
+        226,
+        220,
+        234,
+        0.52
+      );
+  }
+
+
+  .difference-grid {
+    display: grid;
+
+    grid-template-columns:
+      1fr 1fr;
+
+    gap: 10px;
+
+    margin-top: 27px;
+  }
+
+
+  .difference-grid > div {
+    min-height: 240px;
+
+    padding: 21px;
+
+    border:
+      1px solid #c6bdcf;
+
+    border-radius: 16px;
+
+    background:
+      rgba(
+        243,
+        239,
+        247,
+        0.48
+      );
+  }
+
+
+  .difference-icon {
+    display: grid;
+
+    width: 41px;
+    height: 41px;
+
+    place-items: center;
+
+    border-radius: 11px;
+
+    font-size: 12px;
+
+    font-weight: 850;
+  }
+
+
+  .difference-icon.roadmap {
+    background: #e3dcfb;
+    color: #6952ee;
+  }
+
+
+  .difference-icon.changelog {
+    background: #dcece4;
+    color: #3b9b72;
+  }
+
+
+  .difference-grid small {
+    display: block;
+
+    margin-top: 18px;
+
+    color: #958b9f;
+
+    font-size: 5px;
+
+    letter-spacing:
+      0.1em;
+  }
+
+
+  .difference-grid strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #302938;
+
+    font-size: 13px;
+  }
+
+
+  .difference-grid p {
+    margin:
+      6px 0 0;
+
+    color: #7b7185;
+
+    font-size: 7px;
+  }
+
+
+  .difference-grid a {
+    display: inline-flex;
+
+    margin-top: 18px;
+
+    color: #6952ee;
+
+    font-size: 7px;
+
+    font-weight: 800;
+  }
+
+
+  /* PRINCIPLES */
+
+  .changelog-principles {
+    padding:
+      72px 0;
+
+    background: #17131f;
+
+    color: white;
+  }
+
+
+  .changelog-principles-layout {
+    display: grid;
+
+    grid-template-columns:
+      0.8fr 1.2fr;
+
+    align-items: center;
+
+    gap: 70px;
+  }
+
+
+  .changelog-principles h2 {
+    max-width: 570px;
+
+    margin:
+      10px 0;
+
+    color: #f2eef5;
+
+    font-size:
+      clamp(
+        34px,
+        4vw,
+        50px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.055em;
+  }
+
+
+  .changelog-principles p {
+    margin: 0;
+
+    color: #8d8696;
+
+    font-size: 9px;
+
+    line-height: 1.7;
+  }
+
+
+  .changelog-principle-list {
+    display: grid;
+
+    gap: 8px;
+  }
+
+
+  .changelog-principle-list
+  > div {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-height: 69px;
+
+    padding:
+      0 14px;
+
+    border:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.08
+      );
+
+    border-radius: 11px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.025
+      );
+  }
+
+
+  .changelog-principle-list
+  > div > span {
+    display: grid;
+
+    width: 33px;
+    height: 33px;
+
+    place-items: center;
+
+    border-radius: 9px;
+
+    background:
+      rgba(
+        105,
+        82,
+        238,
+        0.18
+      );
+
+    color: #aa9cff;
+
+    font-size: 6px;
+
+    font-weight: 850;
+  }
+
+
+  .changelog-principle-list
+  small {
+    display: block;
+
+    color: #706879;
+
+    font-size: 5px;
+  }
+
+
+  .changelog-principle-list
+  strong {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #ddd7e3;
+
+    font-size: 8px;
+  }
+
+
+  /* FINAL */
+
+  .changelog-final {
+    padding:
+      67px 0 82px;
+  }
+
+
+  .changelog-final-card {
+    display: grid;
+
+    grid-template-columns:
+      1fr auto;
+
+    align-items: center;
+
+    gap: 50px;
+
+    padding: 31px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 20px;
+
+    background:
+      linear-gradient(
+        135deg,
+        #e7e1ef,
+        #d8d3e5
+      );
+
+    box-shadow:
+      0 22px 50px
+      rgba(
+        48,
+        36,
+        66,
+        0.08
+      );
+  }
+
+
+  .changelog-final-card
+  > div:first-child > span {
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .changelog-final-card h2 {
+    margin:
+      8px 0 6px;
+
+    color: #211b2a;
+
+    font-size:
+      clamp(
+        31px,
+        4vw,
+        45px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.05em;
+  }
+
+
+  .changelog-final-card p {
+    margin: 0;
+
+    color: #776d81;
+
+    font-size: 8px;
+  }
+
+
+  .changelog-final-card
+  > div:last-child {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+  }
+
+
+  .changelog-final-card a {
+    display: flex;
+
+    min-width: 165px;
+    min-height: 38px;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 15px;
+
+    padding:
+      0 11px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 9px;
+
+    color: #443b4c;
+
+    font-size: 7px;
+
+    font-weight: 750;
+  }
+
+
+  .changelog-final-card
+  .changelog-final-primary {
+    border-color: #6952ee;
+
+    background: #6952ee;
+
+    color: white;
+  }
+
+
+  @media (max-width: 900px) {
+
+    .changelog-hero-inner,
+    .changelog-section-head,
+    .changelog-principles-layout,
+    .changelog-final-card {
+      grid-template-columns: 1fr;
+    }
+
+
+    .changelog-hero-stats {
+      width: 100%;
+
+      grid-template-columns:
+        repeat(4, 1fr);
+    }
+
+  }
+
+
+  @media (max-width: 620px) {
+
+    .changelog-hero {
+      padding-top: 62px;
+    }
+
+
+    .changelog-hero h1 {
+      font-size:
+        clamp(
+          48px,
+          15vw,
+          68px
+        );
+    }
+
+
+    .changelog-hero-stats,
+    .difference-grid {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+
+    .changelog-final-card
+    > div:last-child,
+    .changelog-final-card a {
+      width: 100%;
+    }
+
+  }
+
+
+  @media (max-width: 440px) {
+
+    .changelog-hero-stats,
+    .difference-grid {
+      grid-template-columns: 1fr;
+    }
+
+  }
+
+</style>

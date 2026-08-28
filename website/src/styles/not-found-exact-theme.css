@@ -1,0 +1,327 @@
+/* =========================================================
+   AITRANOVA V10.8B
+   404 EXACT THEME
+   ========================================================= */
+
+.not-found-page {
+  background:
+    radial-gradient(
+      circle at 50% 44%,
+      rgba(119, 82, 255, 0.18),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 77% 22%,
+      rgba(197, 56, 235, 0.12),
+      transparent 26%
+    ),
+    linear-gradient(
+      135deg,
+      #090610 0%,
+      #0f0919 28%,
+      #181020 58%,
+      #25143d 82%,
+      #100c19 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* Glow */
+
+.not-found-page
+.not-found-glow {
+  background:
+    radial-gradient(
+      circle,
+      rgba(125, 91, 255, 0.20),
+      rgba(174, 61, 236, 0.08) 34%,
+      transparent 68%
+    ) !important;
+
+  opacity:
+    0.9 !important;
+}
+
+
+/* =========================================================
+   404 NUMBER
+   ========================================================= */
+
+.not-found-page
+.not-found-code {
+  color:
+    #ffffff !important;
+
+  text-shadow:
+    0 18px 45px
+    rgba(0,0,0,0.26) !important;
+}
+
+
+.not-found-page
+.not-found-orb {
+  border:
+    1px solid
+    rgba(230, 182, 255, 0.35) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8e26ce 0%,
+      #ad2ee1 52%,
+      #c645ef 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 0 34px
+    rgba(183, 58, 232, 0.28),
+    0 22px 48px
+    rgba(57, 21, 82, 0.34),
+    inset 0 1px 0
+    rgba(255,255,255,0.18) !important;
+}
+
+
+/* =========================================================
+   TEXT
+   ========================================================= */
+
+.not-found-page
+.not-found-kicker {
+  color:
+    #bba6ff !important;
+
+  opacity:
+    1 !important;
+
+  font-size:
+    10px !important;
+}
+
+
+.not-found-page
+.not-found-inner h1 {
+  color:
+    #ffffff !important;
+
+  text-shadow:
+    0 10px 30px
+    rgba(0,0,0,0.22) !important;
+}
+
+
+.not-found-page
+.not-found-inner > p {
+  color:
+    rgba(236, 229, 246, 0.78) !important;
+
+  opacity:
+    1 !important;
+
+  font-size:
+    13px !important;
+}
+
+
+/* =========================================================
+   ACTION AREA
+   ========================================================= */
+
+.not-found-page
+.not-found-actions {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* Primary: magenta purple */
+
+.not-found-page
+.not-found-primary {
+  border:
+    1px solid
+    rgba(225, 171, 255, 0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8f26cf,
+      #aa2de1 52%,
+      #c442ef
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 13px 30px
+    rgba(143,38,198,0.30) !important;
+
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.not-found-page
+.not-found-primary span {
+  color:
+    #ffffff !important;
+}
+
+
+/* Secondary: white */
+
+.not-found-page
+.not-found-actions
+a[href="/guide"] {
+  border:
+    1px solid
+    rgba(255,255,255,0.76) !important;
+
+  background:
+    #ffffff !important;
+
+  color:
+    #5036b8 !important;
+
+  box-shadow:
+    0 11px 25px
+    rgba(0,0,0,0.18) !important;
+
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    color 170ms ease !important;
+}
+
+
+.not-found-page
+.not-found-actions
+a[href="/guide"] span {
+  color:
+    #5036b8 !important;
+}
+
+
+/* Hover */
+
+.not-found-page
+.not-found-actions a:hover {
+  transform:
+    translateY(-2px);
+}
+
+
+.not-found-page
+.not-found-primary:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #9d2ddd,
+      #c441ef
+    ) !important;
+
+  box-shadow:
+    0 17px 36px
+    rgba(143,38,198,0.38) !important;
+}
+
+
+.not-found-page
+.not-found-actions
+a[href="/guide"]:hover {
+  background:
+    #f1ebff !important;
+
+  color:
+    #6042d2 !important;
+}
+
+
+/* =========================================================
+   QUICK LINKS
+   ========================================================= */
+
+.not-found-page
+.not-found-links {
+  border-color:
+    rgba(186, 165, 255, 0.12) !important;
+
+  background:
+    transparent !important;
+}
+
+
+.not-found-page
+.not-found-links a {
+  color:
+    rgba(221, 212, 234, 0.72) !important;
+
+  opacity:
+    1 !important;
+
+  transition:
+    color 160ms ease,
+    transform 160ms ease !important;
+}
+
+
+.not-found-page
+.not-found-links a:hover {
+  color:
+    #c2aeff !important;
+
+  transform:
+    translateY(-1px);
+}
+
+
+.not-found-page
+.not-found-links > span {
+  background:
+    rgba(177, 153, 255, 0.24) !important;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.not-found-page
+a:focus-visible {
+  outline:
+    2px solid
+    #b39aff !important;
+
+  outline-offset:
+    3px !important;
+}
+
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+  .not-found-page
+  a {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+}

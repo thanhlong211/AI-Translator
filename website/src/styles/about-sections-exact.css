@@ -1,0 +1,915 @@
+/* =========================================================
+   AITRANOVA V10.5B
+   ABOUT LOWER SECTIONS — EXACT SAFE THEME
+
+   Visual only.
+   No layout restructuring.
+   ========================================================= */
+
+
+/* =========================================================
+   SHARED LIGHT SECTION TYPOGRAPHY
+   ========================================================= */
+
+.about-page
+:is(
+  .about-why,
+  .about-principles,
+  .about-product,
+  .about-definition
+) {
+  color:
+    #281f31;
+
+  border-color:
+    rgba(92, 73, 114, 0.10) !important;
+}
+
+
+.about-page
+.about-section-heading > span,
+
+.about-page
+.about-section-head span {
+  color:
+    #6c50df !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    850 !important;
+
+  letter-spacing:
+    0.10em !important;
+}
+
+
+.about-page
+.about-section-heading h2,
+
+.about-page
+.about-section-head h2 {
+  color:
+    #251d2d !important;
+}
+
+
+.about-page
+.about-section-heading p,
+
+.about-page
+.about-section-head p {
+  color:
+    #665b70 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   WHY
+   ========================================================= */
+
+.about-page
+.about-why {
+  background:
+    radial-gradient(
+      circle at 84% 16%,
+      rgba(112, 82, 225, 0.07),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      #cbc4d7,
+      #d8d1e2
+    ) !important;
+}
+
+
+.about-page
+.about-why-content > p {
+  color:
+    #5d5367 !important;
+
+  opacity:
+    1 !important;
+
+  line-height:
+    1.75 !important;
+}
+
+
+/* =========================================================
+   WHY EXAMPLE
+   Dark contrast card
+   ========================================================= */
+
+.about-page
+.about-example {
+  border:
+    1px solid
+    rgba(164, 138, 255, 0.18) !important;
+
+  border-radius:
+    17px !important;
+
+  background:
+    radial-gradient(
+      circle at 92% 10%,
+      rgba(123, 86, 255, 0.17),
+      transparent 32%
+    ),
+    linear-gradient(
+      145deg,
+      #0d0916,
+      #171020 55%,
+      #221433
+    ) !important;
+
+  box-shadow:
+    0 18px 42px
+    rgba(41, 25, 57, 0.18) !important;
+}
+
+
+.about-page
+.about-example > small {
+  color:
+    #a991ff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.about-page
+.about-example > div {
+  border-color:
+    rgba(255,255,255,0.08) !important;
+
+  background:
+    rgba(255,255,255,0.045) !important;
+}
+
+
+.about-page
+.about-example > div > span {
+  color:
+    #9d91aa !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.about-page
+.about-example > div > strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* WITH CONTEXT */
+
+.about-page
+.about-example
+> .highlight {
+  border-color:
+    rgba(142, 113, 255, 0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(118,88,255,0.20),
+      rgba(109,139,255,0.08)
+    ) !important;
+}
+
+
+.about-page
+.about-example
+> .highlight > span {
+  color:
+    #b6a4ff !important;
+}
+
+
+.about-page
+.about-example
+> .highlight > strong {
+  color:
+    #ffffff !important;
+}
+
+
+/* =========================================================
+   PRINCIPLES
+   ========================================================= */
+
+.about-page
+.about-principles {
+  background:
+    linear-gradient(
+      135deg,
+      #d6cfdf,
+      #c9c1d5
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(78, 61, 99, 0.08) !important;
+}
+
+
+.about-page
+.about-principle-grid > * {
+  border:
+    1px solid
+    rgba(105, 85, 130, 0.18) !important;
+
+  border-radius:
+    16px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f9f6fb,
+      #efeaf4
+    ) !important;
+
+  box-shadow:
+    0 12px 28px
+    rgba(45, 32, 61, 0.055) !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.about-page
+.about-principle-grid > *:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(110, 82, 230, 0.34) !important;
+
+  box-shadow:
+    0 18px 38px
+    rgba(45, 32, 61, 0.10) !important;
+}
+
+
+.about-page
+.about-principle-grid
+:is(
+  h3,
+  strong
+) {
+  color:
+    #292031 !important;
+}
+
+
+.about-page
+.about-principle-grid p {
+  color:
+    #62576c !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.about-page
+.about-principle-grid
+:is(
+  small,
+  span
+) {
+  color:
+    #7054dd !important;
+}
+
+
+/* =========================================================
+   ARCHITECTURE
+   Dark technical section
+   ========================================================= */
+
+.about-page
+.about-architecture {
+  border-top:
+    1px solid
+    rgba(166, 141, 255, 0.14) !important;
+
+  border-bottom:
+    1px solid
+    rgba(166, 141, 255, 0.14) !important;
+
+  background:
+    radial-gradient(
+      circle at 80% 12%,
+      rgba(118, 82, 255, 0.20),
+      transparent 29%
+    ),
+    radial-gradient(
+      circle at 15% 85%,
+      rgba(77, 111, 214, 0.09),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      #0b0713,
+      #151020 52%,
+      #24143b
+    ) !important;
+
+  color:
+    #ffffff;
+}
+
+
+.about-page
+.about-architecture
+.about-section-head span {
+  color:
+    #ae99ff !important;
+}
+
+
+.about-page
+.about-architecture
+.about-section-head h2 {
+  color:
+    #ffffff !important;
+}
+
+
+.about-page
+.about-architecture
+.about-section-head p {
+  color:
+    rgba(234,227,244,0.80) !important;
+}
+
+
+/* Architecture rows */
+
+.about-page
+.architecture-list article {
+  border:
+    1px solid
+    rgba(169, 144, 255, 0.15) !important;
+
+  border-radius:
+    14px !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,0.055),
+      rgba(255,255,255,0.028)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255,255,255,0.035) !important;
+
+  transition:
+    border-color 170ms ease,
+    background 170ms ease,
+    transform 170ms ease !important;
+}
+
+
+.about-page
+.architecture-list article:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(169, 144, 255, 0.30) !important;
+
+  background:
+    rgba(118,88,255,0.08) !important;
+}
+
+
+/* Number */
+
+.about-page
+.architecture-number {
+  border-color:
+    rgba(162, 137, 255, 0.18) !important;
+
+  background:
+    rgba(118,88,255,0.17) !important;
+
+  color:
+    #b6a3ff !important;
+}
+
+
+/* Name */
+
+.about-page
+.architecture-name strong {
+  color:
+    #ffffff !important;
+}
+
+
+.about-page
+.architecture-name small {
+  color:
+    #aaa0b7 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* Description */
+
+.about-page
+.architecture-list article p {
+  color:
+    rgba(229,222,239,0.76) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* Examples */
+
+.about-page
+.architecture-examples {
+  border-color:
+    rgba(161,136,255,0.16) !important;
+
+  background:
+    rgba(118,88,255,0.09) !important;
+
+  color:
+    #cabdff !important;
+}
+
+
+/* Arrow */
+
+.about-page
+.architecture-arrow {
+  color:
+    #8d70ff !important;
+
+  opacity:
+    0.90 !important;
+}
+
+
+/* =========================================================
+   PRODUCT
+   ========================================================= */
+
+.about-page
+.about-product {
+  background:
+    radial-gradient(
+      circle at 18% 15%,
+      rgba(90, 123, 215, 0.06),
+      transparent 26%
+    ),
+    linear-gradient(
+      135deg,
+      #cbc4d7,
+      #d5cedf
+    ) !important;
+}
+
+
+.about-page
+.about-product-grid > * {
+  border:
+    1px solid
+    rgba(106,87,130,0.18) !important;
+
+  border-radius:
+    16px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #faf7fb,
+      #efeaf4
+    ) !important;
+
+  box-shadow:
+    0 11px 27px
+    rgba(45,32,61,0.055) !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.about-page
+.about-product-grid > *:hover {
+  transform:
+    translateY(-3px);
+
+  border-color:
+    rgba(109,82,230,0.32) !important;
+
+  box-shadow:
+    0 18px 36px
+    rgba(45,32,61,0.10) !important;
+}
+
+
+.about-page
+.about-product-grid
+:is(
+  h3,
+  strong
+) {
+  color:
+    #292031 !important;
+}
+
+
+.about-page
+.about-product-grid p {
+  color:
+    #61566b !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.about-page
+.about-product-grid
+:is(
+  small,
+  span
+) {
+  color:
+    #6c50df !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.about-page
+.about-product-grid a {
+  color:
+    #6044dc !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+/* =========================================================
+   DEFINITION
+   ========================================================= */
+
+.about-page
+.about-definition {
+  background:
+    linear-gradient(
+      135deg,
+      #d5cedf,
+      #c9c1d5
+    ) !important;
+
+  border-top:
+    1px solid
+    rgba(80,64,100,0.08) !important;
+}
+
+
+/* Shared column */
+
+.about-page
+.definition-column {
+  border:
+    1px solid
+    rgba(105,87,127,0.18) !important;
+
+  border-radius:
+    17px !important;
+
+  box-shadow:
+    0 13px 30px
+    rgba(45,32,61,0.065) !important;
+}
+
+
+/* Positive */
+
+.about-page
+.definition-column.positive {
+  border-color:
+    rgba(55,151,111,0.23) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f4faf7,
+      #e9f4ee
+    ) !important;
+}
+
+
+.about-page
+.definition-column.positive
+.definition-symbol {
+  background:
+    #dcefe5 !important;
+
+  color:
+    #2d9866 !important;
+}
+
+
+/* Negative */
+
+.about-page
+.definition-column.negative {
+  border-color:
+    rgba(191,92,121,0.20) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #fbf5f7,
+      #f4e9ed
+    ) !important;
+}
+
+
+.about-page
+.definition-column.negative
+.definition-symbol {
+  background:
+    #f3dfe6 !important;
+
+  color:
+    #bd5577 !important;
+}
+
+
+/* Text */
+
+.about-page
+.definition-column
+:is(
+  h2,
+  h3,
+  strong
+) {
+  color:
+    #292031 !important;
+}
+
+
+.about-page
+.definition-column p,
+
+.about-page
+.definition-column li {
+  color:
+    #61566b !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   DIRECTION / FINAL CTA
+   ========================================================= */
+
+.about-page
+.about-direction {
+  border-top:
+    1px solid
+    rgba(166,141,255,0.14) !important;
+
+  background:
+    radial-gradient(
+      circle at 74% 10%,
+      rgba(183,64,236,0.16),
+      transparent 30%
+    ),
+    radial-gradient(
+      circle at 25% 90%,
+      rgba(93,91,239,0.12),
+      transparent 30%
+    ),
+    linear-gradient(
+      135deg,
+      #090610,
+      #151020 54%,
+      #25143c
+    ) !important;
+}
+
+
+.about-page
+.about-direction
+:is(
+  h2,
+  h3
+) {
+  color:
+    #ffffff !important;
+}
+
+
+.about-page
+.about-direction p {
+  color:
+    rgba(235,228,245,0.82) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.about-page
+.about-direction
+:is(
+  small,
+  span:not(.direction-actions span)
+) {
+  color:
+    #ae99ff !important;
+}
+
+
+/* =========================================================
+   FINAL ACTIONS
+   Magenta-purple + white
+   ========================================================= */
+
+.about-page
+.direction-actions
+a:first-child {
+  border:
+    1px solid
+    rgba(225,170,255,0.28) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8d26cf 0%,
+      #a92be0 50%,
+      #bd42ee 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 13px 30px
+    rgba(142,38,198,0.30) !important;
+}
+
+
+.about-page
+.direction-actions
+a:first-child span {
+  color:
+    #ffffff !important;
+}
+
+
+.about-page
+.direction-actions
+a:not(:first-child) {
+  border:
+    1px solid
+    rgba(255,255,255,0.72) !important;
+
+  background:
+    #ffffff !important;
+
+  color:
+    #4e35b6 !important;
+
+  box-shadow:
+    0 11px 25px
+    rgba(0,0,0,0.16) !important;
+}
+
+
+.about-page
+.direction-actions
+a:not(:first-child) span {
+  color:
+    #4e35b6 !important;
+}
+
+
+.about-page
+.direction-actions
+a {
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.about-page
+.direction-actions
+a:hover {
+  transform:
+    translateY(-2px);
+}
+
+
+.about-page
+.direction-actions
+a:first-child:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #9b2ddd,
+      #c341f0
+    ) !important;
+
+  box-shadow:
+    0 17px 36px
+    rgba(142,38,198,0.38) !important;
+}
+
+
+.about-page
+.direction-actions
+a:not(:first-child):hover {
+  background:
+    #f2ebff !important;
+
+  color:
+    #6043d1 !important;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.about-page
+:is(
+  .about-product-grid a,
+  .direction-actions a
+):focus-visible {
+  outline:
+    2px solid
+    #9d82ff !important;
+
+  outline-offset:
+    3px !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .about-page
+  :is(
+    .about-principle-grid > *,
+    .architecture-list article,
+    .about-product-grid > *,
+    .direction-actions a
+  ) {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}

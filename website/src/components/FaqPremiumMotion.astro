@@ -1,0 +1,322 @@
+<script>
+  function initFaqPremiumMotion() {
+    const page =
+      document.querySelector(
+        ".faq-page"
+      );
+
+    if (
+      !(page instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    if (
+      page.dataset.faqPremiumReady
+      === "true"
+    ) {
+      return;
+    }
+
+    page.dataset.faqPremiumReady =
+      "true";
+
+    page.classList.add(
+      "faq-premium"
+    );
+
+
+    const hero =
+      page.querySelector(
+        ".faq-hero"
+      );
+
+
+    if (
+      hero instanceof HTMLElement
+    ) {
+      hero.classList.add(
+        "faq-premium-hero"
+      );
+
+
+      const effects =
+        document.createElement(
+          "div"
+        );
+
+      effects.className =
+        "faq-premium-effects";
+
+      effects.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      effects.innerHTML = `
+        <div class="faq-premium-orb faq-premium-orb-a"></div>
+        <div class="faq-premium-orb faq-premium-orb-b"></div>
+        <div class="faq-premium-grid"></div>
+        <div class="faq-premium-pointer"></div>
+      `;
+
+
+      hero.insertBefore(
+        effects,
+        hero.firstChild
+      );
+    }
+
+
+    const revealElements =
+      Array.from(
+        page.querySelectorAll(
+          [
+            ".faq-content-head",
+            ".faq-search",
+            ".faq-categories",
+            ".faq-item",
+            ".faq-support-layout",
+          ].join(",")
+        )
+      );
+
+
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
+
+
+    if (
+      reducedMotion.matches
+      || !(
+        "IntersectionObserver"
+        in window
+      )
+    ) {
+
+      revealElements.forEach(
+        element => {
+          element.classList.add(
+            "faq-premium-visible"
+          );
+        }
+      );
+
+    } else {
+
+      const observer =
+        new IntersectionObserver(
+          entries => {
+
+            entries.forEach(
+              entry => {
+
+                if (
+                  !entry.isIntersecting
+                ) {
+                  return;
+                }
+
+                entry.target
+                  .classList.add(
+                    "faq-premium-visible"
+                  );
+
+                observer.unobserve(
+                  entry.target
+                );
+
+              }
+            );
+
+          },
+          {
+            threshold: 0.08,
+            rootMargin:
+              "0px 0px -5% 0px",
+          }
+        );
+
+
+      revealElements.forEach(
+        (
+          element,
+          index
+        ) => {
+
+          element.classList.add(
+            "faq-premium-reveal"
+          );
+
+          element.style.setProperty(
+            "--faq-reveal-delay",
+            `${Math.min(
+              index * 35,
+              220
+            )}ms`
+          );
+
+          observer.observe(
+            element
+          );
+
+        }
+      );
+
+    }
+
+
+    if (
+      hero instanceof HTMLElement
+      && !reducedMotion.matches
+      && window.matchMedia(
+        "(pointer: fine)"
+      ).matches
+    ) {
+
+      let frame =
+        null;
+
+
+      hero.addEventListener(
+        "pointermove",
+        event => {
+
+          if (frame) {
+            cancelAnimationFrame(
+              frame
+            );
+          }
+
+
+          frame =
+            requestAnimationFrame(
+              () => {
+
+                const rect =
+                  hero.getBoundingClientRect();
+
+
+                const x =
+                  (
+                    (
+                      event.clientX
+                      - rect.left
+                    )
+                    / rect.width
+                  )
+                  * 100;
+
+
+                const y =
+                  (
+                    (
+                      event.clientY
+                      - rect.top
+                    )
+                    / rect.height
+                  )
+                  * 100;
+
+
+                hero.style.setProperty(
+                  "--faq-pointer-x",
+                  `${x}%`
+                );
+
+
+                hero.style.setProperty(
+                  "--faq-pointer-y",
+                  `${y}%`
+                );
+
+              }
+            );
+
+        },
+        {
+          passive: true,
+        }
+      );
+
+    }
+
+
+    page.querySelectorAll(
+      ".faq-item"
+    )
+    .forEach(
+      item => {
+
+        item.addEventListener(
+          "toggle",
+          () => {
+
+            if (
+              !(
+                item instanceof
+                HTMLDetailsElement
+              )
+              || !item.open
+              || reducedMotion.matches
+            ) {
+              return;
+            }
+
+
+            const answer =
+              item.querySelector(
+                ".faq-answer"
+              );
+
+
+            answer?.animate(
+              [
+                {
+                  opacity: 0,
+                  transform:
+                    "translateY(-5px)",
+                },
+                {
+                  opacity: 1,
+                  transform:
+                    "translateY(0)",
+                },
+              ],
+              {
+                duration: 190,
+                easing:
+                  "cubic-bezier(.2,.8,.2,1)",
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initFaqPremiumMotion,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initFaqPremiumMotion();
+
+  }
+</script>

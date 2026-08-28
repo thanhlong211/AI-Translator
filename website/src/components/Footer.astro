@@ -1,0 +1,584 @@
+---
+const productLinks = [
+  {
+    href: "/features?feature=screen",
+    vi: "Quick Translate",
+    en: "Quick Translate",
+  },
+  {
+    href: "/features?feature=manga",
+    vi: "Manga",
+    en: "Manga",
+  },
+  {
+    href: "/features?feature=documents",
+    vi: "Tài liệu",
+    en: "Documents",
+  },
+  {
+    href: "/features?feature=profile",
+    vi: "Translation Profiles",
+    en: "Translation Profiles",
+  },
+  {
+    href: "/features?feature=learning",
+    vi: "Learning",
+    en: "Learning",
+  },
+];
+
+const resourceLinks = [
+  {
+    href: "/guide",
+    vi: "Hướng dẫn",
+    en: "Guide",
+  },
+  {
+    href: "/faq",
+    vi: "Câu hỏi thường gặp",
+    en: "FAQ",
+  },
+  {
+    href: "/about",
+    vi: "Giới thiệu",
+    en: "About",
+  },
+  {
+    href: "/roadmap",
+    vi: "Lộ trình",
+    en: "Roadmap",
+  },
+  {
+    href: "/changelog",
+    vi: "Changelog",
+    en: "Changelog",
+  },
+  {
+    href: "/guide/troubleshooting",
+    vi: "Khắc phục sự cố",
+    en: "Troubleshooting",
+  },
+];
+
+const quickLinks = [
+  {
+    href: "/guide/installation",
+    vi: "Cài đặt",
+    en: "Installation",
+  },
+  {
+    href: "/guide/quick",
+    vi: "Quick Translate",
+    en: "Quick Translate",
+  },
+  {
+    href: "/guide/manga",
+    vi: "Manga Guide",
+    en: "Manga Guide",
+  },
+  {
+    href: "/guide/documents",
+    vi: "Documents Guide",
+    en: "Documents Guide",
+  },
+];
+import "../styles/footer-exact-theme.css";
+---
+
+<footer class="site-footer">
+
+  <div class="container footer-main">
+
+    <div class="footer-brand-column">
+
+      <a
+        href="/"
+        class="footer-brand"
+      >
+        <img
+          src="/brand/aitranova-mark.png"
+          alt=""
+          width="34"
+          height="34"
+        />
+
+        <div>
+          <strong>AitraNova</strong>
+
+          <small>
+            CONTEXT-AWARE TRANSLATION
+          </small>
+        </div>
+      </a>
+
+
+      <p
+        data-i18n
+        data-vi="Dịch màn hình, manga và tài liệu với context, Translation Profiles và Learning trong cùng một ứng dụng desktop."
+        data-en="Translate screens, manga and documents with context, Translation Profiles and Learning in one desktop application."
+      >
+        Dịch màn hình, manga và tài liệu
+        với context trong cùng một ứng dụng desktop.
+      </p>
+
+
+      <a
+        href="/download"
+        class="footer-download"
+      >
+        <span
+          data-i18n
+          data-vi="Tải AitraNova cho Windows"
+          data-en="Download AitraNova for Windows"
+        >
+          Tải AitraNova cho Windows
+        </span>
+
+        <span>↓</span>
+      </a>
+
+    </div>
+
+
+    <div class="footer-links-column">
+
+      <small>PRODUCT</small>
+
+      {
+        productLinks.map((link) => (
+
+          <a href={link.href}>
+            <span
+              data-i18n
+              data-vi={link.vi}
+              data-en={link.en}
+            >
+              {link.vi}
+            </span>
+          </a>
+
+        ))
+      }
+
+    </div>
+
+
+    <div class="footer-links-column">
+
+      <small>RESOURCES</small>
+
+      {
+        resourceLinks.map((link) => (
+
+          <a href={link.href}>
+            <span
+              data-i18n
+              data-vi={link.vi}
+              data-en={link.en}
+            >
+              {link.vi}
+            </span>
+          </a>
+
+        ))
+      }
+
+    </div>
+
+
+    <div class="footer-links-column">
+
+      <small>START HERE</small>
+
+      {
+        quickLinks.map((link) => (
+
+          <a href={link.href}>
+            <span
+              data-i18n
+              data-vi={link.vi}
+              data-en={link.en}
+            >
+              {link.vi}
+            </span>
+          </a>
+
+        ))
+      }
+
+    </div>
+
+  </div>
+
+
+  <div class="container footer-bottom">
+
+    <div>
+
+      <span>
+        © {new Date().getFullYear()} AitraNova
+      </span>
+
+      <span class="footer-dot"></span>
+
+      <span>
+        Windows · Beta
+      </span>
+
+    </div>
+
+
+    <div>
+
+      <a href="/roadmap">
+        Roadmap
+      </a>
+
+      <a href="/changelog">
+        Changelog
+      </a>
+
+      <a href="/guide/troubleshooting">
+        Support
+      </a>
+
+    </div>
+
+  </div>
+
+</footer>
+
+
+<style>
+
+  .site-footer {
+    position: relative;
+
+    overflow: hidden;
+
+    padding:
+      56px 0 20px;
+
+    background: #15111c;
+
+    color: #8f8798;
+  }
+
+
+  .site-footer::before {
+    position: absolute;
+
+    top: -390px;
+    left: 50%;
+
+    width: 900px;
+    height: 500px;
+
+    border-radius: 50%;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          105,
+          82,
+          238,
+          0.11
+        ),
+        transparent 70%
+      );
+
+    content: "";
+
+    pointer-events: none;
+
+    transform:
+      translateX(-50%);
+  }
+
+
+  .footer-main {
+    position: relative;
+
+    z-index: 1;
+
+    display: grid;
+
+    grid-template-columns:
+      minmax(280px, 1.5fr)
+      repeat(
+        3,
+        minmax(130px, 0.65fr)
+      );
+
+    gap: 42px;
+
+    padding-bottom: 44px;
+  }
+
+
+  .footer-brand {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 10px;
+  }
+
+
+  .footer-brand img {
+    width: 34px;
+    height: 34px;
+
+    object-fit: contain;
+  }
+
+
+  .footer-brand strong {
+    display: block;
+
+    color: #f2edf5;
+
+    font-size: 11px;
+  }
+
+
+  .footer-brand small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: #645d6d;
+
+    font-size: 4.5px;
+
+    font-weight: 800;
+
+    letter-spacing:
+      0.11em;
+  }
+
+
+  .footer-brand-column p {
+    max-width: 410px;
+
+    margin:
+      17px 0 18px;
+
+    color: #827a8a;
+
+    font-size: 7px;
+
+    line-height: 1.7;
+  }
+
+
+  .footer-download {
+    display: inline-flex;
+
+    min-height: 36px;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding:
+      0 11px;
+
+    border:
+      1px solid
+      rgba(
+        151,
+        133,
+        255,
+        0.18
+      );
+
+    border-radius: 9px;
+
+    background:
+      rgba(
+        105,
+        82,
+        238,
+        0.12
+      );
+
+    color: #b9acff;
+
+    font-size: 6px;
+
+    font-weight: 800;
+  }
+
+
+  .footer-links-column {
+    display: flex;
+
+    align-items: flex-start;
+
+    flex-direction: column;
+
+    gap: 9px;
+  }
+
+
+  .footer-links-column > small {
+    margin-bottom: 4px;
+
+    color: #615968;
+
+    font-size: 5px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .footer-links-column a {
+    color: #8d8595;
+
+    font-size: 6.5px;
+
+    transition:
+      color 140ms ease,
+      transform 140ms ease;
+  }
+
+
+  .footer-links-column a:hover {
+    color: #d7d0dd;
+
+    transform:
+      translateX(2px);
+  }
+
+
+  .footer-bottom {
+    position: relative;
+
+    z-index: 1;
+
+    display: flex;
+
+    min-height: 51px;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 20px;
+
+    border-top:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.06
+      );
+
+    color: #5e5765;
+
+    font-size: 5.5px;
+  }
+
+
+  .footer-bottom > div {
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+  }
+
+
+  .footer-bottom a {
+    color: #716978;
+
+    transition:
+      color 140ms ease;
+  }
+
+
+  .footer-bottom a:hover {
+    color: #aaa1b2;
+  }
+
+
+  .footer-dot {
+    width: 3px;
+    height: 3px;
+
+    border-radius: 50%;
+
+    background: #554d5c;
+  }
+
+
+  @media (max-width: 880px) {
+
+    .footer-main {
+      grid-template-columns:
+        1.4fr 1fr 1fr;
+
+      gap: 35px;
+    }
+
+
+    .footer-brand-column {
+      grid-column:
+        1 / -1;
+    }
+
+  }
+
+
+  @media (max-width: 600px) {
+
+    .footer-main {
+      grid-template-columns:
+        1fr 1fr;
+
+      gap:
+        32px 22px;
+    }
+
+
+    .footer-brand-column {
+      grid-column:
+        1 / -1;
+    }
+
+
+    .footer-bottom {
+      align-items: flex-start;
+
+      flex-direction: column;
+
+      justify-content: center;
+
+      padding:
+        15px 0;
+    }
+
+  }
+
+
+  @media (max-width: 390px) {
+
+    .footer-main {
+      grid-template-columns: 1fr;
+    }
+
+
+    .footer-brand-column {
+      grid-column: auto;
+    }
+
+  }
+
+</style>

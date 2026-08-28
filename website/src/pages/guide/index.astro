@@ -1,0 +1,1350 @@
+---
+import { guideRoutes } from "../../data/guideRoutes";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import GuideNavigator from "../../components/GuideNavigator.astro";
+
+const categories = [
+  {
+    id: "getting-started",
+    number: "01",
+    icon: "⌂",
+    tone: "purple",
+    vi: "Bắt đầu sử dụng",
+    en: "Getting started",
+    viDescription:
+      "Từ cài đặt AitraNova đến bản dịch đầu tiên.",
+    enDescription:
+      "From installing AitraNova to your first translation.",
+    items: [
+      "Installation",
+      "First launch",
+      "Language",
+      "Translation Profile",
+    ],
+  },
+  {
+    id: "installation",
+    number: "02",
+    icon: "↓",
+    tone: "blue",
+    vi: "Cài đặt",
+    en: "Installation",
+    viDescription:
+      "Chuẩn bị AitraNova trên Windows trước khi bắt đầu dịch.",
+    enDescription:
+      "Prepare AitraNova on Windows before translating.",
+    items: [
+      "Windows",
+      "First launch",
+      "OCR",
+    ],
+  },
+  {
+    id: "quick",
+    number: "03",
+    icon: "⌘",
+    tone: "purple",
+    vi: "Quick Translate",
+    en: "Quick Translate",
+    viDescription:
+      "Dịch nhanh một câu, menu, game, subtitle hoặc vùng bất kỳ trên màn hình.",
+    enDescription:
+      "Translate a sentence, menu, game, subtitle or any screen area.",
+    items: [
+      "Ctrl + Shift + Q",
+      "Screen selection",
+      "OCR",
+      "Overlay",
+    ],
+  },
+  {
+    id: "fullscreen",
+    number: "04",
+    icon: "▣",
+    tone: "cyan",
+    vi: "Full Screen Translate",
+    en: "Full Screen Translate",
+    viDescription:
+      "Workflow dành cho nội dung lớn hơn thay vì một vùng nhỏ.",
+    enDescription:
+      "A workflow for larger screen content instead of a small region.",
+    items: [
+      "Capture",
+      "OCR",
+      "Translation",
+    ],
+  },
+  {
+    id: "manga",
+    number: "05",
+    icon: "漫",
+    tone: "pink",
+    vi: "Manga",
+    en: "Manga",
+    viDescription:
+      "Manga Panel, Manga Session, batch translation và cross-page context.",
+    enDescription:
+      "Manga Panel, Manga Session, batch translation and cross-page context.",
+    items: [
+      "Manga Session",
+      "Next Page",
+      "New Chapter",
+      "Continuity",
+    ],
+  },
+  {
+    id: "documents",
+    number: "06",
+    icon: "文",
+    tone: "blue",
+    vi: "Documents",
+    en: "Documents",
+    viDescription:
+      "Đọc và dịch TXT, EPUB, PDF Text hoặc PDF OCR.",
+    enDescription:
+      "Read and translate TXT, EPUB, PDF Text or PDF OCR.",
+    items: [
+      "TXT",
+      "EPUB",
+      "PDF Text",
+      "PDF OCR",
+    ],
+  },
+  {
+    id: "profile",
+    number: "07",
+    icon: "✦",
+    tone: "cyan",
+    vi: "Translation Profile",
+    en: "Translation Profile",
+    viDescription:
+      "Quản lý style dịch, Glossary, Character Rules và các quy tắc liên quan.",
+    enDescription:
+      "Manage translation style, Glossary, Character Rules and related rules.",
+    items: [
+      "Style",
+      "Glossary",
+      "Characters",
+      "Context",
+    ],
+  },
+  {
+    id: "glossary",
+    number: "08",
+    icon: "語",
+    tone: "orange",
+    vi: "Glossary",
+    en: "Glossary",
+    viDescription:
+      "Khóa cách dịch cho thuật ngữ, kỹ năng, địa danh hoặc từ chuyên ngành.",
+    enDescription:
+      "Lock translations for terminology, skills, locations or technical terms.",
+    items: [
+      "Source term",
+      "Translation",
+      "Mandatory",
+    ],
+  },
+  {
+    id: "characters",
+    number: "09",
+    icon: "名",
+    tone: "pink",
+    vi: "Character Rules",
+    en: "Character Rules",
+    viDescription:
+      "Quản lý tên nhân vật và alias để giảm lỗi không nhất quán.",
+    enDescription:
+      "Manage character names and aliases to reduce inconsistent translations.",
+    items: [
+      "Character name",
+      "Translation",
+      "Alias",
+    ],
+  },
+  {
+    id: "correction",
+    number: "10",
+    icon: "↺",
+    tone: "green",
+    vi: "Correction & Memory",
+    en: "Correction & Memory",
+    viDescription:
+      "Sửa bản dịch và sử dụng lại những mapping đáng tin cậy khi phù hợp.",
+    enDescription:
+      "Correct translations and reuse trusted mappings when appropriate.",
+    items: [
+      "Correction",
+      "Memory",
+      "Continuity",
+    ],
+  },
+  {
+    id: "learning",
+    number: "11",
+    icon: "学",
+    tone: "orange",
+    vi: "Learning",
+    en: "Learning",
+    viDescription:
+      "Biến nội dung đang dịch thành vocabulary, grammar và dữ liệu học.",
+    enDescription:
+      "Turn translated content into vocabulary, grammar and learning material.",
+    items: [
+      "Dashboard",
+      "Vocabulary",
+      "Grammar",
+      "Review",
+    ],
+  },
+  {
+    id: "vocabulary",
+    number: "12",
+    icon: "単",
+    tone: "purple",
+    vi: "Vocabulary",
+    en: "Vocabulary",
+    viDescription:
+      "Lưu và quản lý từ vựng gặp trong nội dung thật.",
+    enDescription:
+      "Save and manage vocabulary encountered in real content.",
+    items: [
+      "Word",
+      "Reading",
+      "Meaning",
+      "Context",
+    ],
+  },
+  {
+    id: "review",
+    number: "13",
+    icon: "↻",
+    tone: "green",
+    vi: "Review / SRS",
+    en: "Review / SRS",
+    viDescription:
+      "Ôn lại vocabulary theo lịch thay vì học ngẫu nhiên.",
+    enDescription:
+      "Review vocabulary on a schedule instead of randomly.",
+    items: [
+      "Again",
+      "Hard",
+      "Good",
+    ],
+  },
+  {
+    id: "shortcuts",
+    number: "14",
+    icon: "⌨",
+    tone: "blue",
+    vi: "Phím tắt",
+    en: "Keyboard shortcuts",
+    viDescription:
+      "Các thao tác nhanh quan trọng khi sử dụng AitraNova.",
+    enDescription:
+      "Important shortcuts for using AitraNova efficiently.",
+    items: [
+      "Quick Translate",
+      "Navigation",
+    ],
+  },
+  {
+    id: "troubleshooting",
+    number: "15",
+    icon: "!",
+    tone: "orange",
+    vi: "Xử lý lỗi",
+    en: "Troubleshooting",
+    viDescription:
+      "OCR sai, không hiện overlay, translation chưa đúng hoặc workflow không hoạt động.",
+    enDescription:
+      "OCR errors, missing overlays, translation issues or workflow problems.",
+    items: [
+      "OCR",
+      "Translation",
+      "Context",
+      "App",
+    ],
+  },
+];
+
+
+
+---
+
+<BaseLayout
+  title="AitraNova Guide"
+  description="Hướng dẫn sử dụng AitraNova."
+>
+
+  <main class="guide-page">
+
+    <!-- HERO -->
+
+    <section class="guide-hero">
+
+      <div class="guide-hero-glow"></div>
+
+      <div class="container guide-hero-inner">
+
+        <div class="guide-hero-copy">
+
+          <span class="guide-hero-kicker">
+            DOCUMENTATION
+          </span>
+
+          <h1>
+
+            <span
+              data-i18n
+              data-vi="Học AitraNova"
+              data-en="Learn AitraNova"
+            >
+              Học AitraNova
+            </span>
+
+            <em
+              data-i18n
+              data-vi="từng bước."
+              data-en="step by step."
+            >
+              từng bước.
+            </em>
+
+          </h1>
+
+          <p
+            data-i18n
+            data-vi="Từ lần mở đầu tiên đến Manga Session, Translation Profile, tài liệu và Learning — mọi workflow đều được giải thích theo từng bước."
+            data-en="From your first launch to Manga Session, Translation Profiles, documents and Learning — every workflow is explained step by step."
+          >
+            Từ lần mở đầu tiên đến Manga Session,
+            Translation Profile, tài liệu và Learning.
+          </p>
+
+          <div class="guide-hero-actions">
+
+            <a
+              href="#quick"
+              class="guide-start"
+            >
+              <span
+                data-i18n
+                data-vi="Bắt đầu với Quick Translate"
+                data-en="Start with Quick Translate"
+              >
+                Bắt đầu với Quick Translate
+              </span>
+
+              ↓
+            </a>
+
+            <span>
+              <kbd>/</kbd>
+
+              <span
+                data-i18n
+                data-vi="để tìm kiếm"
+                data-en="to search"
+              >
+                để tìm kiếm
+              </span>
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="guide-hero-index">
+
+          <span>
+            GUIDE INDEX
+          </span>
+
+          <div>
+
+            <strong>
+              15
+            </strong>
+
+            <small
+              data-i18n
+              data-vi="chủ đề"
+              data-en="topics"
+            >
+              chủ đề
+            </small>
+
+          </div>
+
+          <div>
+
+            <strong>
+              VI
+            </strong>
+
+            <small>
+              +
+            </small>
+
+            <strong>
+              EN
+            </strong>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- GUIDE BODY -->
+
+    <section class="guide-body">
+
+      <div class="container guide-layout">
+
+        <GuideNavigator />
+
+
+        <div class="guide-content">
+
+          <!-- INTRO -->
+
+          <div class="guide-content-head">
+
+            <span
+              data-i18n
+              data-vi="DANH MỤC HƯỚNG DẪN"
+              data-en="GUIDE CATEGORIES"
+            >
+              DANH MỤC HƯỚNG DẪN
+            </span>
+
+            <h2
+              data-i18n
+              data-vi="Bạn muốn làm gì?"
+              data-en="What do you want to do?"
+            >
+              Bạn muốn làm gì?
+            </h2>
+
+            <p
+              data-i18n
+              data-vi="Chọn một chủ đề bên dưới. Ở các bước tiếp theo, mỗi chủ đề sẽ có hướng dẫn chi tiết, ví dụ, mẹo và cách xử lý lỗi."
+              data-en="Choose a topic below. Each topic will contain detailed steps, examples, tips and troubleshooting."
+            >
+              Chọn một chủ đề bên dưới.
+            </p>
+
+          </div>
+
+
+          <div class="guide-category-grid">
+
+            {
+              categories.map((category) => (
+                <article
+                  id={category.id}
+                  class="guide-category"
+                  data-guide-search-item={`${category.vi} ${category.en} ${category.items.join(" ")}`}
+                >
+
+                  <div class="guide-category-top">
+
+                    <span class="guide-category-number">
+                      {category.number}
+                    </span>
+
+                    <span
+                      class:list={[
+                        "guide-category-icon",
+                        category.tone,
+                      ]}
+                    >
+                      {category.icon}
+                    </span>
+
+                  </div>
+
+
+                  <h3
+                    data-i18n
+                    data-vi={category.vi}
+                    data-en={category.en}
+                  >
+                    {category.vi}
+                  </h3>
+
+
+                  <p
+                    data-i18n
+                    data-vi={category.viDescription}
+                    data-en={category.enDescription}
+                  >
+                    {category.viDescription}
+                  </p>
+
+
+                  <div class="guide-category-tags">
+
+                    {
+                      category.items.map(
+                        (item) => (
+                          <span>
+                            {item}
+                          </span>
+                        )
+                      )
+                    }
+
+                  </div>
+
+
+                  {
+                    guideRoutes[category.id] ? (
+
+                      <a
+                        href={guideRoutes[category.id]}
+                        class="guide-open-link"
+                      >
+
+                        <span
+                          data-i18n
+                          data-vi="Mở hướng dẫn"
+                          data-en="Open guide"
+                        >
+                          Mở hướng dẫn
+                        </span>
+
+                        →
+
+                      </a>
+
+                    ) : (
+
+                      <span
+                        class="guide-coming-soon"
+                        title="Guide đang được xây dựng"
+                      >
+
+                        <i></i>
+
+                        <span
+                          data-i18n
+                          data-vi="Đang xây dựng"
+                          data-en="Coming soon"
+                        >
+                          Đang xây dựng
+                        </span>
+
+                      </span>
+
+                    )
+                  }
+
+                </article>
+              ))
+            }
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</BaseLayout>
+
+
+<style>
+
+  .guide-page {
+    background:
+      #dad4e4;
+  }
+
+
+  /* HERO */
+
+  .guide-hero {
+    position: relative;
+
+    overflow: hidden;
+
+    padding:
+      92px 0 78px;
+
+    border-bottom:
+      1px solid #c8bfd4;
+
+    background:
+      linear-gradient(
+        135deg,
+        #e6dff0,
+        #d8d5e8
+      );
+  }
+
+
+  .guide-hero-glow {
+    position: absolute;
+
+    top: -350px;
+    right: -180px;
+
+    width: 750px;
+    height: 750px;
+
+    border-radius: 50%;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          105,
+          82,
+          238,
+          0.18
+        ),
+        transparent 67%
+      );
+  }
+
+
+  .guide-hero-inner {
+    position: relative;
+
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+      1fr auto;
+
+    align-items: end;
+
+    gap: 70px;
+  }
+
+
+  .guide-hero-kicker {
+    color:
+      #6952ee;
+
+    font-size: 8px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .guide-hero h1 {
+    max-width: 780px;
+
+    margin:
+      18px 0 20px;
+
+    color:
+      #1d1827;
+
+    font-size:
+      clamp(
+        54px,
+        7vw,
+        82px
+      );
+
+    line-height:
+      0.94;
+
+    letter-spacing:
+      -0.065em;
+  }
+
+
+  .guide-hero h1 span,
+  .guide-hero h1 em {
+    display: block;
+  }
+
+
+  .guide-hero h1 em {
+    color:
+      #6952ee;
+
+    font-style: normal;
+  }
+
+
+  .guide-hero-copy > p {
+    max-width: 650px;
+
+    margin: 0;
+
+    color:
+      #71687d;
+
+    font-size: 14px;
+
+    line-height: 1.75;
+  }
+
+
+  .guide-hero-actions {
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 16px;
+
+    margin-top: 24px;
+  }
+
+
+  .guide-start {
+    display: inline-flex;
+
+    min-height: 44px;
+
+    align-items: center;
+
+    gap: 9px;
+
+    padding:
+      0 15px;
+
+    border-radius: 10px;
+
+    background:
+      #6952ee;
+
+    color: white;
+
+    font-size: 9px;
+
+    font-weight: 750;
+
+    box-shadow:
+      0 13px 30px
+      rgba(
+        78,
+        56,
+        160,
+        0.2
+      );
+  }
+
+
+  .guide-hero-actions
+  > span {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    color:
+      #8a8194;
+
+    font-size: 8px;
+  }
+
+
+  .guide-hero-actions kbd {
+    padding:
+      4px 6px;
+
+    border:
+      1px solid #c4bbcf;
+
+    border-radius: 6px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.45
+      );
+  }
+
+
+  .guide-hero-index {
+    display: grid;
+
+    min-width: 190px;
+
+    gap: 14px;
+
+    padding: 18px;
+
+    border:
+      1px solid
+      rgba(
+        188,
+        179,
+        202,
+        0.85
+      );
+
+    border-radius: 15px;
+
+    background:
+      rgba(
+        244,
+        240,
+        248,
+        0.62
+      );
+  }
+
+
+  .guide-hero-index > span {
+    color:
+      #968ca1;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.1em;
+  }
+
+
+  .guide-hero-index > div {
+    display: flex;
+
+    align-items: baseline;
+
+    gap: 6px;
+  }
+
+
+  .guide-hero-index strong {
+    font-size: 22px;
+  }
+
+
+  .guide-hero-index small {
+    color:
+      #8d8498;
+
+    font-size: 7px;
+  }
+
+
+  /* BODY */
+
+  .guide-body {
+    padding:
+      48px 0 90px;
+
+    background:
+      linear-gradient(
+        180deg,
+        #d9d3e3,
+        #e1dbe8
+      );
+  }
+
+
+  .guide-layout {
+    display: grid;
+
+    grid-template-columns:
+      250px minmax(0, 1fr);
+
+    gap: 28px;
+
+    align-items: start;
+  }
+
+
+  .guide-content {
+    min-width: 0;
+  }
+
+
+  .guide-content-head {
+    margin-bottom: 25px;
+
+    padding:
+      8px 4px 0;
+  }
+
+
+  .guide-content-head > span {
+    color:
+      #6952ee;
+
+    font-size: 7px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.1em;
+  }
+
+
+  .guide-content-head h2 {
+    margin:
+      10px 0 10px;
+
+    color:
+      #211b2b;
+
+    font-size:
+      clamp(
+        34px,
+        4vw,
+        48px
+      );
+
+    line-height:
+      1;
+
+    letter-spacing:
+      -0.05em;
+  }
+
+
+  .guide-content-head p {
+    max-width: 650px;
+
+    margin: 0;
+
+    color:
+      #766d81;
+
+    font-size: 10px;
+
+    line-height: 1.65;
+  }
+
+
+  /* CARDS */
+
+  .guide-category-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        2,
+        minmax(0, 1fr)
+      );
+
+    gap: 10px;
+  }
+
+
+  .guide-category {
+    scroll-margin-top:
+      105px;
+
+    padding: 19px;
+
+    border:
+      1px solid
+      rgba(
+        190,
+        181,
+        204,
+        0.9
+      );
+
+    border-radius: 15px;
+
+    background:
+      rgba(
+        244,
+        240,
+        248,
+        0.78
+      );
+
+    box-shadow:
+      0 5px 14px
+      rgba(
+        43,
+        32,
+        61,
+        0.035
+      );
+
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+
+  .guide-category:hover {
+    transform:
+      translateY(-3px);
+
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.31
+      );
+
+    box-shadow:
+      0 16px 35px
+      rgba(
+        43,
+        32,
+        61,
+        0.08
+      );
+  }
+
+
+  .guide-category[hidden] {
+    display: none;
+  }
+
+
+  .guide-category-top {
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content:
+      space-between;
+  }
+
+
+  .guide-category-number {
+    color:
+      #a198ac;
+
+    font-size: 7px;
+
+    font-weight: 850;
+  }
+
+
+  .guide-category-icon {
+    display: grid;
+
+    width: 39px;
+    height: 39px;
+
+    place-items: center;
+
+    border-radius: 11px;
+
+    font-size: 12px;
+
+    font-weight: 850;
+  }
+
+
+  .guide-category-icon.purple {
+    background: #e4ddff;
+    color: #6952ee;
+  }
+
+
+  .guide-category-icon.blue {
+    background: #dce6f7;
+    color: #557fdc;
+  }
+
+
+  .guide-category-icon.cyan {
+    background: #d9ebed;
+    color: #378ca1;
+  }
+
+
+  .guide-category-icon.pink {
+    background: #f4ddea;
+    color: #ca5b91;
+  }
+
+
+  .guide-category-icon.orange {
+    background: #f3e4cf;
+    color: #c6823f;
+  }
+
+
+  .guide-category-icon.green {
+    background: #dcece4;
+    color: #3b9b72;
+  }
+
+
+  .guide-category h3 {
+    margin:
+      18px 0 8px;
+
+    color:
+      #241e2e;
+
+    font-size: 17px;
+
+    letter-spacing:
+      -0.03em;
+  }
+
+
+  .guide-category > p {
+    min-height: 48px;
+
+    margin: 0;
+
+    color:
+      #776e82;
+
+    font-size: 9px;
+
+    line-height: 1.6;
+  }
+
+
+  .guide-category-tags {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    margin-top: 14px;
+  }
+
+
+  .guide-category-tags span {
+    padding:
+      4px 6px;
+
+    border:
+      1px solid
+      #d0c7da;
+
+    border-radius: 999px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.4
+      );
+
+    color:
+      #756c80;
+
+    font-size: 6px;
+  }
+
+
+  .guide-category > a {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    margin-top: 16px;
+
+    color:
+      #6952ee;
+
+    font-size: 8px;
+
+    font-weight: 750;
+  }
+
+
+  @media (max-width: 1000px) {
+
+    .guide-layout {
+      grid-template-columns:
+        1fr;
+    }
+
+
+    .guide-hero-inner {
+      grid-template-columns:
+        1fr;
+    }
+
+
+    .guide-hero-index {
+      display: none;
+    }
+
+  }
+
+
+  @media (max-width: 650px) {
+
+    .guide-hero {
+      padding:
+        70px 0 55px;
+    }
+
+
+    .guide-category-grid {
+      grid-template-columns:
+        1fr;
+    }
+
+
+    .guide-category > p {
+      min-height: auto;
+    }
+
+  }
+
+
+
+  /* =========================================================
+     GUIDE LINK STATUS
+     ========================================================= */
+
+  .guide-coming-soon {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    margin-top: 16px;
+
+    padding:
+      5px 8px;
+
+    border:
+      1px solid
+      #cec5d8;
+
+    border-radius:
+      999px;
+
+    background:
+      rgba(
+        232,
+        226,
+        239,
+        0.75
+      );
+
+    color:
+      #8c8397;
+
+    font-size:
+      7px;
+
+    font-weight: 750;
+  }
+
+
+  .guide-coming-soon i {
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background:
+      #a49aaa;
+  }
+
+
+  .guide-open-link {
+    transition:
+      gap 160ms ease,
+      color 160ms ease;
+  }
+
+
+  .guide-open-link:hover {
+    gap: 12px;
+
+    color:
+      #573bdc;
+  }
+
+
+  /* =========================================================
+     SIDEBAR JUMP FEEDBACK
+     ========================================================= */
+
+  .guide-category.guide-focus {
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.72
+      );
+
+    box-shadow:
+      0 0 0 4px
+      rgba(
+        105,
+        82,
+        238,
+        0.10
+      ),
+      0 20px 45px
+      rgba(
+        52,
+        38,
+        78,
+        0.12
+      );
+
+    animation:
+      guideFocusPulse
+      900ms ease;
+  }
+
+
+  @keyframes guideFocusPulse {
+
+    0% {
+      transform:
+        scale(1);
+    }
+
+    35% {
+      transform:
+        scale(1.008);
+    }
+
+    100% {
+      transform:
+        scale(1);
+    }
+
+  }
+
+
+  @media (
+    prefers-reduced-motion:
+    reduce
+  ) {
+
+    .guide-category.guide-focus {
+      animation: none;
+    }
+
+  }
+
+</style>

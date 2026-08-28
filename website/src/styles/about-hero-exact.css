@@ -1,0 +1,488 @@
+/* =========================================================
+   AITRANOVA V10.5A
+   ABOUT HERO — EXACT CLASS FIX
+   ========================================================= */
+
+
+/* =========================================================
+   ROOT HERO
+   One background only.
+   ========================================================= */
+
+.about-page .about-hero {
+  border-bottom:
+    1px solid
+    rgba(157, 132, 255, 0.16) !important;
+
+  background:
+    radial-gradient(
+      circle at 82% 18%,
+      rgba(117, 79, 247, 0.27),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 18% 78%,
+      rgba(78, 111, 215, 0.10),
+      transparent 27%
+    ),
+    linear-gradient(
+      132deg,
+      #090610 0%,
+      #0f0919 25%,
+      #171020 55%,
+      #24143d 80%,
+      #100d1b 100%
+    ) !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   HERO INNER
+   Never another panel.
+   ========================================================= */
+
+.about-page .about-hero-inner {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+
+  backdrop-filter:
+    none !important;
+}
+
+
+/* =========================================================
+   LEFT COPY
+   Remove the ugly dark rectangle.
+   ========================================================= */
+
+.about-page .about-hero-copy {
+  border:
+    0 !important;
+
+  border-radius:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+
+  backdrop-filter:
+    none !important;
+}
+
+
+.about-page .about-hero-copy::before,
+.about-page .about-hero-copy::after {
+  display:
+    none !important;
+
+  content:
+    none !important;
+}
+
+
+/* =========================================================
+   KICKER
+   ========================================================= */
+
+.about-page .about-kicker {
+  color:
+    #b29eff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   HERO TITLE
+   ========================================================= */
+
+.about-page
+.about-hero-copy h1 {
+  color:
+    #ffffff !important;
+
+  text-shadow:
+    0 10px 34px
+    rgba(0, 0, 0, 0.20);
+}
+
+
+.about-page
+.about-hero-copy h1 em {
+  background:
+    linear-gradient(
+      110deg,
+      #9f85ff 0%,
+      #795cff 35%,
+      #bd72ee 67%,
+      #78a7ff 100%
+    );
+
+  background-clip:
+    text;
+
+  -webkit-background-clip:
+    text;
+
+  color:
+    transparent !important;
+
+  -webkit-text-fill-color:
+    transparent !important;
+
+  font-style:
+    normal;
+}
+
+
+/* =========================================================
+   HERO DESCRIPTION
+   ========================================================= */
+
+.about-page
+.about-hero-copy > p {
+  color:
+    rgba(
+      242,
+      236,
+      249,
+      0.86
+    ) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   HERO ACTIONS
+   No extra horizontal panel.
+   ========================================================= */
+
+.about-page
+.about-hero-actions {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* Primary */
+
+.about-page
+.about-primary-action {
+  border:
+    1px solid
+    rgba(197, 181, 255, 0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #684cef,
+      #8062ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 13px 28px
+    rgba(82, 54, 210, 0.30) !important;
+}
+
+
+.about-page
+.about-primary-action span {
+  color:
+    #ffffff !important;
+}
+
+
+/* Secondary: white */
+
+.about-page
+.about-hero-actions
+a[href="/roadmap"] {
+  border:
+    1px solid
+    rgba(255,255,255,0.72) !important;
+
+  background:
+    #ffffff !important;
+
+  color:
+    #4f35b8 !important;
+
+  box-shadow:
+    0 10px 24px
+    rgba(0,0,0,0.16) !important;
+}
+
+
+.about-page
+.about-hero-actions
+a[href="/roadmap"] span {
+  color:
+    #4f35b8 !important;
+}
+
+
+.about-page
+.about-hero-actions
+a[href="/roadmap"]:hover {
+  background:
+    #f1ebff !important;
+
+  color:
+    #6246d8 !important;
+}
+
+
+/* =========================================================
+   RIGHT SYSTEM CARD
+   This is the ONLY card inside hero.
+   ========================================================= */
+
+.about-page
+.about-hero-system {
+  border:
+    1px solid
+    rgba(181, 158, 255, 0.28) !important;
+
+  border-radius:
+    18px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20, 13, 32, 0.82),
+      rgba(39, 24, 59, 0.72)
+    ) !important;
+
+  box-shadow:
+    0 24px 52px
+    rgba(0, 0, 0, 0.22) !important;
+
+  backdrop-filter:
+    blur(14px);
+}
+
+
+/* =========================================================
+   SYSTEM HEADER
+   ========================================================= */
+
+.about-page
+.about-system-top {
+  border-color:
+    rgba(172, 147, 255, 0.15) !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.about-page
+.about-system-top > span {
+  color:
+    #b199ff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.about-page
+.about-system-top > small {
+  color:
+    rgba(225, 216, 239, 0.72) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   FLOW
+   ========================================================= */
+
+.about-page
+.about-system-flow {
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* Only actual flow cards */
+
+.about-page
+.about-system-flow > div {
+  border:
+    1px solid
+    rgba(168, 143, 255, 0.16) !important;
+
+  border-radius:
+    13px !important;
+
+  background:
+    rgba(255, 255, 255, 0.055) !important;
+
+  box-shadow:
+    inset 0 1px 0
+    rgba(255,255,255,0.035) !important;
+}
+
+
+.about-page
+.about-system-flow > div:hover {
+  border-color:
+    rgba(176, 151, 255, 0.28) !important;
+
+  background:
+    rgba(118, 88, 255, 0.09) !important;
+}
+
+
+/* Step number */
+
+.about-page
+.about-system-flow > div > span {
+  background:
+    rgba(118, 88, 255, 0.18) !important;
+
+  color:
+    #c0afff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* SOURCE / CONTROL / RESULT */
+
+.about-page
+.about-system-flow > div > small {
+  color:
+    #a99db7 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* Main values */
+
+.about-page
+.about-system-flow > div > strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* arrows */
+
+.about-page
+.about-system-flow > i {
+  color:
+    #8e72ff !important;
+
+  opacity:
+    0.85 !important;
+}
+
+
+/* Result card slightly stronger */
+
+.about-page
+.about-system-flow
+> .result {
+  border-color:
+    rgba(145, 119, 255, 0.26) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(118,88,255,0.13),
+      rgba(255,255,255,0.045)
+    ) !important;
+}
+
+
+/* =========================================================
+   GLOW ELEMENTS
+   Keep decorations subtle.
+   ========================================================= */
+
+.about-page
+.about-glow {
+  opacity:
+    0.72 !important;
+
+  pointer-events:
+    none !important;
+}
+
+
+/* =========================================================
+   INTERACTIONS
+   ========================================================= */
+
+.about-page
+.about-hero-actions a {
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.about-page
+.about-hero-actions a:hover {
+  transform:
+    translateY(-2px);
+}
+
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+.about-page
+.about-hero-actions
+a:focus-visible {
+  outline:
+    2px solid
+    #a98fff !important;
+
+  outline-offset:
+    3px !important;
+}
+

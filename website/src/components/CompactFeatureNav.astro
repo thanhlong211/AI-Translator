@@ -1,0 +1,623 @@
+<section class="compact-features">
+
+  <div class="container">
+
+    <div class="compact-feature-head">
+
+      <div>
+
+        <span class="compact-kicker">
+          <i></i>
+
+          <span
+            data-i18n
+            data-vi="KHÁM PHÁ TÍNH NĂNG"
+            data-en="EXPLORE FEATURES"
+          >
+            KHÁM PHÁ TÍNH NĂNG
+          </span>
+        </span>
+
+        <h2
+          data-i18n
+          data-vi="Một ứng dụng. Nhiều cách sử dụng."
+          data-en="One app. Multiple workflows."
+        >
+          Một ứng dụng. Nhiều cách sử dụng.
+        </h2>
+
+      </div>
+
+      <p
+        data-i18n
+        data-vi="Chọn workflow phù hợp với nội dung bạn đang đọc."
+        data-en="Choose the workflow that fits what you're reading."
+      >
+        Chọn workflow phù hợp với nội dung bạn đang đọc.
+      </p>
+
+    </div>
+
+
+    <div class="compact-feature-grid">
+
+      <!-- QUICK -->
+
+      <a
+        href="/guide#quick"
+        class="compact-feature-card"
+      >
+        <span class="compact-icon purple">
+          ⌘
+        </span>
+
+        <div>
+
+          <strong>
+            Quick Translate
+          </strong>
+
+          <small
+            data-i18n
+            data-vi="Dịch vùng màn hình"
+            data-en="Translate screen areas"
+          >
+            Dịch vùng màn hình
+          </small>
+
+        </div>
+
+        <i>→</i>
+      </a>
+
+
+      <!-- MANGA -->
+
+      <button
+        type="button"
+        class="compact-feature-card"
+        data-open-feature="manga"
+      >
+        <span class="compact-icon pink">
+          漫
+        </span>
+
+        <div>
+
+          <strong>
+            Manga
+          </strong>
+
+          <small
+            data-i18n
+            data-vi="Context nhiều trang"
+            data-en="Cross-page context"
+          >
+            Context nhiều trang
+          </small>
+
+        </div>
+
+        <i>→</i>
+      </button>
+
+
+      <!-- DOCUMENT -->
+
+      <button
+        type="button"
+        class="compact-feature-card"
+        data-open-feature="documents"
+      >
+        <span class="compact-icon blue">
+          文
+        </span>
+
+        <div>
+
+          <strong
+            data-i18n
+            data-vi="Tài liệu"
+            data-en="Documents"
+          >
+            Tài liệu
+          </strong>
+
+          <small>
+            TXT · EPUB · PDF
+          </small>
+
+        </div>
+
+        <i>→</i>
+      </button>
+
+
+      <!-- PROFILE -->
+
+      <button
+        type="button"
+        class="compact-feature-card"
+        data-open-feature="profile"
+      >
+        <span class="compact-icon cyan">
+          ✦
+        </span>
+
+        <div>
+
+          <strong>
+            Translation Profile
+          </strong>
+
+          <small>
+            Glossary · Characters
+          </small>
+
+        </div>
+
+        <i>→</i>
+      </button>
+
+
+      <!-- LEARNING -->
+
+      <button
+        type="button"
+        class="compact-feature-card"
+        data-open-feature="learning"
+      >
+        <span class="compact-icon orange">
+          学
+        </span>
+
+        <div>
+
+          <strong>
+            Learning
+          </strong>
+
+          <small>
+            Vocabulary · SRS
+          </small>
+
+        </div>
+
+        <i>→</i>
+      </button>
+
+
+      <!-- ROADMAP -->
+
+      <button
+        type="button"
+        class="compact-feature-card"
+        data-open-feature="roadmap"
+      >
+        <span class="compact-icon green">
+          ↗
+        </span>
+
+        <div>
+
+          <strong>
+            Roadmap
+          </strong>
+
+          <small
+            data-i18n
+            data-vi="Những gì sắp tới"
+            data-en="What's coming next"
+          >
+            Những gì sắp tới
+          </small>
+
+        </div>
+
+        <i>→</i>
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<script>
+  function initCompactFeatureNav() {
+
+    const buttons =
+      document.querySelectorAll(
+        "[data-open-feature]"
+      );
+
+    const switcher =
+      document.querySelector(
+        "[data-home-switcher]"
+      );
+
+    buttons.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const target =
+              button.dataset
+                .openFeature;
+
+            if (!target) {
+              return;
+            }
+
+            window.location.hash =
+              target;
+
+
+            window.setTimeout(
+              () => {
+
+                switcher?.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
+
+              },
+              40
+            );
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initCompactFeatureNav,
+      {
+        once: true,
+      }
+    );
+  } else {
+    initCompactFeatureNav();
+  }
+</script>
+
+
+<style>
+
+  .compact-features {
+    padding:
+      70px 0;
+
+    border-top:
+      1px solid #c9c1d4;
+
+    border-bottom:
+      1px solid #c9c1d4;
+
+    background:
+      linear-gradient(
+        145deg,
+        #d6cee3,
+        #ddd7e8
+      );
+  }
+
+
+  .compact-feature-head {
+    display: flex;
+
+    align-items: flex-end;
+
+    justify-content: space-between;
+
+    gap: 50px;
+
+    margin-bottom: 30px;
+  }
+
+
+  .compact-kicker {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    color:
+      #6650e8;
+
+    font-size: 8px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.11em;
+  }
+
+
+  .compact-kicker i {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background:
+      #6952ee;
+
+    box-shadow:
+      0 0 0 5px
+      rgba(105, 82, 238, 0.1);
+  }
+
+
+  .compact-feature-head h2 {
+    margin:
+      13px 0 0;
+
+    color:
+      #1c1828;
+
+    font-size:
+      clamp(
+        32px,
+        4vw,
+        48px
+      );
+
+    line-height:
+      1.02;
+
+    letter-spacing:
+      -0.05em;
+  }
+
+
+  .compact-feature-head > p {
+    max-width: 350px;
+
+    margin: 0;
+
+    color:
+      #71697e;
+
+    font-size: 11px;
+
+    line-height: 1.6;
+  }
+
+
+  .compact-feature-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        3,
+        minmax(0, 1fr)
+      );
+
+    gap: 9px;
+  }
+
+
+  .compact-feature-card {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr auto;
+
+    min-height: 74px;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding:
+      11px 13px;
+
+    border:
+      1px solid
+      rgba(192, 183, 205, 0.9);
+
+    border-radius:
+      13px;
+
+    background:
+      rgba(244, 240, 248, 0.78);
+
+    color:
+      #1c1828;
+
+    cursor: pointer;
+
+    text-align: left;
+
+    box-shadow:
+      0 4px 12px
+      rgba(42, 31, 61, 0.035);
+
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      background 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+
+  .compact-feature-card:hover {
+    transform:
+      translateY(-2px);
+
+    border-color:
+      rgba(105, 82, 238, 0.34);
+
+    background:
+      #f1ecf8;
+
+    box-shadow:
+      0 13px 28px
+      rgba(42, 31, 61, 0.08);
+  }
+
+
+  .compact-feature-card
+  > div {
+    min-width: 0;
+  }
+
+
+  .compact-feature-card strong {
+    display: block;
+
+    overflow: hidden;
+
+    color:
+      #241f2f;
+
+    font-size: 10px;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+
+
+  .compact-feature-card small {
+    display: block;
+
+    margin-top: 2px;
+
+    overflow: hidden;
+
+    color:
+      #817889;
+
+    font-size: 7px;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+  }
+
+
+  .compact-feature-card > i {
+    color:
+      #83798f;
+
+    font-size: 10px;
+
+    font-style: normal;
+  }
+
+
+  .compact-icon {
+    display: grid;
+
+    width: 37px;
+    height: 37px;
+
+    place-items: center;
+
+    border-radius: 10px;
+
+    font-size: 11px;
+
+    font-weight: 850;
+  }
+
+
+  .compact-icon.purple {
+    background:
+      #e4ddff;
+
+    color:
+      #6952ee;
+  }
+
+
+  .compact-icon.pink {
+    background:
+      #f4ddea;
+
+    color:
+      #ca5b91;
+  }
+
+
+  .compact-icon.blue {
+    background:
+      #dce6f7;
+
+    color:
+      #557fdc;
+  }
+
+
+  .compact-icon.cyan {
+    background:
+      #d9ebed;
+
+    color:
+      #378ca1;
+  }
+
+
+  .compact-icon.orange {
+    background:
+      #f3e4cf;
+
+    color:
+      #c6823f;
+  }
+
+
+  .compact-icon.green {
+    background:
+      #dcece4;
+
+    color:
+      #3b9b72;
+  }
+
+
+  @media (max-width: 800px) {
+
+    .compact-feature-head {
+      display: block;
+    }
+
+
+    .compact-feature-head > p {
+      margin-top:
+        14px;
+    }
+
+
+    .compact-feature-grid {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+  }
+
+
+  @media (max-width: 520px) {
+
+    .compact-feature-grid {
+      grid-template-columns:
+        1fr;
+    }
+
+  }
+
+</style>

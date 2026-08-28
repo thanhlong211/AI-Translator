@@ -1,0 +1,1720 @@
+---
+const groups = [
+  {
+    id: "screen",
+    icon: "⌗",
+    label: "Screen",
+    labelVi: "Màn hình",
+    kicker: "SCREEN TRANSLATION",
+    titleVi: "Dịch bất kỳ nội dung nào đang hiển thị.",
+    titleEn: "Translate anything visible on your screen.",
+    descriptionVi:
+      "Chọn một vùng trên màn hình, để OCR nhận dạng text và nhận bản dịch mà không cần copy thủ công.",
+    descriptionEn:
+      "Select an area on your screen, let OCR recognize the text and receive a translation without manually copying anything.",
+    guide: "/guide/quick",
+    features: [
+      {
+        title: "Quick Translate",
+        vi: "Dịch nhanh một vùng bằng Ctrl + Shift + Q.",
+        en: "Translate an area quickly with Ctrl + Shift + Q.",
+      },
+      {
+        title: "Screen OCR",
+        vi: "Nhận dạng chữ trực tiếp từ game, website, video hoặc ảnh.",
+        en: "Recognize text directly from games, websites, videos or images.",
+      },
+      {
+        title: "Translation Overlay",
+        vi: "Xem kết quả mà không phải chuyển sang một trang dịch riêng.",
+        en: "Read the result without switching to a separate translator.",
+      },
+    ],
+    workflow: [
+      "Ctrl + Shift + Q",
+      "Select Area",
+      "OCR",
+      "Profile + Context",
+      "AI Translation",
+      "Overlay",
+    ],
+  },
+
+  {
+    id: "manga",
+    icon: "漫",
+    label: "Manga",
+    labelVi: "Manga",
+    kicker: "MANGA TRANSLATION",
+    titleVi: "Dịch cả mạch truyện, không chỉ từng bubble.",
+    titleEn: "Translate the story flow, not just isolated bubbles.",
+    descriptionVi:
+      "Manga Session xử lý nhiều bubble, giữ recent context giữa các trang và hỗ trợ tính nhất quán của nhân vật.",
+    descriptionEn:
+      "Manga Session handles multiple bubbles, preserves recent context across pages and supports character consistency.",
+    guide: "/guide/manga",
+    features: [
+      {
+        title: "Batch Translation",
+        vi: "Dịch nhiều bubble trên cùng một trang với context chung.",
+        en: "Translate multiple bubbles on one page with shared context.",
+      },
+      {
+        title: "Cross-page Context",
+        vi: "Trang mới có thể sử dụng thông tin liên quan từ các trang gần đây.",
+        en: "New pages can use relevant information from recent pages.",
+      },
+      {
+        title: "Character Continuity",
+        vi: "Hỗ trợ giữ cách gọi tên nhân vật nhất quán hơn.",
+        en: "Helps keep character naming more consistent.",
+      },
+      {
+        title: "Correction",
+        vi: "Sửa đúng block bị sai thay vì phải dịch lại toàn bộ trang.",
+        en: "Correct the affected block instead of retranslating the entire page.",
+      },
+    ],
+    workflow: [
+      "Start Session",
+      "Capture",
+      "OCR Blocks",
+      "Batch Translate",
+      "Review",
+      "Next Page",
+      "Context",
+    ],
+  },
+
+  {
+    id: "documents",
+    icon: "▤",
+    label: "Documents",
+    labelVi: "Tài liệu",
+    kicker: "DOCUMENT READER",
+    titleVi: "Đọc và dịch tài liệu theo đúng định dạng.",
+    titleEn: "Read and translate documents using the right workflow.",
+    descriptionVi:
+      "TXT, EPUB, PDF có text và PDF scan không nên xử lý giống nhau. AitraNova chọn workflow phù hợp với source.",
+    descriptionEn:
+      "TXT, EPUB, text PDFs and scanned PDFs should not be processed the same way. AitraNova uses workflows suited to each source.",
+    guide: "/guide/documents",
+    features: [
+      {
+        title: "TXT Reader",
+        vi: "Đọc text thuần trực tiếp, không cần OCR.",
+        en: "Read plain text directly without OCR.",
+      },
+      {
+        title: "EPUB Reader",
+        vi: "Phù hợp ebook và nội dung chia theo chapter.",
+        en: "Designed for ebooks and chapter-based content.",
+      },
+      {
+        title: "PDF Text",
+        vi: "Đọc trực tiếp khi PDF đã chứa selectable text.",
+        en: "Read directly when the PDF contains selectable text.",
+      },
+      {
+        title: "PDF OCR",
+        vi: "Nhận dạng tài liệu scan hoặc PDF dạng ảnh.",
+        en: "Recognize scanned documents or image-based PDFs.",
+      },
+    ],
+    workflow: [
+      "Open File",
+      "Detect Source",
+      "Read / OCR",
+      "Context",
+      "Translate",
+      "Learning",
+    ],
+  },
+
+  {
+    id: "profile",
+    icon: "✦",
+    label: "Profiles",
+    labelVi: "Profiles",
+    kicker: "TRANSLATION CONTROL",
+    titleVi: "Kiểm soát cách AitraNova dịch.",
+    titleEn: "Control how AitraNova translates.",
+    descriptionVi:
+      "Translation Profiles gom các quy tắc dành cho từng loại nội dung: Glossary, Character Rules và các chỉ dẫn dịch.",
+    descriptionEn:
+      "Translation Profiles group the rules for each kind of content: Glossary entries, Character Rules and translation instructions.",
+    guide: "/guide/profile",
+    features: [
+      {
+        title: "Glossary",
+        vi: "Giữ thuật ngữ quan trọng theo mapping bạn xác định.",
+        en: "Keep important terminology aligned with mappings you define.",
+      },
+      {
+        title: "Character Rules",
+        vi: "Quy định cách tên nhân vật nên được giữ hoặc romanize.",
+        en: "Define how character names should be preserved or romanized.",
+      },
+      {
+        title: "Context",
+        vi: "Cung cấp thông tin hỗ trợ cho source hiện tại.",
+        en: "Provide supporting information for the current source.",
+      },
+      {
+        title: "Profile Separation",
+        vi: "Manga, novel và technical content có thể dùng profile riêng.",
+        en: "Manga, novels and technical content can use separate profiles.",
+      },
+    ],
+    workflow: [
+      "Choose Profile",
+      "Glossary",
+      "Characters",
+      "Context",
+      "Translate",
+      "Correct",
+    ],
+  },
+
+  {
+    id: "learning",
+    icon: "学",
+    label: "Learning",
+    labelVi: "Học tập",
+    kicker: "LEARNING SYSTEM",
+    titleVi: "Biến nội dung bạn đang đọc thành dữ liệu học.",
+    titleEn: "Turn what you read into study material.",
+    descriptionVi:
+      "Lưu Vocabulary, Grammar và đưa chúng vào Review thay vì phải chuyển sang một ứng dụng ghi chú khác.",
+    descriptionEn:
+      "Save Vocabulary and Grammar and bring them into Review instead of moving everything to another note-taking app.",
+    guide: "/guide/learning",
+    features: [
+      {
+        title: "Vocabulary",
+        vi: "Lưu từ cùng nghĩa, cách đọc và context thực tế.",
+        en: "Save words with meaning, reading and real context.",
+      },
+      {
+        title: "Grammar",
+        vi: "Lưu cấu trúc xuất hiện trong manga hoặc tài liệu.",
+        en: "Save grammar patterns encountered in manga or documents.",
+      },
+      {
+        title: "Review / SRS",
+        vi: "Đưa nội dung cần học trở lại theo lịch ôn.",
+        en: "Bring study material back according to a review schedule.",
+      },
+      {
+        title: "Learning Dashboard",
+        vi: "Theo dõi Vocabulary, Grammar và những mục cần Review.",
+        en: "Track Vocabulary, Grammar and items due for Review.",
+      },
+    ],
+    workflow: [
+      "Read",
+      "Translate",
+      "Select",
+      "Save",
+      "Learn",
+      "Review",
+    ],
+  },
+];
+---
+
+<section
+  class="feature-explorer"
+  data-feature-explorer
+>
+
+  <div class="feature-explorer-tabs" role="tablist">
+
+    {
+      groups.map((group, index) => (
+
+        <button
+          type="button"
+          class={index === 0 ? "active" : ""}
+          data-feature-tab={group.id}
+          aria-selected={index === 0 ? "true" : "false"}
+        >
+
+          <span class="feature-tab-icon">
+            {group.icon}
+          </span>
+
+          <span
+            data-i18n
+            data-vi={group.labelVi}
+            data-en={group.label}
+          >
+            {group.labelVi}
+          </span>
+
+        </button>
+
+      ))
+    }
+
+  </div>
+
+
+  <div class="feature-explorer-panels">
+
+    {
+      groups.map((group, index) => (
+
+        <article
+          class:list={[
+            "feature-explorer-panel",
+            index === 0 && "active",
+          ]}
+          data-feature-panel={group.id}
+          hidden={index !== 0}
+        >
+
+          <div class="feature-panel-copy">
+
+            <span class="feature-panel-kicker">
+              {group.kicker}
+            </span>
+
+            <h2
+              data-i18n
+              data-vi={group.titleVi}
+              data-en={group.titleEn}
+            >
+              {group.titleVi}
+            </h2>
+
+            <p
+              data-i18n
+              data-vi={group.descriptionVi}
+              data-en={group.descriptionEn}
+            >
+              {group.descriptionVi}
+            </p>
+
+
+            <div class="feature-panel-actions">
+
+              <a
+                href={group.guide}
+                class="feature-primary-action"
+              >
+                <span
+                  data-i18n
+                  data-vi="Xem hướng dẫn"
+                  data-en="Open guide"
+                >
+                  Xem hướng dẫn
+                </span>
+
+                →
+              </a>
+
+              <a
+                href="/download"
+                class="feature-secondary-action"
+              >
+                <span
+                  data-i18n
+                  data-vi="Tải AitraNova"
+                  data-en="Download AitraNova"
+                >
+                  Tải AitraNova
+                </span>
+              </a>
+
+            </div>
+
+          </div>
+
+
+          <div class="feature-panel-product">
+
+            <div class="feature-product-top">
+
+              <div>
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+
+              <small>
+                AITRANOVA
+              </small>
+
+              <strong>
+                {group.label}
+              </strong>
+
+            </div>
+
+
+            <div class="feature-product-body">
+
+              <div class="feature-product-sidebar">
+
+                {
+                  groups.map((item) => (
+
+                    <span
+                      class:list={[
+                        item.id === group.id
+                          && "active",
+                      ]}
+                    >
+                      {item.icon}
+                    </span>
+
+                  ))
+                }
+
+              </div>
+
+
+              <div class="feature-product-content">
+
+                <small>
+                  {group.kicker}
+                </small>
+
+                <strong>
+                  {group.label}
+                </strong>
+
+
+                <div class="feature-product-lines">
+
+                  <span></span>
+                  <span></span>
+                  <span></span>
+
+                </div>
+
+
+                <div class="feature-product-result">
+
+                  <span>
+                    AI
+                  </span>
+
+                  <div>
+                    <small>RESULT</small>
+
+                    <strong
+                      data-i18n
+                      data-vi="Context-aware translation"
+                      data-en="Context-aware translation"
+                    >
+                      Context-aware translation
+                    </strong>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="feature-capabilities">
+
+            {
+              group.features.map((feature, featureIndex) => (
+
+                <div>
+
+                  <span>
+                    {String(featureIndex + 1).padStart(2, "0")}
+                  </span>
+
+                  <strong>
+                    {feature.title}
+                  </strong>
+
+                  <p
+                    data-i18n
+                    data-vi={feature.vi}
+                    data-en={feature.en}
+                  >
+                    {feature.vi}
+                  </p>
+
+                </div>
+
+              ))
+            }
+
+          </div>
+
+
+          <div class="feature-workflow">
+
+            <div class="feature-workflow-head">
+
+              <small>WORKFLOW</small>
+
+              <strong
+                data-i18n
+                data-vi="Từ source đến kết quả"
+                data-en="From source to result"
+              >
+                Từ source đến kết quả
+              </strong>
+
+            </div>
+
+
+            <div class="feature-workflow-track">
+
+              {
+                group.workflow.map((step, stepIndex) => (
+
+                  <>
+                    <div>
+                      <span>
+                        {String(stepIndex + 1).padStart(2, "0")}
+                      </span>
+
+                      <strong>
+                        {step}
+                      </strong>
+                    </div>
+
+                    {
+                      stepIndex < group.workflow.length - 1
+                      && (
+                        <i>→</i>
+                      )
+                    }
+
+                  </>
+
+                ))
+              }
+
+            </div>
+
+          </div>
+
+        </article>
+
+      ))
+    }
+
+  </div>
+
+</section>
+
+
+<script>
+  function initFeatureExplorer() {
+
+    const root =
+      document.querySelector(
+        "[data-feature-explorer]"
+      );
+
+    if (!root) {
+      return;
+    }
+
+
+    const buttons =
+      Array.from(
+        root.querySelectorAll(
+          "[data-feature-tab]"
+        )
+      );
+
+
+    const panels =
+      Array.from(
+        root.querySelectorAll(
+          "[data-feature-panel]"
+        )
+      );
+
+
+    const valid =
+      buttons
+        .map(
+          button =>
+            button.dataset.featureTab
+        )
+        .filter(Boolean);
+
+
+    const storageKey =
+      "aitranova-feature-explorer";
+
+
+    function showFeature(
+      feature,
+      updateUrl = true
+    ) {
+
+      if (
+        !valid.includes(feature)
+      ) {
+        feature = "screen";
+      }
+
+
+      buttons.forEach(
+        button => {
+
+          const active =
+            button.dataset.featureTab
+            === feature;
+
+
+          button.classList.toggle(
+            "active",
+            active
+          );
+
+
+          button.setAttribute(
+            "aria-selected",
+            String(active)
+          );
+
+        }
+      );
+
+
+      panels.forEach(
+        panel => {
+
+          const active =
+            panel.dataset.featurePanel
+            === feature;
+
+
+          panel.hidden =
+            !active;
+
+
+          panel.classList.toggle(
+            "active",
+            active
+          );
+
+
+          if (
+            active
+            && typeof panel.animate
+            === "function"
+          ) {
+
+            panel.animate(
+              [
+                {
+                  opacity: 0,
+                  transform:
+                    "translateY(8px)",
+                },
+                {
+                  opacity: 1,
+                  transform:
+                    "translateY(0)",
+                },
+              ],
+              {
+                duration: 210,
+                easing: "ease-out",
+              }
+            );
+
+          }
+
+        }
+      );
+
+
+      try {
+
+        localStorage.setItem(
+          storageKey,
+          feature
+        );
+
+      } catch {}
+
+
+      if (updateUrl) {
+
+        const url =
+          new URL(
+            window.location.href
+          );
+
+
+        url.searchParams.set(
+          "feature",
+          feature
+        );
+
+
+        history.replaceState(
+          null,
+          "",
+          url
+        );
+
+      }
+
+    }
+
+
+    buttons.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const feature =
+              button.dataset.featureTab;
+
+
+            if (feature) {
+              showFeature(feature);
+            }
+
+          }
+        );
+
+
+        button.addEventListener(
+          "keydown",
+          event => {
+
+            if (
+              event.key !== "ArrowLeft"
+              && event.key !== "ArrowRight"
+            ) {
+              return;
+            }
+
+
+            event.preventDefault();
+
+
+            const index =
+              buttons.indexOf(
+                button
+              );
+
+
+            const delta =
+              event.key === "ArrowRight"
+                ? 1
+                : -1;
+
+
+            const next =
+              buttons[
+                (
+                  index
+                  + delta
+                  + buttons.length
+                )
+                % buttons.length
+              ];
+
+
+            next.focus();
+
+
+            const feature =
+              next.dataset.featureTab;
+
+
+            if (feature) {
+              showFeature(feature);
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const requested =
+      params.get(
+        "feature"
+      );
+
+
+    let stored = null;
+
+
+    try {
+
+      stored =
+        localStorage.getItem(
+          storageKey
+        );
+
+    } catch {}
+
+
+    showFeature(
+      requested
+      || stored
+      || "screen",
+      Boolean(requested)
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initFeatureExplorer,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initFeatureExplorer();
+
+  }
+</script>
+
+
+<style>
+
+  .feature-explorer {
+    margin-top: 34px;
+  }
+
+
+  /* =========================================================
+     TABS
+     ========================================================= */
+
+  .feature-explorer-tabs {
+    position: sticky;
+
+    z-index: 25;
+
+    top: 72px;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        5,
+        minmax(0, 1fr)
+      );
+
+    gap: 5px;
+
+    max-width: 760px;
+
+    margin:
+      0 auto 20px;
+
+    padding: 6px;
+
+    border:
+      1px solid #c5bbd0;
+
+    border-radius: 15px;
+
+    background:
+      rgba(
+        222,
+        215,
+        231,
+        0.92
+      );
+
+    backdrop-filter:
+      blur(18px);
+
+    box-shadow:
+      0 10px 28px
+      rgba(
+        49,
+        38,
+        65,
+        0.07
+      );
+  }
+
+
+  .feature-explorer-tabs
+  button {
+    display: flex;
+
+    min-width: 0;
+    min-height: 45px;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    border: 0;
+
+    border-radius: 10px;
+
+    background:
+      transparent;
+
+    color: #746a7f;
+
+    cursor: pointer;
+
+    font-size: 7px;
+
+    font-weight: 750;
+
+    transition:
+      transform 150ms ease,
+      background 150ms ease,
+      color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+
+  .feature-explorer-tabs
+  button:hover {
+    transform:
+      translateY(-1px);
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.35
+      );
+  }
+
+
+  .feature-explorer-tabs
+  button.active {
+    background: #6952ee;
+
+    color: white;
+
+    box-shadow:
+      0 8px 21px
+      rgba(
+        105,
+        82,
+        238,
+        0.24
+      );
+  }
+
+
+  .feature-tab-icon {
+    font-size: 10px;
+  }
+
+
+  /* =========================================================
+     PANEL
+     ========================================================= */
+
+  .feature-explorer-panel {
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 0.85fr)
+      minmax(420px, 1.15fr);
+
+    gap: 26px;
+
+    padding: 30px;
+
+    border:
+      1px solid #c5bbd0;
+
+    border-radius: 23px;
+
+    background:
+      rgba(
+        239,
+        234,
+        245,
+        0.72
+      );
+
+    box-shadow:
+      0 22px 55px
+      rgba(
+        47,
+        34,
+        65,
+        0.08
+      );
+  }
+
+
+  .feature-explorer-panel[hidden] {
+    display: none !important;
+  }
+
+
+  .feature-panel-copy {
+    align-self: center;
+
+    padding:
+      10px 4px;
+  }
+
+
+  .feature-panel-kicker {
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing: 0.12em;
+  }
+
+
+  .feature-panel-copy h2 {
+    max-width: 560px;
+
+    margin:
+      11px 0 13px;
+
+    color: #211b2b;
+
+    font-size:
+      clamp(
+        34px,
+        4.4vw,
+        54px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.055em;
+  }
+
+
+  .feature-panel-copy > p {
+    max-width: 540px;
+
+    margin: 0;
+
+    color: #71687c;
+
+    font-size: 10px;
+
+    line-height: 1.7;
+  }
+
+
+  .feature-panel-actions {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-top: 21px;
+  }
+
+
+  .feature-panel-actions a {
+    display: inline-flex;
+
+    min-height: 38px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    padding:
+      0 13px;
+
+    border-radius: 10px;
+
+    font-size: 7px;
+
+    font-weight: 800;
+  }
+
+
+  .feature-primary-action {
+    background: #6952ee;
+
+    color: white;
+
+    box-shadow:
+      0 9px 22px
+      rgba(
+        105,
+        82,
+        238,
+        0.2
+      );
+  }
+
+
+  .feature-secondary-action {
+    border:
+      1px solid #c5bbd0;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.38
+      );
+
+    color: #3a3244;
+  }
+
+
+  /* =========================================================
+     PRODUCT MOCK
+     ========================================================= */
+
+  .feature-panel-product {
+    overflow: hidden;
+
+    align-self: center;
+
+    border:
+      1px solid #bdb3c9;
+
+    border-radius: 17px;
+
+    background: #17131f;
+
+    box-shadow:
+      0 28px 55px
+      rgba(
+        31,
+        23,
+        43,
+        0.19
+      );
+  }
+
+
+  .feature-product-top {
+    display: grid;
+
+    grid-template-columns:
+      1fr auto 1fr;
+
+    align-items: center;
+
+    min-height: 38px;
+
+    padding:
+      0 12px;
+
+    border-bottom:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.07
+      );
+
+    color: #8d8697;
+  }
+
+
+  .feature-product-top > div {
+    display: flex;
+
+    gap: 4px;
+  }
+
+
+  .feature-product-top
+  > div span {
+    width: 6px;
+    height: 6px;
+
+    border-radius: 50%;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.17
+      );
+  }
+
+
+  .feature-product-top small {
+    font-size: 5px;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .feature-product-top strong {
+    justify-self: end;
+
+    color: #bcb5c6;
+
+    font-size: 6px;
+  }
+
+
+  .feature-product-body {
+    display: grid;
+
+    grid-template-columns:
+      43px 1fr;
+
+    min-height: 280px;
+  }
+
+
+  .feature-product-sidebar {
+    display: flex;
+
+    align-items: center;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+    padding-top: 15px;
+
+    border-right:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.06
+      );
+
+    background: #121018;
+  }
+
+
+  .feature-product-sidebar
+  span {
+    display: grid;
+
+    width: 26px;
+    height: 26px;
+
+    place-items: center;
+
+    border-radius: 8px;
+
+    color: #756e80;
+
+    font-size: 8px;
+  }
+
+
+  .feature-product-sidebar
+  span.active {
+    background:
+      rgba(
+        105,
+        82,
+        238,
+        0.22
+      );
+
+    color: #a99aff;
+  }
+
+
+  .feature-product-content {
+    padding: 28px;
+  }
+
+
+  .feature-product-content
+  > small {
+    color: #706979;
+
+    font-size: 5px;
+
+    letter-spacing: 0.12em;
+  }
+
+
+  .feature-product-content
+  > strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #f1edf5;
+
+    font-size: 23px;
+
+    letter-spacing:
+      -0.045em;
+  }
+
+
+  .feature-product-lines {
+    display: grid;
+
+    gap: 7px;
+
+    margin-top: 24px;
+  }
+
+
+  .feature-product-lines
+  span {
+    display: block;
+
+    height: 7px;
+
+    border-radius: 999px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.08
+      );
+  }
+
+
+  .feature-product-lines
+  span:nth-child(1) {
+    width: 82%;
+  }
+
+
+  .feature-product-lines
+  span:nth-child(2) {
+    width: 67%;
+  }
+
+
+  .feature-product-lines
+  span:nth-child(3) {
+    width: 45%;
+  }
+
+
+  .feature-product-result {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-top: 29px;
+
+    padding: 13px;
+
+    border:
+      1px solid
+      rgba(
+        140,
+        120,
+        255,
+        0.19
+      );
+
+    border-radius: 11px;
+
+    background:
+      rgba(
+        105,
+        82,
+        238,
+        0.09
+      );
+  }
+
+
+  .feature-product-result
+  > span {
+    display: grid;
+
+    width: 33px;
+    height: 33px;
+
+    place-items: center;
+
+    border-radius: 9px;
+
+    background: #6952ee;
+
+    color: white;
+
+    font-size: 7px;
+
+    font-weight: 850;
+  }
+
+
+  .feature-product-result small {
+    display: block;
+
+    color: #777081;
+
+    font-size: 5px;
+  }
+
+
+  .feature-product-result strong {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #ddd7e4;
+
+    font-size: 8px;
+  }
+
+
+  /* =========================================================
+     FEATURE CARDS
+     ========================================================= */
+
+  .feature-capabilities {
+    grid-column:
+      1 / -1;
+
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+
+    gap: 8px;
+
+    margin-top: 2px;
+  }
+
+
+  .feature-capabilities > div {
+    min-height: 125px;
+
+    padding: 14px;
+
+    border:
+      1px solid #cbc2d5;
+
+    border-radius: 12px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.34
+      );
+
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+
+  .feature-capabilities
+  > div:hover {
+    transform:
+      translateY(-2px);
+
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.35
+      );
+
+    box-shadow:
+      0 12px 25px
+      rgba(
+        49,
+        37,
+        66,
+        0.06
+      );
+  }
+
+
+  .feature-capabilities
+  > div > span {
+    display: grid;
+
+    width: 27px;
+    height: 27px;
+
+    place-items: center;
+
+    border-radius: 8px;
+
+    background: #e3dcfb;
+
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+  }
+
+
+  .feature-capabilities strong {
+    display: block;
+
+    margin-top: 11px;
+
+    color: #2b2433;
+
+    font-size: 9px;
+  }
+
+
+  .feature-capabilities p {
+    margin:
+      5px 0 0;
+
+    color: #7a7184;
+
+    font-size: 7px;
+
+    line-height: 1.55;
+  }
+
+
+  /* =========================================================
+     WORKFLOW
+     ========================================================= */
+
+  .feature-workflow {
+    grid-column:
+      1 / -1;
+
+    margin-top: 5px;
+
+    padding: 16px;
+
+    border:
+      1px solid #c7bed2;
+
+    border-radius: 13px;
+
+    background:
+      rgba(
+        222,
+        215,
+        231,
+        0.62
+      );
+  }
+
+
+  .feature-workflow-head {
+    display: flex;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 10px;
+
+    margin-bottom: 12px;
+  }
+
+
+  .feature-workflow-head
+  small {
+    color: #958b9f;
+
+    font-size: 5px;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .feature-workflow-head
+  strong {
+    font-size: 8px;
+  }
+
+
+  .feature-workflow-track {
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    overflow-x: auto;
+
+    padding-bottom: 3px;
+  }
+
+
+  .feature-workflow-track
+  > div {
+    flex:
+      1 0 105px;
+
+    min-height: 63px;
+
+    padding: 10px;
+
+    border:
+      1px solid #c9c0d3;
+
+    border-radius: 9px;
+
+    background:
+      rgba(
+        248,
+        245,
+        250,
+        0.46
+      );
+  }
+
+
+  .feature-workflow-track
+  > div > span {
+    color: #6952ee;
+
+    font-size: 5px;
+
+    font-weight: 850;
+  }
+
+
+  .feature-workflow-track
+  strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #302837;
+
+    font-size: 7px;
+
+    white-space: nowrap;
+  }
+
+
+  .feature-workflow-track
+  > i {
+    flex: 0 0 auto;
+
+    color: #6952ee;
+
+    font-style: normal;
+  }
+
+
+  @media (max-width: 950px) {
+
+    .feature-explorer-panel {
+      grid-template-columns: 1fr;
+    }
+
+
+    .feature-capabilities {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+  }
+
+
+  @media (max-width: 720px) {
+
+    .feature-explorer-tabs {
+      position: relative;
+
+      top: auto;
+
+      grid-template-columns:
+        repeat(
+          5,
+          minmax(
+            105px,
+            1fr
+          )
+        );
+
+      overflow-x: auto;
+
+      justify-content: start;
+    }
+
+
+    .feature-explorer-panel {
+      padding: 20px;
+    }
+
+
+    .feature-panel-product {
+      width: 100%;
+    }
+
+  }
+
+
+  @media (max-width: 540px) {
+
+    .feature-capabilities {
+      grid-template-columns: 1fr;
+    }
+
+
+    .feature-product-content {
+      padding: 20px;
+    }
+
+  }
+
+</style>

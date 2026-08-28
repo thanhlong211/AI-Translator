@@ -1,0 +1,1008 @@
+/* =========================================================
+   AITRANOVA V9.7
+   TYPOGRAPHY & CONTENT SCALE
+   ========================================================= */
+
+:root {
+  --type-micro: 10px;
+  --type-label: 11px;
+  --type-meta: 12px;
+  --type-small: 13px;
+  --type-body: 14px;
+  --type-body-lg: 15px;
+  --type-lead: 16px;
+
+  --type-card-title: 17px;
+  --type-card-title-lg: 20px;
+
+  --line-tight: 1.2;
+  --line-normal: 1.55;
+  --line-readable: 1.7;
+
+  --tracking-label: 0.09em;
+}
+
+
+/* =========================================================
+   BASE DOCUMENT
+   ========================================================= */
+
+body {
+  font-size:
+    var(--type-body);
+
+  line-height:
+    var(--line-normal);
+
+  text-rendering:
+    optimizeLegibility;
+
+  -webkit-font-smoothing:
+    antialiased;
+}
+
+
+p {
+  text-wrap:
+    pretty;
+}
+
+
+h1,
+h2,
+h3 {
+  text-wrap:
+    balance;
+}
+
+
+/* =========================================================
+   GENERIC MICRO LABELS
+   ========================================================= */
+
+:is(
+  [class*="kicker"],
+  [class*="eyebrow"],
+  [class*="overline"]
+) {
+  font-size:
+    var(--type-micro) !important;
+
+  font-weight:
+    850 !important;
+
+  letter-spacing:
+    var(--tracking-label) !important;
+}
+
+
+/* =========================================================
+   GENERIC SECTION DESCRIPTION
+   ========================================================= */
+
+:is(
+  .roadmap-section-head,
+  .changelog-section-head,
+  .faq-content-head,
+  .about-section-head,
+  .download-section-head
+) > p {
+  font-size:
+    var(--type-small) !important;
+
+  line-height:
+    var(--line-readable) !important;
+}
+
+
+/* =========================================================
+   NAVBAR
+   ========================================================= */
+
+.navbar-v96-link {
+  font-size:
+    12px !important;
+
+  line-height:
+    1 !important;
+}
+
+
+.navbar-v96-download {
+  font-size:
+    12px !important;
+}
+
+
+.navbar-v96-language
+[data-lang-choice] {
+  font-size:
+    11px !important;
+}
+
+
+.navbar-v96-mobile nav > a {
+  font-size:
+    14px !important;
+}
+
+
+.navbar-v96-mobile-language
+> span {
+  font-size:
+    10px !important;
+}
+
+
+/* =========================================================
+   HOME HERO
+   ========================================================= */
+
+.home-hero-premium
+:is(
+  .hero-copy,
+  .home-hero-copy,
+  .hero-content
+) > p {
+  font-size:
+    clamp(
+      14px,
+      1.05vw,
+      16px
+    ) !important;
+
+  line-height:
+    1.72 !important;
+}
+
+
+.home-hero-premium
+:is(
+  .hero-actions,
+  .home-hero-actions,
+  .hero-cta
+) a {
+  font-size:
+    13px !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+.home-hero-premium
+:is(
+  .hero-capabilities,
+  .home-capabilities,
+  .hero-features
+) strong {
+  font-size:
+    12px !important;
+}
+
+
+.home-hero-premium
+:is(
+  .hero-capabilities,
+  .home-capabilities,
+  .hero-features
+) small,
+.home-hero-premium
+:is(
+  .hero-capabilities,
+  .home-capabilities,
+  .hero-features
+) p {
+  font-size:
+    10px !important;
+
+  line-height:
+    1.45 !important;
+}
+
+
+/* =========================================================
+   HOME SECTIONS
+   ========================================================= */
+
+.home-rhythm-section
+> .container
+> header
+> p {
+  font-size:
+    var(--type-small) !important;
+
+  line-height:
+    var(--line-readable) !important;
+}
+
+
+.home-rhythm-section
+:is(
+  article,
+  [class*="card"],
+  [class*="panel"]
+) p {
+  font-size:
+    var(--type-small) !important;
+
+  line-height:
+    1.65 !important;
+}
+
+
+.home-rhythm-section
+:is(
+  article,
+  [class*="card"],
+  [class*="panel"]
+) h3 {
+  font-size:
+    var(--type-card-title) !important;
+
+  line-height:
+    1.2 !important;
+}
+
+
+/* =========================================================
+   FEATURES
+   ========================================================= */
+
+.feature-explorer-tabs button,
+[data-feature-tab] {
+  font-size:
+    12px !important;
+
+  font-weight:
+    760 !important;
+}
+
+
+.feature-panel-copy > p {
+  font-size:
+    14px !important;
+
+  line-height:
+    1.7 !important;
+}
+
+
+.feature-panel-copy h3 {
+  font-size:
+    clamp(
+      24px,
+      2.4vw,
+      34px
+    ) !important;
+
+  line-height:
+    1.05 !important;
+}
+
+
+.feature-capabilities strong {
+  font-size:
+    15px !important;
+}
+
+
+.feature-capabilities p {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.6 !important;
+}
+
+
+.feature-panel-actions a {
+  font-size:
+    12px !important;
+}
+
+
+/* =========================================================
+   DOWNLOAD
+   ========================================================= */
+
+.download-v8 p {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.68 !important;
+}
+
+
+.download-v8
+:is(
+  small,
+  [class*="label"],
+  [class*="meta"]
+) {
+  font-size:
+    10px !important;
+}
+
+
+.download-v8
+:is(
+  h3,
+  [class*="card-title"]
+) {
+  font-size:
+    17px !important;
+}
+
+
+.download-v8 a,
+.download-v8 button {
+  font-size:
+    12px !important;
+}
+
+
+/* =========================================================
+   ROADMAP
+   ========================================================= */
+
+.roadmap-filter button {
+  font-size:
+    12px !important;
+
+  font-weight:
+    780 !important;
+}
+
+
+.roadmap-filter small {
+  font-size:
+    10px !important;
+}
+
+
+.roadmap-result-meta {
+  font-size:
+    11px !important;
+}
+
+
+.roadmap-result-meta strong {
+  font-size:
+    13px !important;
+}
+
+
+.roadmap-item-status {
+  font-size:
+    10px !important;
+}
+
+
+.roadmap-item-copy > small {
+  font-size:
+    10px !important;
+}
+
+
+.roadmap-item-copy h3 {
+  font-size:
+    20px !important;
+
+  line-height:
+    1.08 !important;
+}
+
+
+.roadmap-item-copy p {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.65 !important;
+}
+
+
+.roadmap-tags span {
+  font-size:
+    10px !important;
+}
+
+
+.roadmap-item-footer a,
+.roadmap-no-date {
+  font-size:
+    11px !important;
+}
+
+
+/* =========================================================
+   CHANGELOG
+   ========================================================= */
+
+.changelog-filters button {
+  font-size:
+    12px !important;
+}
+
+
+.changelog-filters small {
+  font-size:
+    10px !important;
+}
+
+
+.changelog-toolbar-actions button {
+  font-size:
+    11px !important;
+}
+
+
+.changelog-result-meta {
+  font-size:
+    11px !important;
+}
+
+
+.release-channel {
+  font-size:
+    10px !important;
+}
+
+
+.release-heading h2 {
+  font-size:
+    24px !important;
+}
+
+
+.release-heading p {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.62 !important;
+}
+
+
+.release-summary-meta > span {
+  font-size:
+    13px !important;
+}
+
+
+.release-summary-meta small {
+  font-size:
+    10px !important;
+}
+
+
+.change-type strong {
+  font-size:
+    11px !important;
+}
+
+
+.change-content small {
+  font-size:
+    10px !important;
+}
+
+
+.change-content h3 {
+  font-size:
+    16px !important;
+}
+
+
+.change-content p {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.65 !important;
+}
+
+
+.change-content a {
+  font-size:
+    11px !important;
+}
+
+
+/* =========================================================
+   FAQ
+   ========================================================= */
+
+.faq-search input {
+  font-size:
+    14px !important;
+}
+
+
+.faq-search kbd {
+  font-size:
+    10px !important;
+}
+
+
+.faq-categories button {
+  font-size:
+    12px !important;
+}
+
+
+.faq-result-meta {
+  font-size:
+    11px !important;
+}
+
+
+.faq-result-meta strong {
+  font-size:
+    13px !important;
+}
+
+
+.faq-item summary strong {
+  font-size:
+    15px !important;
+
+  line-height:
+    1.4 !important;
+}
+
+
+.faq-answer p {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.72 !important;
+}
+
+
+.faq-answer a {
+  font-size:
+    12px !important;
+}
+
+
+.faq-empty strong {
+  font-size:
+    14px !important;
+}
+
+
+.faq-empty p {
+  font-size:
+    12px !important;
+}
+
+
+/* =========================================================
+   ABOUT
+   ========================================================= */
+
+.about-page p {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.7 !important;
+}
+
+
+.about-hero-copy > p {
+  font-size:
+    15px !important;
+}
+
+
+.about-hero-actions a {
+  font-size:
+    12px !important;
+}
+
+
+.about-system-top span {
+  font-size:
+    12px !important;
+}
+
+
+.about-system-top small {
+  font-size:
+    9px !important;
+}
+
+
+.about-system-flow small {
+  font-size:
+    10px !important;
+}
+
+
+.about-system-flow strong {
+  font-size:
+    13px !important;
+}
+
+
+.about-principle-grid small {
+  font-size:
+    10px !important;
+}
+
+
+.about-principle-grid h3 {
+  font-size:
+    20px !important;
+}
+
+
+.about-principle-grid p {
+  font-size:
+    13px !important;
+}
+
+
+.architecture-name small {
+  font-size:
+    9px !important;
+}
+
+
+.architecture-name strong {
+  font-size:
+    14px !important;
+}
+
+
+.architecture-list article p {
+  font-size:
+    12px !important;
+}
+
+
+.architecture-examples {
+  font-size:
+    10px !important;
+}
+
+
+.about-product-grid small {
+  font-size:
+    9px !important;
+}
+
+
+.about-product-grid strong {
+  font-size:
+    16px !important;
+}
+
+
+.about-product-grid p {
+  font-size:
+    12px !important;
+}
+
+
+.definition-column > small {
+  font-size:
+    10px !important;
+}
+
+
+.definition-column li {
+  font-size:
+    13px !important;
+}
+
+
+.direction-actions a,
+.about-final-actions a {
+  font-size:
+    12px !important;
+}
+
+
+/* =========================================================
+   GUIDE OVERVIEW
+   ========================================================= */
+
+.guide-page {
+  font-size:
+    14px;
+}
+
+
+.guide-page p {
+  font-size:
+    14px !important;
+
+  line-height:
+    1.72 !important;
+}
+
+
+.guide-page
+:is(
+  small,
+  [class*="meta"],
+  [class*="label"]
+) {
+  font-size:
+    10px !important;
+}
+
+
+[data-guide-nav] {
+  font-size:
+    12px !important;
+
+  line-height:
+    1.35 !important;
+}
+
+
+.guide-category h2,
+.guide-category h3 {
+  line-height:
+    1.15 !important;
+}
+
+
+.guide-category p {
+  font-size:
+    13px !important;
+}
+
+
+/* =========================================================
+   GUIDE ARTICLES
+   ========================================================= */
+
+.article-page {
+  font-size:
+    14px;
+}
+
+
+.article-page p,
+.article-section-block p {
+  font-size:
+    14px !important;
+
+  line-height:
+    1.76 !important;
+}
+
+
+.article-page li,
+.article-section-block li {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.7 !important;
+}
+
+
+.article-page
+:is(
+  small,
+  [class*="meta"],
+  [class*="label"]
+) {
+  font-size:
+    10px !important;
+}
+
+
+.article-section-block h2 {
+  font-size:
+    clamp(
+      23px,
+      2.2vw,
+      31px
+    ) !important;
+
+  line-height:
+    1.1 !important;
+}
+
+
+.article-section-block h3 {
+  font-size:
+    17px !important;
+
+  line-height:
+    1.2 !important;
+}
+
+
+.article-page code,
+.article-section-block code {
+  font-size:
+    12px !important;
+}
+
+
+.article-page pre,
+.article-section-block pre {
+  font-size:
+    12px !important;
+
+  line-height:
+    1.6 !important;
+}
+
+
+/* =========================================================
+   GUIDE STEPS / CALLOUTS
+   ========================================================= */
+
+.guide-step,
+.guide-callout,
+.guide-example,
+.guide-checklist,
+.guide-troubleshooting {
+  font-size:
+    13px !important;
+}
+
+
+.guide-step strong,
+.guide-callout strong,
+.guide-example strong {
+  font-size:
+    14px !important;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.site-footer {
+  font-size:
+    12px;
+}
+
+
+.footer-brand strong {
+  font-size:
+    17px !important;
+}
+
+
+.footer-brand small {
+  font-size:
+    9px !important;
+}
+
+
+.footer-brand-column p {
+  font-size:
+    13px !important;
+
+  line-height:
+    1.68 !important;
+}
+
+
+.footer-download {
+  font-size:
+    12px !important;
+}
+
+
+.footer-links-column > small {
+  font-size:
+    10px !important;
+}
+
+
+.footer-links-column a {
+  font-size:
+    12px !important;
+
+  line-height:
+    1.45 !important;
+}
+
+
+.footer-bottom {
+  font-size:
+    10px !important;
+}
+
+
+.footer-bottom a {
+  font-size:
+    10px !important;
+}
+
+
+/* =========================================================
+   BUTTON CONSISTENCY
+   ========================================================= */
+
+main
+:is(
+  button,
+  a[class*="button"],
+  a[class*="btn"],
+  a[class*="action"]
+) {
+  font-weight:
+    750;
+}
+
+
+/* =========================================================
+   FORM CONTROLS
+   ========================================================= */
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+
+input::placeholder,
+textarea::placeholder {
+  font-size:
+    inherit;
+}
+
+
+/* =========================================================
+   MOBILE TYPOGRAPHY
+   ========================================================= */
+
+@media (max-width: 680px) {
+
+  body {
+    font-size:
+      14px;
+  }
+
+
+  .home-hero-premium
+  :is(
+    .hero-copy,
+    .home-hero-copy,
+    .hero-content
+  ) > p {
+    font-size:
+      14px !important;
+  }
+
+
+  .guide-page p,
+  .article-page p,
+  .article-section-block p {
+    font-size:
+      13px !important;
+  }
+
+
+  .article-page li,
+  .article-section-block li {
+    font-size:
+      13px !important;
+  }
+
+
+  .footer-links-column a {
+    font-size:
+      12px !important;
+  }
+
+}

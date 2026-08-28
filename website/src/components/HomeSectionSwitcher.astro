@@ -1,0 +1,598 @@
+<section
+  class="home-switcher"
+  data-home-switcher
+>
+
+  <div class="container switcher-inner">
+
+    <div class="switcher-title">
+
+      <span>
+        ✦
+      </span>
+
+      <div>
+
+        <small
+          data-i18n
+          data-vi="KHÁM PHÁ AITRANOVA"
+          data-en="EXPLORE AITRANOVA"
+        >
+          KHÁM PHÁ AITRANOVA
+        </small>
+
+        <strong
+          data-i18n
+          data-vi="Chọn tính năng"
+          data-en="Choose a feature"
+        >
+          Chọn tính năng
+        </strong>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="switcher-tabs"
+      role="tablist"
+    >
+
+      <button
+        type="button"
+        class="active"
+        data-panel-target="manga"
+        role="tab"
+        aria-selected="true"
+      >
+        <span>
+          漫
+        </span>
+
+        <strong>
+          Manga
+        </strong>
+      </button>
+
+
+      <button
+        type="button"
+        data-panel-target="documents"
+        role="tab"
+        aria-selected="false"
+      >
+        <span>
+          文
+        </span>
+
+        <strong
+          data-i18n
+          data-vi="Tài liệu"
+          data-en="Documents"
+        >
+          Tài liệu
+        </strong>
+      </button>
+
+
+      <button
+        type="button"
+        data-panel-target="profile"
+        role="tab"
+        aria-selected="false"
+      >
+        <span>
+          ✦
+        </span>
+
+        <strong>
+          Profile
+        </strong>
+      </button>
+
+
+      <button
+        type="button"
+        data-panel-target="learning"
+        role="tab"
+        aria-selected="false"
+      >
+        <span>
+          学
+        </span>
+
+        <strong>
+          Learning
+        </strong>
+      </button>
+
+
+      <button
+        type="button"
+        data-panel-target="roadmap"
+        role="tab"
+        aria-selected="false"
+      >
+        <span>
+          ↗
+        </span>
+
+        <strong>
+          Roadmap
+        </strong>
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<script>
+  function initHomeSwitcher() {
+
+    const root =
+      document.querySelector(
+        "[data-home-switcher]"
+      );
+
+    if (!root) {
+      return;
+    }
+
+    const buttons =
+      Array.from(
+        root.querySelectorAll(
+          "[data-panel-target]"
+        )
+      );
+
+
+    const panels = {
+      manga:
+        document.querySelector(
+          ".manga-showcase"
+        ),
+
+      documents:
+        document.querySelector(
+          ".documents-deep"
+        ),
+
+      profile:
+        document.querySelector(
+          ".profile-deep"
+        ),
+
+      learning:
+        document.querySelector(
+          ".learning-deep"
+        ),
+
+      roadmap:
+        document.querySelector(
+          ".roadmap-preview-v5"
+        ),
+    };
+
+
+    const validKeys =
+      Object.keys(panels)
+        .filter(
+          key => panels[key]
+        );
+
+
+    function showPanel(
+      key,
+      updateUrl = true
+    ) {
+
+      if (
+        !validKeys.includes(key)
+      ) {
+        key = "manga";
+      }
+
+
+      for (
+        const [
+          panelKey,
+          panel
+        ]
+        of Object.entries(panels)
+      ) {
+
+        if (!panel) {
+          continue;
+        }
+
+        const visible =
+          panelKey === key;
+
+        panel.hidden =
+          !visible;
+
+
+        if (
+          visible
+          && typeof panel.animate
+          === "function"
+        ) {
+
+          panel.animate(
+            [
+              {
+                opacity: 0,
+                transform:
+                  "translateY(12px)",
+              },
+              {
+                opacity: 1,
+                transform:
+                  "translateY(0)",
+              },
+            ],
+            {
+              duration: 240,
+              easing:
+                "ease-out",
+            }
+          );
+
+        }
+
+      }
+
+
+      for (
+        const button
+        of buttons
+      ) {
+
+        const active =
+          button.dataset
+            .panelTarget
+          === key;
+
+        button.classList.toggle(
+          "active",
+          active
+        );
+
+        button.setAttribute(
+          "aria-selected",
+          String(active)
+        );
+
+      }
+
+
+      if (updateUrl) {
+
+        history.replaceState(
+          null,
+          "",
+          `#${key}`
+        );
+
+      }
+
+    }
+
+
+    for (
+      const button
+      of buttons
+    ) {
+
+      button.addEventListener(
+        "click",
+        () => {
+
+          showPanel(
+            button.dataset
+              .panelTarget
+          );
+
+        }
+      );
+
+    }
+
+
+    const requested =
+      window.location.hash
+        .replace("#", "");
+
+    showPanel(
+      validKeys.includes(
+        requested
+      )
+        ? requested
+        : "manga",
+      false
+    );
+
+
+    window.addEventListener(
+      "hashchange",
+      () => {
+
+        const key =
+          window.location.hash
+            .replace("#", "");
+
+        if (
+          validKeys.includes(key)
+        ) {
+          showPanel(
+            key,
+            false
+          );
+        }
+
+      }
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initHomeSwitcher,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initHomeSwitcher();
+
+  }
+</script>
+
+
+<style>
+
+  .home-switcher {
+    position: sticky;
+
+    z-index: 70;
+
+    top: 70px;
+
+    padding:
+      13px 0;
+
+    border-top:
+      1px solid
+      rgba(205, 195, 219, 0.82);
+
+    border-bottom:
+      1px solid
+      rgba(205, 195, 219, 0.82);
+
+    background:
+      rgba(226, 219, 238, 0.91);
+
+    backdrop-filter:
+      blur(18px);
+  }
+
+
+  .switcher-inner {
+    display: flex;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 24px;
+  }
+
+
+  .switcher-title {
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    flex: 0 0 auto;
+  }
+
+
+  .switcher-title > span {
+    display: grid;
+
+    width: 33px;
+    height: 33px;
+
+    place-items: center;
+
+    border-radius: 10px;
+
+    background:
+      #6952ee;
+
+    color:
+      white;
+
+    font-size: 11px;
+  }
+
+
+  .switcher-title small {
+    display: block;
+
+    color:
+      #8c8299;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.09em;
+  }
+
+
+  .switcher-title strong {
+    display: block;
+
+    margin-top:
+      1px;
+
+    color:
+      #292335;
+
+    font-size:
+      9px;
+  }
+
+
+  .switcher-tabs {
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    overflow-x: auto;
+
+    scrollbar-width:
+      none;
+  }
+
+
+  .switcher-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+
+  .switcher-tabs button {
+    display: flex;
+
+    min-height: 39px;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding:
+      0 11px;
+
+    flex: 0 0 auto;
+
+    border:
+      1px solid
+      transparent;
+
+    border-radius:
+      10px;
+
+    background:
+      transparent;
+
+    color:
+      #746b80;
+
+    cursor: pointer;
+
+    transition:
+      background 160ms ease,
+      color 160ms ease,
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+
+  .switcher-tabs button:hover {
+    transform:
+      translateY(-1px);
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.4
+      );
+  }
+
+
+  .switcher-tabs button.active {
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.18
+      );
+
+    background:
+      #6952ee;
+
+    color:
+      white;
+
+    box-shadow:
+      0 9px 24px
+      rgba(
+        74,
+        55,
+        155,
+        0.19
+      );
+  }
+
+
+  .switcher-tabs
+  button > span {
+    font-size:
+      10px;
+  }
+
+
+  .switcher-tabs
+  button strong {
+    font-size:
+      8px;
+
+    font-weight:
+      750;
+  }
+
+
+  @media (
+    max-width: 760px
+  ) {
+
+    .home-switcher {
+      top:
+        63px;
+    }
+
+
+    .switcher-inner {
+      display: block;
+    }
+
+
+    .switcher-title {
+      display: none;
+    }
+
+  }
+
+</style>

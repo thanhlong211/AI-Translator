@@ -1,0 +1,332 @@
+/* =========================================================
+   AITRANOVA V10.8B
+   FOOTER EXACT THEME
+   ========================================================= */
+
+
+/* =========================================================
+   ROOT
+   ========================================================= */
+
+.site-footer {
+  border-top:
+    1px solid
+    rgba(171, 145, 255, 0.15) !important;
+
+  background:
+    radial-gradient(
+      circle at 17% 0%,
+      rgba(116, 80, 247, 0.12),
+      transparent 27%
+    ),
+    radial-gradient(
+      circle at 88% 100%,
+      rgba(183, 62, 229, 0.08),
+      transparent 28%
+    ),
+    linear-gradient(
+      135deg,
+      #090610,
+      #100a19 45%,
+      #181020 100%
+    ) !important;
+
+  color:
+    #f5f0fa !important;
+}
+
+
+/* =========================================================
+   MAIN
+   Keep existing layout, only make it tighter.
+   ========================================================= */
+
+.site-footer
+.footer-main {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+/* =========================================================
+   BRAND
+   ========================================================= */
+
+.site-footer
+.footer-brand-column {
+  color:
+    #ffffff !important;
+}
+
+
+.site-footer
+.footer-brand {
+  color:
+    #ffffff !important;
+}
+
+
+.site-footer
+.footer-brand strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.site-footer
+.footer-brand small {
+  color:
+    #b29eff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.site-footer
+.footer-brand-column > p {
+  color:
+    rgba(215, 205, 226, 0.70) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   DOWNLOAD CTA
+   ========================================================= */
+
+.site-footer
+.footer-download {
+  border:
+    1px solid
+    rgba(220, 170, 255, 0.27) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8524c5,
+      #a42bdd
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 10px 24px
+    rgba(129,35,180,0.23) !important;
+
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    box-shadow 160ms ease !important;
+}
+
+
+.site-footer
+.footer-download
+:is(
+  span,
+  strong
+) {
+  color:
+    #ffffff !important;
+}
+
+
+.site-footer
+.footer-download:hover {
+  transform:
+    translateY(-2px);
+
+  background:
+    linear-gradient(
+      135deg,
+      #9529d2,
+      #b634e8
+    ) !important;
+
+  box-shadow:
+    0 14px 30px
+    rgba(129,35,180,0.30) !important;
+}
+
+
+/* =========================================================
+   LINK COLUMNS
+   ========================================================= */
+
+.site-footer
+.footer-links-column {
+  border:
+    0 !important;
+
+  background:
+    transparent !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.site-footer
+.footer-links-column > small {
+  color:
+    #b39fff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    850 !important;
+
+  letter-spacing:
+    0.08em !important;
+}
+
+
+.site-footer
+.footer-links-column a {
+  color:
+    rgba(221, 212, 232, 0.76) !important;
+
+  opacity:
+    1 !important;
+
+  transition:
+    color 150ms ease,
+    transform 150ms ease !important;
+}
+
+
+.site-footer
+.footer-links-column a:hover {
+  color:
+    #ffffff !important;
+
+  transform:
+    translateX(2px);
+}
+
+
+/* =========================================================
+   BOTTOM BAR
+   ========================================================= */
+
+.site-footer
+.footer-bottom {
+  border-top:
+    1px solid
+    rgba(164, 140, 255, 0.12) !important;
+
+  background:
+    transparent !important;
+
+  color:
+    rgba(192, 182, 205, 0.62) !important;
+}
+
+
+.site-footer
+.footer-bottom
+:is(
+  span,
+  small,
+  p
+) {
+  color:
+    rgba(192, 182, 205, 0.62) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.site-footer
+.footer-bottom a {
+  color:
+    #ad9ada !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.site-footer
+.footer-bottom a:hover {
+  color:
+    #ffffff !important;
+}
+
+
+/* Divider dot */
+
+.site-footer
+.footer-dot {
+  background:
+    rgba(176, 151, 255, 0.38) !important;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.site-footer
+a:focus-visible {
+  outline:
+    2px solid
+    #a88fff !important;
+
+  outline-offset:
+    3px !important;
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (
+  max-width:
+  760px
+) {
+
+  .site-footer
+  .footer-links-column > small {
+    color:
+      #baa7ff !important;
+  }
+
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .site-footer
+  a {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}

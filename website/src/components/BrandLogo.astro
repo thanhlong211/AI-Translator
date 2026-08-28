@@ -1,0 +1,118 @@
+---
+interface Props {
+  compact?: boolean;
+  showTagline?: boolean;
+}
+
+const {
+  compact = false,
+  showTagline = !compact,
+} = Astro.props;
+
+const mark = "/brand/aitranova-mark.png";
+---
+
+<span class:list={["brand-logo-ui", { compact }]}>
+  <span
+    class="brand-logo-mark-wrap"
+    aria-hidden="true"
+  >
+    <img
+      src={mark}
+      alt=""
+      class="brand-logo-mark"
+      loading="eager"
+      decoding="async"
+    />
+
+    <span class="brand-logo-orbit"></span>
+  </span>
+
+  <span class="brand-logo-copy">
+    <span class="brand-logo-main">
+      AitraNova
+    </span>
+
+    {
+      showTagline && (
+        <span class="brand-logo-sub">
+          Contextual AI Translator
+        </span>
+      )
+    }
+  </span>
+</span>
+
+<style>
+  .brand-logo-ui {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    line-height: 1;
+  }
+
+  .brand-logo-mark-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+  }
+
+  .brand-logo-mark {
+    position: relative;
+    z-index: 2;
+    width: 30px;
+    height: 30px;
+    object-fit: contain;
+  }
+
+  .brand-logo-orbit {
+    position: absolute;
+    inset: -4px;
+    border-radius: 999px;
+    border: 1px solid rgba(153, 126, 255, 0.22);
+    opacity: 0.85;
+    transform: scale(0.94);
+  }
+
+  .brand-logo-copy {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .brand-logo-main {
+    font-size: 18px;
+    font-weight: 850;
+    letter-spacing: -0.03em;
+    color: currentColor;
+    white-space: nowrap;
+  }
+
+  .brand-logo-sub {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: currentColor;
+    opacity: 0.74;
+    white-space: nowrap;
+  }
+
+  .brand-logo-ui.compact .brand-logo-sub {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .brand-logo-sub {
+      display: none;
+    }
+
+    .brand-logo-main {
+      font-size: 17px;
+    }
+  }
+</style>

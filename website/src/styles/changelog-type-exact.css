@@ -1,0 +1,514 @@
+/* =========================================================
+   AITRANOVA V10.7C
+   CHANGELOG CHANGE TYPE — EXACT
+   ========================================================= */
+
+
+/* =========================================================
+   BASE CHANGE ITEM
+   ========================================================= */
+
+.changelog-v8
+.change-item {
+  border-radius:
+    14px !important;
+
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease !important;
+}
+
+
+.changelog-v8
+.change-item:hover {
+  transform:
+    translateY(-1px);
+}
+
+
+/* =========================================================
+   NEW
+   MAGENTA / PURPLE
+   ========================================================= */
+
+.changelog-v8
+.change-item.change-new {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(181, 59, 224, 0.065),
+      rgba(255,255,255,0) 48%
+    ) !important;
+
+  box-shadow:
+    inset 3px 0 0
+    rgba(181,59,224,0.72) !important;
+}
+
+
+.changelog-v8
+.change-new
+.change-type {
+  border:
+    1px solid
+    rgba(179,67,220,0.24) !important;
+
+  background:
+    #f0ddf8 !important;
+
+  color:
+    #962abb !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.changelog-v8
+.change-new
+.change-type > span {
+  display:
+    inline-grid !important;
+
+  place-items:
+    center !important;
+
+  background:
+    #ad35d7 !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+.changelog-v8
+.change-new
+.change-type > span::before {
+  content:
+    "✦";
+
+  color:
+    #ffffff;
+
+  font-size:
+    9px;
+
+  font-weight:
+    900;
+}
+
+
+.changelog-v8
+.change-new
+.change-type strong {
+  color:
+    #9027b6 !important;
+}
+
+
+.changelog-v8
+.change-new
+.change-content > small {
+  color:
+    #9862aa !important;
+}
+
+
+/* =========================================================
+   IMPROVED
+   BLUE / INDIGO
+   ========================================================= */
+
+.changelog-v8
+.change-item.change-improved {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(73,111,218,0.060),
+      rgba(255,255,255,0) 48%
+    ) !important;
+
+  box-shadow:
+    inset 3px 0 0
+    rgba(77,115,220,0.70) !important;
+}
+
+
+.changelog-v8
+.change-improved
+.change-type {
+  border:
+    1px solid
+    rgba(76,113,215,0.23) !important;
+
+  background:
+    #e2e9fa !important;
+
+  color:
+    #496bc3 !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.changelog-v8
+.change-improved
+.change-type > span {
+  display:
+    inline-grid !important;
+
+  place-items:
+    center !important;
+
+  background:
+    #557fdc !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+.changelog-v8
+.change-improved
+.change-type > span::before {
+  content:
+    "↑";
+
+  color:
+    #ffffff;
+
+  font-size:
+    10px;
+
+  font-weight:
+    900;
+}
+
+
+.changelog-v8
+.change-improved
+.change-type strong {
+  color:
+    #4668bf !important;
+}
+
+
+.changelog-v8
+.change-improved
+.change-content > small {
+  color:
+    #627ba9 !important;
+}
+
+
+/* =========================================================
+   FIXED
+   MINT / GREEN
+   ========================================================= */
+
+.changelog-v8
+.change-item.change-fixed {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(42,151,105,0.060),
+      rgba(255,255,255,0) 48%
+    ) !important;
+
+  box-shadow:
+    inset 3px 0 0
+    rgba(42,151,105,0.70) !important;
+}
+
+
+.changelog-v8
+.change-fixed
+.change-type {
+  border:
+    1px solid
+    rgba(46,151,106,0.23) !important;
+
+  background:
+    #dff2e9 !important;
+
+  color:
+    #287f59 !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.changelog-v8
+.change-fixed
+.change-type > span {
+  display:
+    inline-grid !important;
+
+  place-items:
+    center !important;
+
+  background:
+    #30996d !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+.changelog-v8
+.change-fixed
+.change-type > span::before {
+  content:
+    "✓";
+
+  color:
+    #ffffff;
+
+  font-size:
+    9px;
+
+  font-weight:
+    900;
+}
+
+
+.changelog-v8
+.change-fixed
+.change-type strong {
+  color:
+    #287f59 !important;
+}
+
+
+.changelog-v8
+.change-fixed
+.change-content > small {
+  color:
+    #5f8d78 !important;
+}
+
+
+/* =========================================================
+   FILTER COLORS — EXACT DATA ATTRIBUTES
+   ========================================================= */
+
+
+/* NEW active */
+
+.changelog-v8
+.changelog-filters
+button[data-changelog-filter="new"].active {
+  border-color:
+    rgba(217,105,255,0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #9225c8,
+      #b83be5
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 8px 18px
+    rgba(153,44,199,0.25) !important;
+}
+
+
+/* IMPROVED active */
+
+.changelog-v8
+.changelog-filters
+button[data-changelog-filter="improved"].active {
+  border-color:
+    rgba(118,153,255,0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #486bc6,
+      #6188e8
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 8px 18px
+    rgba(63,92,176,0.24) !important;
+}
+
+
+/* FIXED active */
+
+.changelog-v8
+.changelog-filters
+button[data-changelog-filter="fixed"].active {
+  border-color:
+    rgba(98,211,162,0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #27875f,
+      #38a978
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 8px 18px
+    rgba(34,128,89,0.22) !important;
+}
+
+
+/* keep ALL purple */
+
+.changelog-v8
+.changelog-filters
+button[data-changelog-filter="all"].active {
+  border-color:
+    rgba(172,146,255,0.28) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #684cef,
+      #8163ff
+    ) !important;
+
+  color:
+    #ffffff !important;
+}
+
+
+/* Active text + counts */
+
+.changelog-v8
+.changelog-filters
+button.active
+:is(
+  span,
+  small
+) {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   FILTER HOVER BY TYPE
+   ========================================================= */
+
+.changelog-v8
+.changelog-filters
+button[data-changelog-filter="new"]:not(.active):hover {
+  border-color:
+    rgba(184,66,224,0.20) !important;
+
+  background:
+    #f2e4f8 !important;
+
+  color:
+    #8629a8 !important;
+}
+
+
+.changelog-v8
+.changelog-filters
+button[data-changelog-filter="improved"]:not(.active):hover {
+  border-color:
+    rgba(80,118,219,0.20) !important;
+
+  background:
+    #e7ecfa !important;
+
+  color:
+    #496bc3 !important;
+}
+
+
+.changelog-v8
+.changelog-filters
+button[data-changelog-filter="fixed"]:not(.active):hover {
+  border-color:
+    rgba(46,151,106,0.20) !important;
+
+  background:
+    #e4f2eb !important;
+
+  color:
+    #287f59 !important;
+}
+
+
+/* =========================================================
+   CHANGE CONTENT
+   ========================================================= */
+
+.changelog-v8
+.change-item
+.change-content h3 {
+  color:
+    #292031 !important;
+}
+
+
+.changelog-v8
+.change-item
+.change-content p {
+  color:
+    #61566b !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.changelog-v8
+.change-item
+.change-content a {
+  color:
+    #6145dc !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+.changelog-v8
+.change-item
+.change-content a:hover {
+  color:
+    #4d31c5 !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .changelog-v8
+  .change-item {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}

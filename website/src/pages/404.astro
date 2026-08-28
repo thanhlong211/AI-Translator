@@ -1,0 +1,423 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import "../styles/not-found-exact-theme.css";
+---
+
+<BaseLayout
+  title="Page not found — AitraNova"
+  description="Trang bạn đang tìm không tồn tại hoặc đã được di chuyển."
+>
+
+  <main class="not-found-page">
+
+    <div class="not-found-glow"></div>
+
+    <div class="container not-found-inner">
+
+      <div class="not-found-code">
+        <span>4</span>
+
+        <div class="not-found-orb">
+          <span>?</span>
+        </div>
+
+        <span>4</span>
+      </div>
+
+
+      <span class="not-found-kicker">
+        PAGE NOT FOUND
+      </span>
+
+
+      <h1
+        data-i18n
+        data-vi="Trang này không còn ở đây."
+        data-en="This page isn't here."
+      >
+        Trang này không còn ở đây.
+      </h1>
+
+
+      <p
+        data-i18n
+        data-vi="Đường dẫn có thể đã thay đổi hoặc trang bạn đang tìm chưa tồn tại."
+        data-en="The URL may have changed or the page you're looking for may not exist."
+      >
+        Đường dẫn có thể đã thay đổi
+        hoặc trang chưa tồn tại.
+      </p>
+
+
+      <div class="not-found-actions">
+
+        <a
+          href="/"
+          class="not-found-primary"
+        >
+          <span
+            data-i18n
+            data-vi="Về trang chủ"
+            data-en="Back home"
+          >
+            Về trang chủ
+          </span>
+
+          →
+        </a>
+
+
+        <a href="/guide">
+
+          <span
+            data-i18n
+            data-vi="Mở hướng dẫn"
+            data-en="Open Guide"
+          >
+            Mở hướng dẫn
+          </span>
+
+        </a>
+
+      </div>
+
+
+      <div class="not-found-links">
+
+        <a href="/features">
+          Features
+        </a>
+
+        <span></span>
+
+        <a href="/download">
+          Download
+        </a>
+
+        <span></span>
+
+        <a href="/roadmap">
+          Roadmap
+        </a>
+
+        <span></span>
+
+        <a href="/changelog">
+          Changelog
+        </a>
+
+      </div>
+
+    </div>
+
+  </main>
+
+</BaseLayout>
+
+
+<style>
+
+  .not-found-page {
+    position: relative;
+
+    display: grid;
+
+    min-height:
+      calc(
+        100vh - 64px
+      );
+
+    place-items: center;
+
+    overflow: hidden;
+
+    background:
+      linear-gradient(
+        180deg,
+        #ded9e9,
+        #d6d0e1
+      );
+  }
+
+
+  .not-found-glow {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    width: 900px;
+    height: 700px;
+
+    border-radius: 50%;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          105,
+          82,
+          238,
+          0.2
+        ),
+        transparent 67%
+      );
+
+    pointer-events: none;
+
+    transform:
+      translate(
+        -50%,
+        -50%
+      );
+  }
+
+
+  .not-found-inner {
+    position: relative;
+
+    z-index: 2;
+
+    max-width: 720px;
+
+    padding:
+      72px 20px;
+
+    text-align: center;
+  }
+
+
+  .not-found-code {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 16px;
+
+    color: #241e2d;
+
+    font-size:
+      clamp(
+        75px,
+        13vw,
+        140px
+      );
+
+    font-weight: 850;
+
+    line-height: 0.8;
+
+    letter-spacing:
+      -0.07em;
+  }
+
+
+  .not-found-orb {
+    display: grid;
+
+    width:
+      clamp(
+        70px,
+        10vw,
+        108px
+      );
+
+    height:
+      clamp(
+        70px,
+        10vw,
+        108px
+      );
+
+    place-items: center;
+
+    border:
+      1px solid
+      rgba(
+        105,
+        82,
+        238,
+        0.28
+      );
+
+    border-radius: 28%;
+
+    background: #6952ee;
+
+    box-shadow:
+      0 20px 50px
+      rgba(
+        105,
+        82,
+        238,
+        0.25
+      );
+
+    color: white;
+
+    transform:
+      rotate(8deg);
+  }
+
+
+  .not-found-orb span {
+    transform:
+      rotate(-8deg);
+  }
+
+
+  .not-found-kicker {
+    display: block;
+
+    margin-top: 36px;
+
+    color: #6952ee;
+
+    font-size: 6px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.13em;
+  }
+
+
+  .not-found-inner h1 {
+    margin:
+      10px 0 9px;
+
+    color: #211b2a;
+
+    font-size:
+      clamp(
+        32px,
+        5vw,
+        48px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.055em;
+  }
+
+
+  .not-found-inner > p {
+    max-width: 520px;
+
+    margin:
+      0 auto;
+
+    color: #756c7f;
+
+    font-size: 8px;
+
+    line-height: 1.65;
+  }
+
+
+  .not-found-actions {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-top: 23px;
+  }
+
+
+  .not-found-actions a {
+    display: inline-flex;
+
+    min-height: 39px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 9px;
+
+    padding:
+      0 13px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 9px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.28
+      );
+
+    color: #403747;
+
+    font-size: 7px;
+
+    font-weight: 800;
+  }
+
+
+  .not-found-actions
+  .not-found-primary {
+    border-color: #6952ee;
+
+    background: #6952ee;
+
+    color: white;
+
+    box-shadow:
+      0 10px 24px
+      rgba(
+        105,
+        82,
+        238,
+        0.2
+      );
+  }
+
+
+  .not-found-links {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    flex-wrap: wrap;
+
+    gap: 11px;
+
+    margin-top: 28px;
+  }
+
+
+  .not-found-links a {
+    color: #766c80;
+
+    font-size: 6px;
+
+    font-weight: 700;
+  }
+
+
+  .not-found-links > span {
+    width: 3px;
+    height: 3px;
+
+    border-radius: 50%;
+
+    background: #aaa0b4;
+  }
+
+</style>

@@ -1,0 +1,189 @@
+---
+import SiteSeo from "../components/SiteSeo.astro";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+import "../styles/v6-overrides.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "AitraNova — AI Translator Desktop",
+  description =
+    "Context-aware AI translation for screens, manga and documents.",
+} = Astro.props;
+
+const pageTitle =
+  title === "AitraNova — AI Translator Desktop"
+    ? title
+    : `${title} — AitraNova`;
+import "../styles/v8-polish.css";
+import "../styles/v9-density.css";
+import "../styles/v9-navbar-compact.css";
+import "../styles/v9-typography.css";
+import "../styles/v9-brand-divider-hotfix.css";
+import "../styles/v9-text-contrast-hotfix.css";
+import "../styles/v10-hero-microtext.css";
+import "../styles/guide-safe-theme.css";
+---
+
+<!doctype html>
+
+<html
+  lang="vi"
+  data-language="vi"
+>
+  <head>
+    <SiteSeo title={title} description={description} />
+
+    <meta charset="UTF-8" />
+
+    <meta
+      name="viewport"
+      content="width=device-width"
+    />
+
+    <meta
+      name="description"
+      content={description}
+    />
+
+    <meta
+      name="theme-color"
+      content="#f6f7fb"
+    />
+
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/favicon.svg"
+    />
+
+    <title>{pageTitle}</title>
+
+    <script is:inline>
+      (() => {
+        const stored =
+          localStorage.getItem(
+            "aitranova-language"
+          );
+
+        let language =
+          stored;
+
+        if (
+          language !== "vi" &&
+          language !== "en"
+        ) {
+          language =
+            navigator.language
+              .toLowerCase()
+              .startsWith("vi")
+              ? "vi"
+              : "en";
+        }
+
+        document.documentElement
+          .setAttribute(
+            "data-language",
+            language
+          );
+
+        document.documentElement.lang =
+          language;
+      })();
+    </script>
+  </head>
+
+  <body>
+    <Navbar />
+
+    <main>
+      <slot />
+    </main>
+
+    <Footer />
+
+    <script is:inline>
+      (() => {
+        function applyLanguage(
+          language
+        ) {
+          document.documentElement
+            .setAttribute(
+              "data-language",
+              language
+            );
+
+          document.documentElement.lang =
+            language;
+
+          localStorage.setItem(
+            "aitranova-language",
+            language
+          );
+
+          document
+            .querySelectorAll(
+              "[data-i18n]"
+            )
+            .forEach(
+              (element) => {
+                const value =
+                  language === "vi"
+                    ? element.dataset.vi
+                    : element.dataset.en;
+
+                if (
+                  typeof value ===
+                  "string"
+                ) {
+                  element.textContent =
+                    value;
+                }
+              }
+            );
+
+          window.dispatchEvent(
+            new CustomEvent(
+              "aitranova-language-change",
+              {
+                detail: {
+                  language,
+                },
+              }
+            )
+          );
+        }
+
+        document
+          .querySelectorAll(
+            "[data-lang-choice]"
+          )
+          .forEach(
+            (button) => {
+              button.addEventListener(
+                "click",
+                () => {
+                  applyLanguage(
+                    button.dataset
+                      .langChoice
+                  );
+                }
+              );
+            }
+          );
+
+        applyLanguage(
+          document.documentElement
+            .getAttribute(
+              "data-language"
+            ) || "vi"
+        );
+      })();
+    </script>
+  </body>
+</html>

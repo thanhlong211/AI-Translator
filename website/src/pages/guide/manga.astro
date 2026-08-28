@@ -1,0 +1,907 @@
+---
+import GuideArticleLayout from "../../components/GuideArticleLayout.astro";
+---
+
+<GuideArticleLayout
+  title="Manga Session"
+  section="Manga Translation"
+  description="Dịch manga theo từng trang, xử lý nhiều bubble cùng nhau và sử dụng context để giữ hội thoại, tên nhân vật và thuật ngữ nhất quán hơn."
+>
+
+  <!-- 01 -->
+
+  <section
+    id="manga"
+    class="article-section-block"
+    data-guide-search-item="manga session manga panel translation context bubbles"
+  >
+    <span class="section-number">01</span>
+
+    <h2
+      data-i18n
+      data-vi="Manga Session dùng để làm gì?"
+      data-en="What is Manga Session for?"
+    >
+      Manga Session dùng để làm gì?
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Quick Translate phù hợp với một vùng nhỏ. Manga Session được thiết kế cho việc đọc liên tục nhiều trang manga, nơi các câu thoại có liên quan với nhau."
+      data-en="Quick Translate works well for a small area. Manga Session is designed for reading multiple manga pages where dialogue is connected across pages."
+    >
+      Manga Session được thiết kế cho việc đọc
+      liên tục nhiều trang manga, nơi các câu thoại
+      có liên quan với nhau.
+    </p>
+
+    <div class="guide-checklist">
+
+      <div>
+        <span>✓</span>
+        <div>
+          <strong
+            data-i18n
+            data-vi="Nhiều bubble trên cùng trang"
+            data-en="Multiple bubbles on one page"
+          >
+            Nhiều bubble trên cùng trang
+          </strong>
+        </div>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <div>
+          <strong>Batch Translation</strong>
+        </div>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <div>
+          <strong>Cross-page Context</strong>
+        </div>
+      </div>
+
+      <div>
+        <span>✓</span>
+        <div>
+          <strong>Character Continuity</strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="guide-callout info">
+      <span>i</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Khi nào nên dùng Quick Translate?"
+          data-en="When should you use Quick Translate instead?"
+        >
+          Khi nào nên dùng Quick Translate?
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Nếu bạn chỉ cần dịch một bubble hoặc một đoạn nhỏ và không cần theo dõi mạch truyện, Quick Translate thường nhanh hơn."
+          data-en="If you only need one bubble or a small area and do not need story continuity, Quick Translate is usually faster."
+        >
+          Nếu chỉ cần một bubble riêng lẻ,
+          Quick Translate thường nhanh hơn.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 02 -->
+
+  <section
+    id="manga-start"
+    class="article-section-block"
+    data-guide-search-item="start manga session begin chapter"
+  >
+    <span class="section-number">02</span>
+
+    <h2
+      data-i18n
+      data-vi="Bắt đầu Manga Session"
+      data-en="Start a Manga Session"
+    >
+      Bắt đầu Manga Session
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Mở workflow Manga trong AitraNova và bắt đầu một session trước khi xử lý trang đầu tiên."
+      data-en="Open the Manga workflow in AitraNova and start a session before processing the first page."
+    >
+      Mở workflow Manga và bắt đầu session
+      trước khi xử lý trang đầu tiên.
+    </p>
+
+    <div class="guide-steps">
+
+      <div class="guide-step">
+        <span class="guide-step-number">1</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Mở Manga"
+            data-en="Open Manga"
+          >
+            Mở Manga
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Đi tới workflow dành cho manga trong ứng dụng."
+            data-en="Go to the manga workflow in the application."
+          >
+            Đi tới workflow Manga trong ứng dụng.
+          </p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">2</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Bắt đầu session"
+            data-en="Start a session"
+          >
+            Bắt đầu session
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">3</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Kiểm tra Translation Profile"
+            data-en="Check the Translation Profile"
+          >
+            Kiểm tra Translation Profile
+          </strong>
+
+          <p
+            data-i18n
+            data-vi="Profile hiện tại có thể ảnh hưởng tới Glossary, Character Rules và style dịch."
+            data-en="The active profile can affect Glossary entries, Character Rules and translation style."
+          >
+            Kiểm tra profile trước khi dịch.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- 03 -->
+
+  <section
+    id="manga-capture"
+    class="article-section-block"
+    data-guide-search-item="capture manga page OCR bubbles detect"
+  >
+    <span class="section-number">03</span>
+
+    <h2
+      data-i18n
+      data-vi="Chụp trang và nhận dạng bubble"
+      data-en="Capture the page and recognize bubbles"
+    >
+      Chụp trang và nhận dạng bubble
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="AitraNova sử dụng OCR để nhận dạng nội dung chữ trên trang. Một trang có thể chứa nhiều block hoặc bubble cần xử lý."
+      data-en="AitraNova uses OCR to recognize text on the page. A page may contain multiple blocks or bubbles that need processing."
+    >
+      OCR nhận dạng chữ và tạo các block
+      cần dịch trên trang.
+    </p>
+
+    <div class="guide-example">
+
+      <div>
+        <small>PAGE</small>
+
+        <strong>
+          01　美咲！<br />
+          02　どこへ行くの？<br />
+          03　待って！
+        </strong>
+      </div>
+
+      <span>→</span>
+
+      <div>
+        <small>OCR BLOCKS</small>
+
+        <strong>
+          Block 01<br />
+          Block 02<br />
+          Block 03
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="guide-callout tip">
+      <span>✦</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="OCR tốt bắt đầu từ ảnh tốt"
+          data-en="Good OCR starts with a good image"
+        >
+          OCR tốt bắt đầu từ ảnh tốt
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Chữ rõ, độ phân giải đủ lớn và ít nhiễu quanh bubble thường giúp việc nhận dạng ổn định hơn."
+          data-en="Clear text, sufficient resolution and less visual noise around bubbles generally improve recognition."
+        >
+          Ưu tiên trang rõ và chữ đủ lớn.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 04 -->
+
+  <section
+    id="manga-batch"
+    class="article-section-block"
+    data-guide-search-item="batch translation multiple bubbles consistency"
+  >
+    <span class="section-number">04</span>
+
+    <h2>Batch Translation</h2>
+
+    <p
+      data-i18n
+      data-vi="Các bubble trên cùng trang có thể được dịch cùng nhau thay vì xử lý từng câu hoàn toàn độc lập. Điều này giúp AI có thêm thông tin về đoạn hội thoại hiện tại."
+      data-en="Bubbles on the same page can be translated together instead of being treated as completely independent sentences. This gives the AI more information about the current dialogue."
+    >
+      Các bubble trên cùng trang có thể được dịch
+      cùng nhau thay vì xử lý hoàn toàn độc lập.
+    </p>
+
+    <div class="guide-example">
+
+      <div>
+        <small>SOURCE</small>
+
+        <strong>
+          美咲！<br />
+          どこへ行くの？<br />
+          待って！
+        </strong>
+      </div>
+
+      <span>→</span>
+
+      <div>
+        <small>PAGE TRANSLATION</small>
+
+        <strong>
+          Misaki!<br />
+          Cậu định đi đâu vậy?<br />
+          Chờ đã!
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="guide-callout info">
+      <span>i</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Vì sao không dịch từng bubble riêng?"
+          data-en="Why not translate every bubble separately?"
+        >
+          Vì sao không dịch từng bubble riêng?
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Một câu ngắn có thể phụ thuộc vào câu trước để hiểu đại từ, đối tượng đang được nói tới hoặc sắc thái hội thoại."
+          data-en="A short sentence may depend on earlier dialogue to understand pronouns, referenced entities or tone."
+        >
+          Câu ngắn thường phụ thuộc vào
+          những câu xung quanh.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 05 -->
+
+  <section
+    id="manga-next-page"
+    class="article-section-block"
+    data-guide-search-item="next page manga context previous recent page"
+  >
+    <span class="section-number">05</span>
+
+    <h2>Next Page</h2>
+
+    <p
+      data-i18n
+      data-vi="Sau khi hoàn tất một trang, chuyển sang trang tiếp theo trong cùng Manga Session. AitraNova có thể sử dụng context từ các trang gần đây khi phù hợp."
+      data-en="After finishing a page, move to the next page in the same Manga Session. AitraNova can use relevant context from recent pages when appropriate."
+    >
+      Sau khi hoàn tất một trang,
+      chuyển sang trang tiếp theo trong cùng session.
+    </p>
+
+    <div class="guide-steps">
+
+      <div class="guide-step">
+        <span class="guide-step-number">1</span>
+
+        <div>
+          <strong>Page 01</strong>
+
+          <p>OCR + Translation</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">2</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Lưu context phù hợp"
+            data-en="Preserve relevant context"
+          >
+            Lưu context phù hợp
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">3</span>
+
+        <div>
+          <strong>Next Page</strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">4</span>
+
+        <div>
+          <strong>Page 02</strong>
+
+          <p
+            data-i18n
+            data-vi="Context trước đó có thể hỗ trợ bản dịch mới."
+            data-en="Previous context can help with the new translation."
+          >
+            Context trước đó có thể hỗ trợ bản dịch mới.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- 06 -->
+
+  <section
+    id="manga-context"
+    class="article-section-block"
+    data-guide-search-item="cross page recent context manga previous pages"
+  >
+    <span class="section-number">06</span>
+
+    <h2>Cross-page Context</h2>
+
+    <p
+      data-i18n
+      data-vi="Context giúp AitraNova không coi mỗi trang như một tài liệu hoàn toàn mới. Những thông tin gần đây có thể hỗ trợ hiểu câu đang dịch."
+      data-en="Context prevents AitraNova from treating every page as an entirely new document. Recent information can help interpret the current dialogue."
+    >
+      Context giúp AitraNova không coi
+      mỗi trang là một tài liệu hoàn toàn mới.
+    </p>
+
+    <div class="guide-example">
+
+      <div>
+        <small>PREVIOUS PAGE</small>
+
+        <strong
+          data-i18n
+          data-vi="Misaki đang chuẩn bị rời khỏi căn phòng."
+          data-en="Misaki is preparing to leave the room."
+        >
+          Misaki đang chuẩn bị rời khỏi căn phòng.
+        </strong>
+      </div>
+
+      <span>→</span>
+
+      <div>
+        <small>CURRENT PAGE</small>
+
+        <strong>
+          どこへ行くの？
+        </strong>
+      </div>
+
+    </div>
+
+    <div class="guide-callout warning">
+      <span>!</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Context không thay thế source hiện tại"
+          data-en="Context does not replace the current source"
+        >
+          Context không thay thế source hiện tại
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Trang hiện tại vẫn là nguồn thông tin chính. Context chỉ được dùng để hỗ trợ khi phù hợp."
+          data-en="The current page remains the primary source of information. Context is supporting information when relevant."
+        >
+          Source hiện tại vẫn là ưu tiên chính.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 07 -->
+
+  <section
+    id="manga-correction"
+    class="article-section-block"
+    data-guide-search-item="manga correction edit translation exact bubble"
+  >
+    <span class="section-number">07</span>
+
+    <h2
+      data-i18n
+      data-vi="Sửa một bản dịch chưa đúng"
+      data-en="Correct an incorrect translation"
+    >
+      Sửa một bản dịch chưa đúng
+    </h2>
+
+    <p
+      data-i18n
+      data-vi="Nếu một bubble được dịch chưa đúng, hãy sử dụng chức năng correction cho chính block đó thay vì chấp nhận lỗi và tiếp tục."
+      data-en="If a bubble is translated incorrectly, correct that specific block instead of accepting the error and continuing."
+    >
+      Nếu một bubble chưa đúng,
+      hãy sửa chính block đó.
+    </p>
+
+    <div class="guide-example">
+
+      <div>
+        <small>BEFORE</small>
+        <strong>美咲 → Mỹ Tiếu</strong>
+      </div>
+
+      <span>→</span>
+
+      <div>
+        <small>USER CORRECTION</small>
+        <strong>美咲 → Misaki</strong>
+      </div>
+
+    </div>
+
+    <div class="guide-callout tip">
+      <span>✦</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Sửa sớm khi thấy tên riêng sai"
+          data-en="Correct names early"
+        >
+          Sửa sớm khi thấy tên riêng sai
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Tên nhân vật hoặc thuật ngữ xuất hiện nhiều lần nên được sửa sớm để giảm việc phải chỉnh lại ở các trang sau."
+          data-en="Character names or terms that appear repeatedly should be corrected early to reduce repeated corrections later."
+        >
+          Đặc biệt quan trọng với tên nhân vật.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 08 -->
+
+  <section
+    id="manga-continuity"
+    class="article-section-block"
+    data-guide-search-item="character continuity name memory repeated mapping"
+  >
+    <span class="section-number">08</span>
+
+    <h2>Character Continuity</h2>
+
+    <p
+      data-i18n
+      data-vi="AitraNova có thể sử dụng các mapping đáng tin cậy để giúp tên nhân vật hoặc thuật ngữ duy trì cách dịch nhất quán giữa những lần xuất hiện."
+      data-en="AitraNova can use trusted mappings to help keep character names or terminology consistent across repeated appearances."
+    >
+      Các mapping đáng tin cậy có thể hỗ trợ
+      giữ tên nhân vật nhất quán.
+    </p>
+
+    <div class="guide-example">
+
+      <div>
+        <small>CHARACTER</small>
+        <strong>美咲</strong>
+      </div>
+
+      <span>→</span>
+
+      <div>
+        <small>CONTINUITY</small>
+        <strong>Misaki</strong>
+      </div>
+
+    </div>
+
+    <div class="guide-callout info">
+      <span>i</span>
+
+      <div>
+        <strong>Character Rules</strong>
+
+        <p
+          data-i18n
+          data-vi="Nếu bạn đã biết trước cách dịch chính xác của tên nhân vật, hãy thêm Character Rule thay vì chỉ dựa vào continuity tự động."
+          data-en="If you already know the correct translation of a character name, add a Character Rule instead of relying only on automatic continuity."
+        >
+          Với mapping chắc chắn từ trước,
+          nên dùng Character Rule.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 09 -->
+
+  <section
+    id="manga-new-chapter"
+    class="article-section-block"
+    data-guide-search-item="new chapter manga chapter context continuity"
+  >
+    <span class="section-number">09</span>
+
+    <h2>New Chapter</h2>
+
+    <p
+      data-i18n
+      data-vi="Khi bắt đầu chương mới, sử dụng workflow New Chapter thay vì tiếp tục coi mọi trang như cùng một đoạn hội thoại liên tục."
+      data-en="When beginning a new chapter, use the New Chapter workflow instead of treating every page as one continuous dialogue."
+    >
+      Khi chuyển sang chương mới,
+      hãy bắt đầu chapter mới trong Manga Session.
+    </p>
+
+    <div class="guide-steps">
+
+      <div class="guide-step">
+        <span class="guide-step-number">1</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Hoàn tất chương hiện tại"
+            data-en="Finish the current chapter"
+          >
+            Hoàn tất chương hiện tại
+          </strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">2</span>
+
+        <div>
+          <strong>New Chapter</strong>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">3</span>
+
+        <div>
+          <strong
+            data-i18n
+            data-vi="Bắt đầu từ trang đầu của chương mới"
+            data-en="Start from the first page of the new chapter"
+          >
+            Bắt đầu từ trang đầu của chương mới
+          </strong>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="guide-callout info">
+      <span>i</span>
+
+      <div>
+        <strong
+          data-i18n
+          data-vi="Continuity và context không phải cùng một thứ"
+          data-en="Continuity and context are not the same thing"
+        >
+          Continuity và context không phải cùng một thứ
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Recent page context mô tả những gì vừa xảy ra, trong khi Character Rules, correction hoặc các mapping đáng tin cậy có thể có vòng đời khác."
+          data-en="Recent page context describes what just happened, while Character Rules, corrections or trusted mappings can have a different lifecycle."
+        >
+          Recent context và các mapping nhân vật
+          có mục đích khác nhau.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- 10 -->
+
+  <section
+    id="manga-troubleshooting"
+    class="article-section-block"
+    data-guide-search-item="manga troubleshooting OCR bubble order context wrong character"
+  >
+    <span class="section-number">10</span>
+
+    <h2
+      data-i18n
+      data-vi="Lỗi thường gặp"
+      data-en="Common problems"
+    >
+      Lỗi thường gặp
+    </h2>
+
+    <div class="trouble-list">
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Một bubble OCR sai"
+            data-en="One bubble has incorrect OCR"
+          >
+            Một bubble OCR sai
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Kiểm tra chất lượng trang, độ rõ của chữ và vùng nhận dạng trước khi cho rằng vấn đề nằm ở AI translation."
+            data-en="Check page quality, text clarity and recognition before assuming the issue comes from AI translation."
+          >
+            Kiểm tra OCR trước khi xử lý phần translation.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Tên nhân vật thay đổi giữa các trang"
+            data-en="A character name changes between pages"
+          >
+            Tên nhân vật thay đổi giữa các trang
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Sử dụng correction cho mapping sai. Nếu bạn biết mapping chính xác từ trước, hãy tạo Character Rule."
+            data-en="Correct the incorrect mapping. If you already know the correct mapping, create a Character Rule."
+          >
+            Correction hoặc Character Rule
+            là hai lựa chọn phù hợp.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Thuật ngữ bị dịch khác nhau"
+            data-en="A term is translated inconsistently"
+          >
+            Thuật ngữ bị dịch khác nhau
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Thêm thuật ngữ quan trọng vào Glossary của Translation Profile."
+            data-en="Add important terminology to the Glossary of the active Translation Profile."
+          >
+            Thêm thuật ngữ vào Glossary.
+          </p>
+        </div>
+      </details>
+
+
+      <details class="trouble-item">
+        <summary>
+          <span>!</span>
+
+          <span
+            data-i18n
+            data-vi="Context từ trang trước không còn phù hợp"
+            data-en="Previous-page context is no longer relevant"
+          >
+            Context từ trang trước không còn phù hợp
+          </span>
+
+          <span>+</span>
+        </summary>
+
+        <div class="trouble-body">
+          <p
+            data-i18n
+            data-vi="Nếu câu chuyện đã chuyển sang chương hoặc ngữ cảnh hoàn toàn mới, hãy sử dụng New Chapter thay vì tiếp tục session như cũ."
+            data-en="If the story has moved to a new chapter or an entirely new context, use New Chapter instead of continuing the old flow."
+          >
+            Khi sang chương mới, hãy dùng New Chapter.
+          </p>
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+
+  <!-- 11 -->
+
+  <section
+    id="manga-summary"
+    class="article-section-block"
+    data-guide-search-item="manga workflow summary session OCR batch next page context continuity"
+  >
+    <span class="section-number">11</span>
+
+    <h2
+      data-i18n
+      data-vi="Tóm tắt Manga workflow"
+      data-en="Manga workflow summary"
+    >
+      Tóm tắt Manga workflow
+    </h2>
+
+    <div class="guide-steps">
+
+      <div class="guide-step">
+        <span class="guide-step-number">1</span>
+        <div><strong>Start Manga Session</strong></div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">2</span>
+        <div><strong>Capture / OCR</strong></div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">3</span>
+        <div><strong>Batch Translation</strong></div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">4</span>
+        <div><strong>Review / Correction</strong></div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">5</span>
+        <div><strong>Next Page</strong></div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">6</span>
+        <div><strong>Cross-page Context</strong></div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">7</span>
+        <div><strong>Character Continuity</strong></div>
+      </div>
+
+      <div class="guide-step">
+        <span class="guide-step-number">8</span>
+        <div><strong>New Chapter</strong></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <div class="next-guide">
+
+    <div>
+      <small>NEXT GUIDE</small>
+
+      <strong>Documents</strong>
+
+      <p
+        data-i18n
+        data-vi="TXT, EPUB, PDF Text và PDF OCR."
+        data-en="TXT, EPUB, PDF Text and PDF OCR."
+      >
+        TXT, EPUB, PDF Text và PDF OCR.
+      </p>
+    </div>
+
+    <a
+      href="/guide/documents"
+      aria-label="Documents guide"
+    >
+      →
+    </a>
+
+  </div>
+
+</GuideArticleLayout>

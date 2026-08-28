@@ -1,0 +1,2512 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const principles = [
+  {
+    number: "01",
+    kicker: "CONTEXT",
+    titleVi: "Hiểu nhiều hơn một câu.",
+    titleEn: "Understand more than one sentence.",
+    descriptionVi:
+      "Một câu có thể thay đổi nghĩa theo trang trước, nhân vật, thuật ngữ hoặc nội dung đang đọc. AitraNova ưu tiên đưa context phù hợp vào workflow thay vì coi mọi câu là hoàn toàn độc lập.",
+    descriptionEn:
+      "A sentence can change meaning depending on previous pages, characters, terminology or surrounding content. AitraNova prioritizes relevant context instead of treating every sentence as completely isolated.",
+  },
+
+  {
+    number: "02",
+    kicker: "CONTROL",
+    titleVi: "Người dùng vẫn kiểm soát cách dịch.",
+    titleEn: "The user stays in control.",
+    descriptionVi:
+      "Glossary, Character Rules, Translation Profiles và correction giúp người dùng xác định những phần quan trọng thay vì phụ thuộc hoàn toàn vào một kết quả tự động.",
+    descriptionEn:
+      "Glossary entries, Character Rules, Translation Profiles and corrections let users define important behavior instead of relying entirely on one automatic result.",
+  },
+
+  {
+    number: "03",
+    kicker: "CONSISTENCY",
+    titleVi: "Giảm những thay đổi không cần thiết.",
+    titleEn: "Reduce unnecessary variation.",
+    descriptionVi:
+      "Tên nhân vật, terminology và những mapping đã được xác nhận nên ổn định hơn khi xuất hiện lại trong context phù hợp.",
+    descriptionEn:
+      "Character names, terminology and confirmed mappings should remain more stable when they appear again in relevant contexts.",
+  },
+
+  {
+    number: "04",
+    kicker: "LEARNING",
+    titleVi: "Nội dung đã dịch không dừng ở bản dịch.",
+    titleEn: "Translated content can become study material.",
+    descriptionVi:
+      "Vocabulary, Grammar và Review cho phép nội dung bạn đang đọc tiếp tục trở thành dữ liệu học thay vì kết thúc ngay sau khi translation hoàn tất.",
+    descriptionEn:
+      "Vocabulary, Grammar and Review allow the content you are reading to become study material instead of ending when translation is complete.",
+  },
+];
+
+
+const architecture = [
+  {
+    number: "01",
+    name: "Capture / Read",
+    vi: "Nhận nội dung",
+    descriptionVi:
+      "Quick Translate lấy nội dung từ màn hình. Manga Session xử lý page và bubble. Document Reader đọc TXT, EPUB hoặc PDF theo workflow phù hợp.",
+    descriptionEn:
+      "Quick Translate captures screen content. Manga Session handles pages and bubbles. Document Reader reads TXT, EPUB or PDF using the appropriate workflow.",
+    examples:
+      "Screen · Manga · TXT · EPUB · PDF",
+  },
+
+  {
+    number: "02",
+    name: "Understand",
+    vi: "Hiểu source",
+    descriptionVi:
+      "OCR hoặc document extraction tạo Source Text để các bước sau có dữ liệu rõ ràng trước khi translation bắt đầu.",
+    descriptionEn:
+      "OCR or document extraction produces Source Text so later stages have a clear input before translation begins.",
+    examples:
+      "OCR · Source Text · Structure",
+  },
+
+  {
+    number: "03",
+    name: "Control",
+    vi: "Áp dụng quy tắc",
+    descriptionVi:
+      "Translation Profile, Glossary, Character Rules và context cung cấp những tín hiệu phù hợp cho loại nội dung hiện tại.",
+    descriptionEn:
+      "Translation Profiles, Glossary entries, Character Rules and context provide signals appropriate to the current content.",
+    examples:
+      "Profiles · Glossary · Characters · Context",
+  },
+
+  {
+    number: "04",
+    name: "Translate",
+    vi: "Tạo bản dịch",
+    descriptionVi:
+      "AI Translation sử dụng source hiện tại cùng những thông tin hỗ trợ phù hợp để tạo result.",
+    descriptionEn:
+      "AI Translation uses the current source together with relevant supporting information to produce a result.",
+    examples:
+      "AI · Batch · Overlay · Correction",
+  },
+
+  {
+    number: "05",
+    name: "Learn",
+    vi: "Tiếp tục học",
+    descriptionVi:
+      "Vocabulary, Grammar và Review cho phép người dùng tiếp tục sử dụng những gì vừa đọc sau khi translation hoàn tất.",
+    descriptionEn:
+      "Vocabulary, Grammar and Review allow users to keep working with what they just read after translation is complete.",
+    examples:
+      "Vocabulary · Grammar · Review",
+  },
+];
+
+
+const productAreas = [
+  {
+    icon: "⌗",
+    title: "Screen Translation",
+    vi: "Dịch trực tiếp nội dung đang hiển thị trên màn hình.",
+    en: "Translate content directly from the screen.",
+    href: "/features?feature=screen",
+  },
+
+  {
+    icon: "漫",
+    title: "Manga",
+    vi: "Workflow nhiều bubble và nhiều trang với context liên tục.",
+    en: "A multi-bubble, multi-page workflow with continuing context.",
+    href: "/features?feature=manga",
+  },
+
+  {
+    icon: "▤",
+    title: "Documents",
+    vi: "Đọc TXT, EPUB, PDF Text và PDF OCR theo workflow riêng.",
+    en: "Read TXT, EPUB, PDF Text and PDF OCR with dedicated workflows.",
+    href: "/features?feature=documents",
+  },
+
+  {
+    icon: "✦",
+    title: "Translation Profiles",
+    vi: "Kiểm soát terminology, nhân vật và cách translation hoạt động.",
+    en: "Control terminology, characters and translation behavior.",
+    href: "/features?feature=profile",
+  },
+
+  {
+    icon: "学",
+    title: "Learning",
+    vi: "Biến nội dung đang đọc thành Vocabulary, Grammar và Review.",
+    en: "Turn reading material into Vocabulary, Grammar and Review.",
+    href: "/features?feature=learning",
+  },
+];
+import "../styles/about-hero-exact.css";
+import "../styles/about-sections-exact.css";
+---
+
+<BaseLayout
+  title="About AitraNova"
+  description="Tìm hiểu AitraNova là gì, vì sao dự án được xây dựng và cách Context, Control, Consistency và Learning định hướng sản phẩm."
+>
+
+  <main class="about-page">
+
+    <!-- =====================================================
+         HERO
+         ===================================================== -->
+
+    <section class="about-hero">
+
+      <div class="about-glow glow-a"></div>
+      <div class="about-glow glow-b"></div>
+
+      <div class="container about-hero-inner">
+
+        <div class="about-hero-copy">
+
+          <span class="about-kicker">
+            ABOUT AITRANOVA
+          </span>
+
+
+          <h1>
+
+            <span
+              data-i18n
+              data-vi="Dịch không chỉ là"
+              data-en="Translation is more than"
+            >
+              Dịch không chỉ là
+            </span>
+
+            <br />
+
+            <em
+              data-i18n
+              data-vi="thay từ bằng từ."
+              data-en="replacing words."
+            >
+              thay từ bằng từ.
+            </em>
+
+          </h1>
+
+
+          <p
+            data-i18n
+            data-vi="AitraNova là ứng dụng desktop được xây dựng quanh một ý tưởng đơn giản: bản dịch tốt hơn cần hiểu source, context và những quy tắc người dùng muốn giữ."
+            data-en="AitraNova is a desktop application built around a simple idea: better translation requires understanding the source, its context and the rules users want to preserve."
+          >
+            AitraNova được xây dựng quanh
+            source, context và khả năng kiểm soát.
+          </p>
+
+
+          <div class="about-hero-actions">
+
+            <a
+              href="/features"
+              class="about-primary-action"
+            >
+              <span
+                data-i18n
+                data-vi="Khám phá tính năng"
+                data-en="Explore Features"
+              >
+                Khám phá tính năng
+              </span>
+
+              →
+            </a>
+
+
+            <a href="/roadmap">
+
+              <span
+                data-i18n
+                data-vi="Xem Roadmap"
+                data-en="View Roadmap"
+              >
+                Xem Roadmap
+              </span>
+
+              →
+            </a>
+
+          </div>
+
+        </div>
+
+
+        <div class="about-hero-system">
+
+          <div class="about-system-top">
+
+            <span>AITRANOVA</span>
+
+            <small>
+              CONTEXT-AWARE TRANSLATION
+            </small>
+
+          </div>
+
+
+          <div class="about-system-flow">
+
+            <div>
+              <span>01</span>
+              <small>SOURCE</small>
+              <strong>Screen / Manga / Document</strong>
+            </div>
+
+            <i>↓</i>
+
+            <div>
+              <span>02</span>
+              <small>UNDERSTAND</small>
+              <strong>OCR + Context</strong>
+            </div>
+
+            <i>↓</i>
+
+            <div>
+              <span>03</span>
+              <small>CONTROL</small>
+              <strong>Profile + Memory</strong>
+            </div>
+
+            <i>↓</i>
+
+            <div class="result">
+              <span>04</span>
+              <small>RESULT</small>
+              <strong>Translation</strong>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         WHY
+         ===================================================== -->
+
+    <section class="about-why">
+
+      <div class="container about-why-layout">
+
+        <div class="about-section-heading">
+
+          <span>WHY AITRANOVA</span>
+
+          <h2
+            data-i18n
+            data-vi="Vấn đề không phải lúc nào cũng là AI không biết từ."
+            data-en="The problem isn't always that AI doesn't know the words."
+          >
+            Vấn đề không phải lúc nào
+            cũng là AI không biết từ.
+          </h2>
+
+        </div>
+
+
+        <div class="about-why-content">
+
+          <p
+            data-i18n
+            data-vi="Nhiều lỗi translation xảy ra vì hệ thống không biết ai đang nói, tên riêng nào phải giữ nguyên, terminology nào phải cố định hoặc những gì đã xảy ra ở đoạn trước."
+            data-en="Many translation problems happen because the system does not know who is speaking, which names should stay unchanged, which terminology must remain fixed or what happened earlier."
+          >
+            Nhiều lỗi translation đến từ việc
+            thiếu thông tin xung quanh source.
+          </p>
+
+
+          <p
+            data-i18n
+            data-vi="AitraNova tập trung vào việc đưa những tín hiệu đó vào cùng workflow: OCR, Translation Profiles, Glossary, Character Rules, context, correction và memory."
+            data-en="AitraNova focuses on bringing those signals into one workflow: OCR, Translation Profiles, Glossary, Character Rules, context, corrections and memory."
+          >
+            AitraNova đưa các tín hiệu đó
+            vào cùng một workflow.
+          </p>
+
+
+          <div class="about-example">
+
+            <small>EXAMPLE</small>
+
+            <div>
+
+              <span>
+                SOURCE
+              </span>
+
+              <strong>
+                「先生はもう帰った？」
+              </strong>
+
+            </div>
+
+
+            <div>
+
+              <span>
+                WITHOUT CONTEXT
+              </span>
+
+              <strong
+                data-i18n
+                data-vi="“Thầy đã về rồi à?”"
+                data-en="“Has the teacher gone home?”"
+              >
+                “Thầy đã về rồi à?”
+              </strong>
+
+            </div>
+
+
+            <div class="highlight">
+
+              <span>
+                WITH CONTEXT
+              </span>
+
+              <strong
+                data-i18n
+                data-vi="Speaker, relationship và scene có thể thay đổi cách diễn đạt."
+                data-en="Speaker, relationship and scene can change the appropriate wording."
+              >
+                Speaker, relationship và scene
+                có thể thay đổi cách diễn đạt.
+              </strong>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PRINCIPLES
+         ===================================================== -->
+
+    <section class="about-principles">
+
+      <div class="container">
+
+        <header class="about-section-head">
+
+          <div>
+
+            <span>PRODUCT PRINCIPLES</span>
+
+            <h2>
+              Context → Control → Consistency → Learning
+            </h2>
+
+          </div>
+
+
+          <p
+            data-i18n
+            data-vi="Bốn nguyên tắc này định hướng cách các workflow của AitraNova được xây dựng."
+            data-en="These four principles guide how AitraNova workflows are designed."
+          >
+            Bốn nguyên tắc định hướng
+            các workflow của AitraNova.
+          </p>
+
+        </header>
+
+
+        <div class="about-principle-grid">
+
+          {
+            principles.map((principle) => (
+
+              <article>
+
+                <span>
+                  {principle.number}
+                </span>
+
+                <small>
+                  {principle.kicker}
+                </small>
+
+                <h3
+                  data-i18n
+                  data-vi={principle.titleVi}
+                  data-en={principle.titleEn}
+                >
+                  {principle.titleVi}
+                </h3>
+
+                <p
+                  data-i18n
+                  data-vi={principle.descriptionVi}
+                  data-en={principle.descriptionEn}
+                >
+                  {principle.descriptionVi}
+                </p>
+
+              </article>
+
+            ))
+          }
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         ARCHITECTURE
+         ===================================================== -->
+
+    <section class="about-architecture">
+
+      <div class="container">
+
+        <header class="about-dark-head">
+
+          <span>PRODUCT ARCHITECTURE</span>
+
+          <h2
+            data-i18n
+            data-vi="Một workflow từ source đến learning."
+            data-en="One workflow from source to learning."
+          >
+            Một workflow từ source đến learning.
+          </h2>
+
+          <p
+            data-i18n
+            data-vi="Đây là cách nhìn ở mức sản phẩm, không phải sơ đồ triển khai kỹ thuật nội bộ."
+            data-en="This is a product-level view, not an internal technical implementation diagram."
+          >
+            Đây là kiến trúc ở mức sản phẩm.
+          </p>
+
+        </header>
+
+
+        <div class="architecture-list">
+
+          {
+            architecture.map((layer, index) => (
+
+              <>
+                <article>
+
+                  <span class="architecture-number">
+                    {layer.number}
+                  </span>
+
+
+                  <div class="architecture-name">
+
+                    <small>
+                      {layer.name.toUpperCase()}
+                    </small>
+
+                    <strong
+                      data-i18n
+                      data-vi={layer.vi}
+                      data-en={layer.name}
+                    >
+                      {layer.vi}
+                    </strong>
+
+                  </div>
+
+
+                  <p
+                    data-i18n
+                    data-vi={layer.descriptionVi}
+                    data-en={layer.descriptionEn}
+                  >
+                    {layer.descriptionVi}
+                  </p>
+
+
+                  <span class="architecture-examples">
+                    {layer.examples}
+                  </span>
+
+                </article>
+
+
+                {
+                  index < architecture.length - 1
+                  && (
+                    <div class="architecture-arrow">
+                      ↓
+                    </div>
+                  )
+                }
+
+              </>
+
+            ))
+          }
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         PRODUCT
+         ===================================================== -->
+
+    <section class="about-product">
+
+      <div class="container">
+
+        <header class="about-section-head">
+
+          <div>
+
+            <span>ONE PRODUCT</span>
+
+            <h2
+              data-i18n
+              data-vi="Nhiều workflow, cùng một nền tảng."
+              data-en="Multiple workflows, one foundation."
+            >
+              Nhiều workflow, cùng một nền tảng.
+            </h2>
+
+          </div>
+
+
+          <p
+            data-i18n
+            data-vi="Screen, Manga và Documents có cách nhập source khác nhau nhưng cùng chia sẻ các nguyên tắc về context và translation control."
+            data-en="Screen, Manga and Documents use different source workflows while sharing the same ideas around context and translation control."
+          >
+            Mỗi loại nội dung có workflow riêng
+            nhưng không phải một sản phẩm tách biệt.
+          </p>
+
+        </header>
+
+
+        <div class="about-product-grid">
+
+          {
+            productAreas.map((area) => (
+
+              <a href={area.href}>
+
+                <span class="product-area-icon">
+                  {area.icon}
+                </span>
+
+                <small>
+                  PRODUCT AREA
+                </small>
+
+                <strong>
+                  {area.title}
+                </strong>
+
+                <p
+                  data-i18n
+                  data-vi={area.vi}
+                  data-en={area.en}
+                >
+                  {area.vi}
+                </p>
+
+                <i>→</i>
+
+              </a>
+
+            ))
+          }
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         IS / IS NOT
+         ===================================================== -->
+
+    <section class="about-definition">
+
+      <div class="container definition-layout">
+
+        <div class="definition-column positive">
+
+          <span class="definition-symbol">
+            ✓
+          </span>
+
+          <small>
+            AITRANOVA IS
+          </small>
+
+          <h2
+            data-i18n
+            data-vi="Một translation workspace."
+            data-en="A translation workspace."
+          >
+            Một translation workspace.
+          </h2>
+
+
+          <ul>
+
+            <li
+              data-i18n
+              data-vi="Dịch nội dung trực tiếp từ màn hình."
+              data-en="Translate content directly from the screen."
+            >
+              Dịch trực tiếp từ màn hình.
+            </li>
+
+            <li
+              data-i18n
+              data-vi="Workflow chuyên biệt cho Manga và Documents."
+              data-en="Dedicated workflows for Manga and Documents."
+            >
+              Manga và Documents workflow.
+            </li>
+
+            <li
+              data-i18n
+              data-vi="Kiểm soát terminology và nhân vật."
+              data-en="Control terminology and characters."
+            >
+              Kiểm soát terminology và nhân vật.
+            </li>
+
+            <li
+              data-i18n
+              data-vi="Sử dụng context và memory khi phù hợp."
+              data-en="Use context and memory when appropriate."
+            >
+              Context và memory.
+            </li>
+
+            <li
+              data-i18n
+              data-vi="Kết nối translation với Learning."
+              data-en="Connect translation with Learning."
+            >
+              Translation kết nối Learning.
+            </li>
+
+          </ul>
+
+        </div>
+
+
+        <div class="definition-column negative">
+
+          <span class="definition-symbol">
+            ×
+          </span>
+
+          <small>
+            AITRANOVA IS NOT
+          </small>
+
+          <h2
+            data-i18n
+            data-vi="Một nút dịch thần kỳ."
+            data-en="A magic translate button."
+          >
+            Một nút dịch thần kỳ.
+          </h2>
+
+
+          <ul>
+
+            <li
+              data-i18n
+              data-vi="Không phải mọi OCR result đều hoàn hảo."
+              data-en="Not every OCR result will be perfect."
+            >
+              OCR không phải lúc nào cũng hoàn hảo.
+            </li>
+
+            <li
+              data-i18n
+              data-vi="Không tự động hiểu mọi tên nhân vật mà không có tín hiệu."
+              data-en="It cannot automatically understand every character name without signals."
+            >
+              Không tự hiểu mọi tên nhân vật.
+            </li>
+
+            <li
+              data-i18n
+              data-vi="Không đảm bảo mọi bản dịch đều cần zero review."
+              data-en="It does not guarantee every translation requires zero review."
+            >
+              Translation vẫn có thể cần review.
+            </li>
+
+            <li
+              data-i18n
+              data-vi="Không coi automation quan trọng hơn khả năng correction."
+              data-en="It does not prioritize automation over the ability to correct results."
+            >
+              Automation không thay correction.
+            </li>
+
+          </ul>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         DIRECTION
+         ===================================================== -->
+
+    <section class="about-direction">
+
+      <div class="container direction-layout">
+
+        <div>
+
+          <span>WHERE NEXT?</span>
+
+          <h2
+            data-i18n
+            data-vi="Sản phẩm vẫn đang phát triển."
+            data-en="The product is still evolving."
+          >
+            Sản phẩm vẫn đang phát triển.
+          </h2>
+
+          <p
+            data-i18n
+            data-vi="Automatic Character Consistency, Manga Reading Order, Continuity Review và những khả năng khác đang tiếp tục được nghiên cứu hoặc phát triển."
+            data-en="Automatic Character Consistency, Manga Reading Order, Continuity Review and other capabilities continue to be researched or developed."
+          >
+            Những workflow hiện tại vẫn tiếp tục
+            được cải thiện.
+          </p>
+
+        </div>
+
+
+        <div class="direction-actions">
+
+          <a
+            href="/roadmap"
+            class="primary"
+          >
+            <span>
+              Roadmap
+            </span>
+
+            →
+          </a>
+
+
+          <a href="/changelog">
+            <span>
+              Changelog
+            </span>
+
+            →
+          </a>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =====================================================
+         FINAL CTA
+         ===================================================== -->
+
+    <section class="about-final">
+
+      <div class="container">
+
+        <div class="about-final-card">
+
+          <div>
+
+            <span>EXPLORE AITRANOVA</span>
+
+            <h2
+              data-i18n
+              data-vi="Xem cách ý tưởng này hoạt động trong sản phẩm."
+              data-en="See how these ideas work in the product."
+            >
+              Xem cách ý tưởng này hoạt động
+              trong sản phẩm.
+            </h2>
+
+          </div>
+
+
+          <div class="about-final-actions">
+
+            <a
+              href="/features"
+              class="primary"
+            >
+              Features
+              →
+            </a>
+
+
+            <a href="/guide">
+              Guide
+              →
+            </a>
+
+
+            <a
+              href="https://github.com/thanhlong211/AI-Translator"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              GitHub
+              ↗
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</BaseLayout>
+
+
+<style>
+
+  .about-page {
+    overflow: hidden;
+
+    background:
+      linear-gradient(
+        180deg,
+        #dfdae9,
+        #d7d1e1
+      );
+  }
+
+
+  /* =========================================================
+     HERO
+     ========================================================= */
+
+  .about-hero {
+    position: relative;
+
+    overflow: hidden;
+
+    padding:
+      88px 0 76px;
+
+    border-bottom:
+      1px solid #c4bacf;
+  }
+
+
+  .about-glow {
+    position: absolute;
+
+    border-radius: 50%;
+
+    pointer-events: none;
+  }
+
+
+  .about-glow.glow-a {
+    top: -430px;
+    right: -230px;
+
+    width: 840px;
+    height: 840px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          105,
+          82,
+          238,
+          0.2
+        ),
+        transparent 68%
+      );
+  }
+
+
+  .about-glow.glow-b {
+    bottom: -520px;
+    left: -330px;
+
+    width: 900px;
+    height: 900px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(
+          85,
+          127,
+          220,
+          0.13
+        ),
+        transparent 69%
+      );
+  }
+
+
+  .about-hero-inner {
+    position: relative;
+
+    z-index: 2;
+
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(360px, 0.72fr);
+
+    align-items: center;
+
+    gap: 70px;
+  }
+
+
+  .about-kicker {
+    color: #6952ee;
+
+    font-size: 11px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.13em;
+  }
+
+
+  .about-hero h1 {
+    margin:
+      17px 0 21px;
+
+    color: #1d1827;
+
+    font-size:
+      clamp(
+        56px,
+        7.5vw,
+        92px
+      );
+
+    line-height: 0.88;
+
+    letter-spacing:
+      -0.067em;
+  }
+
+
+  .about-hero h1 em {
+    color: #6952ee;
+
+    font-style: normal;
+  }
+
+
+  .about-hero-copy > p {
+    max-width: 690px;
+
+    margin: 0;
+
+    color: #6e6578;
+
+    font-size: 15px;
+
+    line-height: 1.72;
+  }
+
+
+  .about-hero-actions {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+    margin-top: 28px;
+  }
+
+
+  .about-hero-actions a {
+    display: inline-flex;
+
+    min-height: 44px;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 10px;
+
+    padding:
+      0 15px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.3
+      );
+
+    color: #403747;
+
+    font-size: 12px;
+
+    font-weight: 800;
+  }
+
+
+  .about-hero-actions
+  .about-primary-action {
+    border-color: #6952ee;
+
+    background: #6952ee;
+
+    color: white;
+
+    box-shadow:
+      0 11px 25px
+      rgba(
+        105,
+        82,
+        238,
+        0.2
+      );
+  }
+
+
+  /* HERO SYSTEM */
+
+  .about-hero-system {
+    overflow: hidden;
+
+    border:
+      1px solid #b9aec6;
+
+    border-radius: 19px;
+
+    background: #17131f;
+
+    box-shadow:
+      0 28px 65px
+      rgba(
+        35,
+        25,
+        48,
+        0.19
+      );
+  }
+
+
+  .about-system-top {
+    display: flex;
+
+    min-height: 48px;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 20px;
+
+    padding:
+      0 17px;
+
+    border-bottom:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.07
+      );
+  }
+
+
+  .about-system-top span {
+    color: #d8d2df;
+
+    font-size: 11px;
+
+    font-weight: 850;
+  }
+
+
+  .about-system-top small {
+    color: #625b6b;
+
+    font-size: 8px;
+
+    letter-spacing:
+      0.09em;
+  }
+
+
+  .about-system-flow {
+    display: grid;
+
+    gap: 8px;
+
+    padding: 22px;
+  }
+
+
+  .about-system-flow > div {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-height: 65px;
+
+    padding:
+      0 14px;
+
+    border:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.07
+      );
+
+    border-radius: 11px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.025
+      );
+  }
+
+
+  .about-system-flow
+  > div > span {
+    grid-row:
+      1 / 3;
+
+    display: grid;
+
+    width: 33px;
+    height: 33px;
+
+    place-items: center;
+
+    border-radius: 9px;
+
+    background:
+      rgba(
+        105,
+        82,
+        238,
+        0.16
+      );
+
+    color: #a99aff;
+
+    font-size: 9px;
+
+    font-weight: 850;
+  }
+
+
+  .about-system-flow small {
+    align-self: end;
+
+    color: #686171;
+
+    font-size: 8px;
+  }
+
+
+  .about-system-flow strong {
+    align-self: start;
+
+    color: #ded8e4;
+
+    font-size: 12px;
+  }
+
+
+  .about-system-flow > i {
+    justify-self: center;
+
+    color: #7461eb;
+
+    font-style: normal;
+  }
+
+
+  .about-system-flow
+  > div.result {
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.35
+      );
+
+    background:
+      rgba(
+        105,
+        82,
+        238,
+        0.08
+      );
+  }
+
+
+  /* =========================================================
+     COMMON HEAD
+     ========================================================= */
+
+  .about-section-head {
+    display: grid;
+
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(270px, 0.48fr);
+
+    align-items: end;
+
+    gap: 45px;
+  }
+
+
+  .about-section-head
+  > div > span,
+  .about-section-heading > span {
+    color: #6952ee;
+
+    font-size: 10px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .about-section-head h2,
+  .about-section-heading h2 {
+    max-width: 760px;
+
+    margin:
+      10px 0 0;
+
+    color: #211b2a;
+
+    font-size:
+      clamp(
+        36px,
+        4.5vw,
+        54px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.052em;
+  }
+
+
+  .about-section-head > p {
+    margin: 0;
+
+    color: #766d80;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+  }
+
+
+  /* =========================================================
+     WHY
+     ========================================================= */
+
+  .about-why {
+    padding:
+      82px 0;
+  }
+
+
+  .about-why-layout {
+    display: grid;
+
+    grid-template-columns:
+      0.85fr 1.15fr;
+
+    gap: 80px;
+  }
+
+
+  .about-why-content > p {
+    margin:
+      0 0 18px;
+
+    color: #645b6e;
+
+    font-size: 15px;
+
+    line-height: 1.78;
+  }
+
+
+  .about-example {
+    display: grid;
+
+    gap: 8px;
+
+    margin-top: 28px;
+
+    padding: 18px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 14px;
+
+    background:
+      rgba(
+        244,
+        240,
+        247,
+        0.5
+      );
+  }
+
+
+  .about-example > small {
+    margin-bottom: 3px;
+
+    color: #958b9f;
+
+    font-size: 8px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .about-example > div {
+    padding: 13px;
+
+    border:
+      1px solid #cec5d7;
+
+    border-radius: 9px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.28
+      );
+  }
+
+
+  .about-example > div.highlight {
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.32
+      );
+
+    background:
+      rgba(
+        105,
+        82,
+        238,
+        0.07
+      );
+  }
+
+
+  .about-example span {
+    display: block;
+
+    color: #948a9e;
+
+    font-size: 8px;
+
+    font-weight: 800;
+  }
+
+
+  .about-example strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #312939;
+
+    font-size: 13px;
+
+    line-height: 1.5;
+  }
+
+
+  /* =========================================================
+     PRINCIPLES
+     ========================================================= */
+
+  .about-principles {
+    padding:
+      78px 0;
+
+    border-top:
+      1px solid #c5bccf;
+
+    background:
+      rgba(
+        226,
+        220,
+        234,
+        0.52
+      );
+  }
+
+
+  .about-principle-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        4,
+        minmax(0, 1fr)
+      );
+
+    gap: 10px;
+
+    margin-top: 31px;
+  }
+
+
+  .about-principle-grid article {
+    min-height: 280px;
+
+    padding: 19px;
+
+    border:
+      1px solid #c6bdcf;
+
+    border-radius: 15px;
+
+    background:
+      rgba(
+        243,
+        239,
+        247,
+        0.5
+      );
+  }
+
+
+  .about-principle-grid
+  article > span {
+    display: grid;
+
+    width: 34px;
+    height: 34px;
+
+    place-items: center;
+
+    border-radius: 9px;
+
+    background: #e3dcfb;
+
+    color: #6952ee;
+
+    font-size: 9px;
+
+    font-weight: 850;
+  }
+
+
+  .about-principle-grid small {
+    display: block;
+
+    margin-top: 19px;
+
+    color: #6952ee;
+
+    font-size: 8px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.1em;
+  }
+
+
+  .about-principle-grid h3 {
+    margin:
+      6px 0 9px;
+
+    color: #302838;
+
+    font-size: 20px;
+
+    line-height: 1.05;
+
+    letter-spacing:
+      -0.035em;
+  }
+
+
+  .about-principle-grid p {
+    margin: 0;
+
+    color: #766d80;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+  }
+
+
+  /* =========================================================
+     ARCHITECTURE
+     ========================================================= */
+
+  .about-architecture {
+    padding:
+      82px 0;
+
+    background: #17131f;
+
+    color: white;
+  }
+
+
+  .about-dark-head {
+    max-width: 760px;
+  }
+
+
+  .about-dark-head > span {
+    color: #a294ff;
+
+    font-size: 10px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .about-dark-head h2 {
+    margin:
+      10px 0 9px;
+
+    color: #f2eef5;
+
+    font-size:
+      clamp(
+        38px,
+        4.7vw,
+        56px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.055em;
+  }
+
+
+  .about-dark-head p {
+    margin: 0;
+
+    color: #8d8696;
+
+    font-size: 13px;
+
+    line-height: 1.7;
+  }
+
+
+  .architecture-list {
+    display: grid;
+
+    margin-top: 35px;
+  }
+
+
+  .architecture-list article {
+    display: grid;
+
+    grid-template-columns:
+      auto 180px 1fr auto;
+
+    align-items: center;
+
+    gap: 20px;
+
+    min-height: 94px;
+
+    padding:
+      15px 18px;
+
+    border:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.08
+      );
+
+    border-radius: 12px;
+
+    background:
+      rgba(
+        255,
+        255,
+        255,
+        0.025
+      );
+  }
+
+
+  .architecture-number {
+    display: grid;
+
+    width: 39px;
+    height: 39px;
+
+    place-items: center;
+
+    border-radius: 10px;
+
+    background:
+      rgba(
+        105,
+        82,
+        238,
+        0.18
+      );
+
+    color: #aa9cff;
+
+    font-size: 9px;
+
+    font-weight: 850;
+  }
+
+
+  .architecture-name small {
+    display: block;
+
+    color: #6e6677;
+
+    font-size: 8px;
+  }
+
+
+  .architecture-name strong {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #ddd7e3;
+
+    font-size: 13px;
+  }
+
+
+  .architecture-list article p {
+    margin: 0;
+
+    color: #918997;
+
+    font-size: 12px;
+
+    line-height: 1.65;
+  }
+
+
+  .architecture-examples {
+    max-width: 180px;
+
+    color: #887cce;
+
+    font-size: 9px;
+
+    text-align: right;
+  }
+
+
+  .architecture-arrow {
+    justify-self: start;
+
+    margin-left: 37px;
+
+    min-height: 22px;
+
+    color: #6952ee;
+
+    font-size: 14px;
+  }
+
+
+  /* =========================================================
+     PRODUCT
+     ========================================================= */
+
+  .about-product {
+    padding:
+      80px 0;
+  }
+
+
+  .about-product-grid {
+    display: grid;
+
+    grid-template-columns:
+      repeat(
+        5,
+        minmax(0, 1fr)
+      );
+
+    gap: 9px;
+
+    margin-top: 30px;
+  }
+
+
+  .about-product-grid a {
+    position: relative;
+
+    display: flex;
+
+    min-height: 230px;
+
+    flex-direction: column;
+
+    padding: 18px;
+
+    border:
+      1px solid #c5bccf;
+
+    border-radius: 14px;
+
+    background:
+      rgba(
+        243,
+        239,
+        247,
+        0.5
+      );
+
+    color: inherit;
+
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+
+
+  .about-product-grid a:hover {
+    transform:
+      translateY(-3px);
+
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.35
+      );
+
+    box-shadow:
+      0 14px 31px
+      rgba(
+        49,
+        37,
+        65,
+        0.07
+      );
+  }
+
+
+  .product-area-icon {
+    display: grid;
+
+    width: 38px;
+    height: 38px;
+
+    place-items: center;
+
+    border-radius: 10px;
+
+    background: #e3dcfb;
+
+    color: #6952ee;
+
+    font-size: 13px;
+
+    font-weight: 850;
+  }
+
+
+  .about-product-grid small {
+    display: block;
+
+    margin-top: 19px;
+
+    color: #968ca0;
+
+    font-size: 8px;
+  }
+
+
+  .about-product-grid strong {
+    display: block;
+
+    margin-top: 5px;
+
+    color: #302938;
+
+    font-size: 15px;
+  }
+
+
+  .about-product-grid p {
+    margin:
+      6px 0 0;
+
+    color: #786f82;
+
+    font-size: 11px;
+
+    line-height: 1.6;
+  }
+
+
+  .about-product-grid i {
+    margin-top: auto;
+
+    padding-top: 16px;
+
+    color: #6952ee;
+
+    font-size: 15px;
+
+    font-style: normal;
+  }
+
+
+  /* =========================================================
+     DEFINITION
+     ========================================================= */
+
+  .about-definition {
+    padding:
+      80px 0;
+
+    border-top:
+      1px solid #c4bacf;
+
+    background:
+      rgba(
+        225,
+        219,
+        234,
+        0.48
+      );
+  }
+
+
+  .definition-layout {
+    display: grid;
+
+    grid-template-columns:
+      1fr 1fr;
+
+    gap: 11px;
+  }
+
+
+  .definition-column {
+    min-height: 430px;
+
+    padding: 25px;
+
+    border:
+      1px solid #c5bccf;
+
+    border-radius: 17px;
+
+    background:
+      rgba(
+        243,
+        239,
+        247,
+        0.54
+      );
+  }
+
+
+  .definition-symbol {
+    display: grid;
+
+    width: 43px;
+    height: 43px;
+
+    place-items: center;
+
+    border-radius: 11px;
+
+    font-size: 16px;
+
+    font-weight: 850;
+  }
+
+
+  .definition-column.positive
+  .definition-symbol {
+    background: #dcece4;
+    color: #3b9b72;
+  }
+
+
+  .definition-column.negative
+  .definition-symbol {
+    background: #e7dfe7;
+    color: #877587;
+  }
+
+
+  .definition-column > small {
+    display: block;
+
+    margin-top: 21px;
+
+    color: #958b9f;
+
+    font-size: 9px;
+
+    letter-spacing:
+      0.1em;
+  }
+
+
+  .definition-column h2 {
+    margin:
+      7px 0 18px;
+
+    color: #282130;
+
+    font-size:
+      clamp(
+        29px,
+        3.4vw,
+        42px
+      );
+
+    letter-spacing:
+      -0.045em;
+  }
+
+
+  .definition-column ul {
+    display: grid;
+
+    gap: 9px;
+
+    margin: 0;
+
+    padding: 0;
+
+    list-style: none;
+  }
+
+
+  .definition-column li {
+    position: relative;
+
+    padding:
+      11px 12px 11px 34px;
+
+    border:
+      1px solid #d0c7d8;
+
+    border-radius: 9px;
+
+    color: #6c6376;
+
+    font-size: 12px;
+
+    line-height: 1.55;
+  }
+
+
+  .definition-column li::before {
+    position: absolute;
+
+    top: 11px;
+    left: 12px;
+
+    color: #6952ee;
+
+    content: "•";
+
+    font-weight: 900;
+  }
+
+
+  /* =========================================================
+     DIRECTION
+     ========================================================= */
+
+  .about-direction {
+    padding:
+      74px 0;
+
+    background: #17131f;
+
+    color: white;
+  }
+
+
+  .direction-layout {
+    display: grid;
+
+    grid-template-columns:
+      1fr auto;
+
+    align-items: center;
+
+    gap: 55px;
+  }
+
+
+  .about-direction
+  > .container
+  > div:first-child
+  > span {
+    color: #a294ff;
+
+    font-size: 9px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .about-direction h2 {
+    margin:
+      8px 0 7px;
+
+    color: #f2eef5;
+
+    font-size:
+      clamp(
+        35px,
+        4vw,
+        49px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.05em;
+  }
+
+
+  .about-direction p {
+    max-width: 650px;
+
+    margin: 0;
+
+    color: #8d8696;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+  }
+
+
+  .direction-actions {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+  }
+
+
+  .direction-actions a {
+    display: flex;
+
+    min-width: 155px;
+    min-height: 40px;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 15px;
+
+    padding:
+      0 12px;
+
+    border:
+      1px solid
+      rgba(
+        255,
+        255,
+        255,
+        0.1
+      );
+
+    border-radius: 9px;
+
+    color: #d9d3df;
+
+    font-size: 11px;
+
+    font-weight: 800;
+  }
+
+
+  .direction-actions a.primary {
+    border-color: #6952ee;
+
+    background: #6952ee;
+
+    color: white;
+  }
+
+
+  /* =========================================================
+     FINAL
+     ========================================================= */
+
+  .about-final {
+    padding:
+      70px 0 84px;
+  }
+
+
+  .about-final-card {
+    display: grid;
+
+    grid-template-columns:
+      1fr auto;
+
+    align-items: center;
+
+    gap: 50px;
+
+    padding: 33px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 20px;
+
+    background:
+      linear-gradient(
+        135deg,
+        #e7e1ef,
+        #d8d3e5
+      );
+
+    box-shadow:
+      0 22px 50px
+      rgba(
+        48,
+        36,
+        66,
+        0.08
+      );
+  }
+
+
+  .about-final-card
+  > div:first-child > span {
+    color: #6952ee;
+
+    font-size: 9px;
+
+    font-weight: 850;
+
+    letter-spacing:
+      0.12em;
+  }
+
+
+  .about-final-card h2 {
+    max-width: 720px;
+
+    margin:
+      9px 0 0;
+
+    color: #211b2a;
+
+    font-size:
+      clamp(
+        32px,
+        4vw,
+        46px
+      );
+
+    line-height: 0.98;
+
+    letter-spacing:
+      -0.05em;
+  }
+
+
+  .about-final-actions {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 7px;
+  }
+
+
+  .about-final-actions a {
+    display: flex;
+
+    min-width: 150px;
+    min-height: 39px;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 14px;
+
+    padding:
+      0 11px;
+
+    border:
+      1px solid #c4bacf;
+
+    border-radius: 9px;
+
+    color: #443b4c;
+
+    font-size: 11px;
+
+    font-weight: 800;
+  }
+
+
+  .about-final-actions a.primary {
+    border-color: #6952ee;
+
+    background: #6952ee;
+
+    color: white;
+  }
+
+
+  /* =========================================================
+     RESPONSIVE
+     ========================================================= */
+
+  @media (max-width: 1000px) {
+
+    .about-hero-inner,
+    .about-why-layout {
+      grid-template-columns: 1fr;
+    }
+
+
+    .about-principle-grid {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+
+    .about-product-grid {
+      grid-template-columns:
+        repeat(
+          3,
+          1fr
+        );
+    }
+
+
+    .architecture-list article {
+      grid-template-columns:
+        auto 150px 1fr;
+    }
+
+
+    .architecture-examples {
+      grid-column:
+        2 / -1;
+
+      max-width: none;
+
+      text-align: left;
+    }
+
+  }
+
+
+  @media (max-width: 800px) {
+
+    .about-section-head,
+    .definition-layout,
+    .direction-layout,
+    .about-final-card {
+      grid-template-columns: 1fr;
+    }
+
+
+    .about-product-grid {
+      grid-template-columns:
+        1fr 1fr;
+    }
+
+
+    .direction-actions,
+    .about-final-actions {
+      width: 100%;
+    }
+
+
+    .direction-actions a,
+    .about-final-actions a {
+      width: 100%;
+    }
+
+  }
+
+
+  @media (max-width: 600px) {
+
+    .about-hero {
+      padding-top: 64px;
+    }
+
+
+    .about-hero h1 {
+      font-size:
+        clamp(
+          48px,
+          15vw,
+          68px
+        );
+    }
+
+
+    .about-principle-grid,
+    .about-product-grid {
+      grid-template-columns: 1fr;
+    }
+
+
+    .architecture-list article {
+      grid-template-columns:
+        auto 1fr;
+    }
+
+
+    .architecture-list article p,
+    .architecture-examples {
+      grid-column:
+        1 / -1;
+    }
+
+
+    .architecture-arrow {
+      margin-left: 18px;
+    }
+
+  }
+
+</style>

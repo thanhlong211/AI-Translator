@@ -1,0 +1,1520 @@
+---
+const faqItems = [
+  {
+    id: "what-is-aitranova",
+    category: "getting-started",
+    questionVi: "AitraNova là gì?",
+    questionEn: "What is AitraNova?",
+    answerVi:
+      "AitraNova là ứng dụng desktop tập trung vào dịch nội dung trên màn hình, manga và tài liệu. Ứng dụng cũng có Translation Profiles, context, memory và các workflow Learning.",
+    answerEn:
+      "AitraNova is a desktop application focused on translating screen content, manga and documents. It also includes Translation Profiles, context, memory and Learning workflows.",
+    keywords:
+      "aitranova app desktop translator application ứng dụng dịch",
+    guide: "/features",
+  },
+
+  {
+    id: "windows-support",
+    category: "getting-started",
+    questionVi: "AitraNova hiện hỗ trợ hệ điều hành nào?",
+    questionEn: "Which operating system does AitraNova currently support?",
+    answerVi:
+      "Ứng dụng desktop hiện tập trung vào Windows. Yêu cầu chi tiết có thể thay đổi trong giai đoạn Beta và được công bố cùng release.",
+    answerEn:
+      "The desktop application currently focuses on Windows. Detailed requirements may change during Beta and are published with releases.",
+    keywords:
+      "windows mac macos linux system operating os hệ điều hành",
+    guide: "/download",
+  },
+
+  {
+    id: "first-translation",
+    category: "getting-started",
+    questionVi: "Tôi nên bắt đầu từ đâu sau khi cài đặt?",
+    questionEn: "Where should I start after installation?",
+    answerVi:
+      "Quick Translate là workflow đơn giản nhất để kiểm tra AitraNova. Hãy bắt đầu với một dòng text rõ trên màn hình rồi dùng Ctrl + Shift + Q.",
+    answerEn:
+      "Quick Translate is the simplest workflow for verifying AitraNova. Start with a clear line of text on screen and use Ctrl + Shift + Q.",
+    keywords:
+      "start install installation bắt đầu cài đặt first translation",
+    guide: "/guide/quick",
+  },
+
+  {
+    id: "quick-shortcut",
+    category: "translation",
+    questionVi: "Phím tắt Quick Translate là gì?",
+    questionEn: "What is the Quick Translate shortcut?",
+    answerVi:
+      "Phím tắt Quick Translate được tài liệu hiện tại sử dụng là Ctrl + Shift + Q. Các shortcut khác có thể thay đổi theo phiên bản.",
+    answerEn:
+      "The current documentation uses Ctrl + Shift + Q for Quick Translate. Other shortcut assignments may vary by version.",
+    keywords:
+      "ctrl shift q shortcut hotkey phím tắt quick translate",
+    guide: "/guide/quick",
+  },
+
+  {
+    id: "ocr-before-translation",
+    category: "translation",
+    questionVi: "Nếu bản dịch sai, tôi nên kiểm tra gì trước?",
+    questionEn: "What should I check first if a translation is wrong?",
+    answerVi:
+      "Hãy kiểm tra Source Text sau OCR trước. Nếu OCR đã nhận sai chữ, việc thay đổi Glossary hoặc Translation Profile thường không giải quyết được nguồn lỗi.",
+    answerEn:
+      "Check the Source Text produced by OCR first. If OCR already recognized the text incorrectly, changing the Glossary or Translation Profile usually will not fix the source problem.",
+    keywords:
+      "ocr wrong translation sai bản dịch source text nhận dạng",
+    guide: "/guide/troubleshooting?category=ocr",
+  },
+
+  {
+    id: "translation-profile",
+    category: "translation",
+    questionVi: "Translation Profile dùng để làm gì?",
+    questionEn: "What is a Translation Profile for?",
+    answerVi:
+      "Translation Profile dùng để tổ chức các quy tắc và chỉ dẫn phù hợp với từng loại nội dung, ví dụ Glossary, Character Rules và các thiết lập context liên quan.",
+    answerEn:
+      "A Translation Profile organizes rules and instructions for different content types, including Glossary entries, Character Rules and related context settings.",
+    keywords:
+      "profile translation style glossary character context phong cách dịch",
+    guide: "/guide/profile",
+  },
+
+  {
+    id: "manga-context",
+    category: "manga",
+    questionVi: "Manga Session có sử dụng context từ trang trước không?",
+    questionEn: "Does Manga Session use context from previous pages?",
+    answerVi:
+      "Có. Cross-page Manga Context có thể sử dụng recent context phù hợp từ những trang trước trong cùng workflow để hỗ trợ bản dịch hiện tại.",
+    answerEn:
+      "Yes. Cross-page Manga Context can use relevant recent context from previous pages in the same workflow to support the current translation.",
+    keywords:
+      "manga context previous page trang trước cross page",
+    guide: "/guide/manga",
+  },
+
+  {
+    id: "manga-name-consistency",
+    category: "manga",
+    questionVi: "Làm sao giữ tên nhân vật nhất quán?",
+    questionEn: "How can I keep character names consistent?",
+    answerVi:
+      "Nếu bạn biết mapping chính xác, hãy cấu hình Character Rules. Correction và continuity memory cũng có thể hỗ trợ các mapping đáng tin cậy khi phù hợp. Automatic Character Consistency vẫn đang được phát triển.",
+    answerEn:
+      "If you know the correct mapping, configure Character Rules. Corrections and continuity memory can also support trusted mappings when applicable. Automatic Character Consistency is still in development.",
+    keywords:
+      "character name consistency tên nhân vật continuity rule mapping",
+    guide: "/guide/profile?tab=characters",
+  },
+
+  {
+    id: "manga-one-bubble",
+    category: "manga",
+    questionVi: "Nếu chỉ một bubble manga bị sai thì sao?",
+    questionEn: "What if only one manga bubble is wrong?",
+    answerVi:
+      "Kiểm tra OCR của chính bubble đó trước. Nếu OCR đúng nhưng translation sai, correction nên được áp dụng vào đúng block thay vì dịch lại toàn bộ trang.",
+    answerEn:
+      "Check the OCR for that specific bubble first. If OCR is correct but the translation is wrong, apply a correction to the affected block instead of retranslating the whole page.",
+    keywords:
+      "bubble manga block correction wrong sai một bubble",
+    guide: "/guide/manga",
+  },
+
+  {
+    id: "pdf-text-or-ocr",
+    category: "documents",
+    questionVi: "Khi nào dùng PDF Text và khi nào dùng PDF OCR?",
+    questionEn: "When should I use PDF Text versus PDF OCR?",
+    answerVi:
+      "Nếu PDF có selectable text, ưu tiên PDF Text. Nếu tài liệu là bản scan hoặc mỗi trang thực chất là ảnh, dùng PDF OCR.",
+    answerEn:
+      "If the PDF contains selectable text, prefer PDF Text. If it is a scan or each page is effectively an image, use PDF OCR.",
+    keywords:
+      "pdf text pdf ocr scan scanned selectable document tài liệu",
+    guide: "/guide/documents",
+  },
+
+  {
+    id: "txt-ocr",
+    category: "documents",
+    questionVi: "TXT có cần OCR không?",
+    questionEn: "Does TXT require OCR?",
+    answerVi:
+      "Không. TXT là plain text nên có thể đọc trực tiếp mà không cần OCR.",
+    answerEn:
+      "No. TXT is plain text and can be read directly without OCR.",
+    keywords:
+      "txt ocr plain text document",
+    guide: "/guide/documents?mode=txt",
+  },
+
+  {
+    id: "epub-workflow",
+    category: "documents",
+    questionVi: "EPUB được xử lý như thế nào?",
+    questionEn: "How is EPUB handled?",
+    answerVi:
+      "EPUB phù hợp với ebook và nội dung chia theo chapter. Workflow tập trung vào việc đọc text trực tiếp và duy trì context phù hợp trong quá trình đọc.",
+    answerEn:
+      "EPUB is suited to ebooks and chapter-based content. The workflow focuses on reading text directly while maintaining relevant context during reading.",
+    keywords:
+      "epub ebook chapter document reader",
+    guide: "/guide/documents?mode=epub",
+  },
+
+  {
+    id: "glossary",
+    category: "profiles",
+    questionVi: "Glossary khác Character Rules như thế nào?",
+    questionEn: "How is Glossary different from Character Rules?",
+    answerVi:
+      "Glossary phù hợp với thuật ngữ và cách dịch cố định. Character Rules tập trung vào nhân vật, tên gọi, alias và cách biểu diễn tên mà bạn muốn giữ nhất quán.",
+    answerEn:
+      "Glossary is suited to terminology and fixed translations. Character Rules focus on characters, names, aliases and how those names should remain consistent.",
+    keywords:
+      "glossary character rules difference thuật ngữ tên nhân vật alias",
+    guide: "/guide/profile",
+  },
+
+  {
+    id: "profile-per-content",
+    category: "profiles",
+    questionVi: "Có nên dùng một Profile cho tất cả nội dung không?",
+    questionEn: "Should I use one Profile for every kind of content?",
+    answerVi:
+      "Không nhất thiết. Manga, novel và technical content có thể có terminology, nhân vật và style khác nhau nên tách Profile thường dễ kiểm soát hơn.",
+    answerEn:
+      "Not necessarily. Manga, novels and technical content can have different terminology, characters and styles, so separate Profiles are often easier to control.",
+    keywords:
+      "profile manga novel technical separate content",
+    guide: "/guide/profile",
+  },
+
+  {
+    id: "learning-vocabulary",
+    category: "learning",
+    questionVi: "Learning có thể lưu Vocabulary không?",
+    questionEn: "Can Learning save Vocabulary?",
+    answerVi:
+      "Có. Workflow Learning hỗ trợ Vocabulary và có thể giữ từ cùng thông tin liên quan và context từ nội dung bạn đang đọc.",
+    answerEn:
+      "Yes. The Learning workflow supports Vocabulary and can preserve words with related information and context from what you are reading.",
+    keywords:
+      "learning vocabulary word từ vựng save lưu",
+    guide: "/guide/learning?tab=vocabulary",
+  },
+
+  {
+    id: "learning-review",
+    category: "learning",
+    questionVi: "Review / SRS dùng để làm gì?",
+    questionEn: "What is Review / SRS for?",
+    answerVi:
+      "Review đưa những nội dung cần học trở lại để ôn tập. Cách hiển thị và workflow có thể tiếp tục thay đổi khi AitraNova phát triển.",
+    answerEn:
+      "Review brings study material back for revision. Its presentation and workflow may continue to evolve as AitraNova develops.",
+    keywords:
+      "review srs learning again hard good ôn tập",
+    guide: "/guide/learning?tab=review",
+  },
+];
+
+const categories = [
+  {
+    id: "all",
+    vi: "Tất cả",
+    en: "All",
+  },
+  {
+    id: "getting-started",
+    vi: "Bắt đầu",
+    en: "Getting Started",
+  },
+  {
+    id: "translation",
+    vi: "Dịch",
+    en: "Translation",
+  },
+  {
+    id: "manga",
+    vi: "Manga",
+    en: "Manga",
+  },
+  {
+    id: "documents",
+    vi: "Tài liệu",
+    en: "Documents",
+  },
+  {
+    id: "profiles",
+    vi: "Profiles",
+    en: "Profiles",
+  },
+  {
+    id: "learning",
+    vi: "Learning",
+    en: "Learning",
+  },
+];
+---
+
+<section
+  class="faq-explorer"
+  data-faq-explorer
+>
+
+  <div class="faq-search">
+
+    <span>⌕</span>
+
+    <input
+      type="search"
+      data-faq-search
+      placeholder="Tìm: OCR, Manga, PDF, Profile..."
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Search FAQ"
+    />
+
+    <kbd>/</kbd>
+
+    <button
+      type="button"
+      data-faq-clear
+      aria-label="Clear FAQ search"
+      hidden
+    >
+      ×
+    </button>
+
+  </div>
+
+
+  <div class="faq-categories">
+
+    {
+      categories.map((category, index) => (
+
+        <button
+          type="button"
+          class={index === 0 ? "active" : ""}
+          data-faq-category={category.id}
+          aria-pressed={index === 0 ? "true" : "false"}
+        >
+          <span
+            data-i18n
+            data-vi={category.vi}
+            data-en={category.en}
+          >
+            {category.vi}
+          </span>
+        </button>
+
+      ))
+    }
+
+  </div>
+
+
+  <div class="faq-result-meta">
+
+    <span>
+      <strong data-faq-count>
+        {faqItems.length}
+      </strong>
+
+      <span
+        data-i18n
+        data-vi=" câu hỏi"
+        data-en=" questions"
+      >
+        {" "}câu hỏi
+      </span>
+    </span>
+
+
+    <button
+      type="button"
+      data-faq-reset
+    >
+      <span
+        data-i18n
+        data-vi="Đặt lại"
+        data-en="Reset"
+      >
+        Đặt lại
+      </span>
+    </button>
+
+  </div>
+
+
+  <div class="faq-list">
+
+    {
+      faqItems.map((item) => (
+
+        <details
+          class="faq-item"
+          id={item.id}
+          data-faq-item
+          data-category={item.category}
+          data-search={`${item.questionVi} ${item.questionEn} ${item.answerVi} ${item.answerEn} ${item.keywords}`}
+        >
+
+          <summary>
+
+            <span class="faq-number">
+              ?
+            </span>
+
+            <div>
+              <strong
+                data-i18n
+                data-vi={item.questionVi}
+                data-en={item.questionEn}
+              >
+                {item.questionVi}
+              </strong>
+            </div>
+
+            <span class="faq-toggle">
+              +
+            </span>
+
+          </summary>
+
+
+          <div class="faq-answer">
+
+            <p
+              data-i18n
+              data-vi={item.answerVi}
+              data-en={item.answerEn}
+            >
+              {item.answerVi}
+            </p>
+
+
+            {
+              item.guide
+              && (
+                <a href={item.guide}>
+                  <span
+                    data-i18n
+                    data-vi="Tìm hiểu thêm"
+                    data-en="Learn more"
+                  >
+                    Tìm hiểu thêm
+                  </span>
+
+                  →
+                </a>
+              )
+            }
+
+          </div>
+
+        </details>
+
+      ))
+    }
+
+  </div>
+
+
+  <div
+    class="faq-empty"
+    data-faq-empty
+    hidden
+  >
+
+    <span>?</span>
+
+    <strong
+      data-i18n
+      data-vi="Không tìm thấy câu hỏi phù hợp."
+      data-en="No matching question found."
+    >
+      Không tìm thấy câu hỏi phù hợp.
+    </strong>
+
+    <p
+      data-i18n
+      data-vi="Thử từ khóa ngắn hơn như OCR, Manga, PDF hoặc Profile."
+      data-en="Try a shorter keyword such as OCR, Manga, PDF or Profile."
+    >
+      Thử từ khóa ngắn hơn.
+    </p>
+
+    <button
+      type="button"
+      data-faq-empty-reset
+    >
+      <span
+        data-i18n
+        data-vi="Xóa bộ lọc"
+        data-en="Clear filters"
+      >
+        Xóa bộ lọc
+      </span>
+    </button>
+
+  </div>
+
+</section>
+
+
+<script>
+  function initFaqExplorer() {
+
+    const root =
+      document.querySelector(
+        "[data-faq-explorer]"
+      );
+
+    if (!root) {
+      return;
+    }
+
+
+    const search =
+      root.querySelector(
+        "[data-faq-search]"
+      );
+
+
+    if (
+      !(search instanceof HTMLInputElement)
+    ) {
+      return;
+    }
+
+
+    const items =
+      Array.from(
+        root.querySelectorAll(
+          "[data-faq-item]"
+        )
+      );
+
+
+    const categories =
+      Array.from(
+        root.querySelectorAll(
+          "[data-faq-category]"
+        )
+      );
+
+
+    const count =
+      root.querySelector(
+        "[data-faq-count]"
+      );
+
+
+    const empty =
+      root.querySelector(
+        "[data-faq-empty]"
+      );
+
+
+    const clearButton =
+      root.querySelector(
+        "[data-faq-clear]"
+      );
+
+
+    const storageKey =
+      "aitranova-faq-category";
+
+
+    let activeCategory =
+      "all";
+
+
+    function normalizeText(
+      value
+    ) {
+
+      return String(value || "")
+        .normalize("NFD")
+        .replace(
+          /[\u0300-\u036f]/g,
+          ""
+        )
+        .toLowerCase()
+        .trim();
+
+    }
+
+
+    function updateUrl() {
+
+      const url =
+        new URL(
+          window.location.href
+        );
+
+
+      const query =
+        search.value.trim();
+
+
+      if (query) {
+        url.searchParams.set(
+          "q",
+          query
+        );
+      } else {
+        url.searchParams.delete(
+          "q"
+        );
+      }
+
+
+      if (
+        activeCategory === "all"
+      ) {
+        url.searchParams.delete(
+          "category"
+        );
+      } else {
+        url.searchParams.set(
+          "category",
+          activeCategory
+        );
+      }
+
+
+      history.replaceState(
+        null,
+        "",
+        url
+      );
+
+    }
+
+
+    function applyFilters() {
+
+      const query =
+        normalizeText(
+          search.value
+        );
+
+
+      let visible =
+        0;
+
+
+      items.forEach(
+        item => {
+
+          const category =
+            item.getAttribute(
+              "data-category"
+            )
+            || "";
+
+
+          const searchText =
+            normalizeText(
+              item.getAttribute(
+                "data-search"
+              )
+            );
+
+
+          const categoryMatch =
+            activeCategory === "all"
+            || activeCategory === category;
+
+
+          const queryMatch =
+            !query
+            || searchText.includes(
+              query
+            );
+
+
+          const show =
+            categoryMatch
+            && queryMatch;
+
+
+          item.hidden =
+            !show;
+
+
+          if (show) {
+            visible++;
+          } else if (
+            item instanceof HTMLDetailsElement
+          ) {
+            item.open =
+              false;
+          }
+
+        }
+      );
+
+
+      if (count) {
+        count.textContent =
+          String(visible);
+      }
+
+
+      if (empty) {
+        empty.hidden =
+          visible !== 0;
+      }
+
+
+      if (clearButton) {
+        clearButton.hidden =
+          !search.value;
+      }
+
+
+      updateUrl();
+
+    }
+
+
+    function setCategory(
+      category
+    ) {
+
+      activeCategory =
+        category;
+
+
+      categories.forEach(
+        button => {
+
+          const active =
+            button.getAttribute(
+              "data-faq-category"
+            )
+            === category;
+
+
+          button.classList.toggle(
+            "active",
+            active
+          );
+
+
+          button.setAttribute(
+            "aria-pressed",
+            String(active)
+          );
+
+        }
+      );
+
+
+      try {
+
+        localStorage.setItem(
+          storageKey,
+          category
+        );
+
+      } catch {}
+
+
+      applyFilters();
+
+    }
+
+
+    function resetFaq() {
+
+      search.value =
+        "";
+
+      setCategory(
+        "all"
+      );
+
+      search.focus();
+
+    }
+
+
+    search.addEventListener(
+      "input",
+      applyFilters
+    );
+
+
+    categories.forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            const category =
+              button.getAttribute(
+                "data-faq-category"
+              );
+
+
+            if (category) {
+              setCategory(
+                category
+              );
+            }
+
+          }
+        );
+
+      }
+    );
+
+
+    clearButton
+      ?.addEventListener(
+        "click",
+        () => {
+
+          search.value =
+            "";
+
+          applyFilters();
+
+          search.focus();
+
+        }
+      );
+
+
+    root.querySelector(
+      "[data-faq-reset]"
+    )
+    ?.addEventListener(
+      "click",
+      resetFaq
+    );
+
+
+    root.querySelector(
+      "[data-faq-empty-reset]"
+    )
+    ?.addEventListener(
+      "click",
+      resetFaq
+    );
+
+
+    document.addEventListener(
+      "keydown",
+      event => {
+
+        const target =
+          event.target;
+
+
+        const editing =
+          target instanceof HTMLInputElement
+          || target instanceof HTMLTextAreaElement;
+
+
+        if (
+          event.key === "/"
+          && !editing
+        ) {
+
+          event.preventDefault();
+
+          search.focus();
+
+          return;
+        }
+
+
+        if (
+          event.key === "Escape"
+          && document.activeElement === search
+        ) {
+
+          if (search.value) {
+
+            search.value =
+              "";
+
+            applyFilters();
+
+          } else {
+
+            search.blur();
+
+          }
+
+        }
+
+      }
+    );
+
+
+    const params =
+      new URLSearchParams(
+        window.location.search
+      );
+
+
+    const requestedQuery =
+      params.get("q");
+
+
+    const requestedCategory =
+      params.get(
+        "category"
+      );
+
+
+    if (requestedQuery) {
+      search.value =
+        requestedQuery;
+    }
+
+
+    const validCategory =
+      categories.some(
+        button =>
+          button.getAttribute(
+            "data-faq-category"
+          )
+          === requestedCategory
+      );
+
+
+    if (
+      requestedCategory
+      && validCategory
+    ) {
+
+      activeCategory =
+        requestedCategory;
+
+    } else {
+
+      try {
+
+        const stored =
+          localStorage.getItem(
+            storageKey
+          );
+
+
+        const storedValid =
+          categories.some(
+            button =>
+              button.getAttribute(
+                "data-faq-category"
+              )
+              === stored
+          );
+
+
+        if (
+          stored
+          && storedValid
+        ) {
+          activeCategory =
+            stored;
+        }
+
+      } catch {}
+
+    }
+
+
+    setCategory(
+      activeCategory
+    );
+
+
+    if (
+      window.location.hash
+    ) {
+
+      const id =
+        decodeURIComponent(
+          window.location.hash
+            .slice(1)
+        );
+
+
+      const item =
+        document.getElementById(
+          id
+        );
+
+
+      if (
+        item instanceof HTMLDetailsElement
+      ) {
+
+        item.hidden =
+          false;
+
+        item.open =
+          true;
+
+      }
+
+    }
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initFaqExplorer,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initFaqExplorer();
+
+  }
+</script>
+
+
+<style>
+
+  .faq-explorer {
+    margin-top: 31px;
+  }
+
+
+  .faq-search {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr auto auto;
+
+    align-items: center;
+
+    gap: 10px;
+
+    min-height: 55px;
+
+    padding:
+      0 14px;
+
+    border:
+      1px solid #c2b8cd;
+
+    border-radius: 14px;
+
+    background:
+      rgba(
+        245,
+        241,
+        248,
+        0.58
+      );
+
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease,
+      background 150ms ease;
+  }
+
+
+  .faq-search:focus-within {
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.58
+      );
+
+    background:
+      rgba(
+        248,
+        245,
+        250,
+        0.84
+      );
+
+    box-shadow:
+      0 0 0 4px
+      rgba(
+        105,
+        82,
+        238,
+        0.08
+      );
+  }
+
+
+  .faq-search > span {
+    color: #6952ee;
+
+    font-size: 16px;
+  }
+
+
+  .faq-search input {
+    width: 100%;
+
+    border: 0;
+
+    outline: 0;
+
+    background: transparent;
+
+    color: #2a2332;
+
+    font: inherit;
+
+    font-size: 10px;
+  }
+
+
+  .faq-search input::placeholder {
+    color: #92889d;
+  }
+
+
+  .faq-search kbd {
+    padding:
+      4px 7px;
+
+    border:
+      1px solid #c6bccf;
+
+    border-radius: 6px;
+
+    background: #e4deeb;
+
+    color: #7c7286;
+
+    font-size: 6px;
+  }
+
+
+  .faq-search button {
+    display: grid;
+
+    width: 26px;
+    height: 26px;
+
+    place-items: center;
+
+    border: 0;
+
+    border-radius: 7px;
+
+    background: #ded7e7;
+
+    color: #6d6476;
+
+    cursor: pointer;
+  }
+
+
+  .faq-search button[hidden] {
+    display: none;
+  }
+
+
+  .faq-categories {
+    display: flex;
+
+    flex-wrap: wrap;
+
+    gap: 6px;
+
+    margin-top: 11px;
+  }
+
+
+  .faq-categories button {
+    min-height: 31px;
+
+    padding:
+      0 11px;
+
+    border:
+      1px solid #c6bccf;
+
+    border-radius: 999px;
+
+    background:
+      rgba(
+        241,
+        236,
+        246,
+        0.5
+      );
+
+    color: #756b7f;
+
+    cursor: pointer;
+
+    font-size: 7px;
+
+    font-weight: 750;
+
+    transition:
+      transform 150ms ease,
+      border-color 150ms ease,
+      background 150ms ease,
+      color 150ms ease;
+  }
+
+
+  .faq-categories button:hover {
+    transform:
+      translateY(-1px);
+  }
+
+
+  .faq-categories button.active {
+    border-color: #6952ee;
+
+    background: #6952ee;
+
+    color: white;
+  }
+
+
+  .faq-result-meta {
+    display: flex;
+
+    align-items: center;
+
+    justify-content:
+      space-between;
+
+    gap: 15px;
+
+    margin:
+      19px 0 9px;
+
+    color: #857b90;
+
+    font-size: 7px;
+  }
+
+
+  .faq-result-meta strong {
+    color: #2c2534;
+
+    font-size: 9px;
+  }
+
+
+  .faq-result-meta button {
+    border: 0;
+
+    background: transparent;
+
+    color: #6952ee;
+
+    cursor: pointer;
+
+    font-size: 7px;
+
+    font-weight: 800;
+  }
+
+
+  .faq-list {
+    display: grid;
+
+    gap: 7px;
+  }
+
+
+  .faq-item {
+    overflow: hidden;
+
+    border:
+      1px solid #c6bdcf;
+
+    border-radius: 13px;
+
+    background:
+      rgba(
+        243,
+        239,
+        247,
+        0.54
+      );
+
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+
+  .faq-item[hidden] {
+    display: none !important;
+  }
+
+
+  .faq-item[open] {
+    border-color:
+      rgba(
+        105,
+        82,
+        238,
+        0.4
+      );
+
+    box-shadow:
+      0 10px 27px
+      rgba(
+        49,
+        37,
+        65,
+        0.055
+      );
+  }
+
+
+  .faq-item summary {
+    display: grid;
+
+    grid-template-columns:
+      auto 1fr auto;
+
+    align-items: center;
+
+    gap: 12px;
+
+    min-height: 68px;
+
+    padding:
+      11px 14px;
+
+    cursor: pointer;
+
+    list-style: none;
+  }
+
+
+  .faq-item
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+
+  .faq-number {
+    display: grid;
+
+    width: 35px;
+    height: 35px;
+
+    place-items: center;
+
+    border-radius: 10px;
+
+    background: #e3dcfb;
+
+    color: #6952ee;
+
+    font-size: 10px;
+
+    font-weight: 850;
+  }
+
+
+  .faq-item summary strong {
+    color: #2d2635;
+
+    font-size: 10px;
+
+    line-height: 1.35;
+  }
+
+
+  .faq-toggle {
+    color: #8d8397;
+
+    font-size: 15px;
+
+    transition:
+      transform 150ms ease;
+  }
+
+
+  .faq-item[open]
+  .faq-toggle {
+    transform:
+      rotate(45deg);
+  }
+
+
+  .faq-answer {
+    padding:
+      0 16px 16px 61px;
+  }
+
+
+  .faq-answer p {
+    max-width: 850px;
+
+    margin: 0;
+
+    color: #776e81;
+
+    font-size: 8px;
+
+    line-height: 1.7;
+  }
+
+
+  .faq-answer a {
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-top: 11px;
+
+    color: #6952ee;
+
+    font-size: 7px;
+
+    font-weight: 800;
+  }
+
+
+  .faq-empty {
+    margin-top: 10px;
+
+    padding:
+      39px 20px;
+
+    border:
+      1px dashed #c2b8cd;
+
+    border-radius: 14px;
+
+    text-align: center;
+  }
+
+
+  .faq-empty[hidden] {
+    display: none;
+  }
+
+
+  .faq-empty > span {
+    display: grid;
+
+    width: 41px;
+    height: 41px;
+
+    place-items: center;
+
+    margin:
+      0 auto 10px;
+
+    border-radius: 11px;
+
+    background: #e3ddea;
+
+    color: #776d82;
+
+    font-size: 15px;
+  }
+
+
+  .faq-empty strong {
+    display: block;
+
+    font-size: 10px;
+  }
+
+
+  .faq-empty p {
+    margin:
+      5px 0 12px;
+
+    color: #7d7387;
+
+    font-size: 7px;
+  }
+
+
+  .faq-empty button {
+    min-height: 32px;
+
+    padding:
+      0 11px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background: #6952ee;
+
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 7px;
+
+    font-weight: 800;
+  }
+
+
+  @media (max-width: 560px) {
+
+    .faq-search kbd {
+      display: none;
+    }
+
+
+    .faq-search {
+      grid-template-columns:
+        auto 1fr auto;
+    }
+
+
+    .faq-answer {
+      padding:
+        0 13px 14px;
+    }
+
+
+    .faq-toggle {
+      display: none;
+    }
+
+
+    .faq-item summary {
+      grid-template-columns:
+        auto 1fr;
+    }
+
+  }
+
+</style>

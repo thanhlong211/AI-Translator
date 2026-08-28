@@ -1,0 +1,326 @@
+<script>
+  function initFeaturesPremium() {
+    const page =
+      document.querySelector(".features-v8")
+      || document.querySelector(
+        "main"
+      );
+
+    if (
+      !(page instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    if (
+      page.dataset.featuresPremiumReady
+      === "true"
+    ) {
+      return;
+    }
+
+    page.dataset.featuresPremiumReady =
+      "true";
+
+    page.classList.add(
+      "features-premium"
+    );
+
+
+    /* ============================================
+       HERO
+       ============================================ */
+
+    const sections =
+      Array.from(
+        page.children
+      ).filter(
+        item =>
+          item instanceof HTMLElement
+          && item.tagName === "SECTION"
+      );
+
+
+    const hero =
+      sections[0];
+
+
+    if (
+      hero instanceof HTMLElement
+    ) {
+
+      hero.classList.add(
+        "features-premium-hero"
+      );
+
+
+      const effects =
+        document.createElement(
+          "div"
+        );
+
+      effects.className =
+        "features-premium-effects";
+
+      effects.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      effects.innerHTML = `
+        <div class="features-orb features-orb-a"></div>
+        <div class="features-orb features-orb-b"></div>
+        <div class="features-orb features-orb-c"></div>
+        <div class="features-grid"></div>
+        <div class="features-pointer-light"></div>
+      `;
+
+      hero.insertBefore(
+        effects,
+        hero.firstChild
+      );
+
+    }
+
+
+    /* ============================================
+       SECTION REVEAL
+       ============================================ */
+
+    sections
+      .slice(1)
+      .forEach(
+        section => {
+
+          section.classList.add(
+            "features-premium-section"
+          );
+
+        }
+      );
+
+
+    const reveal =
+      Array.from(
+        page.querySelectorAll(
+          [
+            ".features-premium-section",
+            ".feature-explorer",
+            "[class*='feature-card']",
+            "[class*='feature-panel']",
+            "[class*='showcase']",
+          ].join(",")
+        )
+      );
+
+
+    const reducedMotion =
+      window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+      );
+
+
+    if (
+      reducedMotion.matches
+      || !(
+        "IntersectionObserver"
+        in window
+      )
+    ) {
+
+      reveal.forEach(
+        element =>
+          element.classList.add(
+            "features-premium-visible"
+          )
+      );
+
+    } else {
+
+      const observer =
+        new IntersectionObserver(
+          entries => {
+
+            entries.forEach(
+              entry => {
+
+                if (
+                  !entry.isIntersecting
+                ) {
+                  return;
+                }
+
+                entry.target
+                  .classList.add(
+                    "features-premium-visible"
+                  );
+
+                observer.unobserve(
+                  entry.target
+                );
+
+              }
+            );
+
+          },
+          {
+            threshold: 0.1,
+            rootMargin:
+              "0px 0px -6% 0px",
+          }
+        );
+
+
+      reveal.forEach(
+        element => {
+
+          element.classList.add(
+            "features-premium-reveal"
+          );
+
+          observer.observe(
+            element
+          );
+
+        }
+      );
+
+    }
+
+
+    /* ============================================
+       POINTER GLOW
+       ============================================ */
+
+    if (
+      hero instanceof HTMLElement
+      && !reducedMotion.matches
+      && window.matchMedia(
+        "(pointer: fine)"
+      ).matches
+    ) {
+
+      let frame = null;
+
+
+      hero.addEventListener(
+        "pointermove",
+        event => {
+
+          if (frame) {
+            cancelAnimationFrame(
+              frame
+            );
+          }
+
+          frame =
+            requestAnimationFrame(
+              () => {
+
+                const rect =
+                  hero.getBoundingClientRect();
+
+                const x =
+                  (
+                    (
+                      event.clientX
+                      - rect.left
+                    )
+                    / rect.width
+                  )
+                  * 100;
+
+                const y =
+                  (
+                    (
+                      event.clientY
+                      - rect.top
+                    )
+                    / rect.height
+                  )
+                  * 100;
+
+                hero.style.setProperty(
+                  "--features-pointer-x",
+                  `${x}%`
+                );
+
+                hero.style.setProperty(
+                  "--features-pointer-y",
+                  `${y}%`
+                );
+
+              }
+            );
+
+        },
+        {
+          passive: true,
+        }
+      );
+
+    }
+
+
+    /* ============================================
+       FEATURE TAB MICRO MOTION
+       ============================================ */
+
+    page.querySelectorAll(
+      [
+        "[data-feature-tab]",
+        ".feature-explorer-tabs button",
+      ].join(",")
+    )
+    .forEach(
+      button => {
+
+        button.addEventListener(
+          "click",
+          () => {
+
+            button.animate?.(
+              [
+                {
+                  transform:
+                    "scale(.97)",
+                },
+                {
+                  transform:
+                    "scale(1)",
+                },
+              ],
+              {
+                duration: 180,
+                easing: "ease-out",
+              }
+            );
+
+          }
+        );
+
+      }
+    );
+
+  }
+
+
+  if (
+    document.readyState
+    === "loading"
+  ) {
+
+    document.addEventListener(
+      "DOMContentLoaded",
+      initFeaturesPremium,
+      {
+        once: true,
+      }
+    );
+
+  } else {
+
+    initFeaturesPremium();
+
+  }
+</script>

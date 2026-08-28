@@ -1,0 +1,522 @@
+/* =========================================================
+   AITRANOVA V10.10C
+   DOWNLOAD FINAL RHYTHM
+   Exact DOM only.
+   ========================================================= */
+
+
+/* =========================================================
+   BETA SOFTWARE
+   Light section after dark SYSTEM.
+   ========================================================= */
+
+.download-v8
+.download-beta {
+  position: relative;
+
+  border-top:
+    1px solid
+    rgba(93, 65, 125, 0.08) !important;
+
+  background:
+    radial-gradient(
+      circle at 84% 20%,
+      rgba(170, 58, 218, 0.08),
+      transparent 27%
+    ),
+    linear-gradient(
+      135deg,
+      #d8d1e2 0%,
+      #e1dae9 52%,
+      #d4cddd 100%
+    ) !important;
+}
+
+
+/* =========================================================
+   BETA CARD
+   ========================================================= */
+
+.download-v8
+.download-beta
+.beta-card {
+  border:
+    1px solid
+    rgba(117, 82, 145, 0.22) !important;
+
+  border-radius:
+    18px !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      #faf7fb 0%,
+      #f0eaf4 100%
+    ) !important;
+
+  box-shadow:
+    0 18px 40px
+    rgba(54, 35, 72, 0.09) !important;
+
+  color:
+    #271d30 !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.download-v8
+.download-beta
+.beta-card:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(165, 74, 201, 0.34) !important;
+
+  box-shadow:
+    0 23px 46px
+    rgba(54, 35, 72, 0.13) !important;
+}
+
+
+/* =========================================================
+   BETA SYMBOL
+   ========================================================= */
+
+.download-v8
+.download-beta
+.beta-symbol {
+  border:
+    1px solid
+    rgba(223, 164, 255, 0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8f26cf 0%,
+      #ad2ce1 52%,
+      #c642ef 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 10px 25px
+    rgba(148, 39, 198, 0.27) !important;
+}
+
+
+/* BETA SOFTWARE label */
+
+.download-v8
+.download-beta
+.beta-card small {
+  color:
+    #8d2ab7 !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    900 !important;
+}
+
+
+/* Heading */
+
+.download-v8
+.download-beta
+.beta-card h2 {
+  color:
+    #281c31 !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* Description */
+
+.download-v8
+.download-beta
+.beta-card p {
+  color:
+    #605469 !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    500 !important;
+}
+
+
+/* =========================================================
+   BETA LINKS
+   ========================================================= */
+
+.download-v8
+.download-beta
+.beta-links a {
+  border:
+    1px solid
+    rgba(105, 77, 129, 0.18) !important;
+
+  border-radius:
+    9px !important;
+
+  background:
+    #ffffff !important;
+
+  color:
+    #6044cf !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    800 !important;
+
+  box-shadow:
+    0 7px 17px
+    rgba(53, 34, 70, 0.06) !important;
+
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease,
+    color 160ms ease !important;
+}
+
+
+.download-v8
+.download-beta
+.beta-links a:hover {
+  transform:
+    translateY(-2px);
+
+  border-color:
+    rgba(116, 74, 211, 0.30) !important;
+
+  background:
+    #f3edff !important;
+
+  color:
+    #4f32bd !important;
+}
+
+
+/* Changelog gets magenta accent */
+
+.download-v8
+.download-beta
+.beta-links
+a[href="/changelog"] {
+  border-color:
+    rgba(170, 60, 211, 0.23) !important;
+
+  color:
+    #922ab6 !important;
+}
+
+
+/* Roadmap remains violet */
+
+.download-v8
+.download-beta
+.beta-links
+a[href="/roadmap"] {
+  border-color:
+    rgba(105, 80, 222, 0.22) !important;
+
+  color:
+    #6044cf !important;
+}
+
+
+/* =========================================================
+   AFTER INSTALLATION SECTION
+   ========================================================= */
+
+.download-v8
+.download-next {
+  border-top:
+    1px solid
+    rgba(159, 113, 255, 0.12) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #d5cedf,
+      #cbc4d7
+    ) !important;
+}
+
+
+/* =========================================================
+   FINAL CTA CARD
+   ========================================================= */
+
+.download-v8
+.download-next
+.download-next-card {
+  position:
+    relative;
+
+  overflow:
+    hidden;
+
+  border:
+    1px solid
+    rgba(174, 137, 255, 0.23) !important;
+
+  border-radius:
+    20px !important;
+
+  background:
+    radial-gradient(
+      circle at 82% 10%,
+      rgba(194, 62, 235, 0.18),
+      transparent 29%
+    ),
+    radial-gradient(
+      circle at 8% 100%,
+      rgba(88, 82, 224, 0.11),
+      transparent 31%
+    ),
+    linear-gradient(
+      135deg,
+      #090612 0%,
+      #120b20 38%,
+      #1b102d 68%,
+      #291541 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 24px 52px
+    rgba(36, 21, 52, 0.22) !important;
+}
+
+
+/* =========================================================
+   LABEL
+   ========================================================= */
+
+.download-v8
+.download-next
+.download-next-card
+> div:first-child
+> span {
+  color:
+    #b89dff !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    900 !important;
+}
+
+
+/* =========================================================
+   HEADING
+   ========================================================= */
+
+.download-v8
+.download-next
+.download-next-card h2 {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+
+  text-shadow:
+    0 10px 28px
+    rgba(0, 0, 0, 0.24) !important;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   Fix old #8d8696 low contrast.
+   ========================================================= */
+
+.download-v8
+.download-next
+.download-next-card p {
+  color:
+    rgba(234, 226, 243, 0.84) !important;
+
+  opacity:
+    1 !important;
+
+  font-weight:
+    500 !important;
+}
+
+
+/* =========================================================
+   FINAL BUTTON BASE
+   ========================================================= */
+
+.download-v8
+.download-next
+.download-next-card a {
+  border-radius:
+    10px !important;
+
+  opacity:
+    1 !important;
+
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    border-color 170ms ease,
+    box-shadow 170ms ease,
+    color 170ms ease !important;
+}
+
+
+.download-v8
+.download-next
+.download-next-card a:hover {
+  transform:
+    translateY(-2px);
+}
+
+
+/* =========================================================
+   PRIMARY
+   Deep magenta-purple
+   ========================================================= */
+
+.download-v8
+.download-next
+.download-next-card
+.next-primary {
+  border:
+    1px solid
+    rgba(226, 171, 255, 0.30) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8f26cf 0%,
+      #ab2ce1 52%,
+      #c342ef 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 13px 30px
+    rgba(143, 38, 198, 0.30) !important;
+}
+
+
+.download-v8
+.download-next
+.download-next-card
+.next-primary:hover {
+  background:
+    linear-gradient(
+      135deg,
+      #9d2ddd,
+      #c340ef
+    ) !important;
+
+  box-shadow:
+    0 17px 36px
+    rgba(143, 38, 198, 0.38) !important;
+}
+
+
+/* =========================================================
+   SECONDARY
+   White contrast button
+   ========================================================= */
+
+.download-v8
+.download-next
+.download-next-card
+a[href="/features"] {
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.78) !important;
+
+  background:
+    #ffffff !important;
+
+  color:
+    #5036b8 !important;
+
+  box-shadow:
+    0 11px 25px
+    rgba(0, 0, 0, 0.17) !important;
+}
+
+
+.download-v8
+.download-next
+.download-next-card
+a[href="/features"]:hover {
+  background:
+    #f1eaff !important;
+
+  color:
+    #6042d2 !important;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.download-v8
+:is(
+  .download-beta,
+  .download-next
+)
+a:focus-visible {
+  outline:
+    2px solid
+    #c08cff !important;
+
+  outline-offset:
+    3px !important;
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .download-v8
+  :is(
+    .beta-card,
+    .beta-links a,
+    .download-next-card a
+  ) {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}
