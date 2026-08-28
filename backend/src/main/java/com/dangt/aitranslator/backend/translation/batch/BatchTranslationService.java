@@ -8,6 +8,7 @@ import com.dangt.aitranslator.backend.memory.TranslationMemoryService;
 import com.dangt.aitranslator.backend.profile.ProfileService;
 import com.dangt.aitranslator.backend.profile.PromptBuilderService;
 import com.dangt.aitranslator.backend.profile.TranslationProfile;
+import com.dangt.aitranslator.backend.translation.TranslationOutputQualityGuard;
 import com.dangt.aitranslator.backend.translation.ai.TranslationAiProvider;
 import com.dangt.aitranslator.backend.translation.ai.TranslationAiResult;
 import com.dangt.aitranslator.backend.usage.AiProviderUsage;
@@ -109,9 +110,50 @@ public class BatchTranslationService {
 
         int memoryHits = 0;
 
+        /*
+         * Translation Quality V2 / Context-safe Batch Memory.
+         *
+         * In a multi-block request, neighbouring blocks are meaningful
+         * context even when request.context() is empty.
+         *
+         * An old exact personal correction must therefore not remove one
+         * block from the AI prompt and accidentally change speaker,
+         * pronoun, honorific, terminology or narrative consistency.
+         *
+         * Terminal personal-memory reuse remains allowed for a standalone
+         * single block with no meaningful external context.
+         */
+        boolean contextSensitiveBatch =
+                hasMeaningfulBatchContext(
+                        request,
+                        blocks
+                );
+
+        boolean allowTerminalMemoryHit =
+                allowTranslationMemory
+                        &&
+                !contextSensitiveBatch;
+
+        if (
+                allowTranslationMemory
+                &&
+                contextSensitiveBatch
+        ) {
+            log.debug(
+                    "TRANSLATION_MEMORY_BATCH_CONTEXT_BYPASS requestId={} blocks={} contextItems={} purpose={} sourceLanguage={} targetLanguage={} profileId={}",
+                    requestId,
+                    blocks.size(),
+                    request.context().size(),
+                    request.purpose(),
+                    request.sourceLanguage(),
+                    request.targetLanguage(),
+                    profile.getId()
+            );
+        }
+
         for (BatchTranslationBlockRequest block : blocks) {
             Optional<TranslationMemoryMatch> memoryMatch =
-                    allowTranslationMemory
+                    allowTerminalMemoryHit
                             ? memoryService.findExact(
                                     userId,
                                     profile.getId(),
@@ -207,6 +249,13 @@ public class BatchTranslationService {
                         parseAiTranslations(
                                 aiResult.text(),
                                 aiBlocks
+                        );
+
+                parsed =
+                        validateAiTranslationQuality(
+                                parsed,
+                                aiBlocks,
+                                request
                         );
 
                 parseMs =
@@ -375,6 +424,105 @@ public class BatchTranslationService {
         );
     }
 
+    private boolean hasMeaningfulBatchContext(
+            BatchTranslateRequest request,
+            List<BatchTranslationBlockRequest> blocks
+    ) {
+        /*
+         * Two or more source blocks are context for one another.
+         */
+        if (
+                blocks != null
+                &&
+                blocks.size() > 1
+        ) {
+            return true;
+        }
+
+        if (
+                request == null
+                ||
+                request.context() == null
+                ||
+                request.context().isEmpty()
+        ) {
+            return false;
+        }
+
+        for (var item : request.context()) {
+            if (item == null) {
+                continue;
+            }
+
+            String original =
+                    item.original() == null
+                            ? ""
+                            : item.original().trim();
+
+            String translated =
+                    item.effectiveTranslation() == null
+                            ? ""
+                            : item
+                                    .effectiveTranslation()
+                                    .trim();
+
+            if (
+                    !original.isBlank()
+                    ||
+                    !translated.isBlank()
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    private Map<String, String> validateAiTranslationQuality(
+            Map<String, String> parsed,
+            List<BatchTranslationBlockRequest> blocks,
+            BatchTranslateRequest request
+    ) {
+        Map<String, String> validated =
+                new LinkedHashMap<>();
+
+        for (BatchTranslationBlockRequest block : blocks) {
+            String translatedText =
+                    parsed.get(
+                            block.id()
+                    );
+
+            final String clean;
+
+            try {
+                clean =
+                        TranslationOutputQualityGuard
+                                .validateAndNormalize(
+                                        block.text(),
+                                        translatedText,
+                                        request.sourceLanguage(),
+                                        request.targetLanguage()
+                                );
+            } catch (IllegalStateException ex) {
+                throw new AiResponseFormatException(
+                        "AI batch translation vi phạm quality contract cho block "
+                                + block.id()
+                                + ": "
+                                + ex.getMessage()
+                );
+            }
+
+            validated.put(
+                    block.id(),
+                    clean
+            );
+        }
+
+        return validated;
+    }
+
+
     private List<BatchTranslationBlockRequest> normalizeAndValidateBlocks(
             List<BatchTranslationBlockRequest> input
     ) {
@@ -469,9 +617,20 @@ public class BatchTranslationService {
             List<BatchTranslationBlockRequest> expectedBlocks
     ) {
         String json =
-                stripCodeFence(
-                        safe(rawOutput)
+                safe(
+                        rawOutput
                 );
+
+        /*
+         * Batch prompt explicitly forbids markdown/code fences.
+         * Do not silently repair contract violations because that hides
+         * provider regressions.
+         */
+        if (json.contains("```")) {
+            throw new AiResponseFormatException(
+                    "AI batch translation trả về markdown/code fence thay vì JSON thuần."
+            );
+        }
 
         if (json.isBlank()) {
             throw new AiResponseFormatException(
