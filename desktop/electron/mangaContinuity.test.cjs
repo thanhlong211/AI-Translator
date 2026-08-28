@@ -10,6 +10,7 @@ const {
   createEmptyMangaContinuityState,
   isMangaContinuityCandidate,
   upsertMangaContinuityTerm,
+  observeMangaContinuityCandidate,
   buildMangaContinuityContextItem,
   mergeMangaTranslationContext,
 } = require("./mangaContinuity.cjs");
@@ -23,6 +24,7 @@ test(
       {
         version: 1,
         terms: [],
+        observations: [],
         updatedAt: null,
       }
     );
@@ -390,6 +392,348 @@ test(
         0
       ),
       []
+    );
+  }
+);
+
+
+
+test(
+  "first automatic observation does not promote",
+  () => {
+    const result =
+      observeMangaContinuityCandidate(
+        createEmptyMangaContinuityState(),
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Misaki",
+          chapterNumber: 1,
+          pageNumber: 3,
+          updatedAt: 100,
+        }
+      );
+
+    assert.equal(
+      result.reason,
+      "OBSERVED"
+    );
+
+    assert.equal(
+      result.promoted,
+      null
+    );
+
+    assert.equal(
+      result.state.terms.length,
+      0
+    );
+
+    assert.equal(
+      result.state
+        .observations.length,
+      1
+    );
+
+    assert.equal(
+      result.state
+        .observations[0]
+        .seenCount,
+      1
+    );
+  }
+);
+
+
+test(
+  "same mapping on two distinct pages promotes AUTO_REPEATED",
+  () => {
+    const first =
+      observeMangaContinuityCandidate(
+        createEmptyMangaContinuityState(),
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Misaki",
+          chapterNumber: 1,
+          pageNumber: 3,
+          updatedAt: 100,
+        }
+      );
+
+    const second =
+      observeMangaContinuityCandidate(
+        first.state,
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Misaki",
+          chapterNumber: 1,
+          pageNumber: 7,
+          updatedAt: 200,
+        }
+      );
+
+    assert.equal(
+      second.reason,
+      "PROMOTED"
+    );
+
+    assert.ok(
+      second.promoted
+    );
+
+    assert.equal(
+      second.promoted
+        .evidence,
+      "AUTO_REPEATED"
+    );
+
+    assert.equal(
+      second.promoted
+        .seenCount,
+      2
+    );
+
+    assert.equal(
+      second.state
+        .observations.length,
+      0
+    );
+  }
+);
+
+
+test(
+  "repeating on the same page does not increase evidence",
+  () => {
+    const first =
+      observeMangaContinuityCandidate(
+        createEmptyMangaContinuityState(),
+        {
+          original:
+            "魔王",
+          translatedText:
+            "Ma Vương",
+          chapterNumber: 1,
+          pageNumber: 4,
+        }
+      );
+
+    const second =
+      observeMangaContinuityCandidate(
+        first.state,
+        {
+          original:
+            "魔王",
+          translatedText:
+            "Ma Vương",
+          chapterNumber: 1,
+          pageNumber: 4,
+        }
+      );
+
+    assert.equal(
+      second.reason,
+      "OBSERVED"
+    );
+
+    assert.equal(
+      second.state
+        .terms.length,
+      0
+    );
+
+    assert.equal(
+      second.state
+        .observations[0]
+        .seenCount,
+      1
+    );
+  }
+);
+
+
+test(
+  "conflicting automatic translations block promotion",
+  () => {
+    const first =
+      observeMangaContinuityCandidate(
+        createEmptyMangaContinuityState(),
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Misaki",
+          chapterNumber: 1,
+          pageNumber: 1,
+        }
+      );
+
+    const conflict =
+      observeMangaContinuityCandidate(
+        first.state,
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Mỹ Saki",
+          chapterNumber: 1,
+          pageNumber: 2,
+        }
+      );
+
+    assert.equal(
+      conflict.reason,
+      "CONFLICT"
+    );
+
+    assert.equal(
+      conflict.state
+        .terms.length,
+      0
+    );
+
+    assert.equal(
+      conflict.state
+        .observations[0]
+        .conflicting,
+      true
+    );
+
+    const later =
+      observeMangaContinuityCandidate(
+        conflict.state,
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Misaki",
+          chapterNumber: 1,
+          pageNumber: 3,
+        }
+      );
+
+    assert.equal(
+      later.state
+        .terms.length,
+      0
+    );
+
+    assert.equal(
+      later.promoted,
+      null
+    );
+  }
+);
+
+
+test(
+  "USER_CORRECTION cannot be overwritten by automatic learning",
+  () => {
+    const terms =
+      upsertMangaContinuityTerm(
+        [],
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Misaki",
+          evidence:
+            "USER_CORRECTION",
+        }
+      );
+
+    const state = {
+      version: 1,
+      terms,
+      observations: [],
+      updatedAt: null,
+    };
+
+    const result =
+      observeMangaContinuityCandidate(
+        state,
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Mỹ Saki",
+          chapterNumber: 3,
+          pageNumber: 10,
+        }
+      );
+
+    assert.equal(
+      result.reason,
+      "USER_CONFIRMED_EXISTS"
+    );
+
+    assert.equal(
+      result.state
+        .terms[0]
+        .translatedText,
+      "Misaki"
+    );
+
+    assert.equal(
+      result.state
+        .terms[0]
+        .evidence,
+      "USER_CORRECTION"
+    );
+  }
+);
+
+
+test(
+  "user correction can replace an AUTO_REPEATED term",
+  () => {
+    const automatic =
+      upsertMangaContinuityTerm(
+        [],
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Mỹ Saki",
+          evidence:
+            "AUTO_REPEATED",
+          seenCount: 2,
+        }
+      );
+
+    const corrected =
+      upsertMangaContinuityTerm(
+        automatic,
+        {
+          original:
+            "美咲",
+          translatedText:
+            "Misaki",
+          evidence:
+            "USER_CORRECTION",
+        }
+      );
+
+    assert.equal(
+      corrected.length,
+      1
+    );
+
+    assert.equal(
+      corrected[0]
+        .translatedText,
+      "Misaki"
+    );
+
+    assert.equal(
+      corrected[0]
+        .evidence,
+      "USER_CORRECTION"
     );
   }
 );

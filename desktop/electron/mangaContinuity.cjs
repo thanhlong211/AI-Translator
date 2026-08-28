@@ -3,6 +3,16 @@
 const DEFAULT_MAX_TERMS = 32;
 const DEFAULT_CONTEXT_MAX_CHARS = 1750;
 
+/*
+ * Patch 8.1
+ *
+ * Auto continuity is intentionally conservative:
+ * the same exact mapping must appear on at least two
+ * different Manga pages before it may be promoted.
+ */
+const DEFAULT_AUTO_THRESHOLD = 2;
+const DEFAULT_MAX_OBSERVATIONS = 64;
+
 function normalizeText(value) {
   return String(value ?? "")
     .replace(/\r\n?/g, "\n")
@@ -52,6 +62,7 @@ function createEmptyMangaContinuityState() {
   return {
     version: 1,
     terms: [],
+    observations: [],
     updatedAt: null,
   };
 }
@@ -120,6 +131,8 @@ function upsertMangaContinuityTerm(
     chapterNumber = 1,
     pageNumber = 1,
     updatedAt = Date.now(),
+    evidence = "USER_CORRECTION",
+    seenCount = null,
   } = {},
   maxTerms = DEFAULT_MAX_TERMS
 ) {
@@ -168,7 +181,18 @@ function upsertMangaContinuityTerm(
     translatedText: target,
     vietnamese: target,
     evidence:
-      "USER_CORRECTION",
+      evidence === "AUTO_REPEATED"
+        ? "AUTO_REPEATED"
+        : "USER_CORRECTION",
+
+    ...(
+      Number(seenCount) > 0
+        ? {
+            seenCount:
+              Number(seenCount),
+          }
+        : {}
+    ),
 
     chapterNumber:
       Math.max(
@@ -189,6 +213,368 @@ function upsertMangaContinuityTerm(
 
   return next.slice(-safeLimit);
 }
+
+
+function observeMangaContinuityCandidate(
+  continuityState,
+  {
+    original,
+    translatedText,
+    chapterNumber = 1,
+    pageNumber = 1,
+    updatedAt = Date.now(),
+  } = {},
+  {
+    threshold =
+      DEFAULT_AUTO_THRESHOLD,
+    maxObservations =
+      DEFAULT_MAX_OBSERVATIONS,
+    maxTerms =
+      DEFAULT_MAX_TERMS,
+  } = {}
+) {
+  const state = {
+    version:
+      Number(
+        continuityState?.version
+      ) || 1,
+
+    terms:
+      Array.isArray(
+        continuityState?.terms
+      )
+        ? continuityState.terms.map(
+            (term) => ({
+              ...term,
+            })
+          )
+        : [],
+
+    observations:
+      Array.isArray(
+        continuityState?.observations
+      )
+        ? continuityState
+            .observations
+            .map(
+              (item) => ({
+                ...item,
+                seenPages:
+                  Array.isArray(
+                    item?.seenPages
+                  )
+                    ? [
+                        ...item
+                          .seenPages,
+                      ]
+                    : [],
+              })
+            )
+        : [],
+
+    updatedAt:
+      continuityState?.updatedAt ??
+      null,
+  };
+
+  const source =
+    normalizeText(original);
+
+  const target =
+    normalizeText(
+      translatedText
+    );
+
+  if (
+    !isMangaContinuityCandidate(
+      source,
+      target
+    )
+  ) {
+    return {
+      state,
+      promoted: null,
+      reason:
+        "NOT_CANDIDATE",
+    };
+  }
+
+  const existingTerm =
+    state.terms.find(
+      (term) =>
+        normalizeText(
+          term?.original
+        ) === source
+    );
+
+  /*
+   * Stable continuity must never be silently rewritten by
+   * automatic observations. This is especially important for
+   * USER_CORRECTION evidence.
+   */
+  if (existingTerm) {
+    return {
+      state,
+      promoted: null,
+      reason:
+        existingTerm.evidence ===
+        "USER_CORRECTION"
+          ? "USER_CONFIRMED_EXISTS"
+          : "TERM_ALREADY_EXISTS",
+    };
+  }
+
+  const safeChapter =
+    Math.max(
+      1,
+      Number(chapterNumber) || 1
+    );
+
+  const safePage =
+    Math.max(
+      1,
+      Number(pageNumber) || 1
+    );
+
+  const pageKey =
+    `${safeChapter}:${safePage}`;
+
+  const now =
+    Number(updatedAt) ||
+    Date.now();
+
+  const observationIndex =
+    state.observations
+      .findIndex(
+        (item) =>
+          normalizeText(
+            item?.original
+          ) === source
+      );
+
+  let observation;
+
+  if (observationIndex < 0) {
+    observation = {
+      original:
+        source,
+
+      translatedText:
+        target,
+
+      seenPages:
+        [pageKey],
+
+      seenCount:
+        1,
+
+      conflicting:
+        false,
+
+      firstSeenChapter:
+        safeChapter,
+
+      firstSeenPage:
+        safePage,
+
+      lastSeenChapter:
+        safeChapter,
+
+      lastSeenPage:
+        safePage,
+
+      updatedAt:
+        now,
+    };
+
+    state.observations.push(
+      observation
+    );
+  } else {
+    observation =
+      state.observations[
+        observationIndex
+      ];
+
+    /*
+     * One conflicting AI translation is enough to prevent
+     * automatic promotion for this source in the current
+     * Manga Session.
+     */
+    if (
+      normalizeText(
+        observation
+          ?.translatedText
+      ) !== target
+    ) {
+      observation = {
+        ...observation,
+
+        conflicting:
+          true,
+
+        lastConflictingTranslation:
+          target,
+
+        lastSeenChapter:
+          safeChapter,
+
+        lastSeenPage:
+          safePage,
+
+        updatedAt:
+          now,
+      };
+
+      state.observations[
+        observationIndex
+      ] = observation;
+
+      state.updatedAt =
+        now;
+
+      return {
+        state,
+        promoted: null,
+        reason:
+          "CONFLICT",
+      };
+    }
+
+    const seenPages =
+      Array.from(
+        new Set([
+          ...(
+            Array.isArray(
+              observation
+                ?.seenPages
+            )
+              ? observation
+                  .seenPages
+              : []
+          ),
+          pageKey,
+        ])
+      );
+
+    observation = {
+      ...observation,
+
+      seenPages,
+
+      seenCount:
+        seenPages.length,
+
+      lastSeenChapter:
+        safeChapter,
+
+      lastSeenPage:
+        safePage,
+
+      updatedAt:
+        now,
+    };
+
+    state.observations[
+      observationIndex
+    ] = observation;
+  }
+
+  state.observations =
+    state.observations.slice(
+      -Math.max(
+        1,
+        Number(
+          maxObservations
+        ) ||
+        DEFAULT_MAX_OBSERVATIONS
+      )
+    );
+
+  state.updatedAt =
+    now;
+
+  const required =
+    Math.max(
+      2,
+      Number(threshold) ||
+      DEFAULT_AUTO_THRESHOLD
+    );
+
+  if (
+    observation.conflicting ||
+    Number(
+      observation.seenCount
+    ) < required
+  ) {
+    return {
+      state,
+      promoted: null,
+      reason:
+        "OBSERVED",
+    };
+  }
+
+  const terms =
+    upsertMangaContinuityTerm(
+      state.terms,
+      {
+        original:
+          source,
+
+        translatedText:
+          target,
+
+        chapterNumber:
+          safeChapter,
+
+        pageNumber:
+          safePage,
+
+        updatedAt:
+          now,
+
+        evidence:
+          "AUTO_REPEATED",
+
+        seenCount:
+          observation
+            .seenCount,
+      },
+      maxTerms
+    );
+
+  const promoted =
+    terms.find(
+      (term) =>
+        normalizeText(
+          term?.original
+        ) === source
+    ) || null;
+
+  state.terms =
+    terms;
+
+  /*
+   * Once promoted, the temporary observation is no longer
+   * needed. The stable term contains its evidence and count.
+   */
+  state.observations =
+    state.observations.filter(
+      (item) =>
+        normalizeText(
+          item?.original
+        ) !== source
+    );
+
+  return {
+    state,
+    promoted,
+    reason:
+      "PROMOTED",
+  };
+}
+
 
 function buildMangaContinuityContextItem(
   terms,
@@ -306,9 +692,12 @@ function mergeMangaTranslationContext(
 module.exports = {
   DEFAULT_MAX_TERMS,
   DEFAULT_CONTEXT_MAX_CHARS,
+  DEFAULT_AUTO_THRESHOLD,
+  DEFAULT_MAX_OBSERVATIONS,
   createEmptyMangaContinuityState,
   isMangaContinuityCandidate,
   upsertMangaContinuityTerm,
+  observeMangaContinuityCandidate,
   buildMangaContinuityContextItem,
   mergeMangaTranslationContext,
 };
