@@ -445,11 +445,7 @@
   border-radius:
     8px !important;
 
-  background:
-    transparent !important;
 
-  color:
-    #aea3bf !important;
 
   font-size:
     11px !important;
@@ -464,38 +460,6 @@
       150ms ease,
     box-shadow
       150ms ease;
-}
-
-
-.navbar-v96-language
-[data-lang-choice]:hover {
-  color:
-    white !important;
-}
-
-
-.navbar-v96-language
-[data-lang-choice].active,
-.navbar-v96-language
-[data-lang-choice][aria-pressed="true"] {
-  background:
-    linear-gradient(
-      135deg,
-      #6850ec,
-      #8269ff
-    ) !important;
-
-  color:
-    #ffffff !important;
-
-  box-shadow:
-    0 7px 15px
-    rgba(
-      92,
-      66,
-      222,
-      0.3
-    );
 }
 
 
@@ -1302,24 +1266,6 @@
 
   padding: 0 !important;
 
-  color:
-    #beb3ce !important;
-}
-
-
-.navbar-v96-language
-[data-lang-choice].active,
-.navbar-v96-language
-[data-lang-choice][aria-pressed="true"] {
-  background:
-    linear-gradient(
-      135deg,
-      #7658ff,
-      #9278ff
-    ) !important;
-
-  color:
-    #ffffff !important;
 }
 
 
