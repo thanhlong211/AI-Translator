@@ -21,10 +21,11 @@ export const siteConfig = {
     "AitraNova is a context-aware desktop translation app for screen translation, manga, documents and language learning.",
 
   ogImage:
-    configuredOgImage,
+    configuredOgImage
+    || "/brand/aitranova-og.png",
 
   themeColor:
-    "#ded9e9",
+    "#12091d",
 
   locale:
     "vi_VN",
