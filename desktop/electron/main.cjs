@@ -2596,6 +2596,407 @@ function getMangaPanelSessionContext() {
     }));
 }
 
+/*
+ * Translation Quality V2 / Patch 6
+ *
+ * Store one context item per translated manga page instead of one
+ * context item per speech bubble.
+ */
+function compactMangaContextText(
+  value,
+  maxChars = 1900
+) {
+  const text =
+    normalizeTranslationText(
+      value
+    );
+
+  const limit =
+    Math.max(
+      200,
+      Math.min(
+        1950,
+        Number(maxChars) || 1900
+      )
+    );
+
+  if (text.length <= limit) {
+    return text;
+  }
+
+  const separator =
+    "\n…\n";
+
+  const usable =
+    Math.max(
+      0,
+      limit -
+      separator.length
+    );
+
+  const headLength =
+    Math.floor(
+      usable * 0.35
+    );
+
+  const tailLength =
+    usable -
+    headLength;
+
+  return (
+    text.slice(
+      0,
+      headLength
+    )
+    +
+    separator
+    +
+    text.slice(
+      -tailLength
+    )
+  );
+}
+
+
+function normalizeMangaPageContextBlock(
+  block
+) {
+  const original =
+    normalizeTranslationText(
+      block?.original ||
+      block?.text
+    );
+
+  const translatedText =
+    String(
+      block?.translatedText ||
+      block?.vietnamese ||
+      ""
+    ).trim();
+
+  if (
+    !original ||
+    !translatedText
+  ) {
+    return null;
+  }
+
+  return {
+    original,
+    translatedText,
+    vietnamese:
+      translatedText,
+  };
+}
+
+
+function buildMangaPageContextEntry(
+  blocks,
+  {
+    chapterNumber = null,
+    pageNumber = null,
+    scope = "PAGE",
+    carryoverFromChapter = null,
+  } = {}
+) {
+  const normalizedBlocks =
+    (
+      Array.isArray(blocks)
+        ? blocks
+        : []
+    )
+      .map(
+        normalizeMangaPageContextBlock
+      )
+      .filter(Boolean);
+
+  if (!normalizedBlocks.length) {
+    return null;
+  }
+
+  const original =
+    compactMangaContextText(
+      normalizedBlocks
+        .map(
+          (item) =>
+            item.original
+        )
+        .join("\n")
+    );
+
+  const translatedText =
+    compactMangaContextText(
+      normalizedBlocks
+        .map(
+          (item) =>
+            item.translatedText
+        )
+        .join("\n")
+    );
+
+  if (
+    !original ||
+    !translatedText
+  ) {
+    return null;
+  }
+
+  return {
+    scope:
+      String(
+        scope ||
+        "PAGE"
+      ),
+
+    chapterNumber:
+      Math.max(
+        1,
+        Number(
+          chapterNumber ??
+          mangaPanelSession?.chapterNumber ??
+          1
+        ) || 1
+      ),
+
+    pageNumber:
+      Math.max(
+        1,
+        Number(
+          pageNumber ??
+          (
+            Number(
+              mangaPanelSession?.pageNumber ||
+              0
+            ) + 1
+          )
+        ) || 1
+      ),
+
+    carryoverFromChapter:
+      carryoverFromChapter == null
+        ? null
+        : Math.max(
+            1,
+            Number(
+              carryoverFromChapter
+            ) || 1
+          ),
+
+    blockCount:
+      normalizedBlocks.length,
+
+    blocks:
+      normalizedBlocks,
+
+    original,
+    translatedText,
+    vietnamese:
+      translatedText,
+  };
+}
+
+
+function rememberMangaPanelSessionPageContext(
+  translatedBlocks
+) {
+  if (!mangaPanelSession) {
+    return;
+  }
+
+  const contextLimit =
+    getDesktopContextItemLimit();
+
+  if (contextLimit <= 0) {
+    mangaPanelSession.context = [];
+    return;
+  }
+
+  const entry =
+    buildMangaPageContextEntry(
+      translatedBlocks,
+      {
+        chapterNumber:
+          mangaPanelSession.chapterNumber,
+
+        pageNumber:
+          Math.max(
+            1,
+            Number(
+              mangaPanelSession.pageNumber ||
+              0
+            ) + 1
+          ),
+
+        scope:
+          "PAGE",
+      }
+    );
+
+  if (!entry) {
+    return;
+  }
+
+  const items =
+    getMangaPanelSessionContext();
+
+  const last =
+    items[
+      items.length - 1
+    ];
+
+  if (
+    last &&
+    Number(
+      last.chapterNumber
+    ) ===
+      Number(
+        entry.chapterNumber
+      ) &&
+    Number(
+      last.pageNumber
+    ) ===
+      Number(
+        entry.pageNumber
+      )
+  ) {
+    items[
+      items.length - 1
+    ] = entry;
+  } else {
+    items.push(
+      entry
+    );
+  }
+
+  while (
+    items.length >
+    contextLimit
+  ) {
+    items.shift();
+  }
+
+  mangaPanelSession.context =
+    items;
+
+  mangaPanelSession.lastUsedAt =
+    Date.now();
+
+  console.log(
+    "MANGA PAGE CONTEXT STORED:",
+    {
+      chapterNumber:
+        entry.chapterNumber,
+      pageNumber:
+        entry.pageNumber,
+      blockCount:
+        entry.blockCount,
+      contextPages:
+        items.length,
+    }
+  );
+
+  notifyMangaSessionInspectorRefresh();
+}
+
+
+function getMangaChapterCarryoverContext() {
+  if (!mangaPanelSession) {
+    return [];
+  }
+
+  const contextLimit =
+    getDesktopContextItemLimit();
+
+  if (contextLimit <= 0) {
+    return [];
+  }
+
+  const currentChapter =
+    Math.max(
+      1,
+      Number(
+        mangaPanelSession.chapterNumber ||
+        1
+      )
+    );
+
+  const all =
+    getMangaPanelSessionContext();
+
+  const currentChapterPages =
+    all.filter(
+      (item) =>
+        String(
+          item?.scope ||
+          ""
+        ) === "PAGE"
+        &&
+        Number(
+          item?.chapterNumber
+        ) === currentChapter
+    );
+
+  const candidates =
+    currentChapterPages.length
+      ? currentChapterPages
+      : all;
+
+  return candidates
+    .slice(
+      -Math.min(
+        2,
+        contextLimit
+      )
+    )
+    .map(
+      (item) => ({
+        ...item,
+
+        scope:
+          "CHAPTER_CARRYOVER",
+
+        carryoverFromChapter:
+          Number(
+            item?.chapterNumber ||
+            currentChapter
+          ),
+      })
+    );
+}
+
+
+function toBackendTranslationContextItem(
+  item
+) {
+  const original =
+    compactMangaContextText(
+      item?.original,
+      1950
+    );
+
+  const translatedText =
+    compactMangaContextText(
+      item?.translatedText ||
+      item?.vietnamese,
+      1950
+    );
+
+  if (
+    !original &&
+    !translatedText
+  ) {
+    return null;
+  }
+
+  return {
+    original,
+    translatedText,
+    vietnamese:
+      translatedText,
+  };
+}
+
+
 function getMangaPanelSessionState() {
   if (!mangaPanelSession) {
     return {
@@ -2792,9 +3193,22 @@ function getMangaPanelSessionDetails() {
       getMangaPanelSessionContext()
         .map((item, index) => ({
           index: index + 1,
+          chapterNumber:
+            Number(item?.chapterNumber) ||
+            null,
           pageNumber:
             Number(item?.pageNumber) ||
             null,
+          scope:
+            String(
+              item?.scope ||
+              "LEGACY"
+            ),
+          blockCount:
+            Number(
+              item?.blockCount ||
+              0
+            ),
           original:
             normalizeTranslationText(
               item?.original
@@ -2828,7 +3242,11 @@ function resetMangaPanelSessionChapter() {
         ) + 1
       ),
     pageNumber: 0,
-    context: [],
+    /*
+     * Keep the tail of the previous chapter for continuity.
+     */
+    context:
+      getMangaChapterCarryoverContext(),
     startedAt:
       Date.now(),
     lastUsedAt:
@@ -2908,75 +3326,6 @@ function ensureMangaPanelSessionCompatible(
   }
 
   return mangaPanelSession;
-}
-
-function rememberMangaPanelSessionContext(
-  result
-) {
-  if (!mangaPanelSession) {
-    return;
-  }
-
-  const translatedText =
-    result?.translatedText ||
-    result?.vietnamese ||
-    "";
-
-  const original =
-    normalizeTranslationText(
-      result?.original
-    );
-
-  if (
-    !original ||
-    !translatedText
-  ) {
-    return;
-  }
-
-  const items =
-    getMangaPanelSessionContext();
-
-  const last =
-    items[items.length - 1];
-
-  if (
-    last?.original === original &&
-    (
-      last?.translatedText ||
-      last?.vietnamese
-    ) === translatedText
-  ) {
-    return;
-  }
-
-  items.push({
-    pageNumber:
-      Math.max(
-        1,
-        Number(
-          mangaPanelSession.pageNumber || 0
-        ) + 1
-      ),
-    original,
-    translatedText,
-    vietnamese:
-      translatedText,
-  });
-
-  const contextLimit =
-    getDesktopContextItemLimit();
-
-  while (items.length > contextLimit) {
-    items.shift();
-  }
-
-  mangaPanelSession.context =
-    items;
-  mangaPanelSession.lastUsedAt =
-    Date.now();
-
-  notifyMangaSessionInspectorRefresh();
 }
 
 function completeMangaPanelSessionPage(
@@ -9339,9 +9688,10 @@ async function translateBatchBlocks(
           .slice(
             -getDesktopContextItemLimit()
           )
-          .map((item) => ({
-            ...item,
-          }))
+          .map(
+            toBackendTranslationContextItem
+          )
+          .filter(Boolean)
       : getCurrentTranslationContext(
           profile,
           sourceLanguage,
@@ -9953,6 +10303,64 @@ async function applyOverlayCorrectionLocally(
     const nextSessionItems =
       sessionItems.map((item) => {
         if (
+          Array.isArray(
+            item?.blocks
+          )
+        ) {
+          let pageChanged =
+            false;
+
+          const nextBlocks =
+            item.blocks.map(
+              (block) => {
+                if (
+                  normalizeTranslationText(
+                    block?.original
+                  ) !== sourceText
+                ) {
+                  return block;
+                }
+
+                pageChanged =
+                  true;
+
+                sessionChanged =
+                  true;
+
+                return {
+                  ...block,
+                  translatedText:
+                    correctedTranslation,
+                  vietnamese:
+                    correctedTranslation,
+                };
+              }
+            );
+
+          if (!pageChanged) {
+            return item;
+          }
+
+          return (
+            buildMangaPageContextEntry(
+              nextBlocks,
+              {
+                chapterNumber:
+                  item.chapterNumber,
+                pageNumber:
+                  item.pageNumber,
+                scope:
+                  item.scope,
+                carryoverFromChapter:
+                  item.carryoverFromChapter,
+              }
+            )
+            ||
+            item
+          );
+        }
+
+        if (
           normalizeTranslationText(
             item?.original
           ) !== sourceText
@@ -9960,7 +10368,8 @@ async function applyOverlayCorrectionLocally(
           return item;
         }
 
-        sessionChanged = true;
+        sessionChanged =
+          true;
 
         return {
           ...item,
@@ -9973,9 +10382,13 @@ async function applyOverlayCorrectionLocally(
 
     if (sessionChanged) {
       mangaPanelSession.context =
-        nextSessionItems.slice(-getDesktopContextItemLimit());
+        nextSessionItems.slice(
+          -getDesktopContextItemLimit()
+        );
+
       mangaPanelSession.lastUsedAt =
         Date.now();
+
       notifyMangaSessionInspectorRefresh();
     }
   }
@@ -12108,19 +12521,16 @@ async function processMangaPanelTranslation({
           target
         );
 
-        rememberMangaPanelSessionContext(
-          {
-            original:
-              block.text,
-            translatedText,
-            vietnamese:
-              translatedText,
-          }
-        );
-
         return result;
       }
     );
+
+  /*
+   * One complete page consumes one context slot.
+   */
+  rememberMangaPanelSessionPageContext(
+    translatedBlocks
+  );
 
   const sessionState =
     completeMangaPanelSessionPage(
