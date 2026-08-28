@@ -418,6 +418,7 @@ public class PromptBuilderService {
                     CROSS-PAGE / CROSS-CHAPTER MANGA CONTEXT:
                     - Context có thể là các trang manga đã dịch trước đó, không nhất thiết chỉ là một câu thoại.
                     - Dùng context để giữ ổn định tên nhân vật, đại từ, cách xưng hô, honorific, thuật ngữ và giọng thoại giữa các trang.
+                    - Nếu context có nhãn [MANGA_CONTINUITY USER_CONFIRMED], đó là mapping dài hạn đã được user xác nhận; ưu tiên nó cao hơn recent page context để giữ tên/thuật ngữ nhất quán, nhưng vẫn thấp hơn source hiện tại, Character Rules và Glossary bắt buộc.
                     - Một số context đầu chapter mới có thể là phần cuối chapter trước; chỉ dùng chúng cho tính nhất quán dài hạn, không giả định scene hiện tại giống scene cũ.
                     - Nội dung context KHÔNG thuộc output hiện tại và tuyệt đối không được chép thêm vào translatedText.
                     - Khi context cũ mâu thuẫn rõ ràng với source hiện tại, source hiện tại luôn được ưu tiên.
