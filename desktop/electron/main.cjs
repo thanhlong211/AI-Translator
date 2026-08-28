@@ -2661,6 +2661,12 @@ function compactMangaContextText(
 function normalizeMangaPageContextBlock(
   block
 ) {
+  const id =
+    String(
+      block?.id ||
+      ""
+    ).trim();
+
   const original =
     normalizeTranslationText(
       block?.original ||
@@ -2682,6 +2688,19 @@ function normalizeMangaPageContextBlock(
   }
 
   return {
+    /*
+     * Patch 6.2
+     *
+     * Keep the concrete Manga overlay block id inside the local
+     * page-context metadata so an edited bubble can rebuild only
+     * its own page/block context.
+     *
+     * toBackendTranslationContextItem() intentionally strips this
+     * metadata before sending context to the backend.
+     */
+    ...(id
+      ? { id }
+      : {}),
     original,
     translatedText,
     vietnamese:
