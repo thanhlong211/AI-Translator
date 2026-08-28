@@ -108,13 +108,17 @@
 
             <div class="manga-art">
 
-              <div class="character">
+              <div class="character mascot-character">
 
-                <div class="hair"></div>
+                <div class="mascot-glow"></div>
 
-                <div class="face"></div>
-
-                <div class="body"></div>
+                <img
+                  src="/brand/aitranova-mascot-manga.png"
+                  alt="AitraNova mascot"
+                  loading="eager"
+                  decoding="async"
+                  draggable="false"
+                />
 
               </div>
 
@@ -1146,4 +1150,389 @@
       display: none;
     }
   }
+
+
+  /* =========================================================
+     V10.13C
+     AITRANOVA MASCOT — MANGA PREVIEW
+     ========================================================= */
+
+  .manga-area {
+    background:
+      radial-gradient(
+        circle at 55% 35%,
+        rgba(136, 103, 255, 0.20),
+        transparent 38%
+      ),
+      linear-gradient(
+        145deg,
+        #eef0ff 0%,
+        #e5e4fa 40%,
+        #d8d8f0 100%
+      );
+  }
+
+
+  .manga-art {
+    overflow: hidden;
+  }
+
+
+  /* subtle manga lighting */
+
+  .manga-art::before {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+
+    content: "";
+
+    pointer-events: none;
+
+    background:
+      linear-gradient(
+        115deg,
+        rgba(255,255,255,0.30),
+        transparent 38%
+      ),
+      radial-gradient(
+        circle at 70% 30%,
+        rgba(151, 98, 255, 0.15),
+        transparent 35%
+      );
+  }
+
+
+  /* =========================================================
+     MASCOT
+     ========================================================= */
+
+  .character.mascot-character {
+    position: absolute;
+
+    z-index: 2;
+
+    right: -3%;
+    bottom: -2%;
+
+    width:
+      min(
+        90%,
+        440px
+      );
+
+    height:
+      96%;
+
+    pointer-events: none;
+
+    transform-origin:
+      center bottom;
+
+    animation:
+      mascotPreviewFloat
+      6.5s ease-in-out infinite;
+  }
+
+
+  .mascot-character img {
+    position: relative;
+
+    z-index: 2;
+
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    object-fit: contain;
+    object-position:
+      center bottom;
+
+    user-select: none;
+
+    filter:
+      drop-shadow(
+        0 18px 28px
+        rgba(55, 35, 120, 0.18)
+      )
+      drop-shadow(
+        0 0 18px
+        rgba(130, 76, 255, 0.10)
+      );
+  }
+
+
+  .mascot-glow {
+    position: absolute;
+
+    z-index: 1;
+
+    top: 15%;
+    left: 14%;
+
+    width: 72%;
+    height: 70%;
+
+    border-radius: 50%;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(139, 87, 255, 0.25),
+        rgba(174, 72, 255, 0.09) 46%,
+        transparent 72%
+      );
+
+    filter:
+      blur(24px);
+
+    animation:
+      mascotGlowPulse
+      5s ease-in-out infinite;
+  }
+
+
+  /* disable old placeholder pieces */
+
+  .mascot-character
+  :is(
+    .hair,
+    .face,
+    .body
+  ) {
+    display: none !important;
+  }
+
+
+  /* =========================================================
+     SPEECH BUBBLES
+     ========================================================= */
+
+  .manga-art
+  .bubble {
+    z-index: 6;
+
+    border:
+      1.5px solid
+      rgba(50, 45, 70, 0.88);
+
+    background:
+      rgba(255, 255, 255, 0.96);
+
+    color:
+      #1c1727;
+
+    box-shadow:
+      0 10px 26px
+      rgba(36, 27, 61, 0.10);
+
+    backdrop-filter:
+      blur(8px);
+  }
+
+
+  .manga-art
+  .bubble-a {
+    top: 50px;
+    right: 18px;
+
+    animation:
+      mascotBubbleFloatA
+      5.5s ease-in-out infinite;
+  }
+
+
+  .manga-art
+  .bubble-b {
+    bottom: 42px;
+    left: 18px;
+
+    animation:
+      mascotBubbleFloatB
+      6.2s ease-in-out infinite;
+  }
+
+
+  /* =========================================================
+     PAGE LABEL
+     ========================================================= */
+
+  .manga-area
+  .page-label {
+    border:
+      1px solid
+      rgba(103, 82, 238, 0.10);
+
+    background:
+      rgba(255, 255, 255, 0.82);
+
+    color:
+      #655c73;
+
+    box-shadow:
+      0 8px 20px
+      rgba(54, 42, 80, 0.06);
+  }
+
+
+  /* =========================================================
+     ANIMATIONS
+     ========================================================= */
+
+  @keyframes mascotPreviewFloat {
+
+    0%,
+    100% {
+      transform:
+        translate3d(
+          0,
+          0,
+          0
+        );
+    }
+
+    50% {
+      transform:
+        translate3d(
+          0,
+          -6px,
+          0
+        );
+    }
+
+  }
+
+
+  @keyframes mascotGlowPulse {
+
+    0%,
+    100% {
+      opacity: 0.65;
+
+      transform:
+        scale(0.96);
+    }
+
+    50% {
+      opacity: 1;
+
+      transform:
+        scale(1.04);
+    }
+
+  }
+
+
+  @keyframes mascotBubbleFloatA {
+
+    0%,
+    100% {
+      transform:
+        translateY(0);
+    }
+
+    50% {
+      transform:
+        translateY(-3px);
+    }
+
+  }
+
+
+  @keyframes mascotBubbleFloatB {
+
+    0%,
+    100% {
+      transform:
+        translateY(0);
+    }
+
+    50% {
+      transform:
+        translateY(3px);
+    }
+
+  }
+
+
+  /* =========================================================
+     TABLET
+     ========================================================= */
+
+  @media (
+    max-width:
+    900px
+  ) {
+
+    .character.mascot-character {
+      right: -5%;
+
+      width:
+        min(
+          94%,
+          390px
+        );
+    }
+
+  }
+
+
+  /* =========================================================
+     MOBILE
+     ========================================================= */
+
+  @media (
+    max-width:
+    700px
+  ) {
+
+    .character.mascot-character {
+      right: 0;
+      bottom: -1%;
+
+      width: 92%;
+      height: 92%;
+    }
+
+
+    .manga-art
+    .bubble-a {
+      top: 50px;
+      right: 12px;
+    }
+
+
+    .manga-art
+    .bubble-b {
+      bottom: 38px;
+      left: 12px;
+    }
+
+  }
+
+
+  /* =========================================================
+     REDUCED MOTION
+     ========================================================= */
+
+  @media (
+    prefers-reduced-motion:
+    reduce
+  ) {
+
+    .character.mascot-character,
+    .mascot-glow,
+    .manga-art
+    :is(
+      .bubble-a,
+      .bubble-b
+    ) {
+      animation:
+        none !important;
+    }
+
+  }
+
+
 </style>

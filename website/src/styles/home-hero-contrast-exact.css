@@ -1,0 +1,969 @@
+/* =========================================================
+   AITRANOVA V10.13B
+   HOME HERO — CINEMATIC NIGHT PURPLE
+   Exact DOM only
+   ========================================================= */
+
+
+/* =========================================================
+   HERO BASE
+   ========================================================= */
+
+.hero-v5 {
+  position: relative;
+  isolation: isolate;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 85% 20%,
+      rgba(113, 72, 236, 0.32),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 20% 65%,
+      rgba(166, 52, 224, 0.12),
+      transparent 32%
+    ),
+    linear-gradient(
+      125deg,
+      #090612 0%,
+      #10091d 38%,
+      #17102c 67%,
+      #26164b 100%
+    ) !important;
+
+  color: #ffffff !important;
+}
+
+
+/* subtle texture */
+
+.hero-v5::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+
+  content: "";
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      115deg,
+      transparent 0%,
+      rgba(255,255,255,0.015) 38%,
+      rgba(157,91,255,0.045) 50%,
+      transparent 66%
+    );
+
+  background-size: 220% 100%;
+
+  animation:
+    homeHeroSurfaceSweep 11s
+    linear infinite;
+}
+
+
+/* bottom fade */
+
+.hero-v5::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+
+  height: 160px;
+
+  content: "";
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      to bottom,
+      transparent,
+      rgba(128, 100, 175, 0.20)
+    );
+}
+
+
+/* keep content over effects */
+
+.hero-v5
+> * {
+  position: relative;
+  z-index: 2;
+}
+
+
+/* =========================================================
+   EXISTING ORBS
+   ========================================================= */
+
+.hero-v5
+.hero-orb {
+  opacity: 0.75 !important;
+
+  filter:
+    blur(18px);
+
+  pointer-events: none;
+}
+
+
+.hero-v5
+.hero-orb-purple {
+  background:
+    radial-gradient(
+      circle,
+      rgba(183, 73, 255, 0.36),
+      rgba(106, 68, 230, 0.13) 48%,
+      transparent 72%
+    ) !important;
+
+  animation:
+    homeHeroPurpleOrb
+    10s ease-in-out infinite;
+}
+
+
+.hero-v5
+.hero-orb-blue {
+  background:
+    radial-gradient(
+      circle,
+      rgba(91, 111, 255, 0.28),
+      rgba(90, 70, 196, 0.10) 48%,
+      transparent 72%
+    ) !important;
+
+  animation:
+    homeHeroBlueOrb
+    13s ease-in-out infinite;
+}
+
+
+/* =========================================================
+   PRODUCT CHIP
+   ========================================================= */
+
+.hero-v5
+.product-chip {
+  border:
+    1px solid
+    rgba(185, 145, 255, 0.20) !important;
+
+  background:
+    rgba(255, 255, 255, 0.94) !important;
+
+  color:
+    #3c3147 !important;
+
+  box-shadow:
+    0 11px 30px
+    rgba(0, 0, 0, 0.24),
+    0 0 24px
+    rgba(134, 79, 233, 0.08) !important;
+
+  backdrop-filter:
+    blur(14px);
+
+  animation:
+    homeHeroEnterDown
+    650ms cubic-bezier(.2,.8,.2,1)
+    both;
+}
+
+
+.hero-v5
+.product-chip b {
+  background:
+    linear-gradient(
+      135deg,
+      #ddd2ff,
+      #ead9ff
+    ) !important;
+
+  color:
+    #6e47d8 !important;
+}
+
+
+/* =========================================================
+   HEADLINE
+   ========================================================= */
+
+.hero-v5
+.hero-v5-copy h1 {
+  color:
+    #ffffff !important;
+
+  text-shadow:
+    0 10px 36px
+    rgba(0, 0, 0, 0.26) !important;
+}
+
+
+/* first line */
+
+.hero-v5
+.hero-v5-copy h1
+> span:nth-child(1) {
+  color:
+    #ffffff !important;
+
+  -webkit-text-fill-color:
+    #ffffff !important;
+
+  background:
+    none !important;
+
+  filter:
+    none !important;
+
+  opacity: 1 !important;
+
+  animation:
+    homeHeroTitleReveal
+    720ms 90ms
+    cubic-bezier(.16,.84,.28,1)
+    both;
+}
+
+
+/* second line */
+
+.hero-v5
+.hero-v5-copy h1
+> span:nth-child(2) {
+  color:
+    #f5efff !important;
+
+  -webkit-text-fill-color:
+    #f5efff !important;
+
+  background:
+    none !important;
+
+  filter:
+    none !important;
+
+  opacity: 1 !important;
+
+  animation:
+    homeHeroTitleReveal
+    720ms 180ms
+    cubic-bezier(.16,.84,.28,1)
+    both;
+}
+
+
+/* accent line */
+
+.hero-v5
+.hero-v5-copy h1
+> em {
+  display: inline-block;
+
+  background:
+    linear-gradient(
+      105deg,
+      #8a62ff 0%,
+      #a54bff 32%,
+      #c838f0 58%,
+      #8e69ff 82%,
+      #8a62ff 100%
+    ) !important;
+
+  background-size:
+    220% auto !important;
+
+  background-clip:
+    text !important;
+
+  -webkit-background-clip:
+    text !important;
+
+  color:
+    transparent !important;
+
+  -webkit-text-fill-color:
+    transparent !important;
+
+  filter:
+    drop-shadow(
+      0 12px 28px
+      rgba(159, 66, 239, 0.23)
+    ) !important;
+
+  opacity: 1 !important;
+
+  animation:
+    homeHeroTitleReveal
+      760ms 280ms
+      cubic-bezier(.16,.84,.28,1)
+      both,
+    homeHeroAccentFlow
+      6s 1.2s
+      linear infinite;
+}
+
+
+/* =========================================================
+   DESCRIPTION
+   ========================================================= */
+
+.hero-v5
+.hero-v5-copy
+> p {
+  color:
+    rgba(230, 220, 240, 0.78) !important;
+
+  opacity:
+    1 !important;
+
+  text-shadow:
+    none !important;
+
+  animation:
+    homeHeroFadeUp
+    650ms 390ms
+    cubic-bezier(.2,.8,.2,1)
+    both;
+}
+
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.hero-v5
+.hero-v5-actions {
+  animation:
+    homeHeroFadeUp
+    650ms 480ms
+    cubic-bezier(.2,.8,.2,1)
+    both;
+}
+
+
+/* PRIMARY */
+
+.hero-v5
+.hero-v5-actions
+.hero-download {
+  position: relative;
+
+  overflow: hidden;
+
+  border:
+    1px solid
+    rgba(225, 168, 255, 0.25) !important;
+
+  background:
+    linear-gradient(
+      135deg,
+      #8621cb 0%,
+      #a829e2 48%,
+      #c33aef 100%
+    ) !important;
+
+  color:
+    #ffffff !important;
+
+  box-shadow:
+    0 15px 34px
+    rgba(139, 39, 199, 0.33),
+    inset 0 1px 0
+    rgba(255,255,255,0.18) !important;
+
+  transition:
+    transform 170ms ease,
+    box-shadow 170ms ease,
+    filter 170ms ease !important;
+}
+
+
+.hero-v5
+.hero-v5-actions
+.hero-download::after {
+  position: absolute;
+
+  top: -50%;
+  left: -70%;
+
+  width: 45%;
+  height: 200%;
+
+  content: "";
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,0.26),
+      transparent
+    );
+
+  transform:
+    rotate(17deg);
+
+  animation:
+    homeHeroButtonShine
+    5.2s ease-in-out infinite;
+}
+
+
+.hero-v5
+.hero-v5-actions
+.hero-download:hover {
+  transform:
+    translateY(-3px);
+
+  filter:
+    brightness(1.07);
+
+  box-shadow:
+    0 20px 42px
+    rgba(151, 44, 216, 0.43),
+    0 0 30px
+    rgba(177, 57, 234, 0.14) !important;
+}
+
+
+/* SECONDARY */
+
+.hero-v5
+.hero-v5-actions
+.button-secondary {
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.82) !important;
+
+  background:
+    #ffffff !important;
+
+  color:
+    #33233f !important;
+
+  box-shadow:
+    0 13px 28px
+    rgba(0, 0, 0, 0.22) !important;
+
+  transition:
+    transform 170ms ease,
+    background 170ms ease,
+    color 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.hero-v5
+.hero-v5-actions
+.button-secondary span {
+  color:
+    inherit !important;
+}
+
+
+.hero-v5
+.hero-v5-actions
+.button-secondary:hover {
+  transform:
+    translateY(-3px);
+
+  background:
+    #f5edff !important;
+
+  color:
+    #6836c4 !important;
+
+  box-shadow:
+    0 18px 33px
+    rgba(0, 0, 0, 0.27) !important;
+}
+
+
+/* =========================================================
+   CAPABILITIES
+   ========================================================= */
+
+.hero-v5
+.hero-capabilities {
+  animation:
+    homeHeroFadeUp
+    700ms 570ms
+    cubic-bezier(.2,.8,.2,1)
+    both;
+}
+
+
+.hero-v5
+.hero-capabilities
+> div {
+  border:
+    1px solid
+    rgba(187, 158, 255, 0.17) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(43, 31, 64, 0.86),
+      rgba(25, 19, 40, 0.90)
+    ) !important;
+
+  box-shadow:
+    inset 0 1px 0
+      rgba(255,255,255,0.055),
+    0 12px 26px
+      rgba(0,0,0,0.18) !important;
+
+  backdrop-filter:
+    blur(14px);
+
+  opacity:
+    1 !important;
+
+  transition:
+    transform 170ms ease,
+    border-color 170ms ease,
+    background 170ms ease,
+    box-shadow 170ms ease !important;
+}
+
+
+.hero-v5
+.hero-capabilities
+> div:hover {
+  transform:
+    translateY(-4px);
+
+  border-color:
+    rgba(190, 132, 255, 0.38) !important;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(56, 37, 82, 0.94),
+      rgba(31, 23, 49, 0.96)
+    ) !important;
+
+  box-shadow:
+    0 17px 34px
+    rgba(0,0,0,0.24),
+    0 0 22px
+    rgba(150, 75, 235, 0.09) !important;
+}
+
+
+.hero-v5
+.hero-capabilities strong {
+  color:
+    #ffffff !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.hero-v5
+.hero-capabilities small {
+  color:
+    rgba(216, 206, 226, 0.67) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* icons */
+
+.hero-v5
+.capability-icon {
+  opacity:
+    1 !important;
+}
+
+
+.hero-v5
+.capability-icon.purple {
+  border:
+    1px solid
+    rgba(186, 141, 255, 0.22) !important;
+
+  background:
+    rgba(126, 81, 238, 0.18) !important;
+
+  color:
+    #b897ff !important;
+}
+
+
+.hero-v5
+.capability-icon.blue {
+  border:
+    1px solid
+    rgba(100, 153, 255, 0.20) !important;
+
+  background:
+    rgba(75, 118, 224, 0.16) !important;
+
+  color:
+    #8fb6ff !important;
+}
+
+
+.hero-v5
+.capability-icon.green {
+  border:
+    1px solid
+    rgba(86, 216, 170, 0.18) !important;
+
+  background:
+    rgba(52, 172, 134, 0.14) !important;
+
+  color:
+    #7de0bd !important;
+}
+
+
+/* =========================================================
+   PRODUCT PREVIEW
+   ========================================================= */
+
+.hero-v5
+.hero-v5-product {
+  filter:
+    drop-shadow(
+      0 28px 44px
+      rgba(0, 0, 0, 0.32)
+    );
+
+  animation:
+    homeHeroProductEnter
+      850ms 180ms
+      cubic-bezier(.16,.84,.28,1)
+      both,
+    homeHeroProductFloat
+      7s 1.2s
+      ease-in-out infinite;
+}
+
+
+.hero-v5
+.product-heading {
+  color:
+    rgba(206, 194, 221, 0.64) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+.hero-v5
+.product-heading span {
+  color:
+    rgba(206, 194, 221, 0.64) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* =========================================================
+   TRUST STRIP
+   ========================================================= */
+
+.hero-v5
+.hero-trust {
+  border-top:
+    1px solid
+    rgba(210, 190, 238, 0.22) !important;
+
+  color:
+    rgba(214, 203, 224, 0.58) !important;
+
+  animation:
+    homeHeroFadeUp
+    650ms 720ms
+    cubic-bezier(.2,.8,.2,1)
+    both;
+}
+
+
+.hero-v5
+.hero-trust
+> span {
+  color:
+    rgba(214, 203, 224, 0.56) !important;
+}
+
+
+.hero-v5
+.hero-trust b {
+  color:
+    rgba(242, 235, 248, 0.78) !important;
+}
+
+
+.hero-v5
+.hero-trust i {
+  color:
+    rgba(176, 146, 222, 0.55) !important;
+}
+
+
+/* =========================================================
+   FOCUS
+   ========================================================= */
+
+.hero-v5
+.hero-v5-actions
+a:focus-visible {
+  outline:
+    2px solid
+    #d58bff !important;
+
+  outline-offset:
+    3px !important;
+}
+
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes homeHeroFadeUp {
+  from {
+    opacity: 0;
+    transform:
+      translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0);
+  }
+}
+
+
+@keyframes homeHeroEnterDown {
+  from {
+    opacity: 0;
+    transform:
+      translateY(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translateY(0);
+  }
+}
+
+
+@keyframes homeHeroTitleReveal {
+  from {
+    opacity: 0;
+    transform:
+      translate3d(
+        0,
+        30px,
+        0
+      );
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+}
+
+
+@keyframes homeHeroAccentFlow {
+  from {
+    background-position:
+      0% center;
+  }
+
+  to {
+    background-position:
+      220% center;
+  }
+}
+
+
+@keyframes homeHeroProductEnter {
+  from {
+    opacity: 0;
+    transform:
+      translate3d(
+        34px,
+        18px,
+        0
+      )
+      scale(0.975);
+  }
+
+  to {
+    opacity: 1;
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      )
+      scale(1);
+  }
+}
+
+
+@keyframes homeHeroProductFloat {
+  0%,
+  100% {
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+
+  50% {
+    transform:
+      translate3d(
+        0,
+        -7px,
+        0
+      );
+  }
+}
+
+
+@keyframes homeHeroPurpleOrb {
+  0%,
+  100% {
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      )
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate3d(
+        38px,
+        -20px,
+        0
+      )
+      scale(1.12);
+  }
+}
+
+
+@keyframes homeHeroBlueOrb {
+  0%,
+  100% {
+    transform:
+      translate3d(
+        0,
+        0,
+        0
+      )
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translate3d(
+        -32px,
+        18px,
+        0
+      )
+      scale(1.08);
+  }
+}
+
+
+@keyframes homeHeroButtonShine {
+  0%,
+  68% {
+    left: -70%;
+  }
+
+  82%,
+  100% {
+    left: 135%;
+  }
+}
+
+
+@keyframes homeHeroSurfaceSweep {
+  from {
+    background-position:
+      220% 0;
+  }
+
+  to {
+    background-position:
+      -220% 0;
+  }
+}
+
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+
+@media (
+  prefers-reduced-motion:
+  reduce
+) {
+
+  .hero-v5,
+  .hero-v5::before,
+  .hero-v5
+  :is(
+    .hero-orb,
+    .product-chip,
+    .hero-v5-copy h1 > span,
+    .hero-v5-copy h1 > em,
+    .hero-v5-copy > p,
+    .hero-v5-actions,
+    .hero-capabilities,
+    .hero-v5-product,
+    .hero-trust,
+    .hero-download::after
+  ) {
+    animation:
+      none !important;
+  }
+
+
+  .hero-v5
+  :is(
+    .hero-v5-actions a,
+    .hero-capabilities > div
+  ) {
+    transition:
+      none !important;
+
+    transform:
+      none !important;
+  }
+
+}
