@@ -93,8 +93,33 @@ public class TranslationService {
         stageStartedAt =
                 System.nanoTime();
 
-        Optional<TranslationMemoryMatch> memoryMatch =
+        /*
+         * Translation Quality V2 / Context-safe Memory.
+         *
+         * Personal Translation Memory is authoritative only when the
+         * translation has no meaningful conversational/document context.
+         *
+         * Why:
+         * the same short source text can legitimately require a different
+         * translation depending on speaker, previous dialogue or document
+         * context. An exact source-text match alone is not enough to safely
+         * bypass the prompt in that case.
+         *
+         * We intentionally do NOT delete or mutate the memory record.
+         * With context present we simply let Prompt + Context + AI decide.
+         */
+        boolean hasMeaningfulContext =
+                hasMeaningfulTranslationContext(
+                        request
+                );
+
+        boolean allowTerminalMemoryHit =
                 allowTranslationMemory
+                        &&
+                !hasMeaningfulContext;
+
+        Optional<TranslationMemoryMatch> memoryMatch =
+                allowTerminalMemoryHit
                         ? memoryService.findExact(
                                 userId,
                                 profile.getId(),
@@ -108,6 +133,22 @@ public class TranslationService {
                 elapsedMs(
                         stageStartedAt
                 );
+
+        if (
+                allowTranslationMemory
+                &&
+                hasMeaningfulContext
+        ) {
+            log.debug(
+                    "TRANSLATION_MEMORY_CONTEXT_BYPASS requestId={} chars={} contextItems={} sourceLanguage={} targetLanguage={} profileId={}",
+                    requestId,
+                    cleanText.length(),
+                    request.context().size(),
+                    request.sourceLanguage(),
+                    request.targetLanguage(),
+                    profile.getId()
+            );
+        }
 
         if (memoryMatch.isPresent()) {
             TranslationMemoryMatch match =
@@ -328,6 +369,56 @@ public class TranslationService {
                 performance
         );
     }
+
+    private boolean hasMeaningfulTranslationContext(
+            TranslateRequest request
+    ) {
+        if (
+                request == null
+                ||
+                request.context() == null
+                ||
+                request.context().isEmpty()
+        ) {
+            return false;
+        }
+
+        for (
+                TranslationContextItem item
+                : request.context()
+        ) {
+            if (item == null) {
+                continue;
+            }
+
+            String original =
+                    item.original() == null
+                            ? ""
+                            : item.original().trim();
+
+            String translated =
+                    item.effectiveTranslation() == null
+                            ? ""
+                            : item
+                                    .effectiveTranslation()
+                                    .trim();
+
+            if (
+                    !original.isBlank()
+                    ||
+                    !translated.isBlank()
+            ) {
+                return true;
+            }
+        }
+
+        /*
+         * Empty/placeholder context items must not disable a valid
+         * Translation Memory exact hit.
+         */
+        return false;
+    }
+
 
     private long elapsedMs(
             long startedAt
