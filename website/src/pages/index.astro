@@ -72,7 +72,7 @@ import "../styles/home-hero-contrast-exact.css";
 
   <!-- HERO -->
 
-  <section class="hero-v5">
+  <section class="hero-v5 home-hero-production-lock">
 
     <div class="hero-orb hero-orb-purple"></div>
     <div class="hero-orb hero-orb-blue"></div>
@@ -333,7 +333,7 @@ import "../styles/home-hero-contrast-exact.css";
 
   <!-- HOW IT WORKS -->
 
-  <section class="how-section section">
+  <section class="how-section section home-how-production-lock">
 
     <div class="container">
 
@@ -13187,3 +13187,485 @@ import "../styles/home-hero-contrast-exact.css";
   }
 
 </style>
+
+
+
+<!-- V10.15A HOME PRODUCTION COLOR LOCK -->
+
+<style is:inline>
+
+  /* =======================================================
+     HERO — production cascade lock
+     ======================================================= */
+
+  html body
+  .home-hero-production-lock {
+    position: relative !important;
+    isolation: isolate !important;
+
+    background:
+      radial-gradient(
+        circle at 83% 18%,
+        rgba(116, 72, 239, 0.34),
+        transparent 31%
+      ),
+      radial-gradient(
+        circle at 18% 68%,
+        rgba(182, 50, 226, 0.12),
+        transparent 31%
+      ),
+      linear-gradient(
+        125deg,
+        #080511 0%,
+        #10091d 38%,
+        #18102e 68%,
+        #29164f 100%
+      ) !important;
+
+    color: #ffffff !important;
+  }
+
+
+  html body
+  .home-hero-production-lock
+  .hero-v5-copy h1 {
+    color: #ffffff !important;
+    text-shadow:
+      0 12px 34px
+      rgba(0,0,0,.28) !important;
+  }
+
+
+  html body
+  .home-hero-production-lock
+  .hero-v5-copy h1
+  > span {
+    background: none !important;
+
+    color: #ffffff !important;
+
+    -webkit-text-fill-color:
+      #ffffff !important;
+
+    filter: none !important;
+
+    opacity: 1 !important;
+  }
+
+
+  html body
+  .home-hero-production-lock
+  .hero-v5-copy h1
+  > em {
+    background:
+      linear-gradient(
+        105deg,
+        #9a6cff 0%,
+        #805cff 32%,
+        #c13ee7 61%,
+        #8d73ff 100%
+      ) !important;
+
+    background-size:
+      220% auto !important;
+
+    background-clip:
+      text !important;
+
+    -webkit-background-clip:
+      text !important;
+
+    color:
+      transparent !important;
+
+    -webkit-text-fill-color:
+      transparent !important;
+
+    filter:
+      drop-shadow(
+        0 10px 24px
+        rgba(164,72,236,.23)
+      ) !important;
+
+    opacity: 1 !important;
+
+    animation:
+      homeProductionAccent
+      7s linear infinite !important;
+  }
+
+
+  html body
+  .home-hero-production-lock
+  .hero-v5-copy
+  > p {
+    color:
+      rgba(232,224,242,.80) !important;
+
+    opacity: 1 !important;
+  }
+
+
+  /* product chip */
+
+  html body
+  .home-hero-production-lock
+  .product-chip {
+    border:
+      1px solid
+      rgba(191,151,255,.24) !important;
+
+    background:
+      rgba(255,255,255,.94) !important;
+
+    color:
+      #44364f !important;
+
+    box-shadow:
+      0 10px 26px
+      rgba(0,0,0,.22) !important;
+  }
+
+
+  /* primary CTA */
+
+  html body
+  .home-hero-production-lock
+  .hero-download {
+    border:
+      1px solid
+      rgba(225,168,255,.28) !important;
+
+    background:
+      linear-gradient(
+        135deg,
+        #8d22ce,
+        #a82be0 52%,
+        #c03ced
+      ) !important;
+
+    color:
+      #ffffff !important;
+
+    box-shadow:
+      0 15px 34px
+      rgba(145,40,203,.34) !important;
+  }
+
+
+  /* secondary CTA */
+
+  html body
+  .home-hero-production-lock
+  .button-secondary {
+    border:
+      1px solid
+      rgba(255,255,255,.82) !important;
+
+    background:
+      #ffffff !important;
+
+    color:
+      #372541 !important;
+
+    box-shadow:
+      0 12px 28px
+      rgba(0,0,0,.22) !important;
+  }
+
+
+  html body
+  .home-hero-production-lock
+  .button-secondary
+  * {
+    color:
+      inherit !important;
+  }
+
+
+  /* capability cards */
+
+  html body
+  .home-hero-production-lock
+  .hero-capabilities
+  > * {
+    border:
+      1px solid
+      rgba(185,148,255,.20) !important;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(45,31,66,.91),
+        rgba(24,18,39,.94)
+      ) !important;
+
+    color:
+      #ffffff !important;
+
+    box-shadow:
+      0 12px 28px
+      rgba(0,0,0,.20) !important;
+
+    opacity: 1 !important;
+  }
+
+
+  html body
+  .home-hero-production-lock
+  .hero-capabilities strong {
+    color:
+      #ffffff !important;
+  }
+
+
+  html body
+  .home-hero-production-lock
+  .hero-capabilities small {
+    color:
+      rgba(220,209,231,.72) !important;
+
+    opacity: 1 !important;
+  }
+
+
+  /* hero footer */
+
+  html body
+  .home-hero-production-lock
+  .hero-trust {
+    border-color:
+      rgba(213,192,239,.22) !important;
+
+    color:
+      rgba(220,208,231,.65) !important;
+  }
+
+
+  html body
+  .home-hero-production-lock
+  .hero-trust b {
+    color:
+      rgba(245,239,250,.82) !important;
+  }
+
+
+
+  /* =======================================================
+     HOW IT WORKS
+     Make this a different cool-indigo dark section.
+     ======================================================= */
+
+  html body
+  .home-how-production-lock {
+    position: relative !important;
+
+    background:
+      radial-gradient(
+        circle at 82% 15%,
+        rgba(74,100,231,.20),
+        transparent 31%
+      ),
+      radial-gradient(
+        circle at 10% 78%,
+        rgba(112,54,215,.17),
+        transparent 34%
+      ),
+      linear-gradient(
+        135deg,
+        #080d1d 0%,
+        #0d1430 40%,
+        #14183b 69%,
+        #171134 100%
+      ) !important;
+
+    color:
+      #ffffff !important;
+
+    border-top:
+      1px solid
+      rgba(131,111,245,.18) !important;
+
+    border-bottom:
+      1px solid
+      rgba(131,111,245,.16) !important;
+  }
+
+
+  html body
+  .home-how-production-lock
+  .section-label {
+    color:
+      #9e91ff !important;
+
+    opacity: 1 !important;
+  }
+
+
+  html body
+  .home-how-production-lock
+  .section-title,
+  html body
+  .home-how-production-lock
+  .section-title
+  * {
+    color:
+      #ffffff !important;
+
+    -webkit-text-fill-color:
+      #ffffff !important;
+
+    opacity: 1 !important;
+  }
+
+
+  html body
+  .home-how-production-lock
+  .how-intro p {
+    color:
+      rgba(221,225,241,.78) !important;
+
+    opacity: 1 !important;
+  }
+
+
+  html body
+  .home-how-production-lock
+  .how-intro a {
+    color:
+      #a996ff !important;
+
+    opacity: 1 !important;
+  }
+
+
+  /* step cards */
+
+  html body
+  .home-how-production-lock
+  .how-step {
+    border:
+      1px solid
+      rgba(115,137,255,.28) !important;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(27,34,73,.94),
+        rgba(18,22,54,.96)
+      ) !important;
+
+    color:
+      #ffffff !important;
+
+    box-shadow:
+      0 12px 28px
+      rgba(0,0,0,.15) !important;
+  }
+
+
+  html body
+  .home-how-production-lock
+  .how-step.active {
+    border-color:
+      rgba(153,120,255,.62) !important;
+
+    background:
+      linear-gradient(
+        145deg,
+        rgba(57,37,104,.96),
+        rgba(31,26,72,.98)
+      ) !important;
+
+    box-shadow:
+      0 15px 34px
+      rgba(62,38,151,.18) !important;
+  }
+
+
+  html body
+  .home-how-production-lock
+  .how-step strong {
+    color:
+      #ffffff !important;
+  }
+
+
+  html body
+  .home-how-production-lock
+  .how-step p {
+    color:
+      rgba(208,213,232,.70) !important;
+
+    opacity: 1 !important;
+  }
+
+
+  html body
+  .home-how-production-lock
+  .step-number {
+    background:
+      linear-gradient(
+        135deg,
+        #6749db,
+        #8557f2
+      ) !important;
+
+    color:
+      #ffffff !important;
+  }
+
+
+  /* central app workspace remains bright for contrast */
+
+  html body
+  .home-how-production-lock
+  .how-workspace {
+    border-color:
+      rgba(133,115,218,.35) !important;
+
+    filter:
+      drop-shadow(
+        0 22px 42px
+        rgba(0,0,0,.22)
+      );
+  }
+
+
+
+  /* =======================================================
+     ANIMATION
+     ======================================================= */
+
+  @keyframes homeProductionAccent {
+
+    from {
+      background-position:
+        0% center;
+    }
+
+    to {
+      background-position:
+        220% center;
+    }
+
+  }
+
+
+  @media (
+    prefers-reduced-motion:
+    reduce
+  ) {
+
+    html body
+    .home-hero-production-lock
+    .hero-v5-copy h1
+    > em {
+      animation:
+        none !important;
+    }
+
+  }
+
+</style>
+
