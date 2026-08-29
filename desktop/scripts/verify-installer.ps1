@@ -27,12 +27,12 @@ if ([string]::IsNullOrWhiteSpace($version)) {
 }
 
 if (-not $InstallerPath) {
-    $expectedName = "AI-Translator-Setup-$version-x64.exe"
+    $expectedName = "AitraNova-Setup-$version-x64.exe"
     $expectedPath = Join-Path $ReleaseDir $expectedName
     if (Test-Path $expectedPath -PathType Leaf) {
         $InstallerPath = $expectedPath
     } else {
-        $matches = @(Get-ChildItem $ReleaseDir -File -Filter "AI-Translator-Setup-*.exe" | Sort-Object LastWriteTime -Descending)
+        $matches = @(Get-ChildItem $ReleaseDir -File -Filter "AitraNova-Setup-*.exe" | Sort-Object LastWriteTime -Descending)
         if ($matches.Count -eq 0) {
             throw "NSIS installer not found in $ReleaseDir. Expected: $expectedName"
         }

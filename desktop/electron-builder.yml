@@ -1,5 +1,5 @@
 appId: com.dangt.aitranslator
-productName: AI Translator
+productName: AitraNova
 
 asar: true
 compression: normal
@@ -49,7 +49,7 @@ win:
         - x64
   # buildResources already points to electron/assets, so resolve icon from there.
   icon: icon.ico
-  executableName: AI Translator
+  executableName: AitraNova
   requestedExecutionLevel: asInvoker
 
 # Batch 15.1.3 - Windows installer. Use the assisted NSIS flow so the user can
@@ -63,8 +63,8 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: AI Translator
+  shortcutName: AitraNova
   installerIcon: icon.ico
   uninstallerIcon: icon.ico
   runAfterFinish: true
-  artifactName: "AI-Translator-Setup-${version}-${arch}.${ext}"
+  artifactName: "AitraNova-Setup-${version}-${arch}.${ext}"
