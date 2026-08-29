@@ -2438,3 +2438,470 @@ html body .roadmap-preview-v5
   }
 
 }
+/* ============================================================
+   HOME LEARNING — FINAL CONTRAST LOCK
+   Dark outer / Light cards / Dark readable text
+   ============================================================ */
+
+/* NỀN NGOÀI */
+html body .learning-deep {
+  background:
+    radial-gradient(
+      circle at 14% 10%,
+      rgba(105, 82, 238, 0.18),
+      transparent 30rem
+    ),
+    radial-gradient(
+      circle at 88% 75%,
+      rgba(62, 105, 195, 0.10),
+      transparent 28rem
+    ),
+    linear-gradient(
+      180deg,
+      #0b0714 0%,
+      #151022 52%,
+      #0b0714 100%
+    ) !important;
+
+  color: #f5effa !important;
+}
+
+
+/* ============================================================
+   HEADING NẰM NGOÀI KHUNG
+   ============================================================ */
+
+html body .learning-deep
+.learning-heading
+:is(h1, h2, h3),
+html body .learning-deep
+.learning-heading
+:is(h1, h2, h3) span {
+  color: #f5effa !important;
+  -webkit-text-fill-color: #f5effa !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+html body .learning-deep
+.learning-heading em {
+  color: #a98bff !important;
+  -webkit-text-fill-color: #a98bff !important;
+  background-image: none !important;
+}
+
+html body .learning-deep
+.learning-heading p,
+html body .learning-deep
+.learning-heading p span {
+  color: #bdb2ca !important;
+  -webkit-text-fill-color: #bdb2ca !important;
+  opacity: 1 !important;
+}
+
+html body .learning-deep
+.learning-heading .section-label,
+html body .learning-deep
+.learning-heading .section-label * {
+  color: #a98bff !important;
+  -webkit-text-fill-color: #a98bff !important;
+}
+
+
+/* ============================================================
+   CÁC KHUNG SÁNG BÊN TRONG
+   ============================================================ */
+
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  article,
+  section,
+  aside,
+  [class*="card"],
+  [class*="panel"],
+  [class*="workflow"],
+  [class*="product"],
+  [class*="dashboard"],
+  [class*="review"],
+  [class*="learning"]
+) {
+  color: #24192f !important;
+}
+
+
+/* ============================================================
+   TITLE TRONG KHUNG
+   ============================================================ */
+
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b
+),
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  article,
+  section,
+  aside,
+  div
+)
+:is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b
+) {
+  color: #24192f !important;
+  -webkit-text-fill-color: #24192f !important;
+
+  background-image: none !important;
+  text-shadow: none !important;
+
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   BODY TEXT TRONG KHUNG
+   ============================================================ */
+
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  p,
+  li,
+  label
+),
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  article,
+  section,
+  aside,
+  div
+)
+:is(
+  p,
+  li,
+  label
+) {
+  color: #554960 !important;
+  -webkit-text-fill-color: #554960 !important;
+
+  background-image: none !important;
+  text-shadow: none !important;
+
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   TEXT NHỎ / META
+   ============================================================ */
+
+html body .learning-deep
+.container
+> :not(.learning-heading)
+small {
+  color: #786c83 !important;
+  -webkit-text-fill-color: #786c83 !important;
+
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   SPAN BỊ CSS CŨ GIỮ MÀU TRẮNG
+   ============================================================ */
+
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  article,
+  section,
+  aside,
+  [class*="card"],
+  [class*="panel"],
+  [class*="workflow"]
+)
+span:not(.section-label):not([class*="icon"]):not([class*="badge"]):not([class*="status"]) {
+  color: #554960 !important;
+  -webkit-text-fill-color: #554960 !important;
+
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   WORKFLOW LỚN
+   "Một từ mới đi từ manga vào Review..."
+   ============================================================ */
+
+html body .learning-deep
+:is(
+  .learning-workflow,
+  .learning-workflow-panel,
+  .learning-flow,
+  .learning-flow-card
+)
+:is(
+  h2,
+  h3,
+  h4,
+  strong
+) {
+  color: #24192f !important;
+  -webkit-text-fill-color: #24192f !important;
+
+  background-image: none !important;
+
+  opacity: 1 !important;
+}
+
+html body .learning-deep
+:is(
+  .learning-workflow,
+  .learning-workflow-panel,
+  .learning-flow,
+  .learning-flow-card
+)
+p {
+  color: #554960 !important;
+  -webkit-text-fill-color: #554960 !important;
+
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   WORKFLOW STEP CARDS
+   ============================================================ */
+
+html body .learning-deep
+:is(
+  .learning-workflow,
+  .learning-flow,
+  [class*="workflow"]
+)
+article {
+  color: #24192f !important;
+}
+
+html body .learning-deep
+:is(
+  .learning-workflow,
+  .learning-flow,
+  [class*="workflow"]
+)
+article strong {
+  color: #24192f !important;
+  -webkit-text-fill-color: #24192f !important;
+}
+
+html body .learning-deep
+:is(
+  .learning-workflow,
+  .learning-flow,
+  [class*="workflow"]
+)
+article p {
+  color: #554960 !important;
+  -webkit-text-fill-color: #554960 !important;
+}
+
+html body .learning-deep
+:is(
+  .learning-workflow,
+  .learning-flow,
+  [class*="workflow"]
+)
+article > span {
+  color: #6547df !important;
+  -webkit-text-fill-color: #6547df !important;
+}
+
+
+/* ============================================================
+   BOTTOM BENEFIT CARDS
+   Không ghi chép thủ công / Có context thật / Ôn tập...
+   ============================================================ */
+
+html body .learning-deep article
+:is(
+  h3,
+  h4,
+  strong,
+  b
+) {
+  color: #24192f !important;
+  -webkit-text-fill-color: #24192f !important;
+
+  background-image: none !important;
+
+  opacity: 1 !important;
+}
+
+html body .learning-deep article
+:is(
+  p,
+  p span,
+  small
+) {
+  color: #554960 !important;
+  -webkit-text-fill-color: #554960 !important;
+
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   DASHBOARD / APP PREVIEW
+   ============================================================ */
+
+html body .learning-deep
+:is(
+  [class*="dashboard"],
+  [class*="learning-app"],
+  [class*="review-app"],
+  [class*="study-app"]
+)
+:is(
+  h2,
+  h3,
+  h4,
+  strong,
+  b,
+  label
+) {
+  color: #24192f !important;
+  -webkit-text-fill-color: #24192f !important;
+
+  background-image: none !important;
+
+  opacity: 1 !important;
+}
+
+html body .learning-deep
+:is(
+  [class*="dashboard"],
+  [class*="learning-app"],
+  [class*="review-app"],
+  [class*="study-app"]
+)
+:is(
+  p,
+  small,
+  li,
+  td,
+  th
+) {
+  color: #554960 !important;
+  -webkit-text-fill-color: #554960 !important;
+
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   INPUT / BUTTON / CHIP SAFETY
+   ============================================================ */
+
+html body .learning-deep
+:is(
+  input,
+  textarea,
+  select
+) {
+  color: #24192f !important;
+  -webkit-text-fill-color: #24192f !important;
+}
+
+html body .learning-deep
+:is(
+  input,
+  textarea
+)::placeholder {
+  color: #8a7e96 !important;
+}
+
+
+/* Purple accents */
+
+html body .learning-deep
+:is(
+  .section-label,
+  [class*="eyebrow"],
+  [class*="kicker"]
+) {
+  color: #6952ee !important;
+  -webkit-text-fill-color: #6952ee !important;
+}
+
+
+/* Không phá màu button */
+html body .learning-deep
+:is(
+  button,
+  a,
+  [role="button"]
+) {
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html body .learning-deep
+:is(
+  button,
+  a,
+  [role="button"]
+)
+* {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+
+/* ============================================================
+   FINAL SAFETY
+   Xóa white gradient / opacity cũ trên light surfaces
+   ============================================================ */
+
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  article,
+  section,
+  aside,
+  [class*="card"],
+  [class*="panel"],
+  [class*="workflow"]
+)
+:is(
+  h1,
+  h2,
+  h3,
+  h4,
+  strong,
+  p,
+  small
+) {
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
