@@ -1,0 +1,85 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TrustPage from "../components/TrustPage.astro";
+import "../styles/trust-pages.css";
+
+const sections = [
+  {
+    kicker: "ACCOUNT",
+    titleVi: "Thông tin tài khoản.",
+    titleEn: "Account information.",
+    bodyVi: [
+      "Khi bạn tạo hoặc sử dụng tài khoản AitraNova, dịch vụ có thể xử lý thông tin cần thiết cho đăng nhập, xác minh tài khoản, quản lý phiên và các tính năng liên quan đến tài khoản.",
+      "Bạn nên giữ thông tin đăng nhập an toàn và không chia sẻ mật khẩu hoặc mã xác minh với người khác.",
+    ],
+    bodyEn: [
+      "When you create or use an AitraNova account, the service may process information required for sign-in, account verification, session management and account-related features.",
+      "You should keep your credentials secure and never share passwords or verification codes with others.",
+    ],
+  },
+  {
+    kicker: "TRANSLATION",
+    titleVi: "Nội dung bạn yêu cầu xử lý.",
+    titleEn: "Content you ask AitraNova to process.",
+    bodyVi: [
+      "Text, hình ảnh, tài liệu hoặc nội dung OCR mà bạn đưa vào một workflow có thể được xử lý để tạo bản dịch, context, vocabulary, grammar hoặc các kết quả liên quan.",
+      "Một số workflow AI có thể cần gửi dữ liệu cần thiết tới dịch vụ AI được cấu hình cho tác vụ đó. Không nên đưa dữ liệu bí mật hoặc nhạy cảm vào một workflow nếu bạn không muốn dữ liệu đó được xử lý bởi dịch vụ liên quan.",
+    ],
+    bodyEn: [
+      "Text, images, documents or OCR content submitted to a workflow may be processed to produce translations, context, vocabulary, grammar or related results.",
+      "Some AI workflows may need to send necessary data to the AI service configured for that task. Do not submit confidential or sensitive information if you do not want it processed by the relevant service.",
+    ],
+  },
+  {
+    kicker: "DESKTOP",
+    titleVi: "Dữ liệu trên thiết bị.",
+    titleEn: "Data on your device.",
+    bodyVi: [
+      "AitraNova Desktop có thể lưu các thiết lập ứng dụng, dữ liệu hỗ trợ workflow và thông tin phiên cần thiết trên thiết bị của bạn.",
+      "Việc gỡ ứng dụng không nhất thiết đồng nghĩa mọi dữ liệu người dùng trên thiết bị sẽ tự động bị xóa.",
+    ],
+    bodyEn: [
+      "AitraNova Desktop may store application settings, workflow-supporting data and session information required on your device.",
+      "Uninstalling the application does not necessarily mean that all user data on the device will automatically be removed.",
+    ],
+  },
+  {
+    kicker: "OPERATIONS",
+    titleVi: "Vận hành và bảo mật.",
+    titleEn: "Operations and security.",
+    bodyVi: [
+      "AitraNova có thể xử lý thông tin kỹ thuật cần thiết để vận hành, phát hiện lỗi, bảo vệ tài khoản, kiểm soát quota hoặc ngăn hành vi lạm dụng.",
+      "Thời gian lưu giữ có thể khác nhau tùy loại dữ liệu và mục đích vận hành.",
+    ],
+    bodyEn: [
+      "AitraNova may process technical information necessary to operate the service, diagnose errors, protect accounts, enforce quotas or prevent abuse.",
+      "Retention periods may differ depending on the type of data and operational purpose.",
+    ],
+  },
+  {
+    kicker: "CHANGES",
+    titleVi: "Thay đổi chính sách.",
+    titleEn: "Policy changes.",
+    bodyVi: [
+      "AitraNova đang ở giai đoạn Beta. Chính sách này có thể được cập nhật khi workflow, nhà cung cấp dịch vụ hoặc cách sản phẩm xử lý dữ liệu thay đổi.",
+    ],
+    bodyEn: [
+      "AitraNova is currently in Beta. This policy may be updated as workflows, service providers or the way the product processes data changes.",
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Privacy — AitraNova"
+  description="Thông tin về cách AitraNova Beta xử lý dữ liệu tài khoản, nội dung dịch, dữ liệu desktop và thông tin vận hành."
+>
+  <TrustPage
+    kicker="PRIVACY"
+    titleVi="Quyền riêng tư và dữ liệu."
+    titleEn="Privacy and data."
+    introVi="Thông tin này mô tả cách AitraNova Beta hiện xử lý dữ liệu cần thiết cho các workflow của sản phẩm."
+    introEn="This information describes how AitraNova Beta currently handles data required by product workflows."
+    sections={sections}
+  />
+</BaseLayout>

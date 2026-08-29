@@ -60,6 +60,30 @@ const resourceLinks = [
   },
 ];
 
+const trustLinks = [
+  {
+    href: "/privacy",
+    vi: "Quyền riêng tư",
+    en: "Privacy",
+  },
+  {
+    href: "/terms",
+    vi: "Điều khoản",
+    en: "Terms",
+  },
+  {
+    href: "/security",
+    vi: "Bảo mật",
+    en: "Security",
+  },
+  {
+    href: "/system-requirements",
+    vi: "Yêu cầu hệ thống",
+    en: "System Requirements",
+  },
+];
+
+
 const quickLinks = [
   {
     href: "/guide/installation",
@@ -208,6 +232,29 @@ import "../styles/footer-exact-theme.css";
 
     </div>
 
+
+    <div class="footer-links-column">
+
+      <small>TRUST &amp; LEGAL</small>
+
+      {
+        trustLinks.map((link) => (
+
+          <a href={link.href}>
+            <span
+              data-i18n
+              data-vi={link.vi}
+              data-en={link.en}
+            >
+              {link.vi}
+            </span>
+          </a>
+
+        ))
+      }
+
+    </div>
+
   </div>
 
 
@@ -307,8 +354,8 @@ import "../styles/footer-exact-theme.css";
     grid-template-columns:
       minmax(280px, 1.5fr)
       repeat(
-        3,
-        minmax(130px, 0.65fr)
+        4,
+        minmax(120px, 0.65fr)
       );
 
     gap: 42px;

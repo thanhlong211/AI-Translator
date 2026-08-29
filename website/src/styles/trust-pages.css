@@ -1,0 +1,262 @@
+/* ============================================================
+   V10.17B — TRUST & LEGAL
+   ============================================================ */
+
+.trust-page {
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      180deg,
+      #ded9e9,
+      #d7d1e2 52%,
+      #ded9e9
+    );
+  color: #1c1828;
+}
+
+.trust-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 86px 0 72px;
+  border-bottom: 1px solid rgba(84, 66, 106, 0.12);
+}
+
+.trust-glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(10px);
+}
+
+.trust-glow-a {
+  top: -260px;
+  left: -120px;
+  width: 620px;
+  height: 620px;
+  background:
+    radial-gradient(
+      circle,
+      rgba(105, 82, 238, 0.19),
+      transparent 68%
+    );
+}
+
+.trust-glow-b {
+  right: -160px;
+  bottom: -330px;
+  width: 720px;
+  height: 720px;
+  background:
+    radial-gradient(
+      circle,
+      rgba(174, 77, 190, 0.15),
+      transparent 70%
+    );
+}
+
+.trust-hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: 900px;
+}
+
+.trust-kicker {
+  display: inline-flex;
+  min-height: 29px;
+  align-items: center;
+  padding: 0 11px;
+  border: 1px solid rgba(105, 82, 238, 0.22);
+  border-radius: 999px;
+  background: rgba(243, 239, 249, 0.58);
+  color: #6952ee;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+.trust-hero h1 {
+  max-width: 820px;
+  margin: 22px 0 17px;
+  color: #1e1928;
+  font-size:
+    clamp(
+      44px,
+      7vw,
+      76px
+    );
+  line-height: 0.98;
+  letter-spacing: -0.055em;
+}
+
+.trust-hero > .container > p,
+.trust-hero-inner > p {
+  max-width: 720px;
+  margin: 0;
+  color: #5f576a;
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.trust-updated {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  color: #82788e;
+  font-size: 12px;
+}
+
+.trust-updated strong {
+  color: #453a51;
+}
+
+.trust-content {
+  padding: 72px 0 96px;
+}
+
+.trust-layout {
+  display: grid;
+  grid-template-columns:
+    minmax(210px, 0.32fr)
+    minmax(0, 1fr);
+  align-items: start;
+  gap: 48px;
+}
+
+.trust-index {
+  position: sticky;
+  top: 105px;
+  padding: 22px;
+  border: 1px solid #c9c0d2;
+  border-radius: 18px;
+  background: rgba(243, 239, 249, 0.58);
+  box-shadow:
+    0 18px 50px
+    rgba(48, 35, 67, 0.07);
+}
+
+.trust-index small {
+  display: block;
+  color: #6952ee;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.trust-index strong {
+  display: block;
+  margin-top: 10px;
+  color: #282130;
+  font-size: 17px;
+}
+
+.trust-index p {
+  margin: 10px 0 0;
+  color: #71697e;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.trust-sections {
+  display: grid;
+  gap: 18px;
+}
+
+.trust-section {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 20px;
+  padding: 28px;
+  border: 1px solid #c9c0d2;
+  border-radius: 20px;
+  background:
+    rgba(
+      243,
+      239,
+      249,
+      0.72
+    );
+  box-shadow:
+    0 20px 55px
+    rgba(48, 35, 67, 0.07);
+}
+
+.trust-section-number {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: #e7e0ff;
+  color: #6952ee;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.trust-section > div > span {
+  color: #6952ee;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.trust-section h2 {
+  margin: 7px 0 13px;
+  color: #282130;
+  font-size:
+    clamp(
+      22px,
+      3vw,
+      31px
+    );
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.trust-section-copy {
+  display: grid;
+  gap: 11px;
+}
+
+.trust-section-copy p {
+  margin: 0;
+  color: #625a6e;
+  font-size: 14px;
+  line-height: 1.72;
+}
+
+@media (max-width: 820px) {
+  .trust-hero {
+    padding: 66px 0 56px;
+  }
+
+  .trust-layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .trust-index {
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .trust-content {
+    padding: 48px 0 72px;
+  }
+
+  .trust-section {
+    grid-template-columns: 1fr;
+    padding: 22px 18px;
+  }
+
+  .trust-section-number {
+    width: 36px;
+    height: 36px;
+  }
+
+  .trust-hero h1 {
+    font-size: 42px;
+  }
+}

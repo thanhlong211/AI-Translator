@@ -1,0 +1,85 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TrustPage from "../components/TrustPage.astro";
+import "../styles/trust-pages.css";
+
+const sections = [
+  {
+    kicker: "WEB",
+    titleVi: "Website production sử dụng HTTPS.",
+    titleEn: "The production website uses HTTPS.",
+    bodyVi: [
+      "Website chính thức của AitraNova được cung cấp qua HTTPS tại aitranova.com.",
+      "Installer production được phân phối qua GitHub Releases thay vì nhúng trực tiếp binary lớn vào website.",
+    ],
+    bodyEn: [
+      "The official AitraNova website is served over HTTPS at aitranova.com.",
+      "Production installers are distributed through GitHub Releases rather than embedding large binaries directly in the website.",
+    ],
+  },
+  {
+    kicker: "INTEGRITY",
+    titleVi: "Xác minh installer bằng SHA-256.",
+    titleEn: "Verify the installer with SHA-256.",
+    bodyVi: [
+      "Release 1.0.0 Beta công bố SHA-256 để người dùng có thể so sánh file đã tải với release chính thức.",
+      "SHA-256 của AitraNova-Setup-1.0.0-x64.exe là 91A2FF19096F4CAA14E2C9F5BC8DFE8A160E29E91A9BEB1C8F6F96C6FF5C5FA9.",
+    ],
+    bodyEn: [
+      "Release 1.0.0 Beta publishes a SHA-256 value so users can compare the downloaded file with the official release.",
+      "The SHA-256 for AitraNova-Setup-1.0.0-x64.exe is 91A2FF19096F4CAA14E2C9F5BC8DFE8A160E29E91A9BEB1C8F6F96C6FF5C5FA9.",
+    ],
+  },
+  {
+    kicker: "WINDOWS",
+    titleVi: "Installer Beta hiện chưa ký số.",
+    titleEn: "The Beta installer is currently unsigned.",
+    bodyVi: [
+      "AitraNova 1.0.0 Beta hiện có trạng thái NotSigned. Windows SmartScreen có thể hiển thị cảnh báo khi bạn mở installer.",
+      "Chỉ tải installer từ aitranova.com hoặc GitHub Release chính thức và kiểm tra SHA-256 nếu cần.",
+    ],
+    bodyEn: [
+      "AitraNova 1.0.0 Beta currently has a NotSigned status. Windows SmartScreen may display a warning when you open the installer.",
+      "Only download the installer from aitranova.com or the official GitHub Release and verify the SHA-256 when needed.",
+    ],
+  },
+  {
+    kicker: "ACCOUNT",
+    titleVi: "Bảo vệ tài khoản.",
+    titleEn: "Account protection.",
+    bodyVi: [
+      "Không chia sẻ mật khẩu, mã xác minh email, reset token hoặc thông tin phiên với người khác.",
+      "Nếu nghi ngờ tài khoản bị truy cập trái phép, hãy thay đổi thông tin xác thực liên quan và kết thúc các phiên không còn tin cậy.",
+    ],
+    bodyEn: [
+      "Do not share passwords, email verification codes, reset tokens or session information with others.",
+      "If you suspect unauthorized access, update the relevant credentials and end sessions you no longer trust.",
+    ],
+  },
+  {
+    kicker: "REPORTING",
+    titleVi: "Báo cáo vấn đề bảo mật.",
+    titleEn: "Report a security issue.",
+    bodyVi: [
+      "Nếu phát hiện vấn đề bảo mật, tránh công bố dữ liệu nhạy cảm hoặc thông tin khai thác chi tiết trong một báo cáo công khai. Hãy cung cấp thông tin tối thiểu cần thiết để vấn đề có thể được xác minh.",
+    ],
+    bodyEn: [
+      "If you discover a security issue, avoid publishing sensitive data or detailed exploit information in a public report. Provide only the minimum information necessary to verify the issue.",
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Security — AitraNova"
+  description="Thông tin bảo mật AitraNova Beta: HTTPS, GitHub Releases, SHA-256, trạng thái ký số và bảo vệ tài khoản."
+>
+  <TrustPage
+    kicker="SECURITY"
+    titleVi="Bảo mật và tính toàn vẹn."
+    titleEn="Security and integrity."
+    introVi="Thông tin kỹ thuật công khai giúp bạn xác minh release và sử dụng AitraNova Beta an toàn hơn."
+    introEn="Public technical information to help you verify releases and use AitraNova Beta more safely."
+    sections={sections}
+  />
+</BaseLayout>

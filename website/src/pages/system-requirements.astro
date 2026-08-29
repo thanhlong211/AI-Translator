@@ -1,0 +1,83 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TrustPage from "../components/TrustPage.astro";
+import "../styles/trust-pages.css";
+
+const sections = [
+  {
+    kicker: "WINDOWS",
+    titleVi: "Windows 10/11 64-bit.",
+    titleEn: "Windows 10/11 64-bit.",
+    bodyVi: [
+      "AitraNova 1.0.0 Beta hiện được phát hành cho Windows 10/11 trên kiến trúc x64.",
+      "Installer hiện tại là AitraNova-Setup-1.0.0-x64.exe và sử dụng NSIS.",
+    ],
+    bodyEn: [
+      "AitraNova 1.0.0 Beta is currently released for Windows 10/11 on x64 architecture.",
+      "The current installer is AitraNova-Setup-1.0.0-x64.exe and uses NSIS.",
+    ],
+  },
+  {
+    kicker: "DOWNLOAD",
+    titleVi: "Dung lượng tải xuống.",
+    titleEn: "Download size.",
+    bodyVi: [
+      "Installer AitraNova 1.0.0 Beta có dung lượng khoảng 302.43 MiB.",
+      "Bạn cần thêm dung lượng trống để Windows giải nén và cài đặt ứng dụng; dung lượng cài đặt thực tế có thể lớn hơn kích thước installer.",
+    ],
+    bodyEn: [
+      "The AitraNova 1.0.0 Beta installer is approximately 302.43 MiB.",
+      "Additional free space is required for Windows to unpack and install the application; installed size may be larger than the installer itself.",
+    ],
+  },
+  {
+    kicker: "NETWORK",
+    titleVi: "Cần kết nối Internet cho dịch vụ trực tuyến.",
+    titleEn: "Internet is required for online services.",
+    bodyVi: [
+      "Các workflow sử dụng dịch vụ AI trực tuyến, đăng nhập hoặc những API từ xa cần kết nối Internet hoạt động.",
+    ],
+    bodyEn: [
+      "Workflows that use online AI services, account sign-in or remote APIs require an active Internet connection.",
+    ],
+  },
+  {
+    kicker: "OCR",
+    titleVi: "OCR phụ thuộc chất lượng đầu vào.",
+    titleEn: "OCR depends on input quality.",
+    bodyVi: [
+      "Ảnh rõ, độ phân giải phù hợp, độ tương phản tốt và chữ không bị che khuất thường giúp OCR tạo Source Text ổn định hơn.",
+    ],
+    bodyEn: [
+      "Clear images, suitable resolution, good contrast and unobstructed text generally help OCR produce more reliable source text.",
+    ],
+  },
+  {
+    kicker: "SMARTSCREEN",
+    titleVi: "SmartScreen có thể cảnh báo.",
+    titleEn: "SmartScreen may show a warning.",
+    bodyVi: [
+      "Installer Beta 1.0.0 hiện chưa được ký số. Windows có thể yêu cầu xác nhận bổ sung trước khi chạy.",
+      "Bạn có thể kiểm tra SHA-256 trên trang Download hoặc Security trước khi cài đặt.",
+    ],
+    bodyEn: [
+      "The 1.0.0 Beta installer is currently unsigned. Windows may require additional confirmation before running it.",
+      "You can verify the SHA-256 value on the Download or Security page before installation.",
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="System Requirements — AitraNova"
+  description="Yêu cầu hệ thống cho AitraNova 1.0.0 Beta: Windows 10/11 x64, Internet, installer NSIS và thông tin SmartScreen."
+>
+  <TrustPage
+    kicker="SYSTEM REQUIREMENTS"
+    titleVi="Yêu cầu hệ thống."
+    titleEn="System requirements."
+    introVi="Thông tin hiện tại cho AitraNova Desktop 1.0.0 Beta trên Windows."
+    introEn="Current requirements for AitraNova Desktop 1.0.0 Beta on Windows."
+    sections={sections}
+  />
+</BaseLayout>

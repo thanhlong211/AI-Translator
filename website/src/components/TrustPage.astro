@@ -1,0 +1,171 @@
+---
+interface Section {
+  kicker: string;
+  titleVi: string;
+  titleEn: string;
+  bodyVi: string[];
+  bodyEn: string[];
+}
+
+interface Props {
+  kicker: string;
+  titleVi: string;
+  titleEn: string;
+  introVi: string;
+  introEn: string;
+  updated?: string;
+  sections: Section[];
+}
+
+const {
+  kicker,
+  titleVi,
+  titleEn,
+  introVi,
+  introEn,
+  updated = "29/08/2026",
+  sections,
+} = Astro.props;
+---
+
+<main class="trust-page">
+
+  <section class="trust-hero">
+
+    <div class="trust-glow trust-glow-a"></div>
+    <div class="trust-glow trust-glow-b"></div>
+
+    <div class="container trust-hero-inner">
+
+      <span class="trust-kicker">
+        {kicker}
+      </span>
+
+      <h1
+        data-i18n
+        data-vi={titleVi}
+        data-en={titleEn}
+      >
+        {titleVi}
+      </h1>
+
+      <p
+        data-i18n
+        data-vi={introVi}
+        data-en={introEn}
+      >
+        {introVi}
+      </p>
+
+      <div class="trust-updated">
+
+        <span
+          data-i18n
+          data-vi="Cập nhật"
+          data-en="Updated"
+        >
+          Cập nhật
+        </span>
+
+        <strong>{updated}</strong>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <section class="trust-content">
+
+    <div class="container trust-layout">
+
+      <aside class="trust-index">
+
+        <small>AITRANOVA</small>
+
+        <strong
+          data-i18n
+          data-vi="Thông tin công khai"
+          data-en="Public information"
+        >
+          Thông tin công khai
+        </strong>
+
+        <p
+          data-i18n
+          data-vi="Các trang này mô tả trạng thái hiện tại của AitraNova Beta và có thể được cập nhật khi sản phẩm thay đổi."
+          data-en="These pages describe the current state of AitraNova Beta and may be updated as the product changes."
+        >
+          Các trang này mô tả trạng thái
+          hiện tại của AitraNova Beta.
+        </p>
+
+      </aside>
+
+
+      <div class="trust-sections">
+
+        {
+          sections.map(
+            (section, index) => (
+
+              <article class="trust-section">
+
+                <div class="trust-section-number">
+                  {String(index + 1).padStart(2, "0")}
+                </div>
+
+                <div>
+
+                  <span>
+                    {section.kicker}
+                  </span>
+
+                  <h2
+                    data-i18n
+                    data-vi={section.titleVi}
+                    data-en={section.titleEn}
+                  >
+                    {section.titleVi}
+                  </h2>
+
+                  <div class="trust-section-copy">
+
+                    {
+                      section.bodyVi.map(
+                        (body, bodyIndex) => (
+
+                          <p
+                            data-i18n
+                            data-vi={body}
+                            data-en={
+                              section.bodyEn[
+                                bodyIndex
+                              ] || body
+                            }
+                          >
+                            {body}
+                          </p>
+
+                        )
+                      )
+                    }
+
+                  </div>
+
+                </div>
+
+              </article>
+
+            )
+          )
+        }
+
+      </div>
+
+    </div>
+
+  </section>
+
+</main>

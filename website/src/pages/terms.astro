@@ -1,0 +1,85 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import TrustPage from "../components/TrustPage.astro";
+import "../styles/trust-pages.css";
+
+const sections = [
+  {
+    kicker: "BETA",
+    titleVi: "Phần mềm đang trong giai đoạn Beta.",
+    titleEn: "The software is in Beta.",
+    bodyVi: [
+      "AitraNova 1.0.0 Beta có thể thay đổi về tính năng, giao diện, workflow, giới hạn sử dụng hoặc yêu cầu hệ thống giữa các release.",
+      "Một số tính năng có thể tạm thời không khả dụng hoặc hoạt động khác so với bản phát hành sau này.",
+    ],
+    bodyEn: [
+      "AitraNova 1.0.0 Beta may change in features, interface, workflows, usage limits or system requirements between releases.",
+      "Some features may temporarily be unavailable or behave differently from later releases.",
+    ],
+  },
+  {
+    kicker: "ACCOUNT",
+    titleVi: "Trách nhiệm tài khoản.",
+    titleEn: "Account responsibility.",
+    bodyVi: [
+      "Bạn chịu trách nhiệm bảo vệ thông tin đăng nhập của mình và các hoạt động được thực hiện thông qua tài khoản của bạn.",
+    ],
+    bodyEn: [
+      "You are responsible for protecting your credentials and for activity performed through your account.",
+    ],
+  },
+  {
+    kicker: "USE",
+    titleVi: "Sử dụng hợp lệ.",
+    titleEn: "Acceptable use.",
+    bodyVi: [
+      "Không sử dụng AitraNova để cố ý xâm nhập hệ thống, phá hoại dịch vụ, vượt qua giới hạn bảo mật, phân phối phần mềm độc hại hoặc thực hiện hoạt động trái pháp luật.",
+      "Bạn chịu trách nhiệm đảm bảo mình có quyền xử lý nội dung được đưa vào ứng dụng.",
+    ],
+    bodyEn: [
+      "Do not use AitraNova to intentionally compromise systems, disrupt services, bypass security controls, distribute malware or conduct unlawful activity.",
+      "You are responsible for ensuring that you have the right to process content submitted to the application.",
+    ],
+  },
+  {
+    kicker: "AI OUTPUT",
+    titleVi: "Kết quả AI có thể không chính xác.",
+    titleEn: "AI output may be inaccurate.",
+    bodyVi: [
+      "Bản dịch, OCR, phân tích vocabulary, grammar và các kết quả AI khác có thể chứa lỗi, thiếu context hoặc diễn giải không chính xác.",
+      "Không nên dựa duy nhất vào kết quả của AitraNova cho quyết định pháp lý, y tế, tài chính hoặc các quyết định có rủi ro cao.",
+    ],
+    bodyEn: [
+      "Translations, OCR, vocabulary analysis, grammar analysis and other AI outputs may contain errors, missing context or inaccurate interpretations.",
+      "AitraNova output should not be the sole basis for legal, medical, financial or other high-impact decisions.",
+    ],
+  },
+  {
+    kicker: "AVAILABILITY",
+    titleVi: "Tính sẵn sàng.",
+    titleEn: "Availability.",
+    bodyVi: [
+      "Dịch vụ có thể bị gián đoạn do bảo trì, thay đổi hạ tầng, nhà cung cấp bên ngoài hoặc sự cố kỹ thuật.",
+      "AitraNova không cam kết mọi tính năng sẽ luôn khả dụng liên tục trong giai đoạn Beta.",
+    ],
+    bodyEn: [
+      "The service may be interrupted by maintenance, infrastructure changes, external providers or technical incidents.",
+      "AitraNova does not guarantee uninterrupted availability of every feature during Beta.",
+    ],
+  },
+];
+---
+
+<BaseLayout
+  title="Terms — AitraNova"
+  description="Điều khoản sử dụng AitraNova Beta, bao gồm trách nhiệm tài khoản, AI output, acceptable use và availability."
+>
+  <TrustPage
+    kicker="TERMS"
+    titleVi="Điều khoản sử dụng."
+    titleEn="Terms of use."
+    introVi="Các điều khoản cơ bản áp dụng khi bạn sử dụng AitraNova Beta và các dịch vụ liên quan."
+    introEn="The basic terms that apply when you use AitraNova Beta and related services."
+    sections={sections}
+  />
+</BaseLayout>
