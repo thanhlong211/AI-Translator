@@ -61,4 +61,25 @@ export const releaseInfo = {
       configuredSha256
       || productionSha256
     ),
+
+  os:
+    "Windows 10/11",
+
+  architecture:
+    "x64",
+
+  installerType:
+    "NSIS",
+
+  fileSize:
+    "302.43 MiB",
+
+  signed:
+    false,
+
+  signatureStatus:
+    "NotSigned",
+
+  releasePageUrl:
+    "https://github.com/thanhlong211/AI-Translator/releases/tag/v1.0.0-beta",
 };

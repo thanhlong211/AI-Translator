@@ -1,0 +1,154 @@
+/* ============================================================
+   V10.17A.6 — DOWNLOAD TRUST UI
+   ============================================================ */
+
+.release-trust-facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0 26px 22px;
+}
+
+.release-trust-fact {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(105, 82, 238, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.34);
+}
+
+.release-trust-fact small {
+  display: block;
+  color: #91889e;
+  font-size: 5px;
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+.release-trust-fact strong {
+  display: block;
+  margin-top: 5px;
+  color: #282130;
+  font-size: 8px;
+  font-weight: 850;
+}
+
+.release-signing-notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 13px;
+  margin: 0 26px 26px;
+  padding: 14px 15px;
+  border: 1px solid rgba(214, 143, 45, 0.28);
+  border-radius: 14px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 247, 230, 0.78),
+      rgba(240, 235, 246, 0.78)
+    );
+}
+
+.release-signing-icon {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  flex: 0 0 auto;
+  border-radius: 9px;
+  background: rgba(214, 143, 45, 0.13);
+  color: #a96919;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.release-signing-copy {
+  min-width: 0;
+}
+
+.release-signing-copy small {
+  display: block;
+  color: #a96919;
+  font-size: 5px;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+}
+
+.release-signing-copy strong {
+  display: block;
+  margin-top: 4px;
+  color: #34281a;
+  font-size: 8px;
+}
+
+.release-signing-copy p {
+  max-width: 650px;
+  margin: 4px 0 0 !important;
+  color: #756a5f !important;
+  font-size: 6px !important;
+  line-height: 1.55 !important;
+}
+
+.release-official-link {
+  display: inline-flex;
+  min-height: 31px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 11px;
+  border: 1px solid rgba(105, 82, 238, 0.2);
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.58);
+  color: #5942dc;
+  font-size: 6px;
+  font-weight: 850;
+  white-space: nowrap;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.release-official-link:hover {
+  transform: translateY(-1px);
+  border-color: rgba(105, 82, 238, 0.38);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.release-official-link i {
+  font-style: normal;
+}
+
+.release-download-button small {
+  line-height: 1.4;
+}
+
+@media (max-width: 760px) {
+  .release-trust-facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .release-signing-notice {
+    grid-template-columns: auto minmax(0, 1fr);
+    margin-right: 18px;
+    margin-left: 18px;
+  }
+
+  .release-official-link {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .release-trust-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .release-signing-notice {
+    align-items: start;
+  }
+}

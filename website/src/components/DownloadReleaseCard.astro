@@ -2,6 +2,8 @@
 import {
   releaseInfo,
 } from "../data/release";
+
+import "../styles/download-trust-ui.css";
 ---
 
 <div class="release-card">
@@ -107,7 +109,7 @@ import {
           <small>
             {
               releaseInfo.hasDirectDownload
-                ? "Windows"
+                ? `${releaseInfo.os} · ${releaseInfo.architecture} · ${releaseInfo.fileSize}`
                 : "Latest available builds"
             }
           </small>
@@ -159,7 +161,7 @@ import {
       </small>
 
       <strong>
-        {releaseInfo.platform}
+        {releaseInfo.os} · {releaseInfo.architecture}
       </strong>
 
     </div>
@@ -254,6 +256,85 @@ import {
     }
 
   </div>
+
+
+  <div class="release-trust-facts">
+
+    <div class="release-trust-fact">
+      <small>ARCHITECTURE</small>
+      <strong>{releaseInfo.architecture}</strong>
+    </div>
+
+    <div class="release-trust-fact">
+      <small>INSTALLER</small>
+      <strong>{releaseInfo.installerType}</strong>
+    </div>
+
+    <div class="release-trust-fact">
+      <small>DOWNLOAD SIZE</small>
+      <strong>{releaseInfo.fileSize}</strong>
+    </div>
+
+    <div class="release-trust-fact">
+      <small>INTEGRITY</small>
+      <strong>SHA-256</strong>
+    </div>
+
+  </div>
+
+
+  <div
+    class="release-signing-notice"
+    role="note"
+  >
+
+    <span class="release-signing-icon">
+      !
+    </span>
+
+    <div class="release-signing-copy">
+
+      <small>WINDOWS SECURITY</small>
+
+      <strong
+        data-i18n
+        data-vi="Bản Beta hiện chưa được ký số."
+        data-en="The Beta installer is currently unsigned."
+      >
+        Bản Beta hiện chưa được ký số.
+      </strong>
+
+      <p
+        data-i18n
+        data-vi="Windows SmartScreen có thể hiển thị cảnh báo khi mở installer. Chỉ tải AitraNova từ website hoặc GitHub Release chính thức."
+        data-en="Windows SmartScreen may display a warning when opening the installer. Only download AitraNova from the official website or GitHub Release."
+      >
+        Windows SmartScreen có thể hiển thị cảnh báo
+        khi mở installer. Chỉ tải AitraNova từ nguồn
+        chính thức.
+      </p>
+
+    </div>
+
+    <a
+      class="release-official-link"
+      href={releaseInfo.releasePageUrl}
+      target="_blank"
+      rel="noreferrer"
+    >
+      <span
+        data-i18n
+        data-vi="GitHub Release"
+        data-en="GitHub Release"
+      >
+        GitHub Release
+      </span>
+
+      <i>↗</i>
+    </a>
+
+  </div>
+
 
 </div>
 
