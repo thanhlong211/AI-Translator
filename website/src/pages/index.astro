@@ -14451,3 +14451,171 @@ import "../styles/home-light-card-text-lock.css";
   }
 
 </style>
+
+<style is:global>
+  /* =========================================================
+     LEARNING FINAL PRODUCTION CONTRAST LOCK
+     Outer = night
+     Inner surfaces = light
+     Inner typography = dark
+     ========================================================= */
+
+  /* Heading nằm ngoài các khung sáng */
+  .learning-deep > .container > .learning-heading h2,
+  .learning-deep > .container > .learning-heading h2 > span {
+    color: #f7f2fb !important;
+    -webkit-text-fill-color: #f7f2fb !important;
+    background-image: none !important;
+    opacity: 1 !important;
+  }
+
+  .learning-deep > .container > .learning-heading h2 > em {
+    color: #a986ff !important;
+    -webkit-text-fill-color: #a986ff !important;
+    background-image: none !important;
+    opacity: 1 !important;
+  }
+
+  .learning-deep > .container > .learning-heading p,
+  .learning-deep > .container > .learning-heading p span {
+    color: #c2b7ce !important;
+    -webkit-text-fill-color: #c2b7ce !important;
+    opacity: 1 !important;
+  }
+
+  /* =========================================================
+     TẤT CẢ PHẦN SAU HEADING = nằm trên surface sáng
+     ========================================================= */
+
+  .learning-deep
+  > .container
+  > :not(.learning-heading)
+  :is(
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    strong,
+    b
+  ) {
+    color: #24182f !important;
+    -webkit-text-fill-color: #24182f !important;
+    background-image: none !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
+  }
+
+  .learning-deep
+  > .container
+  > :not(.learning-heading)
+  :is(
+    p,
+    li,
+    label,
+    td,
+    th
+  ) {
+    color: #55485f !important;
+    -webkit-text-fill-color: #55485f !important;
+    background-image: none !important;
+    text-shadow: none !important;
+    opacity: 1 !important;
+  }
+
+  .learning-deep
+  > .container
+  > :not(.learning-heading)
+  small {
+    color: #76697f !important;
+    -webkit-text-fill-color: #76697f !important;
+    opacity: 1 !important;
+  }
+
+  /* Span là nguồn chính gây chữ trắng chìm */
+  .learning-deep
+  > .container
+  > :not(.learning-heading)
+  span:not(.section-label):not([class*="icon"]):not([class*="badge"]):not([class*="status"]) {
+    color: #55485f !important;
+    -webkit-text-fill-color: #55485f !important;
+    opacity: 1 !important;
+  }
+
+  /* =========================================================
+     Learning app cụ thể
+     DOM thật có:
+     .learning-product > .learning-app
+     ========================================================= */
+
+  .learning-deep .learning-product,
+  .learning-deep .learning-app {
+    color: #24182f !important;
+  }
+
+  .learning-deep
+  .learning-app
+  :is(h1, h2, h3, h4, strong, b, label) {
+    color: #24182f !important;
+    -webkit-text-fill-color: #24182f !important;
+    background-image: none !important;
+    opacity: 1 !important;
+  }
+
+  .learning-deep
+  .learning-app
+  :is(p, small, li) {
+    color: #55485f !important;
+    -webkit-text-fill-color: #55485f !important;
+    opacity: 1 !important;
+  }
+
+  /* Workflow lớn phía dưới */
+  .learning-deep
+  > .container
+  > :not(.learning-heading)
+  .section-title,
+  .learning-deep
+  > .container
+  > :not(.learning-heading)
+  .section-title span {
+    color: #24182f !important;
+    -webkit-text-fill-color: #24182f !important;
+    background-image: none !important;
+    opacity: 1 !important;
+  }
+
+  /* Labels tím trên light cards */
+  .learning-deep
+  > .container
+  > :not(.learning-heading)
+  .section-label,
+  .learning-deep
+  > .container
+  > :not(.learning-heading)
+  .section-label * {
+    color: #6849df !important;
+    -webkit-text-fill-color: #6849df !important;
+    opacity: 1 !important;
+  }
+
+  /* Input/select */
+  .learning-deep
+  :is(input, textarea, select) {
+    color: #24182f !important;
+    -webkit-text-fill-color: #24182f !important;
+  }
+
+  /* Links/buttons không bị global text rule phá */
+  .learning-deep
+  :is(a, button, [role="button"]) {
+    -webkit-text-fill-color: currentColor !important;
+  }
+
+  .learning-deep
+  :is(a, button, [role="button"]) * {
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor !important;
+  }
+</style>
