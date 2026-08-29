@@ -2905,3 +2905,215 @@ html body .learning-deep
   text-shadow: none !important;
   opacity: 1 !important;
 }
+
+/* LEARNING PRODUCTION TEXT LOCK */
+
+/* Night outer shell */
+html body .learning-deep {
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      rgba(105, 82, 238, 0.18),
+      transparent 30rem
+    ),
+    linear-gradient(
+      180deg,
+      #0b0714 0%,
+      #171024 52%,
+      #0b0714 100%
+    ) !important;
+}
+
+
+/* Heading outside light cards stays bright */
+html body .learning-deep
+.learning-heading
+:is(h1, h2, h3),
+html body .learning-deep
+.learning-heading
+:is(h1, h2, h3) span {
+  color: #f5effa !important;
+  -webkit-text-fill-color: #f5effa !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+html body .learning-deep
+.learning-heading em {
+  color: #ae91ff !important;
+  -webkit-text-fill-color: #ae91ff !important;
+}
+
+
+/* Main Learning app — dark readable text */
+html body .learning-deep
+.learning-product
+:is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b,
+  label
+),
+html body .learning-deep
+.learning-app
+:is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b,
+  label
+) {
+  color: #261c32 !important;
+  -webkit-text-fill-color: #261c32 !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html body .learning-deep
+.learning-product
+:is(
+  p,
+  li,
+  small
+),
+html body .learning-deep
+.learning-app
+:is(
+  p,
+  li,
+  small
+) {
+  color: #584d64 !important;
+  -webkit-text-fill-color: #584d64 !important;
+  opacity: 1 !important;
+}
+
+
+/* Ordinary spans inside the light Learning UI */
+html body .learning-deep
+.learning-app
+span:not([class*="icon"]):not([class*="badge"]):not([class*="status"]) {
+  color: #584d64 !important;
+  -webkit-text-fill-color: #584d64 !important;
+  opacity: 1 !important;
+}
+
+
+/* Every light section after the heading */
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b
+),
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  article,
+  section,
+  aside,
+  div
+)
+:is(
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b
+) {
+  color: #261c32 !important;
+  -webkit-text-fill-color: #261c32 !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  p,
+  li,
+  label
+),
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  article,
+  section,
+  aside,
+  div
+)
+:is(
+  p,
+  li,
+  label
+) {
+  color: #584d64 !important;
+  -webkit-text-fill-color: #584d64 !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+
+html body .learning-deep
+.container
+> :not(.learning-heading)
+small {
+  color: #776b82 !important;
+  -webkit-text-fill-color: #776b82 !important;
+  opacity: 1 !important;
+}
+
+
+/* Fix faded spans in workflow/cards */
+html body .learning-deep
+.container
+> :not(.learning-heading)
+:is(
+  article,
+  section,
+  aside
+)
+span:not([class*="icon"]):not([class*="badge"]):not([class*="status"]) {
+  color: #584d64 !important;
+  -webkit-text-fill-color: #584d64 !important;
+  opacity: 1 !important;
+}
+
+
+/* Buttons keep their intended colors */
+html body .learning-deep
+:is(
+  button,
+  a,
+  [role="button"]
+),
+html body .learning-deep
+:is(
+  button,
+  a,
+  [role="button"]
+) * {
+  -webkit-text-fill-color: currentColor !important;
+}
+
