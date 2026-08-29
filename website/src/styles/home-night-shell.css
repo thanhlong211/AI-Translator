@@ -1,0 +1,853 @@
+/* ============================================================
+   AITRANOVA HOME
+   NIGHT OUTER + LIGHT INNER
+   FINAL COLOR LOCK
+   ============================================================ */
+
+:root {
+  --an-night: #0d0816;
+  --an-night-2: #151023;
+  --an-night-3: #1b1230;
+
+  --an-surface: #faf9fd;
+  --an-surface-2: #f2eff8;
+  --an-surface-purple: #f1edff;
+  --an-surface-blue: #edf4fb;
+  --an-surface-pink: #fff0f4;
+  --an-surface-green: #edf8f3;
+
+  --an-text: #241a2f;
+  --an-text-2: #574c62;
+  --an-text-3: #786d83;
+
+  --an-purple: #6952ee;
+  --an-purple-light: #ab91ff;
+
+  --an-border: rgba(91, 69, 119, 0.18);
+
+  --an-shadow:
+    0 18px 44px
+    rgba(0, 0, 0, 0.26);
+}
+
+
+/* ============================================================
+   PROFILE — OUTER BACKGROUND DARK
+   ============================================================ */
+
+.profile-deep {
+  background:
+    radial-gradient(
+      circle at 12% 10%,
+      rgba(111, 79, 238, 0.18),
+      transparent 31rem
+    ),
+    radial-gradient(
+      circle at 90% 75%,
+      rgba(71, 109, 205, 0.10),
+      transparent 30rem
+    ),
+    linear-gradient(
+      180deg,
+      var(--an-night),
+      var(--an-night-2) 52%,
+      var(--an-night)
+    ) !important;
+
+  color: #f4eef9 !important;
+
+  border-top:
+    1px solid rgba(142, 112, 255, 0.14) !important;
+
+  border-bottom:
+    1px solid rgba(142, 112, 255, 0.14) !important;
+}
+
+
+/* Heading nằm ngoài card */
+
+.profile-deep
+:is(
+  .profile-heading,
+  .profile-deep-heading
+)
+:is(
+  h2,
+  h3
+),
+.profile-deep
+:is(
+  .profile-heading,
+  .profile-deep-heading
+)
+:is(
+  h2,
+  h3
+) span {
+  color: #f5eff9 !important;
+}
+
+.profile-deep
+:is(
+  .profile-heading,
+  .profile-deep-heading
+)
+em {
+  color: var(--an-purple-light) !important;
+}
+
+.profile-deep
+:is(
+  .profile-heading,
+  .profile-deep-heading
+)
+p,
+.profile-deep
+:is(
+  .profile-heading,
+  .profile-deep-heading
+)
+p span {
+  color: #bdb2ca !important;
+}
+
+.profile-deep .section-label,
+.profile-deep .section-label * {
+  color: var(--an-purple-light) !important;
+}
+
+
+/* ============================================================
+   PROFILE — MAIN APP PREVIEW LIGHT
+   ============================================================ */
+
+.profile-deep
+:is(
+  .profile-product,
+  .profile-editor,
+  .profile-app,
+  .profile-preview,
+  .profile-workspace,
+  .profile-showcase
+) {
+  background:
+    linear-gradient(
+      145deg,
+      #fcfbff,
+      #f3eff8
+    ) !important;
+
+  color: var(--an-text) !important;
+
+  border:
+    1px solid var(--an-border) !important;
+
+  box-shadow:
+    var(--an-shadow) !important;
+}
+
+
+/* ============================================================
+   PROFILE — NORMAL CARDS LIGHT
+   ============================================================ */
+
+.profile-deep article {
+  background:
+    var(--an-surface) !important;
+
+  color:
+    var(--an-text) !important;
+
+  border:
+    1px solid var(--an-border) !important;
+
+  box-shadow:
+    0 12px 28px
+    rgba(0, 0, 0, 0.16) !important;
+}
+
+
+/* 4 feature tones */
+
+.profile-deep article:nth-of-type(4n + 1) {
+  background:
+    var(--an-surface-purple) !important;
+}
+
+.profile-deep article:nth-of-type(4n + 2) {
+  background:
+    var(--an-surface-pink) !important;
+}
+
+.profile-deep article:nth-of-type(4n + 3) {
+  background:
+    var(--an-surface-blue) !important;
+}
+
+.profile-deep article:nth-of-type(4n + 4) {
+  background:
+    var(--an-surface-green) !important;
+}
+
+
+/* Card typography */
+
+.profile-deep article
+:is(
+  h3,
+  h4,
+  h5,
+  strong,
+  b
+) {
+  color:
+    var(--an-text) !important;
+}
+
+.profile-deep article
+:is(
+  p,
+  p span,
+  li
+) {
+  color:
+    var(--an-text-2) !important;
+}
+
+.profile-deep article small {
+  color:
+    var(--an-text-3) !important;
+}
+
+
+/* ============================================================
+   PROFILE PRIORITY — LARGE LIGHT PANEL
+   ============================================================ */
+
+.profile-deep
+.priority-visual {
+  background:
+    linear-gradient(
+      135deg,
+      #fbfaff,
+      #edf4fb
+    ) !important;
+
+  color:
+    var(--an-text) !important;
+
+  border:
+    1px solid var(--an-border) !important;
+
+  box-shadow:
+    var(--an-shadow) !important;
+}
+
+
+.profile-deep
+.priority-visual
+:is(
+  h2,
+  h3,
+  h4
+),
+.profile-deep
+.priority-visual
+:is(
+  h2,
+  h3,
+  h4
+) span {
+  color:
+    var(--an-text) !important;
+}
+
+
+.profile-deep
+.priority-visual
+:is(
+  p,
+  p span
+) {
+  color:
+    var(--an-text-2) !important;
+}
+
+
+/* Priority rows */
+
+.profile-deep
+.priority-level {
+  background:
+    #ffffff !important;
+
+  color:
+    var(--an-text) !important;
+
+  border:
+    1px solid
+    rgba(91, 69, 119, 0.16) !important;
+
+  box-shadow:
+    0 3px 10px
+    rgba(45, 29, 62, 0.05) !important;
+}
+
+
+.profile-deep
+.priority-level:nth-child(1) {
+  background:
+    #eee9ff !important;
+}
+
+.profile-deep
+.priority-level:nth-child(2) {
+  background:
+    #f3efff !important;
+}
+
+.profile-deep
+.priority-level:nth-child(3) {
+  background:
+    #fff0f4 !important;
+}
+
+.profile-deep
+.priority-level:nth-child(4) {
+  background:
+    #eaf7f1 !important;
+}
+
+.profile-deep
+.priority-level:nth-child(5) {
+  background:
+    #f2eff6 !important;
+}
+
+
+.profile-deep
+.priority-level strong {
+  color:
+    var(--an-text) !important;
+}
+
+.profile-deep
+.priority-level small {
+  color:
+    var(--an-text-3) !important;
+}
+
+.profile-deep
+.priority-level b {
+  color:
+    #5941cf !important;
+}
+
+.profile-deep
+.priority-level > span {
+  color:
+    var(--an-purple) !important;
+}
+
+
+/* ============================================================
+   PROFILE 5 STEPS — LARGE LIGHT PANEL
+   ============================================================ */
+
+.profile-deep
+.profile-setup-flow {
+  background:
+    linear-gradient(
+      145deg,
+      #fbfafd,
+      #f2eef7
+    ) !important;
+
+  color:
+    var(--an-text) !important;
+
+  border:
+    1px solid var(--an-border) !important;
+
+  box-shadow:
+    var(--an-shadow) !important;
+}
+
+
+.profile-deep
+.profile-flow-heading h3 {
+  color:
+    var(--an-text) !important;
+}
+
+
+.profile-deep
+.profile-flow-heading
+.section-label,
+.profile-deep
+.profile-flow-heading
+.section-label * {
+  color:
+    var(--an-purple) !important;
+}
+
+
+.profile-deep
+.profile-flow-steps article {
+  background:
+    #ffffff !important;
+
+  color:
+    var(--an-text) !important;
+
+  border:
+    1px solid
+    rgba(91, 69, 119, 0.16) !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.profile-deep
+.profile-flow-steps
+article:nth-of-type(1) {
+  background:
+    var(--an-surface-purple) !important;
+}
+
+.profile-deep
+.profile-flow-steps
+article:nth-of-type(2) {
+  background:
+    var(--an-surface-blue) !important;
+}
+
+.profile-deep
+.profile-flow-steps
+article:nth-of-type(3) {
+  background:
+    var(--an-surface-pink) !important;
+}
+
+.profile-deep
+.profile-flow-steps
+article:nth-of-type(4) {
+  background:
+    var(--an-surface-green) !important;
+}
+
+.profile-deep
+.profile-flow-steps
+article:nth-of-type(5) {
+  background:
+    #f3efff !important;
+}
+
+
+.profile-deep
+.profile-flow-steps
+article > span {
+  color:
+    var(--an-purple) !important;
+}
+
+.profile-deep
+.profile-flow-steps
+article strong {
+  color:
+    var(--an-text) !important;
+}
+
+.profile-deep
+.profile-flow-steps
+article p,
+.profile-deep
+.profile-flow-steps
+article p span {
+  color:
+    var(--an-text-2) !important;
+}
+
+
+/* ============================================================
+   ROADMAP — OUTER BACKGROUND DARK
+   ============================================================ */
+
+.roadmap-preview-v5 {
+  background:
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(108, 76, 235, 0.18),
+      transparent 30rem
+    ),
+    radial-gradient(
+      circle at 92% 80%,
+      rgba(62, 112, 208, 0.10),
+      transparent 30rem
+    ),
+    linear-gradient(
+      180deg,
+      #0b0713,
+      #151023 52%,
+      #0b0713
+    ) !important;
+
+  color:
+    #f5effa !important;
+
+  border-top:
+    1px solid rgba(142, 112, 255, 0.14) !important;
+
+  border-bottom:
+    1px solid rgba(142, 112, 255, 0.14) !important;
+}
+
+
+/* Outer heading */
+
+.roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+:is(
+  h2,
+  h3
+),
+.roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+:is(
+  h2,
+  h3
+) span {
+  color:
+    #f5effa !important;
+}
+
+
+.roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+p,
+.roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+p span {
+  color:
+    #bbb0c9 !important;
+}
+
+
+.roadmap-preview-v5
+.section-label,
+.roadmap-preview-v5
+.section-label * {
+  color:
+    var(--an-purple-light) !important;
+}
+
+
+/* ============================================================
+   ROADMAP — 3 MAIN COLUMNS LIGHT
+   ============================================================ */
+
+.roadmap-preview-v5
+.roadmap-column {
+  background:
+    linear-gradient(
+      150deg,
+      #fcfbff,
+      #f2eff8
+    ) !important;
+
+  color:
+    var(--an-text) !important;
+
+  border:
+    1px solid var(--an-border) !important;
+
+  box-shadow:
+    var(--an-shadow) !important;
+}
+
+
+.roadmap-preview-v5
+.roadmap-column.available {
+  border-top:
+    4px solid #45b98b !important;
+}
+
+.roadmap-preview-v5
+.roadmap-column.development {
+  border-top:
+    4px solid #7959f3 !important;
+}
+
+.roadmap-preview-v5
+.roadmap-column.planned {
+  border-top:
+    4px solid #5c91c8 !important;
+}
+
+
+/* Column heading */
+
+.roadmap-preview-v5
+.roadmap-column-head
+:is(
+  h3,
+  strong
+) {
+  color:
+    var(--an-text) !important;
+}
+
+.roadmap-preview-v5
+.roadmap-column-head small {
+  color:
+    var(--an-text-3) !important;
+}
+
+.roadmap-preview-v5
+.roadmap-count {
+  color:
+    var(--an-purple) !important;
+}
+
+
+/* ============================================================
+   ROADMAP ITEMS — LIGHT
+   ============================================================ */
+
+.roadmap-preview-v5
+.roadmap-item {
+  background:
+    #ffffff !important;
+
+  color:
+    var(--an-text) !important;
+
+  border:
+    1px solid
+    rgba(91, 69, 119, 0.14) !important;
+
+  box-shadow:
+    none !important;
+}
+
+
+.roadmap-preview-v5
+.roadmap-column.available
+.roadmap-item {
+  background:
+    #f1faf6 !important;
+}
+
+.roadmap-preview-v5
+.roadmap-column.development
+.roadmap-item {
+  background:
+    #f5f2ff !important;
+}
+
+.roadmap-preview-v5
+.roadmap-column.planned
+.roadmap-item {
+  background:
+    #eff6fc !important;
+}
+
+
+.roadmap-preview-v5
+.roadmap-item.highlighted {
+  background:
+    #ebe5ff !important;
+
+  border:
+    1px solid
+    rgba(105, 82, 238, 0.5) !important;
+}
+
+
+.roadmap-preview-v5
+.roadmap-item strong {
+  color:
+    var(--an-text) !important;
+}
+
+.roadmap-preview-v5
+.roadmap-item p,
+.roadmap-preview-v5
+.roadmap-item p span {
+  color:
+    var(--an-text-2) !important;
+}
+
+
+/* Status dots */
+
+.roadmap-preview-v5
+.roadmap-column.available
+.roadmap-item > span {
+  color:
+    #258862 !important;
+}
+
+.roadmap-preview-v5
+.roadmap-column.development
+.roadmap-item > span {
+  color:
+    #6748db !important;
+}
+
+.roadmap-preview-v5
+.roadmap-column.planned
+.roadmap-item > span {
+  color:
+    #477bb1 !important;
+}
+
+
+/* ============================================================
+   ROADMAP PROGRESS LIGHT
+   ============================================================ */
+
+.roadmap-preview-v5
+.development-progress {
+  background:
+    #eee9ff !important;
+
+  color:
+    var(--an-text) !important;
+
+  border:
+    1px solid
+    rgba(105, 82, 238, 0.16) !important;
+}
+
+
+.roadmap-preview-v5
+.development-progress span {
+  color:
+    var(--an-text-2) !important;
+}
+
+.roadmap-preview-v5
+.development-progress strong {
+  color:
+    var(--an-text) !important;
+}
+
+
+.roadmap-preview-v5
+.progress-track {
+  background:
+    #dbd3ed !important;
+}
+
+.roadmap-preview-v5
+.progress-track > span {
+  background:
+    linear-gradient(
+      90deg,
+      #6952ee,
+      #9477ff
+    ) !important;
+}
+
+
+/* ============================================================
+   LARGE ROADMAP DIRECTION CARD LIGHT
+   ============================================================ */
+
+.roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+) {
+  background:
+    linear-gradient(
+      135deg,
+      #fbfaff,
+      #edf5fb
+    ) !important;
+
+  color:
+    var(--an-text) !important;
+
+  border:
+    1px solid var(--an-border) !important;
+
+  box-shadow:
+    var(--an-shadow) !important;
+}
+
+
+.roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+)
+:is(
+  h2,
+  h3,
+  strong
+) {
+  color:
+    var(--an-text) !important;
+}
+
+
+.roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+)
+p {
+  color:
+    var(--an-text-2) !important;
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 760px) {
+
+  .profile-deep,
+  .roadmap-preview-v5 {
+    background:
+      linear-gradient(
+        180deg,
+        #0d0816,
+        #171023,
+        #0d0816
+      ) !important;
+  }
+
+}

@@ -1,0 +1,2440 @@
+/* ============================================================
+   AITRANOVA HOME — FINAL LIGHT CARD TEXT LOCK
+   ============================================================ */
+
+:root {
+  --card-title: #21172d;
+  --card-text: #51445d;
+  --card-muted: #75687f;
+  --card-purple: #6547df;
+  --card-blue: #3974b7;
+  --card-green: #268565;
+}
+
+
+/* ============================================================
+   PROFILE — force NIGHT OUTER
+   ============================================================ */
+
+html body section.profile-deep {
+  background:
+    radial-gradient(
+      circle at 12% 10%,
+      rgba(105, 82, 238, 0.20),
+      transparent 32rem
+    ),
+    linear-gradient(
+      180deg,
+      #0c0715 0%,
+      #171022 50%,
+      #0d0816 100%
+    ) !important;
+}
+
+
+/* Heading OUTSIDE cards */
+
+html body .profile-deep
+.profile-heading h2,
+html body .profile-deep
+.profile-heading h2 span,
+html body .profile-deep
+.profile-deep-heading h2,
+html body .profile-deep
+.profile-deep-heading h2 span {
+  color: #f4eef9 !important;
+}
+
+html body .profile-deep
+.profile-heading h2 em,
+html body .profile-deep
+.profile-deep-heading h2 em {
+  color: #ae91ff !important;
+}
+
+html body .profile-deep
+.profile-heading p,
+html body .profile-deep
+.profile-heading p span,
+html body .profile-deep
+.profile-deep-heading p,
+html body .profile-deep
+.profile-deep-heading p span {
+  color: #bbb0c8 !important;
+}
+
+
+/* ============================================================
+   PROFILE LIGHT CARDS
+   ============================================================ */
+
+html body .profile-deep article h3,
+html body .profile-deep article h4,
+html body .profile-deep article h5,
+html body .profile-deep article strong {
+  color: var(--card-title) !important;
+  opacity: 1 !important;
+}
+
+html body .profile-deep article p,
+html body .profile-deep article p span,
+html body .profile-deep article li {
+  color: var(--card-text) !important;
+  opacity: 1 !important;
+}
+
+html body .profile-deep article small {
+  color: var(--card-muted) !important;
+  opacity: 1 !important;
+}
+
+
+/* Feature cards numbers / labels */
+
+html body .profile-deep article > span {
+  color: var(--card-purple) !important;
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   PROFILE PRIORITY LIGHT PANEL
+   ============================================================ */
+
+html body .profile-deep
+.priority-visual h2,
+html body .profile-deep
+.priority-visual h3,
+html body .profile-deep
+.priority-visual h2 span,
+html body .profile-deep
+.priority-visual h3 span {
+  color: var(--card-title) !important;
+  opacity: 1 !important;
+}
+
+html body .profile-deep
+.priority-visual p,
+html body .profile-deep
+.priority-visual p span {
+  color: var(--card-text) !important;
+  opacity: 1 !important;
+}
+
+html body .profile-deep
+.priority-level strong {
+  color: var(--card-title) !important;
+}
+
+html body .profile-deep
+.priority-level small {
+  color: var(--card-muted) !important;
+}
+
+html body .profile-deep
+.priority-level b {
+  color: var(--card-purple) !important;
+}
+
+
+/* The faded big text shown in your screenshot */
+
+html body .profile-deep
+.priority-visual
+:is(h2, h3) {
+  text-shadow: none !important;
+  -webkit-text-fill-color: var(--card-title) !important;
+}
+
+
+/* ============================================================
+   PROFILE 5 STEPS
+   ============================================================ */
+
+html body .profile-deep
+.profile-setup-flow h3,
+html body .profile-deep
+.profile-flow-heading h3 {
+  color: var(--card-title) !important;
+}
+
+html body .profile-deep
+.profile-flow-steps article strong {
+  color: var(--card-title) !important;
+}
+
+html body .profile-deep
+.profile-flow-steps article p,
+html body .profile-deep
+.profile-flow-steps article p span {
+  color: var(--card-text) !important;
+}
+
+html body .profile-deep
+.profile-flow-steps article > span {
+  color: var(--card-purple) !important;
+}
+
+
+/* ============================================================
+   ROADMAP — force NIGHT OUTER
+   ============================================================ */
+
+html body section.roadmap-preview-v5 {
+  background:
+    radial-gradient(
+      circle at 10% 20%,
+      rgba(105, 82, 238, 0.20),
+      transparent 32rem
+    ),
+    radial-gradient(
+      circle at 90% 70%,
+      rgba(60, 105, 205, 0.10),
+      transparent 30rem
+    ),
+    linear-gradient(
+      180deg,
+      #0b0613 0%,
+      #151022 52%,
+      #0b0713 100%
+    ) !important;
+}
+
+
+/* Heading OUTSIDE cards */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+:is(h2, h3),
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+:is(h2, h3) span {
+  color: #f4eef9 !important;
+}
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+p,
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+p span {
+  color: #bdb1ca !important;
+}
+
+
+/* ============================================================
+   ROADMAP LIGHT COLUMNS
+   ============================================================ */
+
+html body .roadmap-preview-v5
+.roadmap-column {
+  background: #f8f6fc !important;
+}
+
+html body .roadmap-preview-v5
+.roadmap-column-head strong {
+  color: var(--card-title) !important;
+}
+
+html body .roadmap-preview-v5
+.roadmap-column-head small {
+  color: var(--card-muted) !important;
+}
+
+html body .roadmap-preview-v5
+.roadmap-count {
+  color: var(--card-purple) !important;
+}
+
+
+/* Individual rows */
+
+html body .roadmap-preview-v5
+.roadmap-item strong {
+  color: var(--card-title) !important;
+  opacity: 1 !important;
+}
+
+html body .roadmap-preview-v5
+.roadmap-item p,
+html body .roadmap-preview-v5
+.roadmap-item p span {
+  color: var(--card-text) !important;
+  opacity: 1 !important;
+}
+
+
+/* Status colours */
+
+html body .roadmap-preview-v5
+.roadmap-column.available {
+  border-top-color: #3cad82 !important;
+}
+
+html body .roadmap-preview-v5
+.roadmap-column.development {
+  border-top-color: #7556ed !important;
+}
+
+html body .roadmap-preview-v5
+.roadmap-column.planned {
+  border-top-color: #518ac4 !important;
+}
+
+
+/* ============================================================
+   ROADMAP DIRECTION LIGHT CARD
+   ============================================================ */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+)
+:is(h2, h3, strong) {
+  color: var(--card-title) !important;
+}
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+)
+p {
+  color: var(--card-text) !important;
+}
+
+
+/* ============================================================
+   GUIDE CARDS
+   Current problem: WHITE TEXT ON LIGHT LAVENDER
+   ============================================================ */
+
+html body .guide-preview
+.guide-card {
+  border:
+    1px solid rgba(91, 69, 119, 0.17) !important;
+
+  box-shadow:
+    0 12px 28px
+    rgba(47, 31, 63, 0.09) !important;
+}
+
+
+/* More visible pastel surfaces */
+
+html body .guide-preview
+.guide-card:nth-child(1) {
+  background: #ebe4ff !important;
+}
+
+html body .guide-preview
+.guide-card:nth-child(2) {
+  background: #e5effa !important;
+}
+
+html body .guide-preview
+.guide-card:nth-child(3) {
+  background: #f8e8ef !important;
+}
+
+html body .guide-preview
+.guide-card:nth-child(4) {
+  background: #e4f3ec !important;
+}
+
+
+/* IMPORTANT: dark text */
+
+html body .guide-preview
+.guide-card h3,
+html body .guide-preview
+.guide-card h3 span,
+html body .guide-preview
+.guide-card strong {
+  color: var(--card-title) !important;
+  -webkit-text-fill-color: var(--card-title) !important;
+  opacity: 1 !important;
+}
+
+html body .guide-preview
+.guide-card p,
+html body .guide-preview
+.guide-card p span {
+  color: var(--card-text) !important;
+  -webkit-text-fill-color: var(--card-text) !important;
+  opacity: 1 !important;
+}
+
+html body .guide-preview
+.guide-card .guide-number {
+  color: var(--card-purple) !important;
+  -webkit-text-fill-color: var(--card-purple) !important;
+}
+
+html body .guide-preview
+.guide-card > strong {
+  color: var(--card-purple) !important;
+}
+
+
+/* ============================================================
+   GENERAL LIGHT-SURFACE SAFETY
+   Prevent old gradient/white typography from leaking through.
+   ============================================================ */
+
+html body
+.profile-deep article
+:is(h3, h4, h5, strong, p, small),
+html body
+.roadmap-preview-v5
+.roadmap-column
+:is(h3, h4, strong, p, small),
+html body
+.guide-preview
+.guide-card
+:is(h3, h4, strong, p, small) {
+  text-shadow: none !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   DOCUMENTS — LIGHT SURFACE TEXT FINAL LOCK
+   Outer remains night, all inner light panels use dark text.
+   ============================================================ */
+
+
+/* ============================================================
+   OUTER DOCUMENT HEADING
+   Keep text bright because it sits on dark background.
+   ============================================================ */
+
+html body .documents-deep
+.documents-heading h2,
+html body .documents-deep
+.documents-heading h2 span {
+  color: #f5effa !important;
+  -webkit-text-fill-color: #f5effa !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+html body .documents-deep
+.documents-heading h2 em {
+  color: #a98bff !important;
+  -webkit-text-fill-color: #a98bff !important;
+  background-image: none !important;
+}
+
+html body .documents-deep
+.documents-heading p,
+html body .documents-deep
+.documents-heading p span {
+  color: #bcb1c9 !important;
+  -webkit-text-fill-color: #bcb1c9 !important;
+}
+
+html body .documents-deep
+.documents-heading .section-label,
+html body .documents-deep
+.documents-heading .section-label * {
+  color: #a98bff !important;
+  -webkit-text-fill-color: #a98bff !important;
+}
+
+
+/* ============================================================
+   EVERYTHING AFTER DOCUMENTS HEADING
+   These blocks are light surfaces.
+   ============================================================ */
+
+html body .documents-deep
+.container
+> :not(.documents-heading)
+:is(
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b
+),
+
+html body .documents-deep
+.container
+> :not(.documents-heading)
+:is(
+  div,
+  article,
+  section,
+  aside
+)
+:is(
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b
+) {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+
+/* Body text */
+
+html body .documents-deep
+.container
+> :not(.documents-heading)
+:is(
+  p,
+  li,
+  label
+),
+
+html body .documents-deep
+.container
+> :not(.documents-heading)
+:is(
+  div,
+  article,
+  section,
+  aside
+)
+:is(
+  p,
+  li,
+  label
+) {
+  color: #51445d !important;
+  -webkit-text-fill-color: #51445d !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+
+/* Small helper text */
+
+html body .documents-deep
+.container
+> :not(.documents-heading)
+small {
+  color: #75687f !important;
+  -webkit-text-fill-color: #75687f !important;
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   READER APP
+   Fix all the currently washed-out mock application text.
+   ============================================================ */
+
+html body .documents-deep
+.reader-app
+:is(
+  h2,
+  h3,
+  h4,
+  strong,
+  b,
+  label
+) {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+
+html body .documents-deep
+.reader-app
+:is(
+  p,
+  small,
+  li,
+  td,
+  th
+) {
+  color: #574b62 !important;
+  -webkit-text-fill-color: #574b62 !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+
+/* Ordinary spans inside reader mock */
+
+html body .documents-deep
+.reader-app
+span:not(.file-icon):not([class*="badge"]):not([class*="status"]) {
+  color: #51445d !important;
+  -webkit-text-fill-color: #51445d !important;
+  opacity: 1 !important;
+}
+
+
+/* Reader brand title */
+
+html body .documents-deep
+.reader-brand strong {
+  color: #241a2f !important;
+  -webkit-text-fill-color: #241a2f !important;
+}
+
+html body .documents-deep
+.reader-brand small {
+  color: #6952ee !important;
+  -webkit-text-fill-color: #6952ee !important;
+}
+
+
+/* Open document filename */
+
+html body .documents-deep
+.reader-file strong {
+  color: #241a2f !important;
+  -webkit-text-fill-color: #241a2f !important;
+}
+
+html body .documents-deep
+.reader-file small {
+  color: #75687f !important;
+  -webkit-text-fill-color: #75687f !important;
+}
+
+
+/* ============================================================
+   DOCUMENT DECISION / FILE MODE AREA
+   "File khác nhau..." + TXT / EPUB / PDF / OCR
+   ============================================================ */
+
+html body .documents-deep
+:is(
+  .document-decision,
+  .documents-decision,
+  .document-workflow,
+  .document-mode,
+  .document-mode-picker
+)
+:is(
+  h2,
+  h3,
+  h4,
+  strong
+) {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+
+html body .documents-deep
+:is(
+  .document-decision,
+  .documents-decision,
+  .document-workflow,
+  .document-mode,
+  .document-mode-picker
+)
+:is(
+  p,
+  small
+) {
+  color: #574b62 !important;
+  -webkit-text-fill-color: #574b62 !important;
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   DOCUMENT BENEFIT CARDS
+   Bottom three cards in your screenshot.
+   ============================================================ */
+
+html body .documents-deep article
+:is(
+  h3,
+  h4,
+  strong,
+  b
+) {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+html body .documents-deep article
+:is(
+  p,
+  p span,
+  small
+) {
+  color: #51445d !important;
+  -webkit-text-fill-color: #51445d !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   ACCENTS
+   ============================================================ */
+
+html body .documents-deep
+.section-label {
+  color: #7559ef !important;
+  -webkit-text-fill-color: #7559ef !important;
+}
+
+html body .documents-deep
+.file-icon {
+  color: #6046dd !important;
+  -webkit-text-fill-color: #6046dd !important;
+}
+
+
+/* ============================================================
+   BUTTON SAFETY
+   Buttons can retain their intended foreground colour.
+   ============================================================ */
+
+html body .documents-deep
+:is(
+  a,
+  button,
+  [role="button"]
+) {
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html body .documents-deep
+:is(
+  a,
+  button,
+  [role="button"]
+)
+* {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+
+/* ============================================================
+   PROFILE — LIGHT SURFACE TEXT FINAL LOCK
+   Outer stays night. Inner light panels use dark readable text.
+   ============================================================ */
+
+
+/* ============================================================
+   OUTER PROFILE HEADING
+   ============================================================ */
+
+html body .profile-deep
+.profile-heading h2,
+html body .profile-deep
+.profile-heading h2 span,
+html body .profile-deep
+.profile-deep-heading h2,
+html body .profile-deep
+.profile-deep-heading h2 span {
+  color: #f5effa !important;
+  -webkit-text-fill-color: #f5effa !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+html body .profile-deep
+.profile-heading h2 em,
+html body .profile-deep
+.profile-deep-heading h2 em {
+  color: #a98bff !important;
+  -webkit-text-fill-color: #a98bff !important;
+}
+
+html body .profile-deep
+.profile-heading p,
+html body .profile-deep
+.profile-heading p span,
+html body .profile-deep
+.profile-deep-heading p,
+html body .profile-deep
+.profile-deep-heading p span {
+  color: #bdb1ca !important;
+  -webkit-text-fill-color: #bdb1ca !important;
+}
+
+
+/* ============================================================
+   MAIN PROFILE APP PREVIEW
+   ============================================================ */
+
+html body .profile-deep
+:is(
+  .profile-product,
+  .profile-editor,
+  .profile-app,
+  .profile-preview,
+  .profile-workspace,
+  .profile-showcase
+)
+:is(
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b,
+  label
+) {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html body .profile-deep
+:is(
+  .profile-product,
+  .profile-editor,
+  .profile-app,
+  .profile-preview,
+  .profile-workspace,
+  .profile-showcase
+)
+:is(
+  p,
+  small,
+  li,
+  td,
+  th
+) {
+  color: #51445d !important;
+  -webkit-text-fill-color: #51445d !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+
+/* ordinary UI labels */
+
+html body .profile-deep
+:is(
+  .profile-product,
+  .profile-editor,
+  .profile-app,
+  .profile-preview,
+  .profile-workspace
+)
+span:not(.section-label):not([class*="badge"]):not([class*="status"]) {
+  color: #51445d !important;
+  -webkit-text-fill-color: #51445d !important;
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   INPUT / SELECT / TABLE INSIDE PROFILE MOCK
+   ============================================================ */
+
+html body .profile-deep
+:is(
+  input,
+  select,
+  textarea
+) {
+  color: #241a2f !important;
+  -webkit-text-fill-color: #241a2f !important;
+}
+
+html body .profile-deep
+:is(
+  table,
+  th,
+  td
+) {
+  color: #34283f !important;
+  -webkit-text-fill-color: #34283f !important;
+}
+
+html body .profile-deep th {
+  color: #62556e !important;
+  -webkit-text-fill-color: #62556e !important;
+}
+
+
+/* ============================================================
+   GLOSSARY / CHARACTER RULES / HONORIFICS / CONTEXT
+   ============================================================ */
+
+html body .profile-deep article
+:is(
+  h3,
+  h4,
+  h5,
+  strong,
+  b
+) {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html body .profile-deep article
+:is(
+  p,
+  p span,
+  li
+) {
+  color: #51445d !important;
+  -webkit-text-fill-color: #51445d !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html body .profile-deep article small {
+  color: #75687f !important;
+  -webkit-text-fill-color: #75687f !important;
+  opacity: 1 !important;
+}
+
+
+/* Card number / accent */
+
+html body .profile-deep article > span {
+  color: #6547df !important;
+  -webkit-text-fill-color: #6547df !important;
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   PRIORITY SECTION
+   "Không phải mọi context..."
+   ============================================================ */
+
+html body .profile-deep
+.priority-copy
+:is(
+  h2,
+  h3,
+  h4
+),
+html body .profile-deep
+.priority-copy
+:is(
+  h2,
+  h3,
+  h4
+) span {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+html body .profile-deep
+.priority-copy
+:is(
+  p,
+  p span
+) {
+  color: #51445d !important;
+  -webkit-text-fill-color: #51445d !important;
+  opacity: 1 !important;
+}
+
+
+/* fallback when left copy has no priority-copy class */
+
+html body .profile-deep
+.priority-visual
+:is(
+  h2,
+  h3,
+  h4
+) {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  background-image: none !important;
+  opacity: 1 !important;
+}
+
+
+html body .profile-deep
+.priority-visual p {
+  color: #51445d !important;
+  -webkit-text-fill-color: #51445d !important;
+}
+
+
+/* Priority rows */
+
+html body .profile-deep
+.priority-level {
+  color: #21172d !important;
+}
+
+html body .profile-deep
+.priority-level strong {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+}
+
+html body .profile-deep
+.priority-level small {
+  color: #75687f !important;
+  -webkit-text-fill-color: #75687f !important;
+}
+
+html body .profile-deep
+.priority-level b {
+  color: #5c43d6 !important;
+  -webkit-text-fill-color: #5c43d6 !important;
+}
+
+html body .profile-deep
+.priority-level > span {
+  color: #6547df !important;
+  -webkit-text-fill-color: #6547df !important;
+}
+
+
+/* ============================================================
+   CREATE PROFILE IN 5 STEPS
+   ============================================================ */
+
+html body .profile-deep
+.profile-setup-flow
+:is(
+  h2,
+  h3,
+  h4
+) {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+
+html body .profile-deep
+.profile-flow-steps article strong {
+  color: #21172d !important;
+  -webkit-text-fill-color: #21172d !important;
+  opacity: 1 !important;
+}
+
+
+html body .profile-deep
+.profile-flow-steps article p,
+html body .profile-deep
+.profile-flow-steps article p span {
+  color: #51445d !important;
+  -webkit-text-fill-color: #51445d !important;
+  opacity: 1 !important;
+}
+
+
+html body .profile-deep
+.profile-flow-steps article > span {
+  color: #6547df !important;
+  -webkit-text-fill-color: #6547df !important;
+}
+
+
+/* arrows between 5 steps */
+
+html body .profile-deep
+.profile-flow-steps > i {
+  color: #685b75 !important;
+}
+
+
+/* ============================================================
+   SECTION LABELS INSIDE LIGHT PANELS
+   ============================================================ */
+
+html body .profile-deep
+:is(
+  .priority-visual,
+  .profile-setup-flow
+)
+.section-label,
+html body .profile-deep
+:is(
+  .priority-visual,
+  .profile-setup-flow
+)
+.section-label * {
+  color: #6547df !important;
+  -webkit-text-fill-color: #6547df !important;
+}
+
+
+/* ============================================================
+   GENERAL PROFILE LIGHT SURFACE SAFETY
+   Kill old white/gradient text.
+   ============================================================ */
+
+html body .profile-deep
+:is(
+  article,
+  .priority-visual,
+  .profile-setup-flow,
+  .profile-product,
+  .profile-editor,
+  .profile-app,
+  .profile-preview,
+  .profile-workspace
+)
+:is(
+  h2,
+  h3,
+  h4,
+  h5,
+  strong
+) {
+  background-image: none !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+
+/* ============================================================
+   BUTTON / LINK SAFETY
+   ============================================================ */
+
+html body .profile-deep
+:is(
+  a,
+  button,
+  [role="button"]
+) {
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html body .profile-deep
+:is(
+  a,
+  button,
+  [role="button"]
+)
+* {
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+
+/* ============================================================
+   PROFILE LEFT SIDEBAR — FIX BLUR / LOW CONTRAST
+   ============================================================ */
+
+html body .profile-deep
+:is(
+  .profile-product,
+  .profile-editor,
+  .profile-app,
+  .profile-preview,
+  .profile-workspace,
+  .profile-showcase
+)
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+) {
+  color: #241a31 !important;
+}
+
+/* left sidebar heading */
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+:is(h2, h3, h4, strong, b, .section-label, .sidebar-title) {
+  color: #241a31 !important;
+  -webkit-text-fill-color: #241a31 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+  background-image: none !important;
+}
+
+/* profile item main text */
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+:is(
+  .profile-item,
+  .profile-card,
+  .profile-option,
+  .profile-row,
+  li,
+  a,
+  button
+)
+:is(strong, b, h4, h5, span) {
+  color: #2b2138 !important;
+  -webkit-text-fill-color: #2b2138 !important;
+  opacity: 1 !important;
+}
+
+/* secondary text under each profile */
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+:is(
+  .profile-item,
+  .profile-card,
+  .profile-option,
+  .profile-row,
+  li,
+  a,
+  button
+)
+:is(small, p, em) {
+  color: #6f6480 !important;
+  -webkit-text-fill-color: #6f6480 !important;
+  opacity: 1 !important;
+}
+
+/* icons in left sidebar */
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+svg,
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+.icon {
+  color: #6a52e3 !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+
+/* active profile item */
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+:is(
+  .active,
+  [aria-current="true"],
+  [aria-selected="true"],
+  [data-active="true"]
+) {
+  background: #d9cffd !important;
+  border-color: #9d86ff !important;
+  box-shadow: inset 0 0 0 1px rgba(122, 92, 255, 0.18) !important;
+}
+
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+:is(
+  .active,
+  [aria-current="true"],
+  [aria-selected="true"],
+  [data-active="true"]
+)
+:is(strong, b, span) {
+  color: #251a35 !important;
+  -webkit-text-fill-color: #251a35 !important;
+}
+
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+:is(
+  .active,
+  [aria-current="true"],
+  [aria-selected="true"],
+  [data-active="true"]
+)
+:is(small, p, em) {
+  color: #6a5d7f !important;
+  -webkit-text-fill-color: #6a5d7f !important;
+}
+
+/* inactive profile items should still be readable */
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+:is(
+  .profile-item,
+  .profile-card,
+  .profile-option,
+  .profile-row,
+  li,
+  a,
+  button
+):not(.active):not([aria-current="true"]):not([aria-selected="true"]):not([data-active="true"]) {
+  opacity: 1 !important;
+}
+
+/* plus button bottom-left */
+html body .profile-deep
+:is(
+  .profile-sidebar,
+  .profile-left,
+  .profile-list,
+  .profile-nav,
+  .profile-panel-left
+)
+:is(
+  .add-profile,
+  .profile-add,
+  .profile-create,
+  .new-profile
+) {
+  color: #6a52e3 !important;
+  border-color: rgba(106, 82, 227, 0.22) !important;
+  background: #fbfaff !important;
+}
+
+
+
+/* ============================================================
+   PROFILE SIDEBAR HEADER
+   PROFILES / Hồ sơ dịch
+   ============================================================ */
+
+/* Header area at top-left of Profile mock */
+html body .profile-deep
+:is(
+  aside,
+  [class*="sidebar"],
+  [class*="side-panel"],
+  [class*="profile-list"]
+)
+> :first-child
+small,
+html body .profile-deep
+:is(
+  aside,
+  [class*="sidebar"],
+  [class*="side-panel"],
+  [class*="profile-list"]
+)
+> :first-child
+[class*="label"] {
+  color: #6952ee !important;
+  -webkit-text-fill-color: #6952ee !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+  background-image: none !important;
+}
+
+
+/* "Hồ sơ dịch" */
+html body .profile-deep
+:is(
+  aside,
+  [class*="sidebar"],
+  [class*="side-panel"],
+  [class*="profile-list"]
+)
+> :first-child
+:is(
+  h2,
+  h3,
+  h4,
+  strong
+) {
+  color: #251a31 !important;
+  -webkit-text-fill-color: #251a31 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+  background-image: none !important;
+}
+
+
+/* Strong fallback for the top-left sidebar heading */
+html body .profile-deep
+:is(
+  [class*="sidebar"],
+  [class*="profile-list"]
+)
+:is(
+  small,
+  strong,
+  h3,
+  h4
+) {
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+
+/* Uppercase sidebar kicker such as PROFILES */
+html body .profile-deep
+:is(
+  [class*="sidebar"],
+  [class*="profile-list"]
+)
+small:first-of-type {
+  color: #7056e8 !important;
+  -webkit-text-fill-color: #7056e8 !important;
+}
+
+
+/* Main sidebar title */
+html body .profile-deep
+:is(
+  [class*="sidebar"],
+  [class*="profile-list"]
+)
+:is(
+  h3,
+  h4,
+  strong
+):first-of-type {
+  color: #2a1e35 !important;
+  -webkit-text-fill-color: #2a1e35 !important;
+}
+
+
+/* ============================================================
+   AITRANOVA HOME ROADMAP
+   FINAL NIGHT OUTER + LIGHT INNER LOCK
+   ============================================================ */
+
+:root {
+  --roadmap-night-1: #090613;
+  --roadmap-night-2: #10091d;
+  --roadmap-night-3: #171027;
+
+  --roadmap-white: #fbfaff;
+  --roadmap-surface: #f5f2fa;
+
+  --roadmap-ink: #24192f;
+  --roadmap-text: #554960;
+  --roadmap-muted: #786c83;
+
+  --roadmap-purple: #7557ef;
+  --roadmap-purple-light: #b89cff;
+
+  --roadmap-green: #36a97e;
+  --roadmap-blue: #568fc8;
+
+  --roadmap-border:
+    rgba(89, 68, 116, 0.18);
+
+  --roadmap-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.28);
+}
+
+
+/* ============================================================
+   1. OUTER ROADMAP SECTION
+   ============================================================ */
+
+html body section.roadmap-preview-v5 {
+  position: relative;
+
+  background:
+    radial-gradient(
+      circle at 15% 10%,
+      rgba(113, 75, 230, 0.22),
+      transparent 31rem
+    ),
+    radial-gradient(
+      circle at 88% 20%,
+      rgba(81, 80, 185, 0.14),
+      transparent 27rem
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(56, 101, 180, 0.08),
+      transparent 30rem
+    ),
+    linear-gradient(
+      180deg,
+      var(--roadmap-night-1) 0%,
+      var(--roadmap-night-2) 48%,
+      #0b0716 100%
+    ) !important;
+
+  color: #f7f2fb !important;
+
+  border-top:
+    1px solid
+    rgba(160, 130, 255, 0.14) !important;
+
+  border-bottom:
+    1px solid
+    rgba(160, 130, 255, 0.14) !important;
+}
+
+
+/* ============================================================
+   2. ROADMAP OUTER HEADING
+   ============================================================ */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+:is(
+  h1,
+  h2,
+  h3
+) {
+  color: #f5effa !important;
+
+  -webkit-text-fill-color:
+    #f5effa !important;
+
+  background-image:
+    none !important;
+
+  text-shadow:
+    0 4px 20px
+    rgba(0, 0, 0, 0.30) !important;
+
+  opacity: 1 !important;
+}
+
+
+/* Any spans inside title */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+:is(
+  h1,
+  h2,
+  h3
+)
+span {
+  color: #f5effa !important;
+
+  -webkit-text-fill-color:
+    #f5effa !important;
+
+  background-image:
+    none !important;
+
+  opacity: 1 !important;
+}
+
+
+/* If AitraNova is wrapped with this class */
+
+html body .roadmap-preview-v5
+.roadmap-brand-accent {
+  color:
+    #c3aaff !important;
+
+  -webkit-text-fill-color:
+    #c3aaff !important;
+
+  text-shadow:
+    0 0 24px
+    rgba(168, 124, 255, 0.28) !important;
+}
+
+
+/* Fallback:
+   make first title word/span brighter when present */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+:is(
+  h1,
+  h2,
+  h3
+)
+> span:first-child {
+  color:
+    #c3aaff !important;
+
+  -webkit-text-fill-color:
+    #c3aaff !important;
+}
+
+
+/* Eyebrow / Tiếp theo */
+
+html body .roadmap-preview-v5
+.section-label,
+html body .roadmap-preview-v5
+.section-label * {
+  color:
+    #a98aff !important;
+
+  -webkit-text-fill-color:
+    #a98aff !important;
+
+  opacity: 1 !important;
+}
+
+
+/* Description outside cards */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+p,
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+p span {
+  color:
+    #bdb2ca !important;
+
+  -webkit-text-fill-color:
+    #bdb2ca !important;
+
+  opacity: 1 !important;
+}
+
+
+/* Roadmap link outside cards */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+a {
+  color:
+    #d1c0ff !important;
+
+  -webkit-text-fill-color:
+    #d1c0ff !important;
+
+  font-weight: 700;
+}
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-heading,
+  .roadmap-v5-heading,
+  .roadmap-preview-heading
+)
+a:hover {
+  color:
+    #ffffff !important;
+
+  -webkit-text-fill-color:
+    #ffffff !important;
+}
+
+
+/* ============================================================
+   3. ROADMAP GRID / COLUMNS
+   ============================================================ */
+
+html body .roadmap-preview-v5
+.roadmap-column {
+  background:
+    linear-gradient(
+      150deg,
+      #fcfbff 0%,
+      #f4f1f9 100%
+    ) !important;
+
+  color:
+    var(--roadmap-ink) !important;
+
+  border:
+    1px solid
+    var(--roadmap-border) !important;
+
+  border-radius:
+    18px !important;
+
+  box-shadow:
+    var(--roadmap-shadow) !important;
+}
+
+
+/* AVAILABLE */
+
+html body .roadmap-preview-v5
+.roadmap-column.available {
+  border-top:
+    4px solid
+    #45bc8c !important;
+}
+
+
+/* DEVELOPMENT */
+
+html body .roadmap-preview-v5
+.roadmap-column.development {
+  border-top:
+    4px solid
+    #7959f5 !important;
+}
+
+
+/* PLANNED */
+
+html body .roadmap-preview-v5
+.roadmap-column.planned {
+  border-top:
+    4px solid
+    #5a91c9 !important;
+}
+
+
+/* ============================================================
+   4. COLUMN HEADER
+   ============================================================ */
+
+html body .roadmap-preview-v5
+.roadmap-column-head {
+  color:
+    var(--roadmap-ink) !important;
+}
+
+
+html body .roadmap-preview-v5
+.roadmap-column-head
+:is(
+  h3,
+  h4,
+  strong,
+  b
+) {
+  color:
+    var(--roadmap-ink) !important;
+
+  -webkit-text-fill-color:
+    var(--roadmap-ink) !important;
+
+  background-image:
+    none !important;
+
+  opacity: 1 !important;
+}
+
+
+html body .roadmap-preview-v5
+.roadmap-column-head small {
+  color:
+    var(--roadmap-muted) !important;
+
+  -webkit-text-fill-color:
+    var(--roadmap-muted) !important;
+
+  opacity: 1 !important;
+}
+
+
+html body .roadmap-preview-v5
+.roadmap-count {
+  color:
+    #6545db !important;
+
+  -webkit-text-fill-color:
+    #6545db !important;
+
+  font-weight:
+    800 !important;
+}
+
+
+/* ============================================================
+   5. STATUS ICON
+   ============================================================ */
+
+html body .roadmap-preview-v5
+.roadmap-status-icon {
+  box-shadow:
+    none !important;
+}
+
+
+/* Available */
+
+html body .roadmap-preview-v5
+.roadmap-column.available
+.roadmap-status-icon {
+  background:
+    #ddf7ec !important;
+
+  color:
+    #218561 !important;
+
+  -webkit-text-fill-color:
+    #218561 !important;
+}
+
+
+/* Development */
+
+html body .roadmap-preview-v5
+.roadmap-column.development
+.roadmap-status-icon {
+  background:
+    #e7e0ff !important;
+
+  color:
+    #6243db !important;
+
+  -webkit-text-fill-color:
+    #6243db !important;
+}
+
+
+/* Planned */
+
+html body .roadmap-preview-v5
+.roadmap-column.planned
+.roadmap-status-icon {
+  background:
+    #e8f1f9 !important;
+
+  color:
+    #477bb0 !important;
+
+  -webkit-text-fill-color:
+    #477bb0 !important;
+}
+
+
+/* ============================================================
+   6. ROADMAP ITEMS
+   ============================================================ */
+
+html body .roadmap-preview-v5
+.roadmap-item {
+  background:
+    #ffffff !important;
+
+  color:
+    var(--roadmap-ink) !important;
+
+  border:
+    1px solid
+    rgba(91, 71, 117, 0.14) !important;
+
+  box-shadow:
+    0 3px 10px
+    rgba(42, 27, 57, 0.04) !important;
+}
+
+
+/* Available items */
+
+html body .roadmap-preview-v5
+.roadmap-column.available
+.roadmap-item {
+  background:
+    #f1faf6 !important;
+}
+
+
+/* Development items */
+
+html body .roadmap-preview-v5
+.roadmap-column.development
+.roadmap-item {
+  background:
+    #f5f2ff !important;
+}
+
+
+/* Planned items */
+
+html body .roadmap-preview-v5
+.roadmap-column.planned
+.roadmap-item {
+  background:
+    #eff6fc !important;
+}
+
+
+/* Highlighted */
+
+html body .roadmap-preview-v5
+.roadmap-item.highlighted {
+  background:
+    #ebe5ff !important;
+
+  border:
+    1px solid
+    rgba(
+      105,
+      82,
+      238,
+      0.52
+    ) !important;
+
+  box-shadow:
+    0 8px 20px
+    rgba(
+      105,
+      82,
+      238,
+      0.10
+    ) !important;
+}
+
+
+/* Item title */
+
+html body .roadmap-preview-v5
+.roadmap-item
+:is(
+  h3,
+  h4,
+  strong,
+  b
+) {
+  color:
+    var(--roadmap-ink) !important;
+
+  -webkit-text-fill-color:
+    var(--roadmap-ink) !important;
+
+  background-image:
+    none !important;
+
+  text-shadow:
+    none !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* Item description */
+
+html body .roadmap-preview-v5
+.roadmap-item p,
+html body .roadmap-preview-v5
+.roadmap-item p span {
+  color:
+    var(--roadmap-text) !important;
+
+  -webkit-text-fill-color:
+    var(--roadmap-text) !important;
+
+  background-image:
+    none !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* ============================================================
+   7. ITEM STATUS MARKS
+   ============================================================ */
+
+html body .roadmap-preview-v5
+.roadmap-column.available
+.roadmap-item
+> span {
+  color:
+    #258763 !important;
+
+  -webkit-text-fill-color:
+    #258763 !important;
+}
+
+
+html body .roadmap-preview-v5
+.roadmap-column.development
+.roadmap-item
+> span {
+  color:
+    #6849df !important;
+
+  -webkit-text-fill-color:
+    #6849df !important;
+}
+
+
+html body .roadmap-preview-v5
+.roadmap-column.planned
+.roadmap-item
+> span {
+  color:
+    #487eb3 !important;
+
+  -webkit-text-fill-color:
+    #487eb3 !important;
+}
+
+
+/* ============================================================
+   8. DEVELOPMENT PROGRESS
+   ============================================================ */
+
+html body .roadmap-preview-v5
+.development-progress {
+  background:
+    #eee9ff !important;
+
+  color:
+    var(--roadmap-ink) !important;
+
+  border:
+    1px solid
+    rgba(
+      105,
+      82,
+      238,
+      0.17
+    ) !important;
+}
+
+
+html body .roadmap-preview-v5
+.development-progress span {
+  color:
+    var(--roadmap-text) !important;
+
+  -webkit-text-fill-color:
+    var(--roadmap-text) !important;
+}
+
+
+html body .roadmap-preview-v5
+.development-progress strong {
+  color:
+    var(--roadmap-ink) !important;
+
+  -webkit-text-fill-color:
+    var(--roadmap-ink) !important;
+}
+
+
+html body .roadmap-preview-v5
+.progress-track {
+  background:
+    #dad2ed !important;
+}
+
+
+html body .roadmap-preview-v5
+.progress-track
+> span {
+  background:
+    linear-gradient(
+      90deg,
+      #6952ee,
+      #9a7cff
+    ) !important;
+}
+
+
+/* ============================================================
+   9. LARGE DIRECTION / FUTURE CARD
+   ============================================================ */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+) {
+  background:
+    radial-gradient(
+      circle at 80% 50%,
+      rgba(89, 110, 220, 0.07),
+      transparent 18rem
+    ),
+    linear-gradient(
+      135deg,
+      #fbfaff,
+      #eef5fb
+    ) !important;
+
+  color:
+    var(--roadmap-ink) !important;
+
+  border:
+    1px solid
+    var(--roadmap-border) !important;
+
+  box-shadow:
+    var(--roadmap-shadow) !important;
+}
+
+
+/* Direction kicker */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+)
+.section-label {
+  color:
+    #6549dc !important;
+
+  -webkit-text-fill-color:
+    #6549dc !important;
+}
+
+
+/* Direction headline */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+)
+:is(
+  h2,
+  h3,
+  h4,
+  strong
+) {
+  color:
+    var(--roadmap-ink) !important;
+
+  -webkit-text-fill-color:
+    var(--roadmap-ink) !important;
+
+  background-image:
+    none !important;
+
+  text-shadow:
+    none !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* Purple part inside direction heading */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+)
+em {
+  color:
+    #6850e8 !important;
+
+  -webkit-text-fill-color:
+    #6850e8 !important;
+
+  background-image:
+    none !important;
+}
+
+
+/* Direction description */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+)
+p {
+  color:
+    var(--roadmap-text) !important;
+
+  -webkit-text-fill-color:
+    var(--roadmap-text) !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* ============================================================
+   10. ORBIT / DIRECTION VISUAL
+   ============================================================ */
+
+html body .roadmap-preview-v5
+:is(
+  .direction-orbit,
+  .roadmap-orbit,
+  .vision-orbit
+) {
+  color:
+    var(--roadmap-text) !important;
+}
+
+
+html body .roadmap-preview-v5
+:is(
+  .direction-orbit,
+  .roadmap-orbit,
+  .vision-orbit
+)
+:is(
+  span,
+  small,
+  strong
+) {
+  color:
+    #40364b !important;
+
+  -webkit-text-fill-color:
+    #40364b !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* ============================================================
+   11. GENERAL LIGHT-CARD TYPOGRAPHY SAFETY
+   ============================================================ */
+
+html body .roadmap-preview-v5
+:is(
+  .roadmap-column,
+  .roadmap-item,
+  .development-progress,
+  .roadmap-direction,
+  .roadmap-direction-card,
+  .roadmap-future,
+  .roadmap-future-card,
+  .roadmap-vision,
+  .roadmap-vision-card
+)
+:is(
+  h2,
+  h3,
+  h4,
+  h5,
+  strong,
+  b
+) {
+  background-image:
+    none !important;
+
+  text-shadow:
+    none !important;
+
+  opacity:
+    1 !important;
+}
+
+
+/* ============================================================
+   12. LINK / BUTTON SAFETY
+   ============================================================ */
+
+html body .roadmap-preview-v5
+.roadmap-column a {
+  color:
+    #5d43d4 !important;
+
+  -webkit-text-fill-color:
+    #5d43d4 !important;
+}
+
+
+html body .roadmap-preview-v5
+:is(
+  button,
+  [role="button"]
+) {
+  -webkit-text-fill-color:
+    currentColor !important;
+}
+
+
+html body .roadmap-preview-v5
+:is(
+  button,
+  [role="button"]
+)
+* {
+  color:
+    inherit !important;
+
+  -webkit-text-fill-color:
+    currentColor !important;
+}
+
+
+/* ============================================================
+   13. MOBILE
+   ============================================================ */
+
+@media (max-width: 760px) {
+
+  html body
+  section.roadmap-preview-v5 {
+    background:
+      radial-gradient(
+        circle at 20% 10%,
+        rgba(
+          105,
+          82,
+          238,
+          0.18
+        ),
+        transparent 22rem
+      ),
+      linear-gradient(
+        180deg,
+        #0b0714,
+        #151022,
+        #0b0714
+      ) !important;
+  }
+
+
+  html body
+  .roadmap-preview-v5
+  .roadmap-column {
+    box-shadow:
+      0 14px 30px
+      rgba(
+        0,
+        0,
+        0,
+        0.25
+      ) !important;
+  }
+
+
+  html body
+  .roadmap-preview-v5
+  :is(
+    .roadmap-direction,
+    .roadmap-direction-card,
+    .roadmap-future,
+    .roadmap-future-card,
+    .roadmap-vision,
+    .roadmap-vision-card
+  ) {
+    box-shadow:
+      0 14px 30px
+      rgba(
+        0,
+        0,
+        0,
+        0.24
+      ) !important;
+  }
+
+}
